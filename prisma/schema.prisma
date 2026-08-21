@@ -1,0 +1,241 @@
+// EduConnect Database Schema
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+model User {
+  id                    String              @id @default(uuid())
+  email                 String              @unique
+  passwordHash          String
+  role                  String              @default("STUDENT") // ADMIN | TEACHER | STUDENT
+  emailVerified         Boolean             @default(false)
+  emailVerifiedAt       DateTime?
+  createdAt             DateTime            @default(now())
+  updatedAt             DateTime            @updatedAt
+
+  profile               Profile?
+  teacherProfile        TeacherProfile?
+  studentProfile        StudentProfile?
+  emailVerifications    EmailVerification[]
+  passwordResets        PasswordReset[]
+  auditLogs             AuditLog[]
+  verificationDecisions TeacherVerificationHistory[] @relation("AdminDecisions")
+  adminNotes            AdminNote[]                  @relation("AdminNotesCreated")
+
+  @@map("users")
+}
+
+model Profile {
+  id        String   @id @default(uuid())
+  userId    String   @unique
+  firstName String
+  lastName  String
+  avatarUrl String?
+  phone     String?
+  bio       String?
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@map("profiles")
+}
+
+model TeacherProfile {
+  id                 String   @id @default(uuid())
+  userId             String   @unique
+  headline           String?
+  bio                String?
+  contactPhone       String?
+  location           String?
+  subjects           String?  // Comma-separated or JSON list of subjects
+  experienceYears    Int      @default(0)
+  hourlyRate         Float?
+  qualifications     String?
+  languages          String?  @default("English")
+  teachingMode       String?  @default("ONLINE") // ONLINE | OFFLINE | BOTH
+  verificationStatus String   @default("PENDING") // PENDING | VERIFIED | REJECTED | SUSPENDED
+  rating             Float    @default(5.0)
+
+  submittedAt        DateTime?
+  verifiedAt         DateTime?
+  rejectedAt         DateTime?
+  suspendedAt        DateTime?
+  rejectionReason    String?
+  suspensionReason   String?
+
+  createdAt          DateTime @default(now())
+  updatedAt          DateTime @updatedAt
+
+  user                  User                         @relation(fields: [userId], references: [id], onDelete: Cascade)
+  courses               Course[]
+  teacherQualifications TeacherQualification[]
+  teacherCertificates   TeacherCertificate[]
+  teacherDocuments      TeacherDocument[]
+  verificationHistories TeacherVerificationHistory[]
+  adminNotes            AdminNote[]
+
+  @@map("teacher_profiles")
+}
+
+model TeacherQualification {
+  id             String         @id @default(uuid())
+  teacherId      String
+  degree         String
+  institution    String
+  specialization String?
+  year           Int
+  description    String?
+  createdAt      DateTime       @default(now())
+  updatedAt      DateTime       @updatedAt
+
+  teacher        TeacherProfile @relation(fields: [teacherId], references: [id], onDelete: Cascade)
+
+  @@map("teacher_qualifications")
+}
+
+model TeacherCertificate {
+  id          String         @id @default(uuid())
+  teacherId   String
+  name        String
+  issuer      String
+  issueDate   DateTime
+  expiryDate  DateTime?
+  documentId  String?
+  description String?
+  createdAt   DateTime       @default(now())
+  updatedAt   DateTime       @updatedAt
+
+  teacher     TeacherProfile @relation(fields: [teacherId], references: [id], onDelete: Cascade)
+
+  @@map("teacher_certificates")
+}
+
+model TeacherDocument {
+  id          String         @id @default(uuid())
+  teacherId   String
+  category    String         // IDENTITY | QUALIFICATION | CERTIFICATE | EXPERIENCE | OTHER
+  fileName    String
+  fileType    String
+  fileSize    Int
+  storageKey  String         @unique
+  status      String         @default("ACTIVE") // ACTIVE | ARCHIVED
+  uploadedAt  DateTime       @default(now())
+  updatedAt   DateTime       @updatedAt
+
+  teacher     TeacherProfile @relation(fields: [teacherId], references: [id], onDelete: Cascade)
+
+  @@map("teacher_documents")
+}
+
+model TeacherVerificationHistory {
+  id             String         @id @default(uuid())
+  teacherId      String
+  adminId        String?
+  previousStatus String
+  newStatus      String
+  reason         String?
+  metadata       String?        // JSON string
+  createdAt      DateTime       @default(now())
+
+  teacher        TeacherProfile @relation(fields: [teacherId], references: [id], onDelete: Cascade)
+  admin          User?          @relation("AdminDecisions", fields: [adminId], references: [id], onDelete: SetNull)
+
+  @@map("teacher_verification_histories")
+}
+
+model AdminNote {
+  id        String         @id @default(uuid())
+  teacherId String
+  adminId   String
+  content   String
+  createdAt DateTime       @default(now())
+
+  teacher   TeacherProfile @relation(fields: [teacherId], references: [id], onDelete: Cascade)
+  admin     User           @relation("AdminNotesCreated", fields: [adminId], references: [id], onDelete: Cascade)
+
+  @@map("admin_notes")
+}
+
+model StudentProfile {
+  id                  String   @id @default(uuid())
+  userId              String   @unique
+  gradeLevel          String?
+  interests           String?
+  learningPreferences String? // Comma-separated preference tags
+  createdAt           DateTime @default(now())
+  updatedAt           DateTime @updatedAt
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@map("student_profiles")
+}
+
+model EmailVerification {
+  id         String    @id @default(uuid())
+  userId     String
+  codeHash   String    // Hashed 6-digit OTP
+  tokenHash  String    @unique // Hashed URL token
+  expiresAt  DateTime
+  attempts   Int       @default(0)
+  verifiedAt DateTime?
+  createdAt  DateTime  @default(now())
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@map("email_verifications")
+}
+
+model PasswordReset {
+  id        String    @id @default(uuid())
+  userId    String
+  tokenHash String    @unique
+  expiresAt DateTime
+  usedAt    DateTime?
+  createdAt DateTime  @default(now())
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@map("password_resets")
+}
+
+model AuditLog {
+  id        String   @id @default(uuid())
+  userId    String?
+  event     String   // e.g. USER_REGISTERED, LOGIN_SUCCESS, EMAIL_VERIFIED
+  metadata  String?  // JSON string
+  ipAddress String?
+  createdAt DateTime @default(now())
+
+  user User? @relation(fields: [userId], references: [id], onDelete: SetNull)
+
+  @@map("audit_logs")
+}
+
+model Course {
+  id            String   @id @default(uuid())
+  title         String
+  slug          String   @unique
+  description   String
+  subject       String
+  gradeLevel    String?
+  price         Float
+  rating        Float    @default(5.0)
+  reviewCount   Int      @default(0)
+  lessonCount   Int      @default(12)
+  durationHours Float    @default(10.0)
+  thumbnailUrl  String?
+  teacherId     String
+
+  teacher       TeacherProfile @relation(fields: [teacherId], references: [id], onDelete: Cascade)
+
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+
+  @@map("courses")
+}
