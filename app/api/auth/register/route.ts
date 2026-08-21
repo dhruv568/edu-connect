@@ -1,3 +1,5 @@
+export const dynamic = "force-dynamic";
+
 import { NextRequest } from "next/server";
 import { RegisterSchema } from "@/schemas/auth-schemas";
 import { AuthService } from "@/services/auth-service";

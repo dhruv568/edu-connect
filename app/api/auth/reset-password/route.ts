@@ -1,3 +1,5 @@
+export const dynamic = "force-dynamic";
+
 import { NextRequest } from "next/server";
 import { AuthService } from "@/services/auth-service";
 import { apiSuccess, apiBadRequest, apiError } from "@/lib/api-response";
