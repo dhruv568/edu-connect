@@ -3,7 +3,7 @@ export const dynamic = "force-dynamic";
 import { NextRequest } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { requireRole } from "@/lib/auth/guards";
-import { apiSuccess, apiError } from "@/lib/api-response";
+import { apiSuccess, apiError, handleApiError } from "@/lib/api-response";
 
 export async function PATCH(
   request: NextRequest,
@@ -35,7 +35,7 @@ export async function PATCH(
 
     return apiSuccess({ message: "Qualification updated", qualification: updated });
   } catch (error: any) {
-    return apiError(error.message || "Failed to update qualification", 500);
+    return handleApiError(error);
   }
 }
 
@@ -61,6 +61,6 @@ export async function DELETE(
 
     return apiSuccess({ message: "Qualification deleted" });
   } catch (error: any) {
-    return apiError(error.message || "Failed to delete qualification", 500);
+    return handleApiError(error);
   }
 }

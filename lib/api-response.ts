@@ -29,3 +29,17 @@ export function apiForbidden(error = "Forbidden: Insufficient role permissions",
 export function apiBadRequest(error = "Invalid request payload", status = 400) {
   return apiError(error, status);
 }
+
+export function handleApiError(error: any, fallbackMessage = "An error occurred", defaultStatus = 400) {
+  const msg = error?.message || fallbackMessage;
+  if (msg.includes("UNAUTHORIZED")) {
+    return apiUnauthorized(msg);
+  }
+  if (msg.includes("FORBIDDEN")) {
+    return apiForbidden(msg);
+  }
+  if (msg.includes("UNVERIFIED")) {
+    return apiForbidden(msg);
+  }
+  return apiError(msg, defaultStatus);
+}

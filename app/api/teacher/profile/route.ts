@@ -3,7 +3,7 @@ export const dynamic = "force-dynamic";
 import { NextRequest } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { requireRole } from "@/lib/auth/guards";
-import { apiSuccess, apiError } from "@/lib/api-response";
+import { apiSuccess, apiError, handleApiError } from "@/lib/api-response";
 import { logAuditEvent } from "@/lib/audit-logger";
 
 export async function PATCH(request: NextRequest) {
@@ -67,6 +67,6 @@ export async function PATCH(request: NextRequest) {
       teacherProfile: updatedTeacher,
     });
   } catch (error: any) {
-    return apiError(error.message || "Failed to update profile", 500);
+    return handleApiError(error);
   }
 }

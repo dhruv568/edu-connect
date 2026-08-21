@@ -3,7 +3,7 @@ export const dynamic = "force-dynamic";
 import { NextRequest } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { requireRole } from "@/lib/auth/guards";
-import { apiSuccess, apiError } from "@/lib/api-response";
+import { apiSuccess, apiError, handleApiError } from "@/lib/api-response";
 
 export async function POST(request: NextRequest) {
   try {
@@ -37,6 +37,6 @@ export async function POST(request: NextRequest) {
 
     return apiSuccess({ qualification }, "Qualification added successfully", 201);
   } catch (error: any) {
-    return apiError(error.message || "Failed to add qualification", 500);
+    return handleApiError(error);
   }
 }

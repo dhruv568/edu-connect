@@ -1,7 +1,7 @@
 import { NextRequest } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { requireRole } from "@/lib/auth/guards";
-import { apiSuccess, apiError } from "@/lib/api-response";
+import { apiSuccess, apiError, handleApiError } from "@/lib/api-response";
 import { logAuditEvent } from "@/lib/audit-logger";
 import { getEmailProvider } from "@/lib/email/email-service";
 
@@ -80,6 +80,6 @@ export async function POST(
       verifiedAt: updated.verifiedAt,
     });
   } catch (error: any) {
-    return apiError(error.message || "Failed to approve teacher", 500);
+    return handleApiError(error);
   }
 }

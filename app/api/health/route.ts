@@ -1,5 +1,5 @@
 import { prisma } from "@/lib/prisma";
-import { apiSuccess, apiError } from "@/lib/api-response";
+import { apiSuccess, apiError, handleApiError } from "@/lib/api-response";
 
 export const dynamic = "force-dynamic";
 
@@ -15,6 +15,6 @@ export async function GET() {
       environment: process.env.NODE_ENV,
     });
   } catch (error: any) {
-    return apiError(`Health Check Failed: ${error.message}`, 500);
+    return handleApiError(error);
   }
 }

@@ -1,6 +1,6 @@
 import { NextRequest } from "next/server";
 import { prisma } from "@/lib/prisma";
-import { apiSuccess, apiError } from "@/lib/api-response";
+import { apiSuccess, apiError, handleApiError } from "@/lib/api-response";
 
 export const dynamic = "force-dynamic";
 
@@ -76,6 +76,6 @@ export async function GET(request: NextRequest) {
       totalCount: results.length,
     });
   } catch (error: any) {
-    return apiError(`Failed to fetch courses: ${error.message}`, 500);
+    return handleApiError(error);
   }
 }

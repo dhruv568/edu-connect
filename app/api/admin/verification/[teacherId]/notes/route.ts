@@ -3,7 +3,7 @@ export const dynamic = "force-dynamic";
 import { NextRequest } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { requireRole } from "@/lib/auth/guards";
-import { apiSuccess, apiError } from "@/lib/api-response";
+import { apiSuccess, apiError, handleApiError } from "@/lib/api-response";
 
 export async function POST(
   request: NextRequest,
@@ -54,6 +54,6 @@ export async function POST(
       201
     );
   } catch (error: any) {
-    return apiError(error.message || "Failed to add admin note", 500);
+    return handleApiError(error);
   }
 }
