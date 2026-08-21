@@ -37,6 +37,8 @@ export async function POST(request: NextRequest) {
  * GET /api/auth/verify-email?token=...&email=...
  * Verifies email via direct click link.
  */
+export const dynamic = "force-dynamic";
+
 export async function GET(request: NextRequest) {
   const { searchParams } = new URL(request.url);
   const token = searchParams.get("token");

@@ -8,6 +8,8 @@ import { logAuditEvent } from "@/lib/audit-logger";
  * GET /api/profile
  * Returns authenticated user's profile and role details.
  */
+export const dynamic = "force-dynamic";
+
 export async function GET() {
   const session = await getSession();
   if (!session) return apiUnauthorized();

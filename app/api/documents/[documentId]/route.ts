@@ -4,6 +4,8 @@ import { getSession } from "@/lib/auth/session";
 import { readDocumentFromStorage } from "@/lib/document-storage";
 import { logAuditEvent } from "@/lib/audit-logger";
 
+export const dynamic = "force-dynamic";
+
 export async function GET(
   request: NextRequest,
   { params }: { params: { documentId: string } }

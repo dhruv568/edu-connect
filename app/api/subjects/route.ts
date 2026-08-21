@@ -1,5 +1,7 @@
 import { apiSuccess } from "@/lib/api-response";
 
+export const dynamic = "force-dynamic";
+
 export async function GET() {
   const subjects = [
     { id: "mathematics", name: "Mathematics", icon: "Calculator", count: 124, category: "STEM" },

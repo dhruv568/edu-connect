@@ -1,6 +1,8 @@
 import { prisma } from "@/lib/prisma";
 import { apiSuccess, apiError } from "@/lib/api-response";
 
+export const dynamic = "force-dynamic";
+
 export async function GET() {
   try {
     // Check DB query execution
