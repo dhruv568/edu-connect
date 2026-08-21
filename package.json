@@ -4,7 +4,7 @@
   "private": true,
   "scripts": {
     "dev": "next dev",
-    "build": "prisma generate && prisma db push --accept-data-loss && next build",
+    "build": "prisma generate && next build",
     "postinstall": "prisma generate",
     "start": "next start",
     "lint": "next lint",
@@ -20,7 +20,7 @@
     "framer-motion": "^11.3.30",
     "gsap": "^3.12.5",
     "lucide-react": "^0.436.0",
-    "next": "14.2.5",
+    "next": "^14.2.25",
     "nodemailer": "^6.9.14",
     "react": "^18.3.1",
     "react-dom": "^18.3.1",
