@@ -1,7 +1,10 @@
+import path from "path";
 import { PrismaClient } from "@prisma/client";
 
-if (!process.env.DATABASE_URL) {
-  process.env.DATABASE_URL = "file:./dev.db";
+// Normalize SQLite database file path to absolute path relative to process.cwd()
+if (!process.env.DATABASE_URL || process.env.DATABASE_URL.startsWith("file:.")) {
+  const absoluteDbPath = path.join(process.cwd(), "prisma", "dev.db");
+  process.env.DATABASE_URL = `file:${absoluteDbPath}`;
 }
 
 const globalForPrisma = globalThis as unknown as {
