@@ -16,7 +16,12 @@ export class ResendEmailProvider implements IEmailProvider {
     this.domainId = process.env.RESEND_DOMAIN_ID;
 
     const fromName = process.env.RESEND_FROM_NAME || "EduConnect";
-    const fromEmail = process.env.RESEND_FROM_EMAIL || process.env.EMAIL_FROM || "no-reply@educonnect.com";
+    let fromEmail = process.env.RESEND_FROM_EMAIL || process.env.EMAIL_FROM || "onboarding@resend.dev";
+    
+    // If using unverified placeholder domain, fallback to Resend onboarding sender
+    if (fromEmail.includes("no-reply@educonnect.com") || fromEmail.includes("example.com")) {
+      fromEmail = "onboarding@resend.dev";
+    }
     
     if (fromEmail.includes("<")) {
       this.defaultFrom = fromEmail;
