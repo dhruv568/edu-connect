@@ -4,8 +4,8 @@
   "private": true,
   "scripts": {
     "dev": "next dev",
-    "build": "DATABASE_URL=\"${DATABASE_URL:-postgresql://neondb_owner:npg_cRqNT4WXI3QE@ep-gentle-sunset-au37ni7u.us-east-1.aws.neon.tech/neondb?sslmode=require}\" prisma generate && next build",
-    "postinstall": "DATABASE_URL=\"${DATABASE_URL:-postgresql://neondb_owner:npg_cRqNT4WXI3QE@ep-gentle-sunset-au37ni7u.us-east-1.aws.neon.tech/neondb?sslmode=require}\" prisma generate",
+    "build": "prisma generate && next build",
+    "postinstall": "prisma generate",
     "start": "next start",
     "lint": "next lint",
     "db:push": "prisma db push",
