@@ -1,15 +1,15 @@
 import { prisma } from "@/lib/prisma";
 import { hashPassword, verifyPassword } from "@/lib/auth/password";
 import { generateOTP, generateVerificationToken, hashToken, verifyTokenHash } from "@/lib/auth/tokens";
-import { getEmailProvider } from "@/lib/email/email-service";
+import { EmailService } from "@/lib/email/email-service";
 import { RegisterInput, LoginInput } from "@/schemas/auth-schemas";
 import { UserRole, UserSession, VerificationResult } from "@/types/auth";
 import { logAuditEvent } from "@/lib/audit-logger";
 
-const OTP_EXPIRY_MINUTES = 15;
+const getOtpExpiryMinutes = () => Number(process.env.OTP_EXPIRY_MINUTES) || 10;
+const getMaxAttempts = () => Number(process.env.OTP_MAX_ATTEMPTS) || 5;
+const getResendCooldownSeconds = () => Number(process.env.OTP_RESEND_COOLDOWN_SECONDS) || 60;
 const RESET_TOKEN_EXPIRY_HOURS = 1;
-const RESEND_COOLDOWN_SECONDS = 60;
-const MAX_VERIFICATION_ATTEMPTS = 5;
 
 export class AuthService {
   /**
@@ -101,14 +101,28 @@ export class AuthService {
   }
 
   /**
-   * Generates OTP/Token, stores hashes in DB, and dispatches email via provider.
+   * Generates OTP/Token, invalidates prior active OTPs so ONLY the newest OTP is valid,
+   * stores hashes in DB, and dispatches email via Resend / EmailService.
    */
   static async createAndSendVerification(userId: string, email: string, firstName: string) {
+    const expiryMinutes = getOtpExpiryMinutes();
+
+    // Invalidate all previous unverified OTP records for this user (Single Active OTP requirement)
+    await prisma.emailVerification.updateMany({
+      where: {
+        userId,
+        verifiedAt: null,
+      },
+      data: {
+        expiresAt: new Date(),
+      },
+    });
+
     const otp = generateOTP();
     const rawToken = generateVerificationToken();
     const codeHash = hashToken(otp);
     const tokenHash = hashToken(rawToken);
-    const expiresAt = new Date(Date.now() + OTP_EXPIRY_MINUTES * 60 * 1000);
+    const expiresAt = new Date(Date.now() + expiryMinutes * 60 * 1000);
 
     // Save hashed tokens to database
     await prisma.emailVerification.create({
@@ -120,27 +134,35 @@ export class AuthService {
       },
     });
 
-    const baseUrl = process.env.NEXTAUTH_URL || "http://localhost:3000";
+    const baseUrl = process.env.APP_URL || process.env.NEXTAUTH_URL || "http://localhost:3000";
     const verificationUrl = `${baseUrl}/verify-email?token=${rawToken}&email=${encodeURIComponent(email)}`;
 
-    const provider = getEmailProvider();
-    await provider.sendVerificationEmail({
-      to: email,
-      subject: "Verify your EduConnect email",
-      templateParams: {
-        recipientEmail: email,
-        firstName,
-        otp,
-        verificationUrl,
-        expiresInMinutes: OTP_EXPIRY_MINUTES,
-      },
+    const sent = await EmailService.sendVerificationOTP({
+      email,
+      userName: firstName,
+      otp,
+      verificationUrl,
+      expiresInMinutes: expiryMinutes,
     });
+
+    if (!sent && process.env.NODE_ENV === "production") {
+      console.error("❌ Failed to deliver verification OTP email via Resend provider.");
+    }
+  }
+
+  /**
+   * Sends or resends verification email enforcing rate-limiting cooldown and account checks.
+   */
+  static async sendVerification(email: string) {
+    return this.resendVerification(email);
   }
 
   /**
    * Resends verification email enforcing rate-limiting cooldown.
    */
   static async resendVerification(email: string) {
+    const cooldownSeconds = getResendCooldownSeconds();
+
     const user = await prisma.user.findUnique({
       where: { email: email.toLowerCase() },
       include: { profile: true, emailVerifications: { orderBy: { createdAt: "desc" }, take: 1 } },
@@ -157,8 +179,8 @@ export class AuthService {
     const latestVerification = user.emailVerifications[0];
     if (latestVerification) {
       const secondsSinceLast = Math.floor((Date.now() - latestVerification.createdAt.getTime()) / 1000);
-      if (secondsSinceLast < RESEND_COOLDOWN_SECONDS) {
-        const waitTime = RESEND_COOLDOWN_SECONDS - secondsSinceLast;
+      if (secondsSinceLast < cooldownSeconds) {
+        const waitTime = cooldownSeconds - secondsSinceLast;
         throw new Error(`Please wait ${waitTime} seconds before requesting another code.`);
       }
     }
@@ -167,14 +189,16 @@ export class AuthService {
 
     return {
       success: true,
-      message: "Verification email resent successfully.",
+      message: "Verification email sent successfully.",
     };
   }
 
   /**
-   * Validates a 6-digit OTP entered by user.
+   * Validates a 6-digit OTP entered by user. Enforces single active OTP, attempt limits, and expiration.
    */
   static async verifyOTP(email: string, otp: string): Promise<VerificationResult> {
+    const maxAttempts = getMaxAttempts();
+
     const user = await prisma.user.findUnique({
       where: { email: email.toLowerCase() },
       include: {
@@ -196,27 +220,42 @@ export class AuthService {
 
     const record = user.emailVerifications[0];
     if (!record) {
-      throw new Error("No active verification request found. Please request a new code.");
+      throw new Error("No active verification code found. Please request a new code.");
     }
 
-    if (record.attempts >= MAX_VERIFICATION_ATTEMPTS) {
-      throw new Error("Too many failed attempts. Please request a new verification code.");
+    // Check attempt count limit
+    if (record.attempts >= maxAttempts) {
+      // Invalidate expired/exhausted OTP
+      await prisma.emailVerification.update({
+        where: { id: record.id },
+        data: { expiresAt: new Date() },
+      });
+      throw new Error("Too many incorrect attempts. Please request a new verification code.");
     }
 
+    // Check expiration
     if (new Date() > record.expiresAt) {
-      throw new Error("Verification code has expired. Please click Resend to get a new code.");
+      throw new Error("This verification code has expired. Please request a new code.");
     }
 
     const isValid = verifyTokenHash(otp, record.codeHash);
 
     if (!isValid) {
+      const newAttempts = record.attempts + 1;
       // Increment attempt counter
       await prisma.emailVerification.update({
         where: { id: record.id },
-        data: { attempts: { increment: 1 } },
+        data: {
+          attempts: newAttempts,
+          ...(newAttempts >= maxAttempts ? { expiresAt: new Date() } : {}),
+        },
       });
-      const remaining = MAX_VERIFICATION_ATTEMPTS - (record.attempts + 1);
-      throw new Error(`Invalid verification code. ${remaining} attempts remaining.`);
+
+      if (newAttempts >= maxAttempts) {
+        throw new Error("Too many incorrect attempts. Please request a new verification code.");
+      }
+
+      throw new Error("Incorrect verification code. Please check your email and try again.");
     }
 
     const now = new Date();
@@ -256,7 +295,7 @@ export class AuthService {
     });
 
     if (!record) {
-      throw new Error("Invalid or expired verification token link.");
+      throw new Error("Invalid or expired verification link.");
     }
 
     if (record.user.emailVerified) {
@@ -264,7 +303,7 @@ export class AuthService {
     }
 
     if (new Date() > record.expiresAt) {
-      throw new Error("Verification link has expired. Please request a new code.");
+      throw new Error("This verification code has expired. Please request a new code.");
     }
 
     const now = new Date();
@@ -289,7 +328,7 @@ export class AuthService {
   }
 
   /**
-   * Initiates forgot password reset token generation and email dispatch.
+   * Initiates forgot password reset token generation and Resend email dispatch.
    */
   static async forgotPassword(email: string) {
     const user = await prisma.user.findUnique({
@@ -316,14 +355,14 @@ export class AuthService {
 
     await logAuditEvent(user.id, "PASSWORD_RESET_REQUESTED", { email: user.email });
 
-    const baseUrl = process.env.NEXTAUTH_URL || "http://localhost:3000";
+    const baseUrl = process.env.APP_URL || process.env.NEXTAUTH_URL || "http://localhost:3000";
     const resetUrl = `${baseUrl}/reset-password?token=${rawToken}&email=${encodeURIComponent(user.email)}`;
 
-    console.log("\n==================================================");
-    console.log("🔑 [PASSWORD RESET REQUESTED]");
-    console.log(`To: ${user.email}`);
-    console.log(`Reset URL: ${resetUrl}`);
-    console.log("==================================================\n");
+    await EmailService.sendPasswordResetEmail({
+      email: user.email,
+      userName: user.profile?.firstName,
+      resetUrl,
+    });
 
     return {
       success: true,

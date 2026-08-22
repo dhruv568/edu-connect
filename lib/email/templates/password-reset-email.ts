@@ -1,25 +1,16 @@
-export interface EmailTemplateParams {
+export interface PasswordResetEmailParams {
   recipientEmail: string;
   firstName?: string;
-  otp: string;
-  verificationUrl?: string;
-  expiresInMinutes?: number;
-  appUrl?: string;
+  resetUrl: string;
 }
 
 /**
- * Generates a premium, responsive HTML template for EduConnect Email OTP Verification.
- * Designed with liquid-glass aesthetic, soft gradients, high contrast, and robust mobile support.
+ * Generates responsive, branded HTML for EduConnect Password Reset requests.
  */
-export function generateVerificationEmailHtml(params: EmailTemplateParams): string {
-  const { firstName, otp, expiresInMinutes = 10, appUrl } = params;
-
+export function generatePasswordResetEmailHtml(params: PasswordResetEmailParams): string {
+  const { firstName, resetUrl } = params;
   const recipientName = firstName && firstName.trim() ? firstName.trim() : "there";
-  const baseUrl = appUrl || process.env.APP_URL || process.env.NEXTAUTH_URL || "http://localhost:3000";
   const currentYear = new Date().getFullYear();
-
-  // Format OTP code with visual spacing for email display (e.g. 4 8 2 9 1 3)
-  const formattedOtp = otp ? otp.split("").join(" ") : "0 0 0 0 0 0";
 
   return `<!DOCTYPE html>
 <html lang="en">
@@ -27,7 +18,7 @@ export function generateVerificationEmailHtml(params: EmailTemplateParams): stri
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <meta http-equiv="X-UA-Compatible" content="IE=edge">
-  <title>Your EduConnect Verification Code 🎓</title>
+  <title>Reset your EduConnect password</title>
   <style>
     body {
       font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
@@ -37,10 +28,6 @@ export function generateVerificationEmailHtml(params: EmailTemplateParams): stri
       padding: 0;
       width: 100% !important;
       -webkit-font-smoothing: antialiased;
-      -webkit-text-size-adjust: 100%;
-    }
-    table {
-      border-collapse: collapse;
     }
     .wrapper {
       width: 100%;
@@ -100,63 +87,14 @@ export function generateVerificationEmailHtml(params: EmailTemplateParams): stri
       margin-top: 12px;
       margin-bottom: 8px;
     }
-    .welcome-text {
+    .body-text {
       font-size: 15px;
       line-height: 1.6;
       color: #475569;
       margin: 0 0 24px 0;
     }
-    .otp-container {
-      background: linear-gradient(135deg, #eff6ff 0%, #dbeafe 100%);
-      border: 2px solid #bfdbfe;
-      border-radius: 20px;
-      padding: 28px 20px;
-      margin: 24px 0;
-      text-align: center;
-      box-shadow: inset 0 2px 4px rgba(255, 255, 255, 0.8);
-    }
-    .otp-header-label {
-      font-size: 11px;
-      font-weight: 800;
-      text-transform: uppercase;
-      letter-spacing: 2px;
-      color: #1e40af;
-      margin-bottom: 12px;
-    }
-    .otp-digits {
-      font-size: 34px;
-      font-weight: 900;
-      letter-spacing: 10px;
-      color: #1e3a8a;
-      font-family: 'Courier New', Courier, monospace;
-      margin: 8px 0;
-      user-select: all;
-      -webkit-user-select: all;
-    }
-    .expiry-badge {
-      display: inline-block;
-      font-size: 12px;
-      font-weight: 700;
-      color: #2563eb;
-      background: #ffffff;
-      padding: 6px 14px;
-      border-radius: 9999px;
-      margin-top: 12px;
-      border: 1px solid #bfdbfe;
-    }
-    .security-notice {
-      background: #f8fafc;
-      border-left: 4px solid #3b82f6;
-      border-radius: 8px;
-      padding: 14px 16px;
-      font-size: 13px;
-      color: #475569;
-      text-align: left;
-      margin: 24px 0;
-      line-height: 1.5;
-    }
     .cta-container {
-      margin: 28px 0;
+      margin: 32px 0;
     }
     .cta-button {
       display: inline-block;
@@ -168,7 +106,16 @@ export function generateVerificationEmailHtml(params: EmailTemplateParams): stri
       padding: 14px 36px;
       border-radius: 14px;
       box-shadow: 0 10px 20px rgba(37, 99, 235, 0.3);
-      transition: all 0.2s ease;
+    }
+    .expiry-notice {
+      background: #f8fafc;
+      border-left: 4px solid #64748b;
+      border-radius: 8px;
+      padding: 12px 16px;
+      font-size: 13px;
+      color: #64748b;
+      text-align: left;
+      margin: 20px 0;
     }
     .disregard-text {
       font-size: 13px;
@@ -204,47 +151,32 @@ export function generateVerificationEmailHtml(params: EmailTemplateParams): stri
 <body>
   <div class="wrapper">
     <div class="main-card">
-      <!-- Header Banner -->
       <div class="header-banner">
         <h1 class="brand-title">EDUCONNECT</h1>
         <p class="brand-tagline">Learn. Connect. Grow.</p>
       </div>
 
-      <!-- Icon Avatar Badge -->
-      <div class="badge-icon">🎓</div>
+      <div class="badge-icon">🔑</div>
 
-      <!-- Body Content -->
       <div class="content-body">
         <h2 class="greeting">Hello ${recipientName},</h2>
-        <p class="welcome-text">
-          Welcome to EduConnect! 🎓<br>
-          We're excited to have you with us. To verify your email address, please enter the verification code below:
+        <p class="body-text">
+          We received a request to reset your EduConnect password. Click the button below to choose a new password:
         </p>
 
-        <!-- OTP Card -->
-        <div class="otp-container">
-          <div class="otp-header-label">VERIFICATION CODE</div>
-          <div class="otp-digits">${formattedOtp}</div>
-          <div class="expiry-badge">⏱️ Valid for ${expiresInMinutes} minutes</div>
-        </div>
-
-        <!-- Security Warning -->
-        <div class="security-notice">
-          <strong>🔐 For your security:</strong> EduConnect will never ask you to share your verification code with anyone.
-        </div>
-
-        <!-- Call to Action Button -->
         <div class="cta-container">
-          <a href="${baseUrl}" class="cta-button" target="_blank">Open EduConnect</a>
+          <a href="${resetUrl}" class="cta-button" target="_blank">Reset Password</a>
         </div>
 
-        <!-- Disregard Disclaimer -->
+        <div class="expiry-notice">
+          ⏱️ <strong>Note:</strong> This link will expire soon for your security.
+        </div>
+
         <p class="disregard-text">
-          If you didn't request this verification code, you can safely ignore this email.
+          If you did not request a password reset, you can safely ignore this email.
         </p>
       </div>
 
-      <!-- Footer -->
       <div class="footer">
         <p class="footer-brand">EduConnect</p>
         <p class="footer-tagline">Learn. Connect. Grow.</p>

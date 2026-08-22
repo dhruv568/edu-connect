@@ -20,6 +20,7 @@ function VerifyEmailForm() {
   const [loading, setLoading] = useState(false);
   const [verifyingToken, setVerifyingToken] = useState(false);
   const [verified, setVerified] = useState(false);
+  const [errorMessage, setErrorMessage] = useState<string | null>(null);
   const [resendCooldown, setResendCooldown] = useState(0);
 
   const inputRefs = useRef<(HTMLInputElement | null)[]>([]);
@@ -35,10 +36,13 @@ function VerifyEmailForm() {
             setVerified(true);
             showToast("Email Verified!", "Welcome to EduConnect 🎓", "success", true);
           } else {
-            showToast("Verification Error", data.error || "Invalid link.", "error");
+            const msg = data.error || "Invalid verification link.";
+            setErrorMessage(msg);
+            showToast("Verification Error", msg, "error");
           }
         })
         .catch((err) => {
+          setErrorMessage(err.message || "Failed to verify link.");
           showToast("Error", err.message, "error");
         })
         .finally(() => {
@@ -57,6 +61,7 @@ function VerifyEmailForm() {
 
   const handleOtpChange = (index: number, value: string) => {
     if (!/^\d*$/.test(value)) return;
+    setErrorMessage(null);
     const newOtp = [...otp];
     newOtp[index] = value.slice(-1);
     setOtp(newOtp);
@@ -76,6 +81,7 @@ function VerifyEmailForm() {
     e.preventDefault();
     const pasted = e.clipboardData.getData("text").trim();
     if (/^\d{6}$/.test(pasted)) {
+      setErrorMessage(null);
       const digits = pasted.split("");
       setOtp(digits);
       inputRefs.current[5]?.focus();
@@ -86,11 +92,13 @@ function VerifyEmailForm() {
     e.preventDefault();
     const code = otp.join("");
     if (code.length !== 6) {
+      setErrorMessage("Please enter all 6 digits of your verification code.");
       showToast("Invalid Input", "Please enter all 6 digits of the OTP code.", "error");
       return;
     }
 
     setLoading(true);
+    setErrorMessage(null);
     try {
       const res = await fetch("/api/auth/verify-email", {
         method: "POST",
@@ -99,12 +107,16 @@ function VerifyEmailForm() {
       });
 
       const data = await res.json();
-      if (!res.ok) throw new Error(data.error || "Verification failed.");
+      if (!res.ok) {
+        throw new Error(data.error || "Incorrect verification code. Please check your email and try again.");
+      }
 
       setVerified(true);
       showToast("Email Verified!", "Welcome to EduConnect 🎓 Your account is fully active.", "success", true);
     } catch (err: any) {
-      showToast("Verification Failed", err.message, "error");
+      const msg = err.message || "Verification failed.";
+      setErrorMessage(msg);
+      showToast("Verification Failed", msg, "error");
     } finally {
       setLoading(false);
     }
@@ -113,6 +125,7 @@ function VerifyEmailForm() {
   const handleResend = async () => {
     if (resendCooldown > 0) return;
     setLoading(true);
+    setErrorMessage(null);
     try {
       const res = await fetch("/api/auth/resend-verification", {
         method: "POST",
@@ -124,8 +137,11 @@ function VerifyEmailForm() {
       if (!res.ok) throw new Error(data.error || "Failed to resend code.");
 
       setResendCooldown(60);
-      showToast("Code Resent", "A new 6-digit verification code was sent to your email.", "info");
+      setOtp(Array(6).fill(""));
+      inputRefs.current[0]?.focus();
+      showToast("Code Resent ✉️", "A new 6-digit verification code was sent to your email inbox.", "info");
     } catch (err: any) {
+      setErrorMessage(err.message || "Resend failed.");
       showToast("Resend Error", err.message, "error");
     } finally {
       setLoading(false);
@@ -146,14 +162,14 @@ function VerifyEmailForm() {
             </div>
             <h2 className="text-2xl font-extrabold text-slate-900">Email Verified!</h2>
             <p className="text-sm text-slate-600">
-              Welcome to EduConnect 🎓 Your email address has been verified. You can now access all features.
+              Your EduConnect account is ready. You can now log in and access all features.
             </p>
             <Button
               variant="gradient"
-              className="w-full mt-4"
+              className="w-full mt-4 h-12 text-base font-bold"
               onClick={() => router.push("/")}
             >
-              Go to EduConnect Platform
+              Continue
             </Button>
           </div>
         ) : (
@@ -163,14 +179,25 @@ function VerifyEmailForm() {
             </div>
 
             <div>
-              <h2 className="text-2xl font-extrabold text-slate-900">Check your email</h2>
+              <h2 className="text-2xl font-extrabold text-slate-900">Check your inbox ✉️</h2>
               <p className="text-sm text-slate-500 mt-1">
-                We&apos;ve sent a 6-digit verification code to
+                We&apos;ve sent a verification code to
               </p>
-              <p className="text-sm font-bold text-slate-900 mt-0.5 bg-slate-100 py-1 px-3 rounded-full inline-block">
+              <p className="text-sm font-bold text-slate-900 mt-1.5 bg-slate-100 py-1 px-4 rounded-full inline-block">
                 {maskEmail(queryEmail)}
               </p>
             </div>
+
+            {errorMessage && (
+              <motion.div
+                initial={{ opacity: 0, y: -5 }}
+                animate={{ opacity: 1, y: 0 }}
+                className="bg-red-50 border border-red-200 text-red-700 text-xs rounded-xl p-3.5 flex items-center gap-2 text-left"
+              >
+                <AlertCircle className="h-4 w-4 shrink-0 text-red-600" />
+                <span>{errorMessage}</span>
+              </motion.div>
+            )}
 
             {verifyingToken ? (
               <div className="py-6 space-y-2 text-slate-500 text-sm">
@@ -198,7 +225,7 @@ function VerifyEmailForm() {
                 <Button
                   type="submit"
                   variant="gradient"
-                  className="w-full h-12"
+                  className="w-full h-12 text-base font-bold"
                   isLoading={loading}
                 >
                   Verify Email

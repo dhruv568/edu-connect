@@ -3,12 +3,18 @@ import { VerifyOTPSchema } from "@/schemas/auth-schemas";
 import { AuthService } from "@/services/auth-service";
 import { apiSuccess, apiBadRequest, apiError } from "@/lib/api-response";
 import { getSession, setSessionCookie } from "@/lib/auth/session";
+import { checkRateLimit } from "@/lib/rate-limiter";
 
 /**
  * POST /api/auth/verify-email
- * Verifies email via 6-digit OTP code input.
+ * Verifies email via 6-digit OTP code input with rate limiting and attempt limits.
  */
 export async function POST(request: NextRequest) {
+  const rateLimit = checkRateLimit(request, "verify-email", { limit: 10, windowMs: 60 * 1000 });
+  if (!rateLimit.allowed) {
+    return apiError(`Too many verification attempts. Please wait ${rateLimit.resetSeconds} seconds before trying again.`, 429);
+  }
+
   try {
     const body = await request.json();
     const validated = VerifyOTPSchema.parse(body);

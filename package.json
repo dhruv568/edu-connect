@@ -10,7 +10,7 @@
     "lint": "next lint",
     "db:push": "prisma db push",
     "db:seed": "tsx database/seed/seed.ts",
-    "test": "tsx tests/auth.test.ts && tsx tests/discovery.test.ts && tsx tests/auth-module3.test.ts && tsx tests/module4-verification.test.ts"
+    "test": "tsx tests/auth.test.ts && tsx tests/discovery.test.ts && tsx tests/auth-module3.test.ts && tsx tests/module4-verification.test.ts && tsx tests/otp-resend.test.ts"
   },
   "dependencies": {
     "@hookform/resolvers": "^3.9.0",
@@ -25,6 +25,7 @@
     "react": "^18.3.1",
     "react-dom": "^18.3.1",
     "react-hook-form": "^7.53.0",
+    "resend": "^6.22.0",
     "tailwind-merge": "^2.5.2",
     "zod": "^3.23.8"
   },
