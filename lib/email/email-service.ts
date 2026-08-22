@@ -220,6 +220,7 @@ export class EmailService {
       recipientName: params.userName || "Learner",
       subject: "Welcome to EduConnect! 🎓",
       statusBadgeText: "WELCOME",
+      statusBadgeVariant: "success",
       headline: "Your EduConnect journey starts here!",
       bodyText: "Explore top teachers, host live classes, and master new skills on EduConnect.",
     });
