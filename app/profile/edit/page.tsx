@@ -47,9 +47,6 @@ export default function ProfileEditPage() {
           if (u.studentProfile) {
             setGradeLevel(u.studentProfile.gradeLevel || "");
           }
-          if (u.parentProfile) {
-            setEmergencyContact(u.parentProfile.emergencyContact || "");
-          }
         }
       })
       .catch(() => router.push("/login"))
@@ -135,10 +132,6 @@ export default function ProfileEditPage() {
 
             {userRole === "STUDENT" && (
               <Input label="Grade Level" value={gradeLevel} onChange={(e) => setGradeLevel(e.target.value)} />
-            )}
-
-            {userRole === "PARENT" && (
-              <Input label="Emergency Contact" value={emergencyContact} onChange={(e) => setEmergencyContact(e.target.value)} />
             )}
 
             <Button type="submit" variant="primary" className="w-full mt-4" isLoading={saving} leftIcon={<Save className="h-4 w-4" />}>

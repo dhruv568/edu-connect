@@ -11,7 +11,7 @@ export function TrustChips() {
     { icon: Video, label: "Live Interactive Learning", color: "text-blue-600", bg: "bg-blue-50" },
     { icon: BookOpen, label: "Structured Courses", color: "text-emerald-600", bg: "bg-emerald-50" },
     { icon: BarChart3, label: "Real-time Progress Tracking", color: "text-purple-600", bg: "bg-purple-50" },
-    { icon: Users, label: "360° Parent Visibility", color: "text-amber-600", bg: "bg-amber-50" },
+    { icon: Sparkles, label: "WebRTC Virtual Classroom", color: "text-amber-600", bg: "bg-amber-50" },
   ];
 
   return (

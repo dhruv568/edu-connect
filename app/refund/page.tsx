@@ -31,7 +31,7 @@ export default function RefundPage() {
           <section className="space-y-2">
             <h3 className="text-sm font-bold text-slate-900">2. Live Class Slot Cancellations</h3>
             <p>
-              Cancellations submitted within the specified window automatically return slot credits to the parent/student wallet balance.
+              Cancellations submitted within the specified window automatically return slot credits to the student wallet balance.
             </p>
           </section>
         </GlassCard>

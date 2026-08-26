@@ -30,3 +30,7 @@ export function ProfileSkeleton() {
     </div>
   );
 }
+
+export function LoadingSkeleton({ className = "w-12 h-12 rounded-xl" }: { className?: string }) {
+  return <div className={`bg-slate-800 animate-pulse ${className}`} />;
+}

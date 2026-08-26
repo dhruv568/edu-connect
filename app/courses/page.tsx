@@ -1,177 +1,355 @@
 "use client";
 
-import React, { useState, useEffect, Suspense } from "react";
-import { useSearchParams, useRouter, usePathname } from "next/navigation";
-import { FloatingNavbar } from "@/components/homepage/floating-navbar";
-import { PremiumFooter } from "@/components/homepage/premium-footer";
-import { CourseFilterPanel, CourseFilterState } from "@/components/discovery/course-filter-panel";
-import { CourseCardGrid } from "@/components/discovery/course-card-grid";
-import { AuthModal } from "@/components/shared/auth-modal";
-import { Search, BookOpen } from "lucide-react";
-import { UserRole } from "@/types/auth";
-import { trackEvent } from "@/lib/analytics";
+import React, { useState, useEffect } from "react";
+import Link from "next/link";
+import {
+  Search,
+  Filter,
+  SlidersHorizontal,
+  GraduationCap,
+  Sparkles,
+  BookOpen,
+  CheckCircle,
+  X,
+  ChevronLeft,
+  ChevronRight,
+  Layers,
+} from "lucide-react";
+import { CourseCard } from "@/components/courses/course-card";
+import { Navbar } from "@/components/layout/navbar";
+import { Footer } from "@/components/layout/footer";
 
-function CoursesContent() {
-  const searchParams = useSearchParams();
-  const router = useRouter();
-  const pathname = usePathname();
+const SUBJECTS = ["All", "Mathematics", "Science", "Physics", "Chemistry", "Biology", "Computer Science", "English", "Economics"];
+const LEVELS = [
+  { label: "All Levels", value: "all" },
+  { label: "Beginner", value: "BEGINNER" },
+  { label: "Intermediate", value: "INTERMEDIATE" },
+  { label: "Advanced", value: "ADVANCED" },
+];
+const SORT_OPTIONS = [
+  { label: "Recommended", value: "recommended" },
+  { label: "Highest Rated", value: "rating" },
+  { label: "Newest", value: "newest" },
+  { label: "Most Enrolled", value: "most_enrolled" },
+  { label: "Price: Low to High", value: "price_asc" },
+  { label: "Price: High to Low", value: "price_desc" },
+  { label: "Shortest Duration", value: "shortest" },
+  { label: "Longest Duration", value: "longest" },
+];
 
-  const [searchQuery, setSearchQuery] = useState(searchParams.get("search") || "");
-  const [filters, setFilters] = useState<CourseFilterState>({
-    subject: searchParams.get("subject") || "all",
-    priceMax: searchParams.get("priceMax") ? Number(searchParams.get("priceMax")) : 150,
-    ratingMin: searchParams.get("ratingMin") ? Number(searchParams.get("ratingMin")) : 0,
-    sortBy: searchParams.get("sortBy") || "recommended",
-  });
-
+export default function CourseMarketplacePage() {
   const [courses, setCourses] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
-  const [authModalOpen, setAuthModalOpen] = useState(false);
-  const [selectedRole, setSelectedRole] = useState<UserRole>("STUDENT");
+  const [totalCount, setTotalCount] = useState(0);
+  const [page, setPage] = useState(1);
+  const [totalPages, setTotalPages] = useState(1);
 
-  const updateURL = (newSearch: string, newFilters: CourseFilterState) => {
-    const params = new URLSearchParams();
-    if (newSearch.trim()) params.set("search", newSearch);
-    if (newFilters.subject !== "all") params.set("subject", newFilters.subject);
-    if (newFilters.priceMax < 150) params.set("priceMax", String(newFilters.priceMax));
-    if (newFilters.sortBy !== "recommended") params.set("sortBy", newFilters.sortBy);
+  // Filters state
+  const [searchQuery, setSearchQuery] = useState("");
+  const [selectedSubject, setSelectedSubject] = useState("All");
+  const [selectedLevel, setSelectedLevel] = useState("all");
+  const [sortBy, setSortBy] = useState("recommended");
+  const [priceMax, setPriceMax] = useState<number | undefined>(undefined);
+  const [showFiltersMobile, setShowFiltersMobile] = useState(false);
 
-    router.replace(`${pathname}?${params.toString()}`, { scroll: false });
+  const fetchCourses = async () => {
+    setLoading(true);
+    try {
+      const params = new URLSearchParams();
+      if (searchQuery) params.set("search", searchQuery);
+      if (selectedSubject !== "All") params.set("subject", selectedSubject);
+      if (selectedLevel !== "all") params.set("level", selectedLevel);
+      if (sortBy) params.set("sortBy", sortBy);
+      if (priceMax !== undefined) params.set("priceMax", priceMax.toString());
+      params.set("page", page.toString());
+      params.set("limit", "9");
+
+      const res = await fetch(`/api/courses?${params.toString()}`);
+      const data = await res.json();
+
+      if (data.success) {
+        setCourses(data.data.courses || []);
+        setTotalCount(data.data.totalCount || 0);
+        setTotalPages(data.data.totalPages || 1);
+      }
+    } catch (err) {
+      console.error("Failed to fetch courses:", err);
+    } finally {
+      setLoading(false);
+    }
   };
 
   useEffect(() => {
-    const fetchCourses = async () => {
-      setLoading(true);
-      try {
-        const queryParams = new URLSearchParams();
-        if (searchQuery.trim()) queryParams.set("search", searchQuery);
-        if (filters.subject !== "all") queryParams.set("subject", filters.subject);
-        if (filters.priceMax) queryParams.set("priceMax", String(filters.priceMax));
-        if (filters.sortBy) queryParams.set("sortBy", filters.sortBy);
-
-        const res = await fetch(`/api/courses?${queryParams.toString()}`);
-        const data = await res.json();
-        if (data.success) {
-          setCourses(data.data.courses);
-        }
-      } catch (err) {
-        console.error("Failed to load courses:", err);
-      } finally {
-        setLoading(false);
-      }
-    };
-
     fetchCourses();
-  }, [searchQuery, filters]);
-
-  const handleSearchSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
-    trackEvent("course_search_submitted", { query: searchQuery });
-    updateURL(searchQuery, filters);
-  };
-
-  const handleFilterChange = (newFilters: CourseFilterState) => {
-    setFilters(newFilters);
-    updateURL(searchQuery, newFilters);
-  };
-
-  const handleResetFilters = () => {
-    const defaultFilters: CourseFilterState = {
-      subject: "all",
-      priceMax: 150,
-      ratingMin: 0,
-      sortBy: "recommended",
-    };
-    setSearchQuery("");
-    setFilters(defaultFilters);
-    updateURL("", defaultFilters);
-  };
-
-  const handleOpenAuth = (role: UserRole) => {
-    setSelectedRole(role);
-    setAuthModalOpen(true);
-  };
+  }, [searchQuery, selectedSubject, selectedLevel, sortBy, priceMax, page]);
 
   return (
-    <div className="min-h-screen flex flex-col bg-slate-50">
-      <FloatingNavbar />
+    <div className="min-h-screen flex flex-col bg-slate-50 dark:bg-slate-950 text-slate-900 dark:text-slate-100 font-sans selection:bg-blue-500 selection:text-white">
+      <Navbar />
 
-      <main className="flex-1 pt-32 pb-20">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 space-y-8">
-          {/* Header */}
-          <div className="text-center max-w-2xl mx-auto space-y-3">
-            <span className="text-xs font-extrabold text-emerald-600 uppercase tracking-widest">
-              Structured LMS Courses
-            </span>
-            <h1 className="text-4xl font-black text-slate-900 tracking-tight">
-              Self-Paced Learning Catalog
-            </h1>
-            <p className="text-sm text-slate-600">
-              Explore video-based courses, download practice workbooks, and earn certificates.
-            </p>
+      {/* Hero Header Section */}
+      <section className="relative pt-28 pb-16 overflow-hidden bg-gradient-to-b from-blue-900/10 via-indigo-950/5 to-transparent">
+        <div className="absolute top-10 left-1/2 -translate-x-1/2 w-[600px] h-[300px] bg-gradient-to-tr from-blue-600/15 via-indigo-500/15 to-purple-600/15 blur-3xl pointer-events-none rounded-full" />
+
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10 text-center">
+          <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-blue-500/10 border border-blue-500/20 text-blue-600 dark:text-blue-400 text-xs font-semibold uppercase tracking-wider mb-4 backdrop-blur-md">
+            <Sparkles className="w-3.5 h-3.5" />
+            <span>EduConnect Course Marketplace</span>
           </div>
 
+          <h1 className="text-3xl sm:text-5xl font-black tracking-tight text-slate-900 dark:text-slate-100 max-w-3xl mx-auto">
+            Master Any Subject with{" "}
+            <span className="bg-gradient-to-r from-blue-600 via-indigo-500 to-purple-600 bg-clip-text text-transparent">
+              Self-Paced Learning
+            </span>
+          </h1>
+
+          <p className="mt-4 text-base sm:text-lg text-slate-600 dark:text-slate-300 max-w-2xl mx-auto font-medium">
+            Explore expert-crafted pre-recorded video courses from verified educators. Learn on your own schedule with complete lesson resources.
+          </p>
+
           {/* Search Bar */}
-          <form onSubmit={handleSearchSubmit} className="max-w-2xl mx-auto">
-            <div className="glass-surface p-2 rounded-2xl flex items-center shadow-lg border border-white/90">
-              <Search className="h-5 w-5 text-slate-400 ml-3" />
+          <div className="mt-8 max-w-2xl mx-auto">
+            <div className="relative flex items-center shadow-xl shadow-blue-500/5 rounded-2xl overflow-hidden border border-slate-200 dark:border-slate-800 bg-white/80 dark:bg-slate-900/80 backdrop-blur-xl">
+              <Search className="absolute left-4 w-5 h-5 text-slate-400" />
               <input
                 type="text"
-                placeholder="Search courses by topic (e.g. 'Calculus' or 'Python')..."
+                placeholder="Search by course title, teacher, subject, or keyword..."
                 value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
-                className="w-full px-3 py-2 text-sm text-slate-900 placeholder:text-slate-400 bg-transparent outline-none font-medium"
+                onChange={(e) => {
+                  setSearchQuery(e.target.value);
+                  setPage(1);
+                }}
+                className="w-full pl-12 pr-10 py-4 text-sm sm:text-base bg-transparent text-slate-900 dark:text-slate-100 placeholder-slate-400 outline-none font-medium"
               />
+              {searchQuery && (
+                <button
+                  onClick={() => setSearchQuery("")}
+                  className="absolute right-4 text-slate-400 hover:text-slate-600 dark:hover:text-slate-200"
+                >
+                  <X className="w-4 h-4" />
+                </button>
+              )}
+            </div>
+          </div>
+
+          {/* Subject Pills Filter */}
+          <div className="mt-6 flex items-center justify-center gap-2 overflow-x-auto pb-2 scrollbar-none">
+            {SUBJECTS.map((sub) => (
               <button
-                type="submit"
-                className="px-5 py-2.5 bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-xs rounded-xl shadow-md transition-all"
+                key={sub}
+                onClick={() => {
+                  setSelectedSubject(sub);
+                  setPage(1);
+                }}
+                className={`px-4 py-2 text-xs font-semibold rounded-xl whitespace-nowrap transition-all duration-200 ${
+                  selectedSubject === sub
+                    ? "bg-gradient-to-r from-blue-600 to-indigo-600 text-white shadow-md shadow-blue-500/20 scale-105"
+                    : "bg-white/60 dark:bg-slate-900/60 text-slate-700 dark:text-slate-300 border border-slate-200 dark:border-slate-800 hover:bg-slate-100 dark:hover:bg-slate-800"
+                }`}
               >
-                Search Courses
+                {sub}
               </button>
-            </div>
-          </form>
+            ))}
+          </div>
+        </div>
+      </section>
 
-          {/* Main Layout */}
-          <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 pt-4">
-            <div className="lg:col-span-4">
-              <CourseFilterPanel
-                filters={filters}
-                onChange={handleFilterChange}
-                onReset={handleResetFilters}
-              />
-            </div>
-
-            <div className="lg:col-span-8 space-y-4">
-              <div className="flex items-center justify-between text-xs font-bold text-slate-600 px-1">
-                <span>Showing {courses.length} LMS Courses</span>
-                <span>URL Filter Sync Active 🔗</span>
+      {/* Main Content Area */}
+      <main className="flex-1 max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-8">
+        <div className="flex flex-col lg:flex-row gap-8">
+          {/* Sidebar Filters Desktop */}
+          <aside className="hidden lg:block w-64 shrink-0 space-y-6">
+            <div className="p-6 rounded-2xl bg-white/70 dark:bg-slate-900/70 border border-slate-200/80 dark:border-slate-800/80 backdrop-blur-md space-y-6">
+              <div className="flex items-center justify-between pb-4 border-b border-slate-200 dark:border-slate-800">
+                <h3 className="font-bold text-slate-900 dark:text-slate-100 flex items-center gap-2 text-sm uppercase tracking-wider">
+                  <Filter className="w-4 h-4 text-blue-500" /> Filter Courses
+                </h3>
+                {(selectedSubject !== "All" || selectedLevel !== "all" || priceMax !== undefined) && (
+                  <button
+                    onClick={() => {
+                      setSelectedSubject("All");
+                      setSelectedLevel("all");
+                      setPriceMax(undefined);
+                      setPage(1);
+                    }}
+                    className="text-xs text-blue-600 dark:text-blue-400 font-semibold hover:underline"
+                  >
+                    Reset
+                  </button>
+                )}
               </div>
 
-              <CourseCardGrid
-                courses={courses}
-                loading={loading}
-                onOpenAuth={handleOpenAuth}
-              />
+              {/* Level Filter */}
+              <div>
+                <label className="text-xs font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400 block mb-3">
+                  Difficulty Level
+                </label>
+                <div className="space-y-2">
+                  {LEVELS.map((lvl) => (
+                    <label key={lvl.value} className="flex items-center gap-2.5 text-xs text-slate-700 dark:text-slate-300 font-medium cursor-pointer hover:text-blue-600">
+                      <input
+                        type="radio"
+                        name="level"
+                        checked={selectedLevel === lvl.value}
+                        onChange={() => {
+                          setSelectedLevel(lvl.value);
+                          setPage(1);
+                        }}
+                        className="text-blue-600 focus:ring-blue-500"
+                      />
+                      {lvl.label}
+                    </label>
+                  ))}
+                </div>
+              </div>
+
+              {/* Price Filter */}
+              <div>
+                <label className="text-xs font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400 block mb-3">
+                  Max Price
+                </label>
+                <div className="space-y-2">
+                  <button
+                    onClick={() => { setPriceMax(undefined); setPage(1); }}
+                    className={`w-full px-3 py-1.5 text-left text-xs font-medium rounded-lg border ${
+                      priceMax === undefined ? "bg-blue-50 dark:bg-blue-950/50 border-blue-500 text-blue-600" : "border-slate-200 dark:border-slate-800 text-slate-600 dark:text-slate-400"
+                    }`}
+                  >
+                    Any Price
+                  </button>
+                  <button
+                    onClick={() => { setPriceMax(0); setPage(1); }}
+                    className={`w-full px-3 py-1.5 text-left text-xs font-medium rounded-lg border ${
+                      priceMax === 0 ? "bg-blue-50 dark:bg-blue-950/50 border-blue-500 text-blue-600" : "border-slate-200 dark:border-slate-800 text-slate-600 dark:text-slate-400"
+                    }`}
+                  >
+                    Free Only (₹0)
+                  </button>
+                  <button
+                    onClick={() => { setPriceMax(1000); setPage(1); }}
+                    className={`w-full px-3 py-1.5 text-left text-xs font-medium rounded-lg border ${
+                      priceMax === 1000 ? "bg-blue-50 dark:bg-blue-950/50 border-blue-500 text-blue-600" : "border-slate-200 dark:border-slate-800 text-slate-600 dark:text-slate-400"
+                    }`}
+                  >
+                    Under ₹1,000
+                  </button>
+                  <button
+                    onClick={() => { setPriceMax(2500); setPage(1); }}
+                    className={`w-full px-3 py-1.5 text-left text-xs font-medium rounded-lg border ${
+                      priceMax === 2500 ? "bg-blue-50 dark:bg-blue-950/50 border-blue-500 text-blue-600" : "border-slate-200 dark:border-slate-800 text-slate-600 dark:text-slate-400"
+                    }`}
+                  >
+                    Under ₹2,500
+                  </button>
+                </div>
+              </div>
             </div>
+          </aside>
+
+          {/* Course Grid & Sorting Header */}
+          <div className="flex-1 space-y-6">
+            {/* Top Toolbar */}
+            <div className="flex flex-col sm:flex-row items-center justify-between gap-4 p-4 rounded-2xl bg-white/70 dark:bg-slate-900/70 border border-slate-200/80 dark:border-slate-800/80 backdrop-blur-md">
+              <div className="text-xs sm:text-sm font-semibold text-slate-600 dark:text-slate-300">
+                Showing <span className="font-bold text-slate-900 dark:text-slate-100">{courses.length}</span> of{" "}
+                <span className="font-bold text-slate-900 dark:text-slate-100">{totalCount}</span> courses
+              </div>
+
+              <div className="flex items-center gap-3 w-full sm:w-auto justify-end">
+                <button
+                  onClick={() => setShowFiltersMobile(!showFiltersMobile)}
+                  className="lg:hidden flex items-center gap-1.5 px-3 py-2 text-xs font-semibold rounded-xl bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300"
+                >
+                  <SlidersHorizontal className="w-3.5 h-3.5" /> Filters
+                </button>
+
+                <div className="flex items-center gap-2">
+                  <span className="text-xs font-bold uppercase tracking-wider text-slate-400 shrink-0">Sort By:</span>
+                  <select
+                    value={sortBy}
+                    onChange={(e) => {
+                      setSortBy(e.target.value);
+                      setPage(1);
+                    }}
+                    className="px-3 py-2 text-xs font-semibold rounded-xl bg-slate-100 dark:bg-slate-800 border-0 text-slate-900 dark:text-slate-100 outline-none cursor-pointer"
+                  >
+                    {SORT_OPTIONS.map((opt) => (
+                      <option key={opt.value} value={opt.value}>
+                        {opt.label}
+                      </option>
+                    ))}
+                  </select>
+                </div>
+              </div>
+            </div>
+
+            {/* Courses Grid */}
+            {loading ? (
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+                {[1, 2, 3, 4, 5, 6].map((n) => (
+                  <div
+                    key={n}
+                    className="h-80 rounded-2xl bg-slate-200 dark:bg-slate-800 animate-pulse"
+                  />
+                ))}
+              </div>
+            ) : courses.length === 0 ? (
+              <div className="p-12 text-center rounded-2xl bg-white/70 dark:bg-slate-900/70 border border-slate-200 dark:border-slate-800">
+                <BookOpen className="w-12 h-12 text-slate-300 mx-auto mb-3" />
+                <h3 className="text-lg font-bold text-slate-800 dark:text-slate-200">No Courses Found</h3>
+                <p className="text-xs text-slate-500 mt-1 max-w-sm mx-auto">
+                  We couldn't find any courses matching your search criteria. Try clearing filters or searching for different keywords.
+                </p>
+                <button
+                  onClick={() => {
+                    setSearchQuery("");
+                    setSelectedSubject("All");
+                    setSelectedLevel("all");
+                    setPriceMax(undefined);
+                  }}
+                  className="mt-4 px-4 py-2 text-xs font-semibold rounded-xl bg-blue-600 text-white shadow-md hover:bg-blue-700 transition"
+                >
+                  Clear Filters
+                </button>
+              </div>
+            ) : (
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+                {courses.map((course) => (
+                  <CourseCard key={course.id} {...course} />
+                ))}
+              </div>
+            )}
+
+            {/* Pagination Controls */}
+            {totalPages > 1 && (
+              <div className="flex items-center justify-center gap-2 pt-6">
+                <button
+                  disabled={page <= 1}
+                  onClick={() => setPage(page - 1)}
+                  className="p-2.5 rounded-xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 text-slate-600 dark:text-slate-300 disabled:opacity-40 disabled:cursor-not-allowed hover:bg-slate-100 dark:hover:bg-slate-800 transition"
+                >
+                  <ChevronLeft className="w-4 h-4" />
+                </button>
+
+                <span className="text-xs font-bold text-slate-700 dark:text-slate-300 px-4">
+                  Page {page} of {totalPages}
+                </span>
+
+                <button
+                  disabled={page >= totalPages}
+                  onClick={() => setPage(page + 1)}
+                  className="p-2.5 rounded-xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 text-slate-600 dark:text-slate-300 disabled:opacity-40 disabled:cursor-not-allowed hover:bg-slate-100 dark:hover:bg-slate-800 transition"
+                >
+                  <ChevronRight className="w-4 h-4" />
+                </button>
+              </div>
+            )}
           </div>
         </div>
       </main>
 
-      <PremiumFooter />
-
-      <AuthModal
-        isOpen={authModalOpen}
-        onClose={() => setAuthModalOpen(false)}
-        initialRole={selectedRole}
-      />
+      <Footer />
     </div>
-  );
-}
-
-export default function CoursesPage() {
-  return (
-    <Suspense fallback={<div className="min-h-screen flex items-center justify-center">Loading Course Discovery...</div>}>
-      <CoursesContent />
-    </Suspense>
   );
 }

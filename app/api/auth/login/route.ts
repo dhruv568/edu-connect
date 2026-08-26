@@ -15,11 +15,23 @@ export async function POST(request: NextRequest) {
 
     await setSessionCookie(userSession);
 
-    const redirectPath = `/${userSession.role.toLowerCase()}`;
+    if (!userSession.emailVerified) {
+      return apiSuccess(
+        {
+          user: userSession,
+          requiresVerification: true,
+          redirectPath: `/verify-email?email=${encodeURIComponent(userSession.email)}`,
+        },
+        "Please verify your email before continuing."
+      );
+    }
+
+    const redirectPath = `/${userSession.role.toLowerCase()}/dashboard`;
 
     return apiSuccess(
       {
         user: userSession,
+        requiresVerification: false,
         redirectPath,
       },
       "Login successful!"

@@ -6,7 +6,21 @@ import { DashboardLayout } from "@/components/layout/dashboard-layout";
 import { Card } from "@/components/ui/card";
 import { GlassButton } from "@/components/glass/glass-button";
 import { StatusBadge } from "@/components/ui/status-badge";
-import { Users, ShieldCheck, Activity, Server, AlertTriangle, ArrowRight, CheckCircle2, XCircle, AlertOctagon, Loader2 } from "lucide-react";
+import { MetricCard } from "@/components/analytics/metric-card";
+import {
+  Users,
+  ShieldCheck,
+  Activity,
+  Server,
+  ArrowRight,
+  CheckCircle2,
+  AlertOctagon,
+  Loader2,
+  DollarSign,
+  BookOpen,
+  BarChart2,
+  TrendingUp,
+} from "lucide-react";
 
 export default function AdminDashboardPage() {
   const [metrics, setMetrics] = useState({
@@ -17,6 +31,17 @@ export default function AdminDashboardPage() {
     verifiedTeachers: 0,
     rejectedTeachers: 0,
     suspendedTeachers: 0,
+    totalCourses: 0,
+    publishedCourses: 0,
+    totalLiveClasses: 0,
+  });
+
+  const [financials, setFinancials] = useState({
+    grossRevenueRupees: 0,
+    platformCommissionRupees: 0,
+    teacherEarningsRupees: 0,
+    refundsRupees: 0,
+    netPlatformRevenueRupees: 0,
   });
 
   const [queue, setQueue] = useState<any[]>([]);
@@ -29,15 +54,16 @@ export default function AdminDashboardPage() {
   const fetchDashboardData = async () => {
     setLoading(true);
     try {
-      const [mRes, qRes] = await Promise.all([
-        fetch("/api/admin/metrics"),
+      const [dRes, qRes] = await Promise.all([
+        fetch("/api/admin/dashboard"),
         fetch("/api/admin/verification?status=PENDING"),
       ]);
 
-      const mJson = await mRes.json();
+      const dJson = await dRes.json();
       const qJson = await qRes.json();
 
-      if (mJson.data?.metrics) setMetrics(mJson.data.metrics);
+      if (dJson.data?.metrics) setMetrics(dJson.data.metrics);
+      if (dJson.data?.financials) setFinancials(dJson.data.financials);
       if (qJson.data?.queue) setQueue(qJson.data.queue);
     } catch (err) {
       console.error("Failed to load admin dashboard metrics:", err);
@@ -47,63 +73,74 @@ export default function AdminDashboardPage() {
   };
 
   return (
-    <DashboardLayout role="ADMIN" userName="System Administrator" userEmail="admin@educonnect.com">
+    <DashboardLayout role="ADMIN" userName="System Administrator">
       <div className="space-y-8 pb-16">
-        <div>
-          <h1 className="text-2xl lg:text-3xl font-black text-slate-900 tracking-tight">Admin System Governance</h1>
-          <p className="text-xs lg:text-sm text-slate-500 mt-1">Platform overview, user statistics, and active teacher verifications.</p>
+        <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
+          <div>
+            <h1 className="text-2xl lg:text-3xl font-black text-slate-900 dark:text-slate-100 tracking-tight">
+              Admin Governance & Operations
+            </h1>
+            <p className="text-xs lg:text-sm text-slate-500 mt-1">
+              Real-time platform overview, user statistics, financial ledger, and teacher verifications.
+            </p>
+          </div>
+
+          <div className="flex items-center gap-2">
+            <Link href="/admin/analytics">
+              <GlassButton variant="primary" size="sm" rightIcon={<BarChart2 className="h-4 w-4" />}>
+                Platform Analytics
+              </GlassButton>
+            </Link>
+            <Link href="/admin/system-health">
+              <GlassButton variant="secondary" size="sm" rightIcon={<Server className="h-4 w-4" />}>
+                System Health
+              </GlassButton>
+            </Link>
+          </div>
         </div>
 
         {/* System Stats Metrics Grid */}
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
-          <Card className="space-y-2 border-slate-200 shadow-xs">
-            <div className="flex items-center justify-between text-slate-500">
-              <span className="text-xs font-semibold uppercase tracking-wider">Total Platform Users</span>
-              <Users className="h-4 w-4 text-blue-600" />
-            </div>
-            <div className="text-3xl font-black text-slate-900">{loading ? "..." : metrics.totalUsers}</div>
-            <div className="flex items-center gap-2 text-[11px] text-slate-500 font-medium">
-              <span>Teachers: {metrics.totalTeachers}</span> • <span>Students: {metrics.totalStudents}</span>
-            </div>
-          </Card>
+          <MetricCard
+            title="Total Platform Users"
+            value={loading ? "..." : metrics.totalUsers}
+            subtitle={`Teachers: ${metrics.totalTeachers} • Students: ${metrics.totalStudents}`}
+            icon={<Users className="h-5 w-5 text-blue-600" />}
+            variant="blue"
+          />
 
-          <Card className="space-y-2 border-amber-200 bg-amber-50/40 shadow-xs">
-            <div className="flex items-center justify-between text-amber-700">
-              <span className="text-xs font-extrabold uppercase tracking-wider">Pending Verifications</span>
-              <ShieldCheck className="h-4 w-4 text-amber-600 animate-pulse" />
-            </div>
-            <div className="text-3xl font-black text-amber-950">{loading ? "..." : metrics.pendingVerifications}</div>
-            <p className="text-[11px] text-amber-800 font-bold">Action Required by Governance</p>
-          </Card>
+          <MetricCard
+            title="Pending Verifications"
+            value={loading ? "..." : metrics.pendingVerifications}
+            subtitle="Action required by admin"
+            icon={<ShieldCheck className="h-5 w-5 text-amber-600" />}
+            variant="amber"
+          />
 
-          <Card className="space-y-2 border-emerald-200 bg-emerald-50/40 shadow-xs">
-            <div className="flex items-center justify-between text-emerald-700">
-              <span className="text-xs font-extrabold uppercase tracking-wider">Verified Educators</span>
-              <CheckCircle2 className="h-4 w-4 text-emerald-600" />
-            </div>
-            <div className="text-3xl font-black text-emerald-950">{loading ? "..." : metrics.verifiedTeachers}</div>
-            <p className="text-[11px] text-emerald-800 font-bold">Live on Marketplace</p>
-          </Card>
+          <MetricCard
+            title="Gross Revenue"
+            value={loading ? "..." : `₹${financials.grossRevenueRupees.toLocaleString()}`}
+            subtitle={`Commission: ₹${financials.platformCommissionRupees.toLocaleString()}`}
+            icon={<DollarSign className="h-5 w-5 text-emerald-600" />}
+            variant="emerald"
+          />
 
-          <Card className="space-y-2 border-slate-200 shadow-xs">
-            <div className="flex items-center justify-between text-slate-500">
-              <span className="text-xs font-semibold uppercase tracking-wider">Rejected / Suspended</span>
-              <AlertOctagon className="h-4 w-4 text-rose-500" />
-            </div>
-            <div className="text-3xl font-black text-slate-900">
-              {loading ? "..." : metrics.rejectedTeachers + metrics.suspendedTeachers}
-            </div>
-            <div className="flex items-center gap-2 text-[11px] text-slate-500 font-medium">
-              <span>Rejected: {metrics.rejectedTeachers}</span> • <span>Suspended: {metrics.suspendedTeachers}</span>
-            </div>
-          </Card>
+          <MetricCard
+            title="Active Published Courses"
+            value={loading ? "..." : metrics.publishedCourses}
+            subtitle={`Total Courses: ${metrics.totalCourses}`}
+            icon={<BookOpen className="h-5 w-5 text-purple-600" />}
+            variant="purple"
+          />
         </div>
 
         {/* Priority Pending Verification Queue Preview */}
-        <Card className="space-y-6 border border-slate-200">
+        <Card className="space-y-6 border border-slate-200 dark:border-slate-800">
           <div className="flex items-center justify-between">
             <div>
-              <h3 className="text-lg font-black text-slate-900">Pending Verification Queue</h3>
+              <h3 className="text-lg font-black text-slate-900 dark:text-slate-100">
+                Pending Verification Queue
+              </h3>
               <p className="text-xs text-slate-500">Oldest unreviewed teacher applications prioritized first</p>
             </div>
             <Link href="/admin/verification">
@@ -118,9 +155,9 @@ export default function AdminDashboardPage() {
               <Loader2 className="h-8 w-8 text-blue-600 animate-spin mx-auto" />
             </div>
           ) : queue.length === 0 ? (
-            <div className="p-8 text-center bg-slate-50 rounded-2xl border border-slate-200">
+            <div className="p-8 text-center bg-slate-50 dark:bg-slate-900/40 rounded-2xl border border-slate-200 dark:border-slate-800">
               <CheckCircle2 className="h-10 w-10 text-emerald-500 mx-auto mb-2" />
-              <div className="text-sm font-bold text-slate-700">Verification Queue Clear</div>
+              <div className="text-sm font-bold text-slate-700 dark:text-slate-300">Verification Queue Clear</div>
               <p className="text-xs text-slate-500 mt-0.5">No pending teacher applications awaiting review.</p>
             </div>
           ) : (
@@ -128,7 +165,7 @@ export default function AdminDashboardPage() {
               {queue.slice(0, 4).map((item) => (
                 <div
                   key={item.teacherProfileId}
-                  className="p-4 rounded-2xl bg-slate-50 border border-slate-200 flex flex-col md:flex-row md:items-center justify-between gap-4 hover:border-slate-300 transition-colors"
+                  className="p-4 rounded-2xl bg-slate-50 dark:bg-slate-800/60 border border-slate-200 dark:border-slate-800 flex flex-col md:flex-row md:items-center justify-between gap-4 hover:border-slate-300 transition-colors"
                 >
                   <div className="flex items-center gap-3">
                     <div className="w-10 h-10 rounded-full bg-blue-600 text-white font-bold flex items-center justify-center text-sm shadow-xs shrink-0">
@@ -136,7 +173,7 @@ export default function AdminDashboardPage() {
                     </div>
                     <div>
                       <div className="flex items-center gap-2">
-                        <h4 className="text-sm font-extrabold text-slate-900">{item.name}</h4>
+                        <h4 className="text-sm font-extrabold text-slate-900 dark:text-slate-100">{item.name}</h4>
                         <StatusBadge status={item.verificationStatus} size="sm" />
                       </div>
                       <p className="text-xs text-slate-500 mt-0.5">
@@ -161,6 +198,33 @@ export default function AdminDashboardPage() {
             </div>
           )}
         </Card>
+
+        {/* Admin Quick Navigation Cards */}
+        <div className="grid grid-cols-1 sm:grid-cols-3 gap-6">
+          <Link href="/admin/analytics">
+            <Card className="p-5 hover:border-blue-500 transition cursor-pointer space-y-2">
+              <BarChart2 className="h-6 w-6 text-blue-600" />
+              <h4 className="text-sm font-extrabold text-slate-900 dark:text-slate-100">Revenue & Growth Analytics</h4>
+              <p className="text-xs text-slate-500">View platform trends, date filters, and top courses.</p>
+            </Card>
+          </Link>
+
+          <Link href="/admin/activity">
+            <Card className="p-5 hover:border-purple-500 transition cursor-pointer space-y-2">
+              <Activity className="h-6 w-6 text-purple-600" />
+              <h4 className="text-sm font-extrabold text-slate-900 dark:text-slate-100">Platform Activity Logs</h4>
+              <p className="text-xs text-slate-500">Audit user actions, purchases, and verifications.</p>
+            </Card>
+          </Link>
+
+          <Link href="/admin/system-health">
+            <Card className="p-5 hover:border-emerald-500 transition cursor-pointer space-y-2">
+              <Server className="h-6 w-6 text-emerald-600" />
+              <h4 className="text-sm font-extrabold text-slate-900 dark:text-slate-100">System Operational Health</h4>
+              <p className="text-xs text-slate-500">Check DB, Razorpay, LiveKit, and Mux status.</p>
+            </Card>
+          </Link>
+        </div>
       </div>
     </DashboardLayout>
   );

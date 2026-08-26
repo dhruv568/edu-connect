@@ -21,13 +21,17 @@ export async function POST(request: NextRequest) {
 
     const result = await AuthService.verifyOTP(validated.email, validated.otp);
 
-    // Update active session if user is logged in
-    const session = await getSession();
-    if (session && session.email.toLowerCase() === validated.email.toLowerCase()) {
-      await setSessionCookie({
-        ...session,
-        emailVerified: true,
-      });
+    // Set or upgrade authenticated session upon successful verification
+    if (result.user) {
+      await setSessionCookie(result.user);
+    } else {
+      const session = await getSession();
+      if (session && session.email.toLowerCase() === validated.email.toLowerCase()) {
+        await setSessionCookie({
+          ...session,
+          emailVerified: true,
+        });
+      }
     }
 
     return apiSuccess(result, result.message);
@@ -57,13 +61,17 @@ export async function GET(request: NextRequest) {
   try {
     const result = await AuthService.verifyToken(token, email);
 
-    // Update active session if user is logged in
-    const session = await getSession();
-    if (session && session.email.toLowerCase() === email.toLowerCase()) {
-      await setSessionCookie({
-        ...session,
-        emailVerified: true,
-      });
+    // Set or upgrade authenticated session upon successful verification link
+    if (result.user) {
+      await setSessionCookie(result.user);
+    } else {
+      const session = await getSession();
+      if (session && session.email.toLowerCase() === email.toLowerCase()) {
+        await setSessionCookie({
+          ...session,
+          emailVerified: true,
+        });
+      }
     }
 
     return apiSuccess(result, result.message);

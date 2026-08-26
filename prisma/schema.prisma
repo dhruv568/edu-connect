@@ -1,7 +1,7 @@
 // EduConnect Database Schema
 datasource db {
   provider = "postgresql"
-  url      = "postgresql://neondb_owner:npg_cRqNT4WXI3QE@ep-gentle-sunset-au37ni7u-pooler.c-10.us-east-1.aws.neon.tech/neondb?sslmode=require"
+  url      = env("DATABASE_URL")
 }
 
 generator client {
@@ -14,6 +14,7 @@ model User {
   email                 String              @unique
   passwordHash          String
   role                  String              @default("STUDENT") // ADMIN | TEACHER | STUDENT
+  status                String              @default("ACTIVE") // ACTIVE | SUSPENDED | DEACTIVATED
   emailVerified         Boolean             @default(false)
   emailVerifiedAt       DateTime?
   createdAt             DateTime            @default(now())
@@ -27,6 +28,21 @@ model User {
   auditLogs             AuditLog[]
   verificationDecisions TeacherVerificationHistory[] @relation("AdminDecisions")
   adminNotes            AdminNote[]                  @relation("AdminNotesCreated")
+  bookings              Booking[]
+  attendances           ClassAttendance[]
+  classroomMessages     ClassroomMessage[]
+  classroomFiles        ClassroomFile[]
+  enrollments           Enrollment[]
+  courseReviews         CourseReview[]
+  notifications         Notification[]
+  notificationPreference NotificationPreference?
+  activityLogs          ActivityLog[]
+  paymentOrders         PaymentOrder[]
+  paymentTransactions   PaymentTransaction[]
+  refundsRequested      Refund[]                     @relation("RefundRequestedBy")
+  reportsCreated        Report[]                     @relation("ReportedBy")
+  reportsResolved       Report[]                     @relation("ReportResolvedBy")
+  courseModerations     CourseModerationHistory[]    @relation("CourseModerationAdmin")
 
   @@map("users")
 }
@@ -80,6 +96,13 @@ model TeacherProfile {
   teacherDocuments      TeacherDocument[]
   verificationHistories TeacherVerificationHistory[]
   adminNotes            AdminNote[]
+  liveClassSlots        LiveClassSlot[]
+  liveClassSessions     LiveClassSession[]
+  availabilities        TeacherAvailability[]
+  breaks                TeacherBreak[]
+  payoutAccount         TeacherPayoutAccount?
+  payouts               TeacherPayout[]
+  ledgerEntries         FinancialLedgerEntry[]
 
   @@map("teacher_profiles")
 }
@@ -219,24 +242,634 @@ model AuditLog {
 }
 
 model Course {
-  id            String   @id @default(uuid())
-  title         String
-  slug          String   @unique
-  description   String
-  subject       String
-  gradeLevel    String?
-  price         Float
-  rating        Float    @default(5.0)
-  reviewCount   Int      @default(0)
-  lessonCount   Int      @default(12)
-  durationHours Float    @default(10.0)
-  thumbnailUrl  String?
-  teacherId     String
+  id               String          @id @default(uuid())
+  title            String
+  slug             String          @unique
+  subtitle         String?
+  description      String
+  subject          String
+  category         String?         @default("General")
+  gradeLevel       String?
+  level            String          @default("BEGINNER") // BEGINNER | INTERMEDIATE | ADVANCED
+  language         String          @default("English")
+  price            Float           @default(0.0)
+  rating           Float           @default(5.0)
+  reviewCount      Int             @default(0)
+  lessonCount      Int             @default(0)
+  durationHours    Float           @default(0.0)
+  enrollmentCount  Int             @default(0)
+  thumbnailUrl     String?
+  status           String          @default("DRAFT") // DRAFT | PUBLISHED | UNPUBLISHED | ARCHIVED
+  learningOutcomes String?         // JSON string or newline list
+  requirements     String?         // JSON string or newline list
+  publishedAt      DateTime?
+  teacherId        String
 
-  teacher       TeacherProfile @relation(fields: [teacherId], references: [id], onDelete: Cascade)
+  teacher          TeacherProfile  @relation(fields: [teacherId], references: [id], onDelete: Cascade)
+  sections         CourseSection[]
+  enrollments      Enrollment[]
+  reviews          CourseReview[]
+  paymentOrders    PaymentOrder[]
+  paymentTransactions PaymentTransaction[]
+  moderationHistories CourseModerationHistory[]
 
-  createdAt     DateTime @default(now())
-  updatedAt     DateTime @updatedAt
+  createdAt        DateTime        @default(now())
+  updatedAt        DateTime        @updatedAt
 
   @@map("courses")
 }
+
+model CourseSection {
+  id          String         @id @default(uuid())
+  courseId    String
+  title       String
+  description String?
+  order       Int            @default(0)
+  createdAt   DateTime       @default(now())
+  updatedAt   DateTime       @updatedAt
+
+  course      Course         @relation(fields: [courseId], references: [id], onDelete: Cascade)
+  lessons     CourseLesson[]
+
+  @@map("course_sections")
+}
+
+model CourseLesson {
+  id              String           @id @default(uuid())
+  sectionId       String
+  title           String
+  description     String?
+  type            String           @default("VIDEO") // VIDEO | TEXT | RESOURCE
+  videoProvider   String?          @default("LOCAL") // LOCAL | STREAM | MUX | CLOUDINARY
+  videoAssetId    String?
+  videoUrl        String?
+  durationSeconds Int              @default(0)
+  order           Int              @default(0)
+  isPreview       Boolean          @default(false)
+  status          String           @default("READY") // UPLOADING | PROCESSING | READY | FAILED
+  content         String?          // Text lesson content if type == TEXT
+
+  createdAt       DateTime         @default(now())
+  updatedAt       DateTime         @updatedAt
+
+  section         CourseSection    @relation(fields: [sectionId], references: [id], onDelete: Cascade)
+  resources       CourseResource[]
+  progresses      LessonProgress[]
+  videoAssets     VideoAsset[]
+
+  @@map("course_lessons")
+}
+
+model VideoAsset {
+  id              String        @id @default(uuid())
+  lessonId        String?
+  provider        String        @default("MUX") // MUX | LOCAL | CLOUDINARY
+  providerAssetId String?       @unique
+  uploadId        String        @unique
+  playbackId      String?
+  status          String        @default("UPLOADING") // UPLOADING | PROCESSING | READY | FAILED
+  duration        Float?
+  width           Int?
+  height          Int?
+  aspectRatio     String?
+  thumbnailUrl    String?
+  createdAt       DateTime      @default(now())
+  updatedAt       DateTime      @updatedAt
+
+  lesson          CourseLesson? @relation(fields: [lessonId], references: [id], onDelete: Cascade)
+
+  @@map("video_assets")
+}
+
+model CourseResource {
+  id         String       @id @default(uuid())
+  lessonId   String
+  name       String
+  storageKey String       @unique
+  mimeType   String
+  size       Int
+  createdAt  DateTime     @default(now())
+
+  lesson     CourseLesson @relation(fields: [lessonId], references: [id], onDelete: Cascade)
+
+  @@map("course_resources")
+}
+
+model Enrollment {
+  id               String            @id @default(uuid())
+  studentId        String
+  courseId         String
+  status           String            @default("ACTIVE") // PAYMENT_PENDING | ACTIVE | PAYMENT_FAILED | CANCELLED | COMPLETED | EXPIRED
+  enrolledAt       DateTime          @default(now())
+  completedAt      DateTime?
+
+  createdAt        DateTime          @default(now())
+  updatedAt        DateTime          @updatedAt
+
+  student          User              @relation(fields: [studentId], references: [id], onDelete: Cascade)
+  course           Course            @relation(fields: [courseId], references: [id], onDelete: Cascade)
+  lessonProgresses LessonProgress[]
+  reviews          CourseReview[]
+  completion       CourseCompletion?
+  paymentTransactions PaymentTransaction[]
+
+  @@unique([studentId, courseId])
+  @@map("enrollments")
+}
+
+model LessonProgress {
+  id              String       @id @default(uuid())
+  enrollmentId    String
+  lessonId        String
+  progressSeconds Int          @default(0)
+  completed       Boolean      @default(false)
+  completedAt     DateTime?
+  lastWatchedAt   DateTime     @default(now())
+  updatedAt       DateTime     @updatedAt
+
+  enrollment      Enrollment   @relation(fields: [enrollmentId], references: [id], onDelete: Cascade)
+  lesson          CourseLesson @relation(fields: [lessonId], references: [id], onDelete: Cascade)
+
+  @@unique([enrollmentId, lessonId])
+  @@map("lesson_progresses")
+}
+
+model CourseReview {
+  id           String      @id @default(uuid())
+  courseId     String
+  studentId    String
+  enrollmentId String?
+  rating       Int         @default(5) // 1-5
+  review       String
+  createdAt    DateTime    @default(now())
+  updatedAt    DateTime    @updatedAt
+
+  course       Course      @relation(fields: [courseId], references: [id], onDelete: Cascade)
+  student      User        @relation(fields: [studentId], references: [id], onDelete: Cascade)
+  enrollment   Enrollment? @relation(fields: [enrollmentId], references: [id], onDelete: SetNull)
+
+  @@unique([courseId, studentId])
+  @@map("course_reviews")
+}
+
+model CourseCompletion {
+  id            String     @id @default(uuid())
+  enrollmentId  String     @unique
+  completedAt   DateTime   @default(now())
+  certificateId String?
+
+  enrollment    Enrollment @relation(fields: [enrollmentId], references: [id], onDelete: Cascade)
+
+  @@map("course_completions")
+}
+
+
+model LiveClassSlot {
+  id                   String    @id @default(uuid())
+  teacherId            String
+  title                String
+  description          String?
+  subject              String
+  level                String    @default("ALL_LEVELS") // BEGINNER | INTERMEDIATE | ADVANCED | ALL_LEVELS
+  language             String    @default("English")
+  startTime            DateTime
+  endTime              DateTime
+  timezone             String    @default("Asia/Kolkata")
+  durationMinutes      Int       @default(60)
+  classType            String    @default("GROUP") // ONE_TO_ONE | GROUP
+  maxCapacity          Int       @default(10)
+  minimumStudents      Int       @default(1)
+  price                Float     @default(0)
+  status               String    @default("SCHEDULED") // DRAFT | SCHEDULED | OPEN | FULL | LIVE | COMPLETED | CANCELLED
+  bookingOpenAt        DateTime?
+  bookingCloseAt       DateTime?
+  joinBeforeMinutes    Int       @default(10)
+  bufferMinutes        Int       @default(15)
+  cameraRequired       Boolean   @default(true)
+  micRequired          Boolean   @default(true)
+  screenSharingAllowed Boolean   @default(true)
+  whiteboardAllowed    Boolean   @default(true)
+  chatAllowed          Boolean   @default(true)
+  fileSharingAllowed   Boolean   @default(true)
+  relatedCourseId      String?
+  isRecurring          Boolean   @default(false)
+  recurrenceRule       String?   // DAILY | WEEKLY | JSON string
+
+  createdAt            DateTime  @default(now())
+  updatedAt            DateTime  @updatedAt
+
+  teacher              TeacherProfile    @relation(fields: [teacherId], references: [id], onDelete: Cascade)
+  bookings             Booking[]
+  session              LiveClassSession?
+  paymentOrders        PaymentOrder[]
+  paymentTransactions  PaymentTransaction[]
+
+  @@map("live_class_slots")
+}
+
+model TeacherAvailability {
+  id        String   @id @default(uuid())
+  teacherId String
+  dayOfWeek Int      // 0 = Sunday, 1 = Monday, ... 6 = Saturday
+  startTime String   // "09:00"
+  endTime   String   // "17:00"
+  timezone  String   @default("Asia/Kolkata")
+  isActive  Boolean  @default(true)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  teacher   TeacherProfile @relation(fields: [teacherId], references: [id], onDelete: Cascade)
+
+  @@unique([teacherId, dayOfWeek, startTime, endTime])
+  @@map("teacher_availabilities")
+}
+
+model TeacherBreak {
+  id        String   @id @default(uuid())
+  teacherId String
+  dayOfWeek Int      // 0 = Sunday, 1 = Monday, ... 6 = Saturday
+  startTime String   // "13:00"
+  endTime   String   // "14:00"
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  teacher   TeacherProfile @relation(fields: [teacherId], references: [id], onDelete: Cascade)
+
+  @@map("teacher_breaks")
+}
+
+model Booking {
+  id              String   @id @default(uuid())
+  liveClassSlotId String
+  studentId       String
+  status          String   @default("CONFIRMED") // CONFIRMED | CANCELLED | ATTENDED
+
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+
+  liveClassSlot LiveClassSlot @relation(fields: [liveClassSlotId], references: [id], onDelete: Cascade)
+  student       User          @relation(fields: [studentId], references: [id], onDelete: Cascade)
+  paymentTransactions PaymentTransaction[]
+
+  @@map("bookings")
+}
+
+model LiveClassSession {
+  id               String   @id @default(uuid())
+  liveClassSlotId  String   @unique
+  teacherId        String
+  roomId           String   @unique
+  status           String   @default("SCHEDULED") // SCHEDULED | OPEN | LIVE | ENDED | CANCELLED
+  scheduledStartAt DateTime
+  scheduledEndAt   DateTime
+  actualStartAt    DateTime?
+  actualEndAt      DateTime?
+  durationMinutes  Int?
+  studentCanDraw   Boolean  @default(false)
+  whiteboardState  String?
+
+  createdAt        DateTime @default(now())
+  updatedAt        DateTime @updatedAt
+
+  liveClassSlot LiveClassSlot       @relation(fields: [liveClassSlotId], references: [id], onDelete: Cascade)
+  teacher       TeacherProfile      @relation(fields: [teacherId], references: [id], onDelete: Cascade)
+  attendances   ClassAttendance[]
+  messages      ClassroomMessage[]
+  files         ClassroomFile[]
+
+  @@map("live_class_sessions")
+}
+
+model ClassAttendance {
+  id        String    @id @default(uuid())
+  sessionId String
+  studentId String
+  joinedAt  DateTime  @default(now())
+  leftAt    DateTime?
+  duration  Int       @default(0)
+  status    String    @default("ABSENT") // PRESENT | PARTIAL | ABSENT
+
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+
+  session LiveClassSession @relation(fields: [sessionId], references: [id], onDelete: Cascade)
+  student User             @relation(fields: [studentId], references: [id], onDelete: Cascade)
+
+  @@map("class_attendances")
+}
+
+model ClassroomMessage {
+  id         String   @id @default(uuid())
+  sessionId  String
+  senderId   String
+  senderName String
+  senderRole String
+  message    String
+  createdAt  DateTime @default(now())
+
+  session LiveClassSession @relation(fields: [sessionId], references: [id], onDelete: Cascade)
+  sender  User             @relation(fields: [senderId], references: [id], onDelete: Cascade)
+
+  @@map("classroom_messages")
+}
+
+model ClassroomFile {
+  id         String   @id @default(uuid())
+  sessionId  String
+  uploadedBy String
+  fileName   String
+  storageKey String   @unique
+  mimeType   String
+  size       Int
+  createdAt  DateTime @default(now())
+
+  session  LiveClassSession @relation(fields: [sessionId], references: [id], onDelete: Cascade)
+  uploader User             @relation(fields: [uploadedBy], references: [id], onDelete: Cascade)
+
+  @@map("classroom_files")
+}
+
+model Notification {
+  id        String    @id @default(uuid())
+  userId    String
+  title     String
+  message   String
+  type      String    @default("INFO") // AUTH | TEACHER | LIVE_CLASS | COURSE | PAYMENT | SYSTEM | INFO | SUCCESS | WARNING
+  data      String?   // JSON payload string
+  actionUrl String?   // Redirect link on click
+  linkUrl   String?   // Legacy alias
+  isRead    Boolean   @default(false)
+  readAt    DateTime?
+  expiresAt DateTime?
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId, isRead])
+  @@index([userId, createdAt])
+  @@map("notifications")
+}
+
+model NotificationPreference {
+  id                  String   @id @default(uuid())
+  userId              String   @unique
+  emailCourseUpdates  Boolean  @default(true)
+  emailClassReminders Boolean  @default(true)
+  emailPaymentUpdates Boolean  @default(true)
+  emailMarketing     Boolean  @default(false)
+  inAppEnabled        Boolean  @default(true)
+  browserEnabled      Boolean  @default(false)
+  createdAt           DateTime @default(now())
+  updatedAt           DateTime @updatedAt
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@map("notification_preferences")
+}
+
+model ActivityLog {
+  id         String   @id @default(uuid())
+  actorId    String?
+  actorRole  String?
+  action     String   // e.g. USER_REGISTERED, COURSE_ENROLLED, PAYMENT_CAPTURED
+  entityType String?  // e.g. Course, LiveClassSlot, PaymentTransaction
+  entityId   String?
+  metadata   String?  // JSON string
+  createdAt  DateTime @default(now())
+
+  actor User? @relation(fields: [actorId], references: [id], onDelete: SetNull)
+
+  @@index([createdAt])
+  @@index([actorId])
+  @@map("activity_logs")
+}
+
+
+model PaymentOrder {
+  id              String   @id @default(uuid())
+  userId          String
+  type            String   // LIVE_CLASS_BOOKING | COURSE_ENROLLMENT
+  referenceId     String   // courseId or liveClassSlotId
+  courseId        String?
+  liveClassSlotId String?
+  provider        String   @default("RAZORPAY")
+  providerOrderId String   @unique
+  amountPaise     Int
+  currency        String   @default("INR")
+  status          String   @default("CREATED") // CREATED | PENDING | CAPTURED | FAILED | CANCELLED | EXPIRED
+  receipt         String   @unique
+  notes           String?  // JSON string
+  expiresAt       DateTime?
+
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+
+  user          User                 @relation(fields: [userId], references: [id], onDelete: Cascade)
+  course        Course?              @relation(fields: [courseId], references: [id], onDelete: SetNull)
+  liveClassSlot LiveClassSlot?       @relation(fields: [liveClassSlotId], references: [id], onDelete: SetNull)
+  transactions  PaymentTransaction[]
+
+  @@map("payment_orders")
+}
+
+model PaymentTransaction {
+  id                 String    @id @default(uuid())
+  userId             String
+  orderId            String?
+  type               String    // LIVE_CLASS_BOOKING | COURSE_ENROLLMENT
+  status             String    @default("CREATED") // CREATED | PENDING | AUTHORIZED | CAPTURED | FAILED | REFUNDED | PARTIALLY_REFUNDED | CANCELLED | DISPUTED
+  amountPaise        Int
+  currency           String    @default("INR")
+  provider           String    @default("RAZORPAY")
+  providerOrderId    String
+  providerPaymentId  String?   @unique
+  providerSignature  String?
+  internalReference  String    @unique
+  courseId           String?
+  liveClassSlotId    String?
+  bookingId          String?
+  enrollmentId       String?
+  paymentMethod      String?
+  capturedAt         DateTime?
+  failedAt           DateTime?
+  failureReason      String?
+
+  createdAt          DateTime  @default(now())
+  updatedAt          DateTime  @updatedAt
+
+  user          User                   @relation(fields: [userId], references: [id], onDelete: Cascade)
+  order         PaymentOrder?          @relation(fields: [orderId], references: [id], onDelete: SetNull)
+  course        Course?                @relation(fields: [courseId], references: [id], onDelete: SetNull)
+  liveClassSlot LiveClassSlot?         @relation(fields: [liveClassSlotId], references: [id], onDelete: SetNull)
+  booking       Booking?               @relation(fields: [bookingId], references: [id], onDelete: SetNull)
+  enrollment    Enrollment?            @relation(fields: [enrollmentId], references: [id], onDelete: SetNull)
+  ledgerEntries FinancialLedgerEntry[]
+  refunds       Refund[]
+  payouts       TeacherPayout[]
+
+  @@index([userId, status])
+  @@index([providerOrderId])
+  @@map("payment_transactions")
+}
+
+model PaymentWebhookEvent {
+  id           String    @id @default(uuid())
+  provider     String    @default("RAZORPAY")
+  eventId      String
+  eventType    String
+  payloadHash  String?
+  payload      String    // Raw JSON string
+  processed    Boolean   @default(false)
+  processedAt  DateTime?
+  error        String?
+
+  createdAt    DateTime  @default(now())
+
+  @@unique([provider, eventId])
+  @@map("payment_webhook_events")
+}
+
+model FinancialLedgerEntry {
+  id            String    @id @default(uuid())
+  transactionId String?
+  teacherId     String?
+  type          String    // PAYMENT | PLATFORM_COMMISSION | TEACHER_EARNING | REFUND | REFUND_REVERSAL | TRANSFER | ADJUSTMENT
+  amountPaise   Int
+  currency      String    @default("INR")
+  direction     String    // CREDIT | DEBIT
+  status        String    @default("COMPLETED") // PENDING | COMPLETED | REVERSED | CANCELLED
+  description   String?
+
+  createdAt     DateTime  @default(now())
+
+  transaction   PaymentTransaction? @relation(fields: [transactionId], references: [id], onDelete: SetNull)
+  teacher       TeacherProfile?     @relation(fields: [teacherId], references: [id], onDelete: SetNull)
+  payouts       TeacherPayout[]
+
+  @@index([teacherId, type])
+  @@map("financial_ledger_entries")
+}
+
+model TeacherPayoutAccount {
+  id                String    @id @default(uuid())
+  teacherId         String    @unique
+  provider          String    @default("RAZORPAY_ROUTE")
+  providerAccountId String?   // Razorpay Account ID (acc_xxx)
+  accountName       String?
+  accountType       String?   @default("STANDARD")
+  status            String    @default("NOT_STARTED") // NOT_STARTED | PENDING | UNDER_REVIEW | ACTIVE | REJECTED
+  onboardingUrl     String?
+  kycStatus         String?
+
+  createdAt         DateTime  @default(now())
+  updatedAt         DateTime  @updatedAt
+
+  teacher           TeacherProfile @relation(fields: [teacherId], references: [id], onDelete: Cascade)
+
+  @@map("teacher_payout_accounts")
+}
+
+model TeacherPayout {
+  id                 String    @id @default(uuid())
+  teacherId          String
+  ledgerEntryId      String?
+  transactionId      String?
+  providerTransferId String?   @unique // Razorpay Transfer ID (trf_xxx)
+  amountPaise        Int
+  currency           String    @default("INR")
+  status             String    @default("PENDING") // PENDING | ELIGIBLE | PROCESSING | PAID | FAILED | ON_HOLD
+  processedAt        DateTime?
+  failureReason      String?
+
+  createdAt          DateTime  @default(now())
+  updatedAt          DateTime  @updatedAt
+
+  teacher            TeacherProfile        @relation(fields: [teacherId], references: [id], onDelete: Cascade)
+  ledgerEntry        FinancialLedgerEntry? @relation(fields: [ledgerEntryId], references: [id], onDelete: SetNull)
+  transaction        PaymentTransaction?   @relation(fields: [transactionId], references: [id], onDelete: SetNull)
+
+  @@index([teacherId, status])
+  @@map("teacher_payouts")
+}
+
+model Refund {
+  id               String    @id @default(uuid())
+  transactionId   String
+  providerRefundId String?   @unique // Razorpay Refund ID (rfnd_xxx)
+  amountPaise      Int
+  currency         String    @default("INR")
+  reason           String?
+  status           String    @default("REFUND_REQUESTED") // REFUND_REQUESTED | REFUND_PROCESSING | REFUNDED | REFUND_FAILED | PARTIALLY_REFUNDED
+  requestedBy      String    // userId
+  approvedBy       String?   // admin userId
+
+  createdAt        DateTime  @default(now())
+  updatedAt        DateTime  @updatedAt
+
+  transaction      PaymentTransaction @relation(fields: [transactionId], references: [id], onDelete: Cascade)
+  requester        User               @relation("RefundRequestedBy", fields: [requestedBy], references: [id], onDelete: Cascade)
+
+  @@map("refunds")
+}
+
+model PlatformConfig {
+  id        String   @id @default(uuid())
+  key       String   @unique
+  value     String
+  updatedAt DateTime @updatedAt
+
+  @@map("platform_configs")
+}
+
+model CourseCategory {
+  id          String   @id @default(uuid())
+  name        String   @unique
+  slug        String   @unique
+  description String?
+  isActive    Boolean  @default(true)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  @@map("course_categories")
+}
+
+model Report {
+  id           String    @id @default(uuid())
+  reporterId   String
+  targetType   String    // USER | TEACHER | COURSE | REVIEW | LIVE_CLASS | CONTENT
+  targetId     String
+  reason       String
+  description  String?
+  status       String    @default("OPEN") // OPEN | UNDER_REVIEW | RESOLVED | REJECTED
+  actionTaken  String?   // Details of admin moderation action taken
+  createdAt    DateTime  @default(now())
+  resolvedAt   DateTime?
+  resolvedById String?
+
+  reporter   User  @relation("ReportedBy", fields: [reporterId], references: [id], onDelete: Cascade)
+  resolvedBy User? @relation("ReportResolvedBy", fields: [resolvedById], references: [id], onDelete: SetNull)
+
+  @@index([targetType, targetId])
+  @@index([status])
+  @@map("reports")
+}
+
+model CourseModerationHistory {
+  id             String   @id @default(uuid())
+  courseId       String
+  adminId        String
+  previousStatus String
+  newStatus      String
+  reason         String?
+  createdAt      DateTime @default(now())
+
+  course Course @relation(fields: [courseId], references: [id], onDelete: Cascade)
+  admin  User   @relation("CourseModerationAdmin", fields: [adminId], references: [id], onDelete: Cascade)
+
+  @@map("course_moderation_histories")
+}
+
+

@@ -56,22 +56,23 @@ export async function POST(
       previousStatus,
     });
 
-    // Email notification
+    // Dispatch event for notifications, email, and activity logging
     try {
-      const emailProvider = getEmailProvider();
-      await emailProvider.sendNotificationEmail({
-        email: tp.user.email,
-        recipientName: tp.user.profile?.firstName || "Teacher",
-        subject: "Congratulations! Your EduConnect Teacher Account is Verified 🎓",
-        headline: "Teacher Profile Verified!",
-        statusBadgeText: "VERIFIED EDUCATOR",
-        statusBadgeVariant: "success",
-        bodyText: "Great news! Your teacher credentials have been thoroughly reviewed and approved by EduConnect Administration. Your profile is now eligible for live marketplace listings, demo class bookings, and course creation.",
-        actionUrl: `${process.env.NEXT_PUBLIC_APP_URL || "http://localhost:3000"}/teacher`,
-        actionText: "Go to Teacher Portal",
+      const { EventService } = require("@/services/event-service");
+      await EventService.emit("teacher.verified", {
+        userId: tp.userId,
+        actorId: adminSession.id,
+        actorRole: "ADMIN",
+        data: {
+          teacherProfileId: tp.id,
+          reason: note,
+          entityType: "TeacherProfile",
+          entityId: tp.id,
+        },
+        idempotencyKey: `verify-${tp.id}-approved`,
       });
-    } catch (emailErr) {
-      console.error("Failed to send approval email notification:", emailErr);
+    } catch (evtErr) {
+      console.error("Failed to emit teacher.verified event:", evtErr);
     }
 
     return apiSuccess({

@@ -15,11 +15,13 @@ function VerifyEmailForm() {
 
   const queryEmail = searchParams.get("email") || "user@example.com";
   const queryToken = searchParams.get("token");
+  const redirectTo = searchParams.get("redirectTo");
 
   const [otp, setOtp] = useState<string[]>(Array(6).fill(""));
   const [loading, setLoading] = useState(false);
   const [verifyingToken, setVerifyingToken] = useState(false);
   const [verified, setVerified] = useState(false);
+  const [redirectTarget, setRedirectTarget] = useState<string | null>(null);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
   const [resendCooldown, setResendCooldown] = useState(0);
 
@@ -33,8 +35,13 @@ function VerifyEmailForm() {
         .then((res) => res.json())
         .then((data) => {
           if (data.success) {
+            const target = data.data?.redirectPath || redirectTo || "/student/dashboard";
+            setRedirectTarget(target);
             setVerified(true);
             showToast("Email Verified!", "Welcome to EduConnect 🎓", "success", true);
+            setTimeout(() => {
+              router.push(target);
+            }, 1200);
           } else {
             const msg = data.error || "Invalid verification link.";
             setErrorMessage(msg);
@@ -49,7 +56,7 @@ function VerifyEmailForm() {
           setVerifyingToken(false);
         });
     }
-  }, [queryToken, queryEmail, showToast]);
+  }, [queryToken, queryEmail, redirectTo, router, showToast]);
 
   // Resend cooldown timer
   useEffect(() => {
@@ -111,8 +118,13 @@ function VerifyEmailForm() {
         throw new Error(data.error || "Incorrect verification code. Please check your email and try again.");
       }
 
+      const target = data.data?.redirectPath || redirectTo || "/student/dashboard";
+      setRedirectTarget(target);
       setVerified(true);
       showToast("Email Verified!", "Welcome to EduConnect 🎓 Your account is fully active.", "success", true);
+      setTimeout(() => {
+        router.push(target);
+      }, 1000);
     } catch (err: any) {
       const msg = err.message || "Verification failed.";
       setErrorMessage(msg);
@@ -127,7 +139,7 @@ function VerifyEmailForm() {
     setLoading(true);
     setErrorMessage(null);
     try {
-      const res = await fetch("/api/auth/resend-verification", {
+      const res = await fetch("/api/auth/resend-otp", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ email: queryEmail }),
@@ -162,14 +174,14 @@ function VerifyEmailForm() {
             </div>
             <h2 className="text-2xl font-extrabold text-slate-900">Email Verified!</h2>
             <p className="text-sm text-slate-600">
-              Your EduConnect account is ready. You can now log in and access all features.
+              Your EduConnect account is verified. Redirecting to your dashboard...
             </p>
             <Button
               variant="gradient"
               className="w-full mt-4 h-12 text-base font-bold"
-              onClick={() => router.push("/")}
+              onClick={() => router.push(redirectTarget || "/student/dashboard")}
             >
-              Continue
+              Continue to Dashboard
             </Button>
           </div>
         ) : (
@@ -181,7 +193,7 @@ function VerifyEmailForm() {
             <div>
               <h2 className="text-2xl font-extrabold text-slate-900">Check your inbox ✉️</h2>
               <p className="text-sm text-slate-500 mt-1">
-                We&apos;ve sent a verification code to
+                We&apos;ve sent a 6-digit verification code to
               </p>
               <p className="text-sm font-bold text-slate-900 mt-1.5 bg-slate-100 py-1 px-4 rounded-full inline-block">
                 {maskEmail(queryEmail)}
@@ -212,6 +224,7 @@ function VerifyEmailForm() {
                       key={idx}
                       ref={(el) => { inputRefs.current[idx] = el; }}
                       type="text"
+                      inputMode="numeric"
                       maxLength={1}
                       value={digit}
                       onChange={(e) => handleOtpChange(idx, e.target.value)}

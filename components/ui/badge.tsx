@@ -7,7 +7,7 @@ function cn(...inputs: any[]) {
 }
 
 export interface BadgeProps extends React.HTMLAttributes<HTMLSpanElement> {
-  variant?: "primary" | "secondary" | "success" | "warning" | "error" | "teacher" | "student" | "parent" | "admin" | "outline";
+  variant?: "primary" | "secondary" | "success" | "warning" | "error" | "teacher" | "student" | "admin" | "outline";
   size?: "sm" | "md";
 }
 
@@ -22,7 +22,6 @@ export function Badge({ className, variant = "primary", size = "md", children, .
     error: "bg-red-50 text-red-700 border-red-200",
     teacher: "bg-indigo-50 text-indigo-700 border-indigo-200",
     student: "bg-emerald-50 text-emerald-700 border-emerald-200",
-    parent: "bg-amber-50 text-amber-800 border-amber-200",
     admin: "bg-rose-50 text-rose-700 border-rose-200",
     outline: "bg-transparent text-slate-600 border-slate-300",
   };

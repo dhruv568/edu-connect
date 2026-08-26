@@ -202,6 +202,7 @@ export class AuthService {
     const user = await prisma.user.findUnique({
       where: { email: email.toLowerCase() },
       include: {
+        profile: true,
         emailVerifications: {
           where: { verifiedAt: null },
           orderBy: { createdAt: "desc" },
@@ -274,9 +275,23 @@ export class AuthService {
 
     await logAuditEvent(user.id, "EMAIL_VERIFIED", { email: user.email });
 
+    const userSession: UserSession = {
+      id: user.id,
+      userId: user.id,
+      email: user.email,
+      role: user.role as UserRole,
+      emailVerified: true,
+      firstName: user.profile?.firstName || "User",
+      lastName: user.profile?.lastName || "",
+    };
+
+    const redirectPath = `/${user.role.toLowerCase()}/dashboard`;
+
     return {
       success: true,
       message: "Email successfully verified!",
+      user: userSession,
+      redirectPath,
     };
   }
 
@@ -291,7 +306,7 @@ export class AuthService {
         tokenHash: hashed,
         verifiedAt: null,
       },
-      include: { user: true },
+      include: { user: { include: { profile: true } } },
     });
 
     if (!record) {
@@ -321,9 +336,23 @@ export class AuthService {
 
     await logAuditEvent(record.userId, "EMAIL_VERIFIED", { email });
 
+    const userSession: UserSession = {
+      id: record.userId,
+      userId: record.userId,
+      email: record.user.email,
+      role: record.user.role as UserRole,
+      emailVerified: true,
+      firstName: record.user.profile?.firstName || "User",
+      lastName: record.user.profile?.lastName || "",
+    };
+
+    const redirectPath = `/${record.user.role.toLowerCase()}/dashboard`;
+
     return {
       success: true,
       message: "Email successfully verified via verification link!",
+      user: userSession,
+      redirectPath,
     };
   }
 

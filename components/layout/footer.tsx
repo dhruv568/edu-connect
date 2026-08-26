@@ -18,7 +18,7 @@ export function Footer() {
               </span>
             </Link>
             <p className="text-xs text-slate-400 leading-relaxed">
-              Empowering global education by connecting expert teachers, motivated students, and supportive parents through flexible learning experiences.
+              Empowering global education by connecting expert teachers and motivated students through flexible, real-time learning experiences.
             </p>
           </div>
 
@@ -28,7 +28,6 @@ export function Footer() {
             <ul className="space-y-2.5 text-xs text-slate-400">
               <li><Link href="/teacher" className="hover:text-white transition-colors">Teacher Portal</Link></li>
               <li><Link href="/student" className="hover:text-white transition-colors">Student Dashboard</Link></li>
-              <li><Link href="/parent" className="hover:text-white transition-colors">Parent Monitor</Link></li>
               <li><Link href="/admin" className="hover:text-white transition-colors">Admin Governance</Link></li>
             </ul>
           </div>

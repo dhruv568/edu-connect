@@ -7,6 +7,12 @@ async function main() {
   console.log("🌱 Starting EduConnect Database Seeding for Module 04...");
 
   // Clean existing data
+  await prisma.classroomFile.deleteMany();
+  await prisma.classroomMessage.deleteMany();
+  await prisma.classAttendance.deleteMany();
+  await prisma.liveClassSession.deleteMany();
+  await prisma.booking.deleteMany();
+  await prisma.liveClassSlot.deleteMany();
   await prisma.adminNote.deleteMany();
   await prisma.teacherVerificationHistory.deleteMany();
   await prisma.teacherDocument.deleteMany();
@@ -282,9 +288,52 @@ async function main() {
         teacherId: teacher1.teacherProfile.id,
       },
     });
+
+    // 8. Seed Live Class Slot & Session for Module 06 Testing
+    const startTime = new Date(Date.now() - 5 * 60 * 1000); // Started 5 mins ago
+    const endTime = new Date(Date.now() + 55 * 60 * 1000); // Ends in 55 mins
+
+    const liveSlot = await prisma.liveClassSlot.create({
+      data: {
+        teacherId: teacher1.teacherProfile.id,
+        title: "Mathematics — Algebra Basics",
+        description: "Interactive live session covering quadratic equations, functions, and graphical analysis.",
+        subject: "Mathematics",
+        startTime,
+        endTime,
+        maxCapacity: 15,
+        price: 25.0,
+        status: "SCHEDULED",
+      },
+    });
+
+    // Create booking for student
+    const booking = await prisma.booking.create({
+      data: {
+        liveClassSlotId: liveSlot.id,
+        studentId: student.id,
+        status: "CONFIRMED",
+      },
+    });
+    console.log(`✅ Student Booking Created: ${booking.id} for slot ${liveSlot.title}`);
+
+    // Create session
+    const session = await prisma.liveClassSession.create({
+      data: {
+        id: "demo-math-session-001",
+        liveClassSlotId: liveSlot.id,
+        teacherId: teacher1.teacherProfile.id,
+        roomId: "room-math-algebra-101",
+        status: "OPEN",
+        scheduledStartAt: startTime,
+        scheduledEndAt: endTime,
+        actualStartAt: startTime,
+      },
+    });
+    console.log(`✅ Live Class Session Created: ${session.id} (Room: ${session.roomId})`);
   }
 
-  console.log("\n🎉 EduConnect Module 04 Seed Completed Successfully!");
+  console.log("\n🎉 EduConnect Module 06 Database Seeding Completed Successfully!");
 }
 
 main()

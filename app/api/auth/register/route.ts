@@ -27,6 +27,7 @@ export async function POST(request: NextRequest) {
       {
         user,
         requiresVerification: true,
+        redirectPath: `/verify-email?email=${encodeURIComponent(user.email)}`,
       },
       "Registration successful! Please check your email for the verification code.",
       201

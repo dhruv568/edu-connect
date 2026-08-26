@@ -24,11 +24,12 @@ import {
 import { Badge } from "@/components/ui/badge";
 import { UserRole } from "@/types/auth";
 import { useToast } from "@/components/ui/toast";
+import { NotificationPopover } from "@/components/layout/notification-popover";
 
 export interface DashboardLayoutProps {
   role: UserRole;
-  userName: string;
-  userEmail: string;
+  userName?: string;
+  userEmail?: string;
   children: React.ReactNode;
 }
 
@@ -47,22 +48,30 @@ export function DashboardLayout({ role, userName, userEmail, children }: Dashboa
   const navItems = {
     ADMIN: [
       { label: "Overview Dashboard", icon: LayoutDashboard, href: "/admin" },
-      { label: "Verification Queue", icon: ShieldCheck, href: "/admin/verification" },
-      { label: "Teacher Management", icon: TeacherIcon, href: "/admin/teachers" },
       { label: "User Governance", icon: Users, href: "/admin/users" },
+      { label: "Teacher Verifications", icon: ShieldCheck, href: "/admin/verification" },
+      { label: "Teacher Roster", icon: TeacherIcon, href: "/admin/teachers" },
+      { label: "Course Moderation", icon: BookOpen, href: "/admin/courses" },
+      { label: "Live Classes", icon: Video, href: "/admin/live-classes" },
+      { label: "Payment Ledger", icon: FileCheck, href: "/admin/payments" },
+      { label: "Refund Management", icon: FileCheck, href: "/admin/refunds" },
+      { label: "Report Moderation", icon: ShieldCheck, href: "/admin/reports" },
+      { label: "Platform Settings", icon: Settings, href: "/admin/settings" },
+      { label: "Activity Audit Logs", icon: FileCheck, href: "/admin/activity" },
+      { label: "System Health", icon: Settings, href: "/admin/system-health" },
     ],
     TEACHER: [
       { label: "Teacher Dashboard", icon: LayoutDashboard, href: "/teacher" },
       { label: "Profile Onboarding", icon: FileCheck, href: "/teacher/onboarding" },
       { label: "Verification Status", icon: ShieldCheck, href: "/teacher/verification" },
-      { label: "Live Class Slots", icon: Video, href: "#" },
-      { label: "Courses & Content", icon: BookOpen, href: "#" },
+      { label: "Live Class Slots", icon: Video, href: "/teacher/live-classes" },
+      { label: "Courses & Content", icon: BookOpen, href: "/teacher/courses" },
     ],
     STUDENT: [
       { label: "Student Hub", icon: LayoutDashboard, href: "/student" },
       { label: "Find Teachers", icon: TeacherIcon, href: "/find-teachers" },
-      { label: "My Live Classes", icon: Video, href: "#" },
-      { label: "Enrolled Courses", icon: BookOpen, href: "#" },
+      { label: "My Live Classes", icon: Video, href: "/student" },
+      { label: "Enrolled Courses", icon: BookOpen, href: "/student" },
     ],
   };
 
@@ -163,10 +172,7 @@ export function DashboardLayout({ role, userName, userEmail, children }: Dashboa
           </div>
 
           <div className="flex items-center gap-4">
-            <button className="relative p-2 rounded-xl text-slate-600 hover:bg-slate-100">
-              <Bell className="h-5 w-5" />
-              <span className="absolute top-1.5 right-1.5 w-2 h-2 bg-blue-600 rounded-full" />
-            </button>
+            <NotificationPopover />
 
             <div className="flex items-center gap-3 pl-4 border-l border-slate-200">
               <div className="w-9 h-9 rounded-full bg-blue-600 text-white font-bold flex items-center justify-center text-sm shadow-sm uppercase">

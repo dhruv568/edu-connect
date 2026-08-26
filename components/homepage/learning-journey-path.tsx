@@ -10,7 +10,7 @@ export function LearningJourneyPath() {
     { num: "01", title: "DISCOVER", desc: "Search verified teachers by subject, hourly rate, and trial availability.", icon: Search, color: "text-blue-600", bg: "bg-blue-50" },
     { num: "02", title: "CONNECT", desc: "Book an introductory 1-on-1 demo session with zero commitment.", icon: Users, color: "text-indigo-600", bg: "bg-indigo-50" },
     { num: "03", title: "LEARN", desc: "Join live class slots or study structured self-paced video modules.", icon: Video, color: "text-purple-600", bg: "bg-purple-50" },
-    { num: "04", title: "PROGRESS", desc: "Track learning mastery, complete quizzes, and share results with parents.", icon: Award, color: "text-emerald-600", bg: "bg-emerald-50" },
+    { num: "04", title: "PROGRESS", desc: "Track learning mastery, complete quizzes, and earn certificates.", icon: Award, color: "text-emerald-600", bg: "bg-emerald-50" },
   ];
 
   return (
@@ -24,7 +24,7 @@ export function LearningJourneyPath() {
             How EduConnect Works
           </h2>
           <p className="text-base text-slate-600">
-            A continuous flowing journey built for student growth and complete parent peace-of-mind.
+            A continuous flowing journey built for student growth and interactive online learning.
           </p>
         </div>
 

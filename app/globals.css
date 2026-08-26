@@ -51,53 +51,149 @@
 }
 
 /* Premium Glass Select & Dropdown Utilities */
-.glass-select {
+select {
   appearance: none;
   -webkit-appearance: none;
   -moz-appearance: none;
-  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 24 24' stroke-width='2.5' stroke='%232563eb'%3E%3Cpath stroke-linecap='round' stroke-linejoin='round' d='M19.5 8.25l-7.5 7.5-7.5-7.5' /%3E%3C/svg%3E");
   background-repeat: no-repeat;
   background-position: right 0.85rem center;
   background-size: 1rem 1rem;
-  background-color: rgba(255, 255, 255, 0.75);
-  backdrop-filter: blur(16px) saturate(180%);
-  -webkit-backdrop-filter: blur(16px) saturate(180%);
-  border: 1px solid rgba(255, 255, 255, 0.85);
-  box-shadow: 
-    0 4px 20px rgba(15, 23, 42, 0.04),
-    0 1px 3px rgba(37, 99, 235, 0.06),
-    inset 0 1px 1px rgba(255, 255, 255, 0.95);
-  border-radius: 1rem;
-  padding-right: 2.5rem;
-  font-weight: 700;
-  color: #0f172a;
   transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
   cursor: pointer;
+  border-radius: 0.75rem;
 }
 
-.glass-select:hover {
-  background-color: rgba(255, 255, 255, 0.92);
-  border-color: rgba(99, 102, 241, 0.4);
-  box-shadow: 
-    0 8px 25px rgba(37, 99, 235, 0.12),
-    inset 0 1px 1px rgba(255, 255, 255, 1);
-  transform: translateY(-1px);
+/* Light Theme Selects / Standard Glass Select */
+.glass-select,
+select.bg-white,
+select.bg-slate-50,
+select.text-slate-900,
+select.text-slate-800,
+select.text-slate-700 {
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 24 24' stroke-width='2.5' stroke='%232563eb'%3E%3Cpath stroke-linecap='round' stroke-linejoin='round' d='M19.5 8.25l-7.5 7.5-7.5-7.5' /%3E%3C/svg%3E") !important;
+  background-color: #ffffff !important;
+  border: 1px solid #cbd5e1 !important;
+  color: #0f172a !important;
 }
 
-.glass-select:focus {
-  outline: none;
-  background-color: #ffffff;
-  border-color: #3b82f6;
-  box-shadow: 
-    0 0 0 4px rgba(59, 130, 246, 0.18),
-    0 10px 30px rgba(37, 99, 235, 0.15);
+.glass-select:hover,
+select.bg-white:hover,
+select.bg-slate-50:hover,
+select.text-slate-900:hover,
+select.text-slate-800:hover,
+select.text-slate-700:hover {
+  background-color: #ffffff !important;
+  border-color: #94a3b8 !important;
+  color: #0f172a !important;
 }
 
-.glass-select option {
-  background-color: rgba(255, 255, 255, 0.98);
-  color: #0f172a;
+.glass-select:focus,
+select.bg-white:focus,
+select.bg-slate-50:focus,
+select.text-slate-900:focus,
+select.text-slate-800:focus,
+select.text-slate-700:focus {
+  outline: none !important;
+  background-color: #ffffff !important;
+  border-color: #3b82f6 !important;
+  color: #0f172a !important;
+  box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.25) !important;
+}
+
+.glass-select option,
+select.bg-white option,
+select.bg-slate-50 option,
+select.text-slate-900 option,
+select.text-slate-800 option,
+select.text-slate-700 option {
+  background-color: #ffffff !important;
+  color: #0f172a !important;
   font-weight: 600;
   padding: 10px 14px;
+}
+
+/* Dark Theme Selects (Dark Forms, Dark Modals & Dark Dashboards) */
+.glass-select-dark,
+select.bg-slate-950,
+select.bg-slate-900,
+select.bg-slate-800,
+select.text-slate-100,
+select.text-slate-200,
+select.text-slate-300,
+select.text-white,
+.dark select,
+.bg-slate-950 select,
+.bg-slate-900 select,
+.bg-slate-800 select {
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 24 24' stroke-width='2.5' stroke='%2360a5fa'%3E%3Cpath stroke-linecap='round' stroke-linejoin='round' d='M19.5 8.25l-7.5 7.5-7.5-7.5' /%3E%3C/svg%3E") !important;
+  background-color: #090d16 !important;
+  border: 1px solid #1e293b !important;
+  color: #f8fafc !important;
+}
+
+.glass-select-dark:hover,
+select.bg-slate-950:hover,
+select.bg-slate-900:hover,
+select.bg-slate-800:hover,
+select.text-slate-100:hover,
+select.text-slate-200:hover,
+select.text-slate-300:hover,
+select.text-white:hover,
+.dark select:hover,
+.bg-slate-950 select:hover,
+.bg-slate-900 select:hover,
+.bg-slate-800 select:hover {
+  background-color: #0f172a !important;
+  border-color: #334155 !important;
+  color: #ffffff !important;
+}
+
+.glass-select-dark:focus,
+select.bg-slate-950:focus,
+select.bg-slate-900:focus,
+select.bg-slate-800:focus,
+select.text-slate-100:focus,
+select.text-slate-200:focus,
+select.text-slate-300:focus,
+select.text-white:focus,
+.dark select:focus,
+.bg-slate-950 select:focus,
+.bg-slate-900 select:focus,
+.bg-slate-800 select:focus {
+  outline: none !important;
+  background-color: #0f172a !important;
+  border-color: #3b82f6 !important;
+  color: #ffffff !important;
+  box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.35) !important;
+}
+
+.glass-select-dark option,
+select.bg-slate-950 option,
+select.bg-slate-900 option,
+select.bg-slate-800 option,
+select.text-slate-100 option,
+select.text-slate-200 option,
+select.text-slate-300 option,
+select.text-white option,
+.dark select option,
+.bg-slate-950 select option,
+.bg-slate-900 select option,
+.bg-slate-800 select option {
+  background-color: #0f172a !important;
+  color: #f8fafc !important;
+  font-weight: 600;
+  padding: 10px 14px;
+}
+
+/* Chrome/Safari Autofill Fix for Select & Input */
+select:-webkit-autofill,
+select:-webkit-autofill:hover,
+select:-webkit-autofill:focus,
+input:-webkit-autofill,
+input:-webkit-autofill:hover,
+input:-webkit-autofill:focus {
+  -webkit-text-fill-color: inherit !important;
+  transition: background-color 5000s ease-in-out 0s;
 }
 
 /* Glass Dropdown Popover Container */

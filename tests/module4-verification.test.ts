@@ -1,8 +1,6 @@
-import { PrismaClient } from "@prisma/client";
+import { prisma } from "../lib/prisma";
 import bcrypt from "bcryptjs";
 import { saveDocumentToStorage, readDocumentFromStorage, deleteDocumentFromStorage } from "../lib/document-storage";
-
-const prisma = new PrismaClient();
 
 async function runModule4Tests() {
   console.log("🧪 Starting EduConnect Module 04 Verification & Admin Automated Tests...\n");

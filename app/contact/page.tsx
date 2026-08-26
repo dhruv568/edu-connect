@@ -15,7 +15,7 @@ export default function ContactPage() {
   const [email, setEmail] = useState("");
   const [subject, setSubject] = useState("");
   const [message, setMessage] = useState("");
-  const [roleType, setRoleType] = useState<"STUDENT" | "TEACHER" | "PARENT" | "GENERAL">("GENERAL");
+  const [roleType, setRoleType] = useState<"STUDENT" | "TEACHER" | "GENERAL">("GENERAL");
   const [loading, setLoading] = useState(false);
 
   const { showToast } = useToast();
@@ -55,7 +55,7 @@ export default function ContactPage() {
           <GlassBadge variant="blue">CONTACT EDUCONNECT</GlassBadge>
           <h1 className="text-4xl font-black text-slate-900 tracking-tight">Get in Touch with Our Team</h1>
           <p className="text-sm text-slate-600 max-w-xl mx-auto">
-            Have a question about demo bookings, live classes, teacher onboarding, or parent accounts? We&apos;re here to help.
+            Have a question about demo bookings, live classes, or teacher onboarding? We&apos;re here to help.
           </p>
         </div>
 
@@ -63,52 +63,55 @@ export default function ContactPage() {
           {/* Contact Info */}
           <div className="lg:col-span-5 space-y-6">
             <GlassCard glowColor="rgba(37, 99, 235, 0.15)" className="p-6 space-y-6 border border-white/80">
-              <h3 className="text-lg font-bold text-slate-900">Support Directory</h3>
+              <h3 className="text-lg font-bold text-slate-900">Direct Support Channels</h3>
 
-              <div className="space-y-4 text-xs">
-                <div className="flex items-center gap-3">
-                  <div className="p-2.5 rounded-xl bg-blue-50 text-blue-600">
-                    <Mail className="h-4 w-4" />
+              <div className="space-y-4">
+                <div className="flex items-start gap-4">
+                  <div className="p-3 bg-blue-50 text-blue-600 rounded-2xl border border-blue-100">
+                    <Mail className="h-5 w-5" />
                   </div>
                   <div>
-                    <div className="font-bold text-slate-900">Email Support</div>
-                    <div className="text-slate-500">support@educonnect.com</div>
+                    <h4 className="text-xs font-bold text-slate-500 uppercase tracking-wider">Email Us</h4>
+                    <p className="text-sm font-bold text-slate-900">support@educonnect.com</p>
+                    <p className="text-xs text-slate-500">24/7 dedicated support inbox</p>
                   </div>
                 </div>
 
-                <div className="flex items-center gap-3">
-                  <div className="p-2.5 rounded-xl bg-indigo-50 text-indigo-600">
-                    <Phone className="h-4 w-4" />
+                <div className="flex items-start gap-4">
+                  <div className="p-3 bg-indigo-50 text-indigo-600 rounded-2xl border border-indigo-100">
+                    <Phone className="h-5 w-5" />
                   </div>
                   <div>
-                    <div className="font-bold text-slate-900">Phone Support</div>
-                    <div className="text-slate-500">+1 (800) 555-EDUCONNECT</div>
+                    <h4 className="text-xs font-bold text-slate-500 uppercase tracking-wider">Call Helpline</h4>
+                    <p className="text-sm font-bold text-slate-900">+1 (800) 555-EDU1</p>
+                    <p className="text-xs text-slate-500">Mon - Fri, 8am - 8pm EST</p>
                   </div>
                 </div>
 
-                <div className="flex items-center gap-3">
-                  <div className="p-2.5 rounded-xl bg-emerald-50 text-emerald-600">
-                    <MapPin className="h-4 w-4" />
+                <div className="flex items-start gap-4">
+                  <div className="p-3 bg-purple-50 text-purple-600 rounded-2xl border border-purple-100">
+                    <MapPin className="h-5 w-5" />
                   </div>
                   <div>
-                    <div className="font-bold text-slate-900">Global Headquarters</div>
-                    <div className="text-slate-500">100 Education Way, Suite 400</div>
+                    <h4 className="text-xs font-bold text-slate-500 uppercase tracking-wider">Headquarters</h4>
+                    <p className="text-sm font-bold text-slate-900">San Francisco, CA</p>
+                    <p className="text-xs text-slate-500">100 Educational Way, Suite 400</p>
                   </div>
                 </div>
               </div>
             </GlassCard>
           </div>
 
-          {/* Contact Form */}
+          {/* Form */}
           <div className="lg:col-span-7">
-            <GlassCard glowColor="rgba(99, 102, 241, 0.15)" className="p-8 border border-white/90 shadow-xl">
+            <GlassCard glowColor="rgba(99, 102, 241, 0.15)" className="p-8 border border-white/80">
               <form onSubmit={handleSubmit} className="space-y-4">
                 <div>
                   <label className="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-2">
                     I am inquiring as a:
                   </label>
-                  <div className="grid grid-cols-4 gap-2">
-                    {(["STUDENT", "TEACHER", "PARENT", "GENERAL"] as const).map((r) => (
+                  <div className="grid grid-cols-3 gap-2">
+                    {(["STUDENT", "TEACHER", "GENERAL"] as const).map((r) => (
                       <button
                         key={r}
                         type="button"

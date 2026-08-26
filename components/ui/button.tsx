@@ -11,7 +11,7 @@ function cn(...inputs: any[]) {
 }
 
 export interface ButtonProps extends HTMLMotionProps<"button"> {
-  variant?: "primary" | "secondary" | "outline" | "ghost" | "teacher" | "student" | "parent" | "gradient";
+  variant?: "primary" | "secondary" | "outline" | "ghost" | "teacher" | "student" | "gradient";
   size?: "sm" | "md" | "lg";
   isLoading?: boolean;
   leftIcon?: React.ReactNode;
@@ -44,7 +44,6 @@ export const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
       ghost: "text-slate-700 hover:bg-slate-100 active:bg-slate-200",
       teacher: "bg-indigo-600 text-white hover:bg-indigo-700 shadow-md shadow-indigo-500/20",
       student: "bg-emerald-600 text-white hover:bg-emerald-700 shadow-md shadow-emerald-500/20",
-      parent: "bg-amber-500 text-white hover:bg-amber-600 shadow-md shadow-amber-500/20",
       gradient: "bg-gradient-to-r from-blue-600 to-indigo-600 text-white hover:from-blue-700 hover:to-indigo-700 shadow-lg shadow-blue-500/25",
     };
 

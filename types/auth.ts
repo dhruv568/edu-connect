@@ -8,6 +8,7 @@ export type TeachingMode = "ONLINE" | "OFFLINE" | "BOTH";
 
 export interface UserSession {
   id: string;
+  userId?: string;
   email: string;
   role: UserRole;
   emailVerified: boolean;
@@ -26,6 +27,8 @@ export interface VerificationResult {
   success: boolean;
   message: string;
   alreadyVerified?: boolean;
+  user?: UserSession;
+  redirectPath?: string;
 }
 
 export interface QualificationItem {

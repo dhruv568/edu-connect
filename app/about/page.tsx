@@ -20,7 +20,7 @@ export default function AboutPage() {
             Connecting Education for Every Learner
           </h1>
           <p className="text-base text-slate-600 max-w-2xl mx-auto">
-            EduConnect is built on the belief that flexible learning models, verified tutors, and parent transparency build better educational futures.
+            EduConnect is built on the belief that flexible learning models, verified tutors, and interactive virtual classrooms build better educational futures.
           </p>
         </div>
 
@@ -30,9 +30,9 @@ export default function AboutPage() {
             <div className="p-3 bg-blue-50 text-blue-600 rounded-2xl w-fit">
               <ShieldCheck className="h-6 w-6" />
             </div>
-            <h3 className="text-lg font-bold text-slate-900">Verified Quality</h3>
+            <h3 className="text-lg font-bold text-slate-900">Verified Educators</h3>
             <p className="text-xs text-slate-600 leading-relaxed">
-              Every teacher undergoes identity and academic background verification before joining the marketplace.
+              Every teacher undergoes multi-stage credential checks, background verification, and administrative audit.
             </p>
           </GlassCard>
 
@@ -46,13 +46,13 @@ export default function AboutPage() {
             </p>
           </GlassCard>
 
-          <GlassCard glowColor="rgba(245, 158, 11, 0.15)" className="p-6 space-y-3">
-            <div className="p-3 bg-amber-50 text-amber-600 rounded-2xl w-fit">
-              <Heart className="h-6 w-6" />
+          <GlassCard glowColor="rgba(16, 185, 129, 0.15)" className="p-6 space-y-3">
+            <div className="p-3 bg-emerald-50 text-emerald-600 rounded-2xl w-fit">
+              <Heart className="h-6 w-6 text-emerald-600" />
             </div>
-            <h3 className="text-lg font-bold text-slate-900">Parent Transparency</h3>
+            <h3 className="text-lg font-bold text-slate-900">Interactive Classroom</h3>
             <p className="text-xs text-slate-600 leading-relaxed">
-              Real-time attendance tracking, quiz performance insights, and direct educator messaging for parents.
+              Real-time WebRTC video, digital whiteboard collaboration, live classroom chat, and attendance tracking.
             </p>
           </GlassCard>
         </div>

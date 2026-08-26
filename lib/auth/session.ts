@@ -18,7 +18,11 @@ export function encodeSession(session: UserSession): string {
 export function decodeSession(token: string): UserSession | null {
   try {
     const jsonStr = Buffer.from(token, "base64url").toString("utf-8");
-    return JSON.parse(jsonStr) as UserSession;
+    const payload = JSON.parse(jsonStr) as UserSession;
+    if (payload) {
+      payload.userId = payload.userId || payload.id;
+    }
+    return payload;
   } catch {
     return null;
   }

@@ -31,7 +31,7 @@ export default function PrivacyPage() {
           <section className="space-y-2">
             <h3 className="text-sm font-bold text-slate-900">2. Student & Child Data Protection</h3>
             <p>
-              We enforce strict privacy controls for student accounts and enable parent visibility controls to protect minor learners.
+              We enforce strict privacy controls and encrypted data transmission for all student accounts and learning activities.
             </p>
           </section>
         </GlassCard>

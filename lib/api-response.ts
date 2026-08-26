@@ -1,11 +1,18 @@
 import { NextResponse } from "next/server";
 import { ApiResponse } from "@/types/auth";
 
-export function apiSuccess<T>(data: T, message?: string, status = 200) {
+export function apiSuccess<T>(data: T, message?: string | number, status = 200) {
+  let msgStr: string | undefined = undefined;
+  if (typeof message === "number") {
+    status = message;
+  } else {
+    msgStr = message;
+  }
+
   const body: ApiResponse<T> = {
     success: true,
     data,
-    ...(message && { message }),
+    ...(msgStr && { message: msgStr }),
   };
   return NextResponse.json(body, { status });
 }

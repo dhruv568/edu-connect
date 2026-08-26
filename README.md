@@ -1,8 +1,6 @@
-# EduConnect — Technical Foundation & Architecture (Module 01)
+# EduConnect — Technical Foundation & Architecture
 
-EduConnect is a next-generation education platform connecting **Teachers**, **Students**, **Parents**, and **Administrators** across three independent learning models: **Demo Bookings**, **Live Class Slots**, and **Pre-recorded Courses**.
-
-Module 01 provides the technical, visual, database, authorization, and working email-verification foundation for the entire EduConnect ecosystem.
+EduConnect is a next-generation education platform connecting **Teachers**, **Students**, and **Administrators** across three independent learning models: **Demo Bookings**, **Live Class Slots**, and **Pre-recorded Courses**, with a production-grade WebRTC **Virtual Classroom**.
 
 ---
 
@@ -12,10 +10,11 @@ Module 01 provides the technical, visual, database, authorization, and working e
 - **Language**: TypeScript (Strict Mode)
 - **Styling & System**: Tailwind CSS & Custom **"EduConnect Playful Learning System"**
 - **Animations**: Framer Motion & GSAP
+- **Real-Time Video**: WebRTC Provider Abstraction (`ClassroomProvider`, `WebRTCAdapter`)
 - **Icons**: Lucide React
 - **Validation**: Zod & React Hook Form
-- **Database & ORM**: Prisma ORM with SQLite (Zero-config local dev) / PostgreSQL compatible
-- **Auth & Hashing**: Bcryptjs & SHA-256 token hashing
+- **Database & ORM**: Prisma ORM with PostgreSQL (Neon DB) / SQLite compatible
+- **Auth & Hashing**: Bcryptjs & HMAC SHA-256 classroom token hashing
 - **Email Service**: Flexible Email Provider Abstraction (Console Log Provider for Dev + SMTP Nodemailer Provider)
 
 ---

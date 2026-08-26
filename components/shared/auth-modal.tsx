@@ -64,7 +64,11 @@ export function AuthModal({ isOpen, onClose, initialRole = "STUDENT", initialMod
         const data = await res.json();
         if (!res.ok) throw new Error(data.error || "Login failed.");
 
-        showToast("Welcome Back!", `Signed in as ${data.data.user.firstName}`, "success");
+        if (data.data?.requiresVerification) {
+          showToast("Verification Required", "Please verify your email to access protected features.", "info");
+        } else {
+          showToast("Welcome Back!", `Signed in as ${data.data.user.firstName}`, "success");
+        }
         onClose();
         router.push(data.data.redirectPath);
       }

@@ -10,7 +10,7 @@ function cn(...inputs: any[]) {
   return twMerge(clsx(inputs));
 }
 
-export type RoleCardType = "teacher" | "student" | "parent";
+export type RoleCardType = "teacher" | "student";
 
 export interface RoleCardProps {
   type: RoleCardType;
@@ -39,15 +39,6 @@ const roleConfigs = {
     glowColor: "group-hover:bg-emerald-500/10",
     buttonBg: "bg-emerald-600 hover:bg-emerald-700",
     badgeText: "For Learners",
-  },
-  parent: {
-    icon: Heart,
-    badgeBg: "bg-amber-100",
-    iconColor: "text-amber-600",
-    borderColor: "hover:border-amber-300",
-    glowColor: "group-hover:bg-amber-500/10",
-    buttonBg: "bg-amber-500 hover:bg-amber-600",
-    badgeText: "For Parents",
   },
 };
 

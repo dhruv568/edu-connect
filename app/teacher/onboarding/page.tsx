@@ -178,6 +178,7 @@ export default function TeacherOnboardingPage() {
   };
 
   const canAccessStep = (targetStep: number): boolean => {
+    if (professional.verificationStatus === "VERIFIED" || readiness.isReady) return true;
     if (targetStep <= 1) return true;
     for (let i = 1; i < targetStep; i++) {
       if (!isStepValid(i).valid) return false;
@@ -188,7 +189,7 @@ export default function TeacherOnboardingPage() {
   const handleStepClick = (targetStep: number) => {
     if (targetStep === activeStep) return;
 
-    if (targetStep < activeStep) {
+    if (professional.verificationStatus === "VERIFIED" || readiness.isReady || targetStep < activeStep) {
       setActiveStep(targetStep);
       return;
     }
@@ -1081,7 +1082,7 @@ export default function TeacherOnboardingPage() {
             </button>
 
             <div className="flex items-center gap-3">
-              {(activeStep === 2 || activeStep === 3) && (
+              {activeStep >= 2 && (
                 <GlassButton
                   type="button"
                   variant="secondary"
@@ -1089,7 +1090,7 @@ export default function TeacherOnboardingPage() {
                   isLoading={saving}
                   onClick={() => handleSaveProfile(false)}
                 >
-                  Save Progress
+                  Save Profile Changes
                 </GlassButton>
               )}
 

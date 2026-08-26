@@ -3,10 +3,11 @@
 import React, { useState, useEffect } from "react";
 import Link from "next/link";
 import { motion, AnimatePresence } from "framer-motion";
-import { GraduationCap, LogIn, UserPlus, Menu, X, Search, ChevronDown, Target, Video, Play } from "lucide-react";
+import { GraduationCap, LogIn, UserPlus, Menu, X, Search, ChevronDown, Target, Video, Play, LogOut, User, LayoutDashboard, MailCheck } from "lucide-react";
 import { GlassButton } from "@/components/glass/glass-button";
 import { AuthModal } from "@/components/shared/auth-modal";
 import { GlobalSearchModal } from "@/components/discovery/global-search-modal";
+import { UserSession } from "@/types/auth";
 
 export function FloatingNavbar() {
   const [scrolled, setScrolled] = useState(false);
@@ -16,7 +17,26 @@ export function FloatingNavbar() {
   const [searchModalOpen, setSearchModalOpen] = useState(false);
   const [megaMenuOpen, setMegaMenuOpen] = useState(false);
 
+  const [userSession, setUserSession] = useState<UserSession | null>(null);
+
+  const checkAuthStatus = async () => {
+    try {
+      const res = await fetch("/api/auth/me");
+      if (res.ok) {
+        const json = await res.json();
+        if (json.data?.user) {
+          setUserSession(json.data.user);
+          return;
+        }
+      }
+      setUserSession(null);
+    } catch {
+      setUserSession(null);
+    }
+  };
+
   useEffect(() => {
+    checkAuthStatus();
     const handleScroll = () => {
       setScrolled(window.scrollY > 40);
     };
@@ -28,6 +48,28 @@ export function FloatingNavbar() {
     setAuthMode(mode);
     setAuthModalOpen(true);
     setMobileOpen(false);
+  };
+
+  const handleLogout = async () => {
+    try {
+      await fetch("/api/auth/logout", { method: "POST" });
+      setUserSession(null);
+      setMobileOpen(false);
+    } catch {
+      setUserSession(null);
+    }
+  };
+
+  const getDashboardPath = (session: UserSession) => {
+    if (session.role === "TEACHER") return "/teacher/dashboard";
+    if (session.role === "ADMIN") return "/admin/dashboard";
+    return "/student/dashboard";
+  };
+
+  const getDashboardLabel = (session: UserSession) => {
+    if (session.role === "TEACHER") return "Teacher Dashboard";
+    if (session.role === "ADMIN") return "Admin Dashboard";
+    return "Dashboard";
   };
 
   return (
@@ -171,25 +213,78 @@ export function FloatingNavbar() {
             </kbd>
           </button>
 
-          {/* Desktop Auth Buttons */}
+          {/* Desktop Auth Buttons based on session state */}
           <div className="hidden sm:flex items-center gap-2">
-            <Link href="/login">
-              <GlassButton
-                variant="ghost"
-                size="sm"
-                leftIcon={<LogIn className="h-3.5 w-3.5 text-slate-600" />}
-              >
-                Login
-              </GlassButton>
-            </Link>
-            <GlassButton
-              variant="primary"
-              size="sm"
-              onClick={() => openAuth("register")}
-              leftIcon={<UserPlus className="h-3.5 w-3.5" />}
-            >
-              Get Started
-            </GlassButton>
+            {!userSession ? (
+              <>
+                <Link href="/login">
+                  <GlassButton
+                    variant="ghost"
+                    size="sm"
+                    leftIcon={<LogIn className="h-3.5 w-3.5 text-slate-600" />}
+                  >
+                    Login
+                  </GlassButton>
+                </Link>
+                <GlassButton
+                  variant="primary"
+                  size="sm"
+                  onClick={() => openAuth("register")}
+                  leftIcon={<UserPlus className="h-3.5 w-3.5" />}
+                >
+                  Get Started
+                </GlassButton>
+              </>
+            ) : !userSession.emailVerified ? (
+              <>
+                <Link href={`/verify-email?email=${encodeURIComponent(userSession.email)}`}>
+                  <GlassButton
+                    variant="primary"
+                    size="sm"
+                    leftIcon={<MailCheck className="h-3.5 w-3.5" />}
+                  >
+                    Verify Email
+                  </GlassButton>
+                </Link>
+                <GlassButton
+                  variant="ghost"
+                  size="sm"
+                  onClick={handleLogout}
+                  leftIcon={<LogOut className="h-3.5 w-3.5 text-slate-600" />}
+                >
+                  Logout
+                </GlassButton>
+              </>
+            ) : (
+              <>
+                <Link href={getDashboardPath(userSession)}>
+                  <GlassButton
+                    variant="primary"
+                    size="sm"
+                    leftIcon={<LayoutDashboard className="h-3.5 w-3.5" />}
+                  >
+                    {getDashboardLabel(userSession)}
+                  </GlassButton>
+                </Link>
+                <Link href="/profile">
+                  <GlassButton
+                    variant="secondary"
+                    size="sm"
+                    leftIcon={<User className="h-3.5 w-3.5" />}
+                  >
+                    Profile
+                  </GlassButton>
+                </Link>
+                <GlassButton
+                  variant="ghost"
+                  size="sm"
+                  onClick={handleLogout}
+                  leftIcon={<LogOut className="h-3.5 w-3.5 text-slate-600" />}
+                >
+                  Logout
+                </GlassButton>
+              </>
+            )}
           </div>
 
           {/* Mobile Menu Button */}
@@ -236,14 +331,45 @@ export function FloatingNavbar() {
             </nav>
 
             <div className="pt-2 flex flex-col gap-2">
-              <Link href="/login" onClick={() => setMobileOpen(false)}>
-                <GlassButton variant="secondary" className="w-full">
-                  Login
-                </GlassButton>
-              </Link>
-              <GlassButton variant="primary" className="w-full" onClick={() => openAuth("register")}>
-                Get Started
-              </GlassButton>
+              {!userSession ? (
+                <>
+                  <Link href="/login" onClick={() => setMobileOpen(false)}>
+                    <GlassButton variant="secondary" className="w-full">
+                      Login
+                    </GlassButton>
+                  </Link>
+                  <GlassButton variant="primary" className="w-full" onClick={() => openAuth("register")}>
+                    Get Started
+                  </GlassButton>
+                </>
+              ) : !userSession.emailVerified ? (
+                <>
+                  <Link href={`/verify-email?email=${encodeURIComponent(userSession.email)}`} onClick={() => setMobileOpen(false)}>
+                    <GlassButton variant="primary" className="w-full">
+                      Verify Email
+                    </GlassButton>
+                  </Link>
+                  <GlassButton variant="secondary" className="w-full" onClick={handleLogout}>
+                    Logout
+                  </GlassButton>
+                </>
+              ) : (
+                <>
+                  <Link href={getDashboardPath(userSession)} onClick={() => setMobileOpen(false)}>
+                    <GlassButton variant="primary" className="w-full">
+                      {getDashboardLabel(userSession)}
+                    </GlassButton>
+                  </Link>
+                  <Link href="/profile" onClick={() => setMobileOpen(false)}>
+                    <GlassButton variant="secondary" className="w-full">
+                      Profile
+                    </GlassButton>
+                  </Link>
+                  <GlassButton variant="ghost" className="w-full" onClick={handleLogout}>
+                    Logout
+                  </GlassButton>
+                </>
+              )}
             </div>
           </motion.div>
         )}
@@ -253,7 +379,10 @@ export function FloatingNavbar() {
 
       <AuthModal
         isOpen={authModalOpen}
-        onClose={() => setAuthModalOpen(false)}
+        onClose={() => {
+          setAuthModalOpen(false);
+          checkAuthStatus();
+        }}
         initialMode={authMode}
       />
     </>

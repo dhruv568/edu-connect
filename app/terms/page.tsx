@@ -31,7 +31,7 @@ export default function TermsPage() {
           <section className="space-y-2">
             <h3 className="text-sm font-bold text-slate-900">2. User Roles & Account Responsibilities</h3>
             <p>
-              Users registering as Teachers, Students, or Parents must provide accurate registration details and maintain secure credentials.
+              Users registering as Teachers or Students must provide accurate registration details and maintain secure credentials.
             </p>
           </section>
 
