@@ -74,7 +74,7 @@ export function FloatingNavbar() {
 
   return (
     <>
-      <header className="fixed top-5 left-0 right-0 z-50 px-6 lg:px-12 pointer-events-none flex items-center justify-between">
+      <header className="fixed top-5 left-0 right-0 z-50 px-3 sm:px-6 lg:px-12 pointer-events-none flex items-center justify-between">
         {/* SEPARATE LOGO IN TOP LEFT CORNER */}
         <motion.div
           initial={{ x: -30, opacity: 0 }}
@@ -84,12 +84,12 @@ export function FloatingNavbar() {
         >
           <Link
             href="/"
-            className="flex items-center gap-3 px-4 py-2.5 rounded-2xl glass-surface border border-white/80 shadow-lg group transition-transform hover:scale-105"
+            className="flex items-center gap-2 sm:gap-3 px-3 sm:px-4 py-2 sm:py-2.5 rounded-2xl glass-surface border border-white/80 shadow-lg group transition-transform hover:scale-105"
           >
             <div className="p-2 rounded-xl bg-gradient-to-tr from-blue-600 to-indigo-600 text-white shadow-md">
               <GraduationCap className="h-5 w-5" />
             </div>
-            <span className="text-lg font-black text-slate-900 tracking-tight whitespace-nowrap">
+            <span className="text-base sm:text-lg font-black text-slate-900 tracking-tight whitespace-nowrap">
               EDU<span className="text-blue-600">CONNECT</span>
             </span>
           </Link>
@@ -197,10 +197,17 @@ export function FloatingNavbar() {
           transition={{ duration: 0.5 }}
           className="pointer-events-auto flex items-center gap-3 shrink-0"
         >
-          {/* Expanded Search Bar Trigger */}
+          {/* Mobile: icon-only search button */}
           <button
             onClick={() => setSearchModalOpen(true)}
-            className="w-44 sm:w-56 lg:w-64 px-3.5 py-2.5 rounded-2xl glass-surface border border-white/80 text-slate-600 hover:text-blue-600 hover:border-blue-300 transition-all text-xs font-semibold flex items-center justify-between shadow-sm group"
+            className="sm:hidden p-2.5 rounded-2xl glass-surface border border-white/80 text-slate-600 hover:text-blue-600 hover:border-blue-300 transition-all shadow-sm"
+          >
+            <Search className="h-4 w-4" />
+          </button>
+          {/* Desktop: expanded search bar */}
+          <button
+            onClick={() => setSearchModalOpen(true)}
+            className="hidden sm:flex w-56 lg:w-64 px-3.5 py-2.5 rounded-2xl glass-surface border border-white/80 text-slate-600 hover:text-blue-600 hover:border-blue-300 transition-all text-xs font-semibold items-center justify-between shadow-sm group"
           >
             <div className="flex items-center gap-2 overflow-hidden">
               <Search className="h-4 w-4 text-slate-400 group-hover:text-blue-600 shrink-0 transition-colors" />
@@ -208,7 +215,7 @@ export function FloatingNavbar() {
                 Search tutors, courses...
               </span>
             </div>
-            <kbd className="hidden sm:inline-block bg-slate-100 px-1.5 py-0.5 rounded text-[10px] text-slate-500 font-mono border border-slate-200 shrink-0">
+            <kbd className="hidden lg:inline-block bg-slate-100 px-1.5 py-0.5 rounded text-[10px] text-slate-500 font-mono border border-slate-200 shrink-0">
               ⌘K
             </kbd>
           </button>
@@ -304,7 +311,7 @@ export function FloatingNavbar() {
             initial={{ opacity: 0, scale: 0.95, y: -10 }}
             animate={{ opacity: 1, scale: 1, y: 0 }}
             exit={{ opacity: 0, scale: 0.95, y: -10 }}
-            className="fixed top-24 left-4 right-4 z-40 p-6 glass-surface rounded-3xl shadow-2xl md:hidden space-y-4 text-center pointer-events-auto border border-white/90"
+            className="fixed top-24 left-4 right-4 z-40 p-6 glass-surface rounded-3xl shadow-2xl md:hidden space-y-4 text-center pointer-events-auto border border-white/90 max-h-[calc(100vh-7rem)] overflow-y-auto"
           >
             <nav className="flex flex-col gap-3 font-bold text-slate-800 text-sm">
               <Link href="/" onClick={() => setMobileOpen(false)} className="py-2 border-b border-slate-100">

@@ -61,7 +61,7 @@ export function TeacherCarousel({ onOpenAuth }: TeacherCarouselProps) {
           <span className="text-xs font-extrabold text-indigo-600 uppercase tracking-widest">
             Verified Educators
           </span>
-          <h2 className="text-4xl font-extrabold text-slate-900 tracking-tight">
+          <h2 className="text-2xl sm:text-3xl md:text-4xl font-extrabold text-slate-900 tracking-tight">
             Find someone who makes it click.
           </h2>
           <p className="text-base text-slate-600">
@@ -76,14 +76,14 @@ export function TeacherCarousel({ onOpenAuth }: TeacherCarouselProps) {
               glowColor="rgba(99, 102, 241, 0.15)"
               onMouseEnter={() => setActiveTeacher(t.id)}
               onMouseLeave={() => setActiveTeacher(null)}
-              className="group cursor-pointer flex flex-col justify-between h-full border-2 border-white/90 hover:border-indigo-300 transition-all p-7"
+              className="group cursor-pointer flex flex-col justify-between h-full border-2 border-white/90 hover:border-indigo-300 transition-all p-5 sm:p-7"
             >
               <div className="space-y-4">
                 <div className="flex items-center gap-4">
                   <img
                     src={t.avatar}
                     alt={t.name}
-                    className="w-16 h-16 rounded-full object-cover ring-4 ring-indigo-500/20 group-hover:ring-indigo-500 transition-all"
+                    className="w-14 h-14 sm:w-16 sm:h-16 rounded-full object-cover ring-4 ring-indigo-500/20 group-hover:ring-indigo-500 transition-all shrink-0"
                   />
                   <div>
                     <h3 className="text-lg font-bold text-slate-900 group-hover:text-indigo-600 transition-colors">

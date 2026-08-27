@@ -60,7 +60,7 @@ export function InteractiveHeroCanvas({ onOpenAuth }: InteractiveHeroCanvasProps
     <section
       ref={containerRef}
       onMouseMove={handleMouseMove}
-      className="relative min-h-[90vh] pt-32 pb-20 flex items-center justify-center overflow-hidden"
+      className="relative min-h-[80vh] sm:min-h-[90vh] pt-24 sm:pt-32 pb-12 sm:pb-20 flex items-center justify-center overflow-hidden"
     >
       {/* Background Liquid Gradient Blobs */}
       <div className="liquid-blob-1 top-10 left-1/4" />
@@ -88,7 +88,7 @@ export function InteractiveHeroCanvas({ onOpenAuth }: InteractiveHeroCanvasProps
             transition={{ duration: 0.6, delay: 0.1 }}
             className="max-w-3xl space-y-4"
           >
-            <h1 className="text-5xl sm:text-6xl lg:text-7xl font-black text-slate-900 tracking-tight leading-[1.08]">
+            <h1 className="text-3xl sm:text-5xl md:text-6xl lg:text-7xl font-black text-slate-900 tracking-tight leading-[1.08]">
               Learning, <br />
               <span className="bg-gradient-to-r from-blue-600 via-indigo-600 to-purple-600 bg-clip-text text-transparent">
                 but more connected.
@@ -120,7 +120,7 @@ export function InteractiveHeroCanvas({ onOpenAuth }: InteractiveHeroCanvasProps
           </motion.div>
 
           {/* LIVING LEARNING CANVAS VISUAL AREA */}
-          <div className="relative w-full max-w-5xl py-8 min-h-[460px] flex items-center justify-center">
+          <div className="relative w-full max-w-5xl py-4 sm:py-8 min-h-[200px] sm:min-h-[460px] flex items-center justify-center">
             {/* Central Learning Orb */}
             <div className="z-10">
               <LearningOrb />

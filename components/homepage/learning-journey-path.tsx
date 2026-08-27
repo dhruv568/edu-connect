@@ -20,7 +20,7 @@ export function LearningJourneyPath() {
           <span className="text-xs font-extrabold text-blue-600 uppercase tracking-widest">
             The EduConnect Experience
           </span>
-          <h2 className="text-4xl font-extrabold text-slate-900 tracking-tight">
+          <h2 className="text-2xl sm:text-3xl md:text-4xl font-extrabold text-slate-900 tracking-tight">
             How EduConnect Works
           </h2>
           <p className="text-base text-slate-600">
@@ -28,7 +28,7 @@ export function LearningJourneyPath() {
           </p>
         </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-4 gap-6 relative">
+        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-4 sm:gap-6 relative">
           {steps.map((step, idx) => {
             const Icon = step.icon;
             return (

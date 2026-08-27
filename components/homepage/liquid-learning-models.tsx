@@ -64,7 +64,7 @@ export function LiquidLearningModels({ onOpenAuth }: LiquidLearningModelsProps) 
           <span className="text-xs font-extrabold text-blue-600 uppercase tracking-widest">
             Flexible Learning Models
           </span>
-          <h2 className="text-4xl font-extrabold text-slate-900 tracking-tight">
+          <h2 className="text-2xl sm:text-3xl md:text-4xl font-extrabold text-slate-900 tracking-tight">
             Choose how you want to learn.
           </h2>
           <p className="text-base text-slate-600">
@@ -83,7 +83,7 @@ export function LiquidLearningModels({ onOpenAuth }: LiquidLearningModelsProps) 
                 glowColor={model.glow}
                 onMouseEnter={() => setHoveredModel(model.id)}
                 onMouseLeave={() => setHoveredModel(null)}
-                className="group relative cursor-pointer flex flex-col justify-between h-full border-2 border-white/80 hover:border-blue-300 transition-all p-8"
+                className="group relative cursor-pointer flex flex-col justify-between h-full border-2 border-white/80 hover:border-blue-300 transition-all p-5 sm:p-8"
               >
                 <div className="space-y-6">
                   <div className="flex items-center justify-between">

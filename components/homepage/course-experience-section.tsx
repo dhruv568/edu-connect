@@ -27,7 +27,7 @@ export function CourseExperienceSection({ onOpenAuth }: CourseExperienceSectionP
           <span className="text-xs font-extrabold text-emerald-600 uppercase tracking-widest">
             Self-Paced Learning Engine
           </span>
-          <h2 className="text-4xl font-extrabold text-slate-900 tracking-tight">
+          <h2 className="text-2xl sm:text-3xl md:text-4xl font-extrabold text-slate-900 tracking-tight">
             Structured Pre-recorded LMS Courses
           </h2>
           <p className="text-base text-slate-600">
@@ -38,7 +38,7 @@ export function CourseExperienceSection({ onOpenAuth }: CourseExperienceSectionP
         {/* Diagonal / Horizontal Layout Composition */}
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-center max-w-6xl mx-auto">
           {/* Left Course Card */}
-          <GlassCard glowColor="rgba(16, 185, 129, 0.2)" className="lg:col-span-7 p-8 space-y-6 border-2 border-white/90">
+          <GlassCard glowColor="rgba(16, 185, 129, 0.2)" className="lg:col-span-7 p-5 sm:p-8 space-y-6 border-2 border-white/90">
             <div className="flex items-center justify-between">
               <GlassBadge variant="emerald" size="md">COURSE IN PROGRESS</GlassBadge>
               <span className="text-xs font-bold text-slate-500 flex items-center gap-1">
@@ -85,7 +85,7 @@ export function CourseExperienceSection({ onOpenAuth }: CourseExperienceSectionP
                   m.active ? "border-emerald-400 bg-emerald-50/50 shadow-md" : "border-white/80 bg-white/60"
                 }`}
               >
-                <div className="flex items-center justify-between text-xs font-bold">
+                <div className="flex items-start sm:items-center justify-between gap-2 text-xs font-bold">
                   <span className={m.active ? "text-emerald-800" : "text-slate-800"}>{m.title}</span>
                   {m.active ? (
                     <span className="text-[10px] text-emerald-700 bg-emerald-100 px-2 py-0.5 rounded-full font-bold">Active</span>

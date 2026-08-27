@@ -259,6 +259,21 @@ input:-webkit-autofill:focus {
   pointer-events: none;
 }
 
+@media (max-width: 640px) {
+  .liquid-blob-1 {
+    width: 250px;
+    height: 250px;
+  }
+  .liquid-blob-2 {
+    width: 220px;
+    height: 220px;
+  }
+  .liquid-blob-3 {
+    width: 200px;
+    height: 200px;
+  }
+}
+
 @media (prefers-reduced-motion: reduce) {
   *, ::before, ::after {
     animation-duration: 0.01ms !important;

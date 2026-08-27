@@ -13,9 +13,9 @@ export function PremiumFooter() {
 
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10 space-y-16">
         {/* Top CTA Banner */}
-        <div className="glass-surface-dark p-8 sm:p-12 rounded-3xl border border-white/10 flex flex-col md:flex-row items-center justify-between gap-8 shadow-2xl">
+        <div className="glass-surface-dark p-5 sm:p-8 md:p-12 rounded-3xl border border-white/10 flex flex-col md:flex-row items-center justify-between gap-6 sm:gap-8 shadow-2xl">
           <div className="space-y-2 text-center md:text-left">
-            <h3 className="text-2xl sm:text-3xl font-black text-white">Ready to transform your learning?</h3>
+            <h3 className="text-xl sm:text-2xl md:text-3xl font-black text-white">Ready to transform your learning?</h3>
             <p className="text-sm text-slate-400 max-w-lg">
               Join thousands of teachers and students building connected education futures on EduConnect.
             </p>
@@ -26,7 +26,7 @@ export function PremiumFooter() {
         </div>
 
         {/* Links Grid */}
-        <div className="grid grid-cols-1 md:grid-cols-5 gap-10 pb-12 border-b border-slate-800">
+        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-5 gap-8 sm:gap-10 pb-12 border-b border-slate-800">
           {/* Brand Col */}
           <div className="space-y-4 md:col-span-2">
             <Link href="/" className="flex items-center gap-2.5">
@@ -79,7 +79,7 @@ export function PremiumFooter() {
 
         {/* Bottom Copyright */}
         <div className="flex flex-col md:flex-row items-center justify-between gap-4 text-xs text-slate-500">
-          <p>&copy; 2026 EduConnect Liquid Learning Platform Inc. All rights reserved.</p>
+          <p className="text-center md:text-left">&copy; 2026 EduConnect Liquid Learning Platform Inc. All rights reserved.</p>
           <div className="flex items-center gap-1">
             <span>Crafted for connected education</span>
             <Heart className="h-3.5 w-3.5 text-red-500 fill-red-500 ml-1" />

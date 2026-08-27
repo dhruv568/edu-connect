@@ -34,7 +34,7 @@ export function LiveClassroomPreview({ onOpenAuth }: LiveClassroomPreviewProps) 
           <span className="text-xs font-extrabold text-blue-600 uppercase tracking-widest">
             Live Classroom Integration
           </span>
-          <h2 className="text-4xl font-extrabold text-slate-900 tracking-tight">
+          <h2 className="text-2xl sm:text-3xl md:text-4xl font-extrabold text-slate-900 tracking-tight">
             Built-in Live Virtual Classroom
           </h2>
           <p className="text-base text-slate-600">
