@@ -32,7 +32,7 @@ export function TrustChips() {
               viewport={{ once: true }}
               transition={{ delay: idx * 0.1, duration: 0.4 }}
               whileHover={{ y: -4, scale: 1.03 }}
-              className="glass-surface px-5 py-3 rounded-2xl flex items-center gap-3 shadow-sm hover:shadow-md transition-all cursor-default border border-white/80"
+              className="glass-surface px-3.5 py-2 sm:px-5 sm:py-3 rounded-2xl flex items-center gap-2 sm:gap-3 shadow-sm hover:shadow-md transition-all cursor-default border border-white/80"
             >
               <div className={`p-2 rounded-xl ${item.bg} ${item.color}`}>
                 <item.icon className="h-4 w-4" />

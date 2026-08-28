@@ -6,7 +6,7 @@ import { BookOpen, GraduationCap, Star, Pencil, Play, Sparkles } from "lucide-re
 
 export function LearningOrb() {
   return (
-    <div className="relative w-72 h-72 sm:w-96 sm:h-96 flex items-center justify-center pointer-events-none select-none">
+    <div className="relative w-48 h-48 sm:w-72 sm:h-72 md:w-96 md:h-96 flex items-center justify-center pointer-events-none select-none">
       {/* Outer Ambient Glowing Halo */}
       <div className="absolute inset-0 rounded-full bg-gradient-to-tr from-blue-500/20 via-indigo-500/20 to-purple-500/20 blur-3xl animate-pulse-glow" />
 
