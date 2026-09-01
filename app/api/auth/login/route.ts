@@ -11,30 +11,37 @@ export async function POST(request: NextRequest) {
     const body = await request.json();
     const validatedData = LoginSchema.parse(body);
 
-    const userSession = await AuthService.loginUser(validatedData);
+    // If OTP is provided in the login payload, validate both credentials and OTP atomically
+    if (validatedData.otp) {
+      await AuthService.validateCredentials(validatedData.email, validatedData.password);
+      const result = await AuthService.verifyOTP(validatedData.email, validatedData.otp);
 
-    await setSessionCookie(userSession);
+      if (result.user) {
+        await setSessionCookie(result.user);
+      }
 
-    if (!userSession.emailVerified) {
       return apiSuccess(
         {
-          user: userSession,
-          requiresVerification: true,
-          redirectPath: `/verify-email?email=${encodeURIComponent(userSession.email)}`,
+          user: result.user,
+          requiresVerification: false,
+          requiresOtp: false,
+          redirectPath: result.redirectPath,
         },
-        "Please verify your email before continuing."
+        "Login successful!"
       );
     }
 
-    const redirectPath = `/${userSession.role.toLowerCase()}/dashboard`;
+    // Step 1: Validate credentials and dispatch mandatory OTP (no session created yet)
+    const loginResult = await AuthService.loginUser(validatedData);
 
     return apiSuccess(
       {
-        user: userSession,
-        requiresVerification: false,
-        redirectPath,
+        user: loginResult,
+        requiresVerification: true,
+        requiresOtp: true,
+        redirectPath: `/verify-email?email=${encodeURIComponent(loginResult.email)}`,
       },
-      "Login successful!"
+      "Credentials verified. Please enter the 6-digit OTP sent to your email."
     );
   } catch (error: any) {
     if (error.name === "ZodError") {

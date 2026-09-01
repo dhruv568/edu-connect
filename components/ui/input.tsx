@@ -1,8 +1,9 @@
 "use client";
 
-import React from "react";
+import React, { useState } from "react";
 import { clsx } from "clsx";
 import { twMerge } from "tailwind-merge";
+import { Eye, EyeOff } from "lucide-react";
 
 function cn(...inputs: any[]) {
   return twMerge(clsx(inputs));
@@ -14,11 +15,17 @@ export interface InputProps extends React.InputHTMLAttributes<HTMLInputElement> 
   helperText?: string;
   leftIcon?: React.ReactNode;
   rightIcon?: React.ReactNode;
+  showPasswordToggle?: boolean;
 }
 
 export const Input = React.forwardRef<HTMLInputElement, InputProps>(
-  ({ className, type, label, error, helperText, leftIcon, rightIcon, id, ...props }, ref) => {
+  ({ className, type, label, error, helperText, leftIcon, rightIcon, showPasswordToggle = true, id, ...props }, ref) => {
     const inputId = id || (label ? label.toLowerCase().replace(/\s+/g, "-") : undefined);
+    const [showPassword, setShowPassword] = useState(false);
+
+    const isPasswordType = type === "password";
+    const effectiveType = isPasswordType ? (showPassword ? "text" : "password") : type;
+    const hasPasswordToggle = isPasswordType && showPasswordToggle;
 
     return (
       <div className="w-full space-y-1.5">
@@ -37,11 +44,11 @@ export const Input = React.forwardRef<HTMLInputElement, InputProps>(
 
           <input
             id={inputId}
-            type={type}
+            type={effectiveType}
             className={cn(
               "w-full h-11 px-4 text-sm bg-white border border-slate-200 rounded-xl text-slate-900 placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all shadow-sm",
               leftIcon && "pl-10",
-              rightIcon && "pr-10",
+              (rightIcon || hasPasswordToggle) && "pr-10",
               error && "border-red-500 focus:ring-red-500",
               className
             )}
@@ -49,11 +56,26 @@ export const Input = React.forwardRef<HTMLInputElement, InputProps>(
             {...props}
           />
 
-          {rightIcon && (
+          {hasPasswordToggle ? (
+            <button
+              type="button"
+              tabIndex={-1}
+              onClick={() => setShowPassword(!showPassword)}
+              className="absolute right-3.5 text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 focus:outline-none transition-colors p-1 rounded-md hover:bg-slate-100 dark:hover:bg-slate-700/50"
+              aria-label={showPassword ? "Hide password" : "Show password"}
+              title={showPassword ? "Hide password" : "Show password"}
+            >
+              {showPassword ? (
+                <EyeOff className="h-4 w-4" />
+              ) : (
+                <Eye className="h-4 w-4" />
+              )}
+            </button>
+          ) : rightIcon ? (
             <div className="absolute right-3.5 text-slate-400">
               {rightIcon}
             </div>
-          )}
+          ) : null}
         </div>
 
         {error ? (
@@ -67,3 +89,4 @@ export const Input = React.forwardRef<HTMLInputElement, InputProps>(
 );
 
 Input.displayName = "Input";
+

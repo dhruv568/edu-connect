@@ -49,9 +49,9 @@ export const GlassButton = React.forwardRef<HTMLButtonElement, GlassButtonProps>
     };
 
     const sizes = {
-      sm: "h-9 px-4 text-xs rounded-xl gap-1.5",
-      md: "h-11 px-6 text-sm rounded-2xl gap-2",
-      lg: "h-13 px-8 text-base rounded-2xl gap-2.5",
+      sm: "h-9 px-3.5 sm:px-4 text-xs rounded-xl gap-1.5",
+      md: "h-10 sm:h-11 px-4 sm:px-6 text-xs sm:text-sm rounded-2xl gap-2",
+      lg: "h-11 sm:h-12 px-5 sm:px-8 text-sm sm:text-base rounded-2xl gap-2.5",
     };
 
     return (

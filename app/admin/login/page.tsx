@@ -33,8 +33,14 @@ export default function AdminLoginPage() {
       const data = await res.json();
       if (!res.ok) throw new Error(data.error || "Admin login failed.");
 
-      if (data.data.user.role !== "ADMIN") {
+      if (data.data?.user?.role !== "ADMIN") {
         throw new Error("Access denied: Account does not possess Administrative privileges.");
+      }
+
+      if (data.data?.requiresVerification || data.data?.requiresOtp) {
+        showToast("Verification Required ✉️", "Please enter the 6-digit OTP sent to your admin email.", "info");
+        router.push(`/verify-email?email=${encodeURIComponent(email)}&redirectTo=/admin`);
+        return;
       }
 
       showToast("Admin Authenticated!", "Welcome to System Governance.", "success");

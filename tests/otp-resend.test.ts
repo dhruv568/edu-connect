@@ -76,7 +76,73 @@ async function runOTPTests() {
   assert.ok(provider.name, "Email provider must have a valid name identifier");
   console.log(`✅ Passed: Active email provider resolved to "${provider.name}".`);
 
-  console.log("\n🎉 ALL OTP & RESEND INTEGRATION TESTS PASSED SUCCESSFULLY! 🚀\n");
+  // Test 6: Mandatory OTP on Login Flow
+  console.log("\nTest 6: Testing Mandatory OTP on Login Flow...");
+  const loginResult = await AuthService.loginUser({
+    email: testEmail,
+    password: "Password123!",
+  });
+  assert.strictEqual(loginResult.requiresOtp, true, "Login must require OTP");
+  assert.strictEqual(loginResult.requiresVerification, true, "Login must require verification");
+  assert.strictEqual(loginResult.emailVerified, false, "Session must not be verified prior to OTP submission");
+  console.log("✅ Passed: Login successfully initiates mandatory OTP dispatch without granting session.");
+
+  // Test 7: Wrong Credentials Rejection
+  console.log("\nTest 7: Testing Wrong Login Credentials Rejection...");
+  try {
+    await AuthService.loginUser({
+      email: testEmail,
+      password: "WrongPassword!",
+    });
+    assert.fail("Should have rejected wrong password");
+  } catch (err: any) {
+    assert.ok(err.message.includes("Invalid email or password"), "Should reject invalid password");
+    console.log("✅ Passed: Invalid login password rejected.");
+  }
+
+  // Test 8: Successful OTP Verification and Session Issuance
+  console.log("\nTest 8: Testing Correct OTP Verification & Session Issuance...");
+  // Query the newest active OTP codeHash from database and verify with valid OTP
+  const activeVerification = await prisma.emailVerification.findFirst({
+    where: { userId: user.id, verifiedAt: null, expiresAt: { gt: new Date() } },
+    orderBy: { createdAt: "desc" },
+  });
+  assert.ok(activeVerification, "Active verification record must exist");
+
+  // In test environment, manually update codeHash to a known OTP hash to test verification
+  const testOTP = "789456";
+  const { hashToken } = require("../lib/auth/tokens");
+  await prisma.emailVerification.update({
+    where: { id: activeVerification.id },
+    data: { codeHash: hashToken(testOTP), attempts: 0 },
+  });
+
+  const verifySuccess = await AuthService.verifyOTP(testEmail, testOTP);
+  assert.strictEqual(verifySuccess.success, true);
+  assert.ok(verifySuccess.user, "User session must be returned on valid OTP");
+  assert.strictEqual(verifySuccess.user.emailVerified, true, "User session must have emailVerified=true");
+  assert.strictEqual(verifySuccess.redirectPath, "/student/dashboard");
+  console.log("✅ Passed: Valid OTP verified, session created, emailVerified marked true.");
+
+  // Test 9: Mandatory OTP on subsequent login for verified users (No Bypass)
+  console.log("\nTest 9: Verifying No Bypass on Subsequent Login for Verified User...");
+  // User is now verified in DB. Trigger login again:
+  const secondLoginResult = await AuthService.loginUser({
+    email: testEmail,
+    password: "Password123!",
+  });
+  assert.strictEqual(secondLoginResult.requiresOtp, true, "Subsequent login must still require OTP");
+
+  // Attempting to verify with wrong OTP on verified user must NOT bypass
+  try {
+    await AuthService.verifyOTP(testEmail, "111111");
+    assert.fail("Wrong OTP on verified user must not be accepted");
+  } catch (err: any) {
+    assert.ok(err.message.includes("Incorrect verification code"), "Wrong OTP must be blocked even for verified users");
+    console.log("✅ Passed: Verified users cannot bypass OTP with wrong code.");
+  }
+
+  console.log("\n🎉 ALL OTP & MANDATORY LOGIN INTEGRATION TESTS PASSED SUCCESSFULLY! 🚀\n");
 }
 
 runOTPTests().catch((err) => {

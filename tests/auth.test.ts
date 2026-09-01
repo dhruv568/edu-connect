@@ -79,7 +79,47 @@ async function runTests() {
     },
   });
   assert.strictEqual(sent, true);
-  console.log("✅ Passed: Email provider abstraction executed successfully.");
+  // Test 7: LoginSchema & VerifyOTPSchema validation
+  console.log("\nTest 7: Testing LoginSchema & VerifyOTPSchema Zod Constraints...");
+  const validLogin = LoginSchema.parse({
+    email: "user@educonnect.com",
+    password: "Password123!",
+  });
+  assert.strictEqual(validLogin.email, "user@educonnect.com");
+
+  const validLoginWithOtp = LoginSchema.parse({
+    email: "user@educonnect.com",
+    password: "Password123!",
+    otp: "123456",
+  });
+  assert.strictEqual(validLoginWithOtp.otp, "123456");
+
+  const validOtp = VerifyOTPSchema.parse({
+    email: "user@educonnect.com",
+    otp: "654321",
+  });
+  assert.strictEqual(validOtp.otp, "654321");
+
+  try {
+    VerifyOTPSchema.parse({
+      email: "user@educonnect.com",
+      otp: "12345", // too short
+    });
+    assert.fail("Should reject short OTP");
+  } catch (e: any) {
+    assert.ok(e.name === "ZodError");
+  }
+
+  try {
+    VerifyOTPSchema.parse({
+      email: "user@educonnect.com",
+      otp: "12345a", // non numeric
+    });
+    assert.fail("Should reject non-numeric OTP");
+  } catch (e: any) {
+    assert.ok(e.name === "ZodError");
+  }
+  console.log("✅ Passed: LoginSchema and VerifyOTPSchema validation.");
 
   console.log("\n🎉 ALL ARCHITECTURAL TESTS PASSED SUCCESSFULLY! 🚀\n");
 }

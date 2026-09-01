@@ -60,7 +60,7 @@ export function InteractiveHeroCanvas({ onOpenAuth }: InteractiveHeroCanvasProps
     <section
       ref={containerRef}
       onMouseMove={handleMouseMove}
-      className="relative min-h-[80vh] sm:min-h-[90vh] pt-24 sm:pt-32 pb-12 sm:pb-20 flex items-center justify-center overflow-hidden"
+      className="relative min-h-[75vh] sm:min-h-[85vh] md:min-h-[90vh] pt-20 sm:pt-28 md:pt-32 pb-8 sm:pb-16 md:pb-20 flex items-center justify-center overflow-hidden"
     >
       {/* Background Liquid Gradient Blobs */}
       <div className="liquid-blob-1 top-10 left-1/4" />
@@ -69,15 +69,15 @@ export function InteractiveHeroCanvas({ onOpenAuth }: InteractiveHeroCanvasProps
 
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 w-full relative z-10">
         {/* Asymmetric Dynamic Composition */}
-        <div className="flex flex-col items-center text-center space-y-12">
+        <div className="flex flex-col items-center text-center space-y-6 sm:space-y-8 md:space-y-12">
           {/* Top Pill Header */}
           <motion.div
             initial={{ opacity: 0, y: -20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.5 }}
-            className="inline-flex items-center gap-2 px-4 py-2 rounded-full glass-pill text-blue-700 text-xs font-extrabold uppercase tracking-widest shadow-sm"
+            className="inline-flex items-center gap-1.5 sm:gap-2 px-3 sm:px-4 py-1.5 sm:py-2 rounded-full glass-pill text-blue-700 text-[10px] sm:text-xs font-extrabold uppercase tracking-widest shadow-sm"
           >
-            <Sparkles className="h-4 w-4 text-blue-600 animate-spin" style={{ animationDuration: "8s" }} />
+            <Sparkles className="h-3.5 w-3.5 sm:h-4 sm:w-4 text-blue-600 animate-spin" style={{ animationDuration: "8s" }} />
             <span>EduConnect Liquid Learning Canvas</span>
           </motion.div>
 
@@ -86,23 +86,24 @@ export function InteractiveHeroCanvas({ onOpenAuth }: InteractiveHeroCanvasProps
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.6, delay: 0.1 }}
-            className="max-w-3xl space-y-4"
+            className="max-w-3xl space-y-3 sm:space-y-4 px-2"
           >
-            <h1 className="text-3xl sm:text-5xl md:text-6xl lg:text-7xl font-black text-slate-900 tracking-tight leading-[1.08]">
+            <h1 className="text-3xl sm:text-5xl md:text-6xl lg:text-7xl font-black text-slate-900 tracking-tight leading-[1.12]">
               Learning, <br />
               <span className="bg-gradient-to-r from-blue-600 via-indigo-600 to-purple-600 bg-clip-text text-transparent">
                 but more connected.
               </span>
             </h1>
-            <p className="text-base sm:text-lg text-slate-600 max-w-xl mx-auto leading-relaxed">
+            <p className="text-sm sm:text-base md:text-lg text-slate-600 max-w-xl mx-auto leading-relaxed">
               Meet the right teacher, join live classes, explore courses, and make learning progress visible.
             </p>
 
             {/* CTAs */}
-            <div className="flex flex-col sm:flex-row items-center justify-center gap-4 pt-4">
+            <div className="flex flex-col sm:flex-row items-center justify-center gap-3 sm:gap-4 pt-3 sm:pt-4 w-full sm:w-auto max-w-xs sm:max-w-none mx-auto">
               <GlassButton
                 variant="primary"
                 size="lg"
+                className="w-full sm:w-auto"
                 onClick={() => onOpenAuth("STUDENT")}
                 rightIcon={<ArrowRight className="h-4 w-4" />}
               >
@@ -111,6 +112,7 @@ export function InteractiveHeroCanvas({ onOpenAuth }: InteractiveHeroCanvasProps
               <GlassButton
                 variant="secondary"
                 size="lg"
+                className="w-full sm:w-auto"
                 onClick={() => onOpenAuth("TEACHER")}
                 leftIcon={<BookOpen className="h-4 w-4 text-indigo-600" />}
               >
@@ -120,7 +122,7 @@ export function InteractiveHeroCanvas({ onOpenAuth }: InteractiveHeroCanvasProps
           </motion.div>
 
           {/* LIVING LEARNING CANVAS VISUAL AREA */}
-          <div className="relative w-full max-w-5xl py-4 sm:py-8 min-h-[200px] sm:min-h-[460px] flex items-center justify-center">
+          <div className="relative w-full max-w-5xl py-2 sm:py-6 md:py-8 min-h-[180px] sm:min-h-[380px] md:min-h-[460px] flex items-center justify-center">
             {/* Central Learning Orb */}
             <div className="z-10">
               <LearningOrb />

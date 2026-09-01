@@ -172,10 +172,6 @@ export class AuthService {
       throw new Error("No account found with this email address.");
     }
 
-    if (user.emailVerified) {
-      return { success: true, message: "Email is already verified.", alreadyVerified: true };
-    }
-
     const latestVerification = user.emailVerifications[0];
     if (latestVerification) {
       const secondsSinceLast = Math.floor((Date.now() - latestVerification.createdAt.getTime()) / 1000);
@@ -213,10 +209,6 @@ export class AuthService {
 
     if (!user) {
       throw new Error("Account not found.");
-    }
-
-    if (user.emailVerified) {
-      return { success: true, message: "Email is already verified.", alreadyVerified: true };
     }
 
     const record = user.emailVerifications[0];
@@ -274,6 +266,7 @@ export class AuthService {
     ]);
 
     await logAuditEvent(user.id, "EMAIL_VERIFIED", { email: user.email });
+    await logAuditEvent(user.id, "LOGIN_SUCCESS", { role: user.role });
 
     const userSession: UserSession = {
       id: user.id,
@@ -285,11 +278,11 @@ export class AuthService {
       lastName: user.profile?.lastName || "",
     };
 
-    const redirectPath = `/${user.role.toLowerCase()}/dashboard`;
+    const redirectPath = user.role === "ADMIN" ? "/admin" : `/${user.role.toLowerCase()}/dashboard`;
 
     return {
       success: true,
-      message: "Email successfully verified!",
+      message: "OTP successfully verified!",
       user: userSession,
       redirectPath,
     };
@@ -313,10 +306,6 @@ export class AuthService {
       throw new Error("Invalid or expired verification link.");
     }
 
-    if (record.user.emailVerified) {
-      return { success: true, message: "Email is already verified.", alreadyVerified: true };
-    }
-
     if (new Date() > record.expiresAt) {
       throw new Error("This verification code has expired. Please request a new code.");
     }
@@ -335,6 +324,7 @@ export class AuthService {
     ]);
 
     await logAuditEvent(record.userId, "EMAIL_VERIFIED", { email });
+    await logAuditEvent(record.userId, "LOGIN_SUCCESS", { role: record.user.role });
 
     const userSession: UserSession = {
       id: record.userId,
@@ -346,7 +336,7 @@ export class AuthService {
       lastName: record.user.profile?.lastName || "",
     };
 
-    const redirectPath = `/${record.user.role.toLowerCase()}/dashboard`;
+    const redirectPath = record.user.role === "ADMIN" ? "/admin" : `/${record.user.role.toLowerCase()}/dashboard`;
 
     return {
       success: true,
@@ -443,34 +433,50 @@ export class AuthService {
   }
 
   /**
-   * Authenticates user with email and password.
+   * Validates user credentials (email and password).
    */
-  static async loginUser(input: LoginInput): Promise<UserSession> {
+  static async validateCredentials(email: string, password: string) {
     const user = await prisma.user.findUnique({
-      where: { email: input.email.toLowerCase() },
+      where: { email: email.toLowerCase() },
       include: { profile: true },
     });
 
     if (!user) {
-      await logAuditEvent(null, "LOGIN_FAILED", { email: input.email });
+      await logAuditEvent(null, "LOGIN_FAILED", { email: email.toLowerCase() });
       throw new Error("Invalid email or password.");
     }
 
-    const isMatch = await verifyPassword(input.password, user.passwordHash);
+    const isMatch = await verifyPassword(password, user.passwordHash);
     if (!isMatch) {
-      await logAuditEvent(user.id, "LOGIN_FAILED", { email: input.email });
+      await logAuditEvent(user.id, "LOGIN_FAILED", { email: user.email });
       throw new Error("Invalid email or password.");
     }
 
-    await logAuditEvent(user.id, "LOGIN_SUCCESS", { role: user.role });
+    return user;
+  }
+
+  /**
+   * Authenticates user credentials and dispatches mandatory OTP verification code.
+   * Session cookie is NOT created until OTP is verified.
+   */
+  static async loginUser(input: LoginInput) {
+    const user = await this.validateCredentials(input.email, input.password);
+
+    // Generate and dispatch fresh 6-digit OTP to user's email
+    await this.createAndSendVerification(user.id, user.email, user.profile?.firstName || "Learner");
+
+    await logAuditEvent(user.id, "LOGIN_OTP_DISPATCHED", { role: user.role });
 
     return {
       id: user.id,
+      userId: user.id,
       email: user.email,
       role: user.role as UserRole,
-      emailVerified: user.emailVerified,
+      emailVerified: false,
       firstName: user.profile?.firstName || "User",
       lastName: user.profile?.lastName || "",
+      requiresOtp: true,
+      requiresVerification: true,
     };
   }
 }

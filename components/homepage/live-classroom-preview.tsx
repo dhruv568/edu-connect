@@ -43,26 +43,26 @@ export function LiveClassroomPreview({ onOpenAuth }: LiveClassroomPreviewProps) 
         </div>
 
         {/* Realistic Virtual Classroom Shell */}
-        <GlassCard glowColor="rgba(37, 99, 235, 0.2)" className="p-6 sm:p-8 max-w-5xl mx-auto border-2 border-white/90 shadow-2xl">
+        <GlassCard glowColor="rgba(37, 99, 235, 0.2)" className="p-4 sm:p-8 max-w-5xl mx-auto border-2 border-white/90 shadow-2xl">
           {/* Header Bar */}
-          <div className="flex flex-col sm:flex-row items-center justify-between pb-6 border-b border-slate-200/80 gap-4">
+          <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between pb-4 sm:pb-6 border-b border-slate-200/80 gap-3 sm:gap-4">
             <div className="flex items-center gap-3">
-              <div className="p-2.5 rounded-xl bg-red-500 text-white animate-pulse">
-                <Video className="h-5 w-5" />
+              <div className="p-2 sm:p-2.5 rounded-xl bg-red-500 text-white animate-pulse shrink-0">
+                <Video className="h-4 w-4 sm:h-5 sm:w-5" />
               </div>
               <div>
-                <div className="flex items-center gap-2">
-                  <h3 className="text-base font-bold text-slate-900">Advanced Calculus & Graphing</h3>
+                <div className="flex flex-wrap items-center gap-2">
+                  <h3 className="text-sm sm:text-base font-bold text-slate-900">Advanced Calculus & Graphing</h3>
                   <GlassBadge variant="rose" size="sm">LIVE NOW</GlassBadge>
                 </div>
-                <p className="text-xs text-slate-500">Instructor: Sarah Jenkins • Room 4B</p>
+                <p className="text-[11px] sm:text-xs text-slate-500">Instructor: Sarah Jenkins • Room 4B</p>
               </div>
             </div>
 
-            <div className="flex items-center gap-2">
+            <div className="flex items-center gap-2 w-full sm:w-auto">
               <button
                 onClick={() => setActiveTab("video")}
-                className={`px-3 py-1.5 rounded-xl text-xs font-bold transition-all ${
+                className={`flex-1 sm:flex-none px-3 py-1.5 rounded-xl text-xs font-bold transition-all ${
                   activeTab === "video" ? "bg-blue-600 text-white shadow-sm" : "bg-slate-100 text-slate-700"
                 }`}
               >
@@ -70,7 +70,7 @@ export function LiveClassroomPreview({ onOpenAuth }: LiveClassroomPreviewProps) 
               </button>
               <button
                 onClick={() => setActiveTab("whiteboard")}
-                className={`px-3 py-1.5 rounded-xl text-xs font-bold transition-all ${
+                className={`flex-1 sm:flex-none px-3 py-1.5 rounded-xl text-xs font-bold transition-all ${
                   activeTab === "whiteboard" ? "bg-blue-600 text-white shadow-sm" : "bg-slate-100 text-slate-700"
                 }`}
               >

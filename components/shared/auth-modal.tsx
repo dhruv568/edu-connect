@@ -64,13 +64,13 @@ export function AuthModal({ isOpen, onClose, initialRole = "STUDENT", initialMod
         const data = await res.json();
         if (!res.ok) throw new Error(data.error || "Login failed.");
 
-        if (data.data?.requiresVerification) {
-          showToast("Verification Required", "Please verify your email to access protected features.", "info");
+        if (data.data?.requiresVerification || data.data?.requiresOtp) {
+          showToast("Verification Code Sent ✉️", "Please enter the 6-digit OTP code sent to your email to complete login.", "info");
         } else {
           showToast("Welcome Back!", `Signed in as ${data.data.user.firstName}`, "success");
         }
         onClose();
-        router.push(data.data.redirectPath);
+        router.push(data.data.redirectPath || `/verify-email?email=${encodeURIComponent(email)}`);
       }
     } catch (err: any) {
       showToast("Authentication Error", err.message, "error");

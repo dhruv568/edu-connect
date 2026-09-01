@@ -74,7 +74,7 @@ export function FloatingNavbar() {
 
   return (
     <>
-      <header className="fixed top-5 left-0 right-0 z-50 px-3 sm:px-6 lg:px-12 pointer-events-none flex items-center justify-between">
+      <header className="fixed top-3 sm:top-5 left-0 right-0 z-50 px-3 sm:px-6 lg:px-12 pointer-events-none flex items-center justify-between">
         {/* SEPARATE LOGO IN TOP LEFT CORNER */}
         <motion.div
           initial={{ x: -30, opacity: 0 }}
@@ -84,12 +84,12 @@ export function FloatingNavbar() {
         >
           <Link
             href="/"
-            className="flex items-center gap-2 sm:gap-3 px-3 sm:px-4 py-2 sm:py-2.5 rounded-2xl glass-surface border border-white/80 shadow-lg group transition-transform hover:scale-105"
+            className="flex items-center gap-2 sm:gap-3 px-2.5 sm:px-4 py-1.5 sm:py-2.5 rounded-2xl glass-surface border border-white/80 shadow-lg group transition-transform hover:scale-105"
           >
-            <div className="p-2 rounded-xl bg-gradient-to-tr from-blue-600 to-indigo-600 text-white shadow-md">
-              <GraduationCap className="h-5 w-5" />
+            <div className="p-1.5 sm:p-2 rounded-xl bg-gradient-to-tr from-blue-600 to-indigo-600 text-white shadow-md">
+              <GraduationCap className="h-4 w-4 sm:h-5 sm:w-5" />
             </div>
-            <span className="text-base sm:text-lg font-black text-slate-900 tracking-tight whitespace-nowrap">
+            <span className="text-sm sm:text-base md:text-lg font-black text-slate-900 tracking-tight whitespace-nowrap">
               EDU<span className="text-blue-600">CONNECT</span>
             </span>
           </Link>
@@ -100,7 +100,7 @@ export function FloatingNavbar() {
           initial={{ y: -30, opacity: 0 }}
           animate={{ y: 0, opacity: 1 }}
           transition={{ duration: 0.5, delay: 0.1 }}
-          className="pointer-events-auto hidden md:flex items-center gap-6 px-6 py-2.5 rounded-full glass-pill border border-white/90 shadow-xl transition-all duration-300"
+          className="pointer-events-auto hidden lg:flex items-center gap-6 px-6 py-2.5 rounded-full glass-pill border border-white/90 shadow-xl transition-all duration-300"
         >
           <nav className="flex items-center gap-6 text-xs font-bold text-slate-700 uppercase tracking-wider whitespace-nowrap">
             <Link href="/" className="hover:text-blue-600 transition-colors">
@@ -190,24 +190,26 @@ export function FloatingNavbar() {
           </nav>
         </motion.div>
 
-        {/* RIGHT ACTIONS & EXPANDED LENGTH SEARCH BAR */}
+        {/* RIGHT ACTIONS */}
         <motion.div
           initial={{ x: 30, opacity: 0 }}
           animate={{ x: 0, opacity: 1 }}
           transition={{ duration: 0.5 }}
-          className="pointer-events-auto flex items-center gap-3 shrink-0"
+          className="pointer-events-auto flex items-center gap-2 sm:gap-3 shrink-0"
         >
-          {/* Mobile: icon-only search button */}
+          {/* Mobile/Tablet: compact icon-only search button */}
           <button
             onClick={() => setSearchModalOpen(true)}
-            className="sm:hidden p-2.5 rounded-2xl glass-surface border border-white/80 text-slate-600 hover:text-blue-600 hover:border-blue-300 transition-all shadow-sm"
+            className="lg:hidden p-2 sm:p-2.5 rounded-2xl glass-surface border border-white/80 text-slate-600 hover:text-blue-600 hover:border-blue-300 transition-all shadow-sm flex items-center justify-center"
+            aria-label="Open Search"
           >
             <Search className="h-4 w-4" />
           </button>
-          {/* Desktop: expanded search bar */}
+
+          {/* Large Desktop: expanded search bar */}
           <button
             onClick={() => setSearchModalOpen(true)}
-            className="hidden sm:flex w-56 lg:w-64 px-3.5 py-2.5 rounded-2xl glass-surface border border-white/80 text-slate-600 hover:text-blue-600 hover:border-blue-300 transition-all text-xs font-semibold items-center justify-between shadow-sm group"
+            className="hidden lg:flex w-52 xl:w-64 px-3.5 py-2.5 rounded-2xl glass-surface border border-white/80 text-slate-600 hover:text-blue-600 hover:border-blue-300 transition-all text-xs font-semibold items-center justify-between shadow-sm group"
           >
             <div className="flex items-center gap-2 overflow-hidden">
               <Search className="h-4 w-4 text-slate-400 group-hover:text-blue-600 shrink-0 transition-colors" />
@@ -215,13 +217,13 @@ export function FloatingNavbar() {
                 Search tutors, courses...
               </span>
             </div>
-            <kbd className="hidden lg:inline-block bg-slate-100 px-1.5 py-0.5 rounded text-[10px] text-slate-500 font-mono border border-slate-200 shrink-0">
+            <kbd className="hidden xl:inline-block bg-slate-100 px-1.5 py-0.5 rounded text-[10px] text-slate-500 font-mono border border-slate-200 shrink-0">
               ⌘K
             </kbd>
           </button>
 
           {/* Desktop Auth Buttons based on session state */}
-          <div className="hidden sm:flex items-center gap-2">
+          <div className="hidden lg:flex items-center gap-2">
             {!userSession ? (
               <>
                 <Link href="/login">
@@ -294,12 +296,13 @@ export function FloatingNavbar() {
             )}
           </div>
 
-          {/* Mobile Menu Button */}
+          {/* Mobile / Tablet Hamburger Menu Button */}
           <button
             onClick={() => setMobileOpen(!mobileOpen)}
-            className="md:hidden p-2.5 rounded-2xl glass-surface border border-white/80 text-slate-800 hover:bg-slate-100 shadow-sm"
+            className="lg:hidden p-2 sm:p-2.5 rounded-2xl glass-surface border border-white/80 text-slate-800 hover:bg-slate-100 shadow-sm flex items-center justify-center"
+            aria-label="Toggle Menu"
           >
-            {mobileOpen ? <X className="h-5 w-5" /> : <Menu className="h-5 w-5" />}
+            {mobileOpen ? <X className="h-4.5 w-4.5" /> : <Menu className="h-4.5 w-4.5" />}
           </button>
         </motion.div>
       </header>
@@ -311,28 +314,45 @@ export function FloatingNavbar() {
             initial={{ opacity: 0, scale: 0.95, y: -10 }}
             animate={{ opacity: 1, scale: 1, y: 0 }}
             exit={{ opacity: 0, scale: 0.95, y: -10 }}
-            className="fixed top-24 left-4 right-4 z-40 p-6 glass-surface rounded-3xl shadow-2xl md:hidden space-y-4 text-center pointer-events-auto border border-white/90 max-h-[calc(100vh-7rem)] overflow-y-auto"
+            className="fixed top-16 sm:top-20 left-3 right-3 sm:left-6 sm:right-6 z-40 p-5 sm:p-6 glass-surface rounded-3xl shadow-2xl lg:hidden space-y-4 text-center pointer-events-auto border border-white/90 max-h-[calc(100vh-5.5rem)] overflow-y-auto"
           >
-            <nav className="flex flex-col gap-3 font-bold text-slate-800 text-sm">
-              <Link href="/" onClick={() => setMobileOpen(false)} className="py-2 border-b border-slate-100">
+            {/* Quick Search Tap Button inside Mobile Menu */}
+            <button
+              onClick={() => {
+                setMobileOpen(false);
+                setSearchModalOpen(true);
+              }}
+              className="w-full flex items-center justify-between px-4 py-2.5 rounded-2xl bg-slate-100/90 text-slate-600 text-xs font-semibold hover:bg-blue-50 hover:text-blue-600 transition-colors border border-slate-200/80"
+            >
+              <div className="flex items-center gap-2">
+                <Search className="h-4 w-4 text-slate-400" />
+                <span>Search tutors, courses...</span>
+              </div>
+              <span className="text-[10px] bg-white px-2 py-0.5 rounded-md text-blue-600 font-bold shadow-xs">
+                Search
+              </span>
+            </button>
+
+            <nav className="flex flex-col gap-2.5 font-bold text-slate-800 text-sm pt-1">
+              <Link href="/" onClick={() => setMobileOpen(false)} className="py-2 border-b border-slate-100 text-left px-2">
                 Home
               </Link>
-              <Link href="/find-teachers" onClick={() => setMobileOpen(false)} className="py-2 border-b border-slate-100">
+              <Link href="/find-teachers" onClick={() => setMobileOpen(false)} className="py-2 border-b border-slate-100 text-left px-2">
                 Find Teachers
               </Link>
-              <Link href="/courses" onClick={() => setMobileOpen(false)} className="py-2 border-b border-slate-100">
+              <Link href="/courses" onClick={() => setMobileOpen(false)} className="py-2 border-b border-slate-100 text-left px-2">
                 Courses
               </Link>
-              <Link href="/pricing" onClick={() => setMobileOpen(false)} className="py-2 border-b border-slate-100">
+              <Link href="/pricing" onClick={() => setMobileOpen(false)} className="py-2 border-b border-slate-100 text-left px-2">
                 Pricing
               </Link>
-              <Link href="/how-it-works" onClick={() => setMobileOpen(false)} className="py-2 border-b border-slate-100">
+              <Link href="/how-it-works" onClick={() => setMobileOpen(false)} className="py-2 border-b border-slate-100 text-left px-2">
                 How It Works
               </Link>
-              <Link href="/about" onClick={() => setMobileOpen(false)} className="py-2 border-b border-slate-100">
+              <Link href="/about" onClick={() => setMobileOpen(false)} className="py-2 border-b border-slate-100 text-left px-2">
                 About
               </Link>
-              <Link href="/contact" onClick={() => setMobileOpen(false)} className="py-2 border-b border-slate-100">
+              <Link href="/contact" onClick={() => setMobileOpen(false)} className="py-2 border-b border-slate-100 text-left px-2">
                 Contact
               </Link>
             </nav>
@@ -341,38 +361,38 @@ export function FloatingNavbar() {
               {!userSession ? (
                 <>
                   <Link href="/login" onClick={() => setMobileOpen(false)}>
-                    <GlassButton variant="secondary" className="w-full">
+                    <GlassButton variant="secondary" className="w-full justify-center">
                       Login
                     </GlassButton>
                   </Link>
-                  <GlassButton variant="primary" className="w-full" onClick={() => openAuth("register")}>
+                  <GlassButton variant="primary" className="w-full justify-center" onClick={() => openAuth("register")}>
                     Get Started
                   </GlassButton>
                 </>
               ) : !userSession.emailVerified ? (
                 <>
                   <Link href={`/verify-email?email=${encodeURIComponent(userSession.email)}`} onClick={() => setMobileOpen(false)}>
-                    <GlassButton variant="primary" className="w-full">
+                    <GlassButton variant="primary" className="w-full justify-center">
                       Verify Email
                     </GlassButton>
                   </Link>
-                  <GlassButton variant="secondary" className="w-full" onClick={handleLogout}>
+                  <GlassButton variant="secondary" className="w-full justify-center" onClick={handleLogout}>
                     Logout
                   </GlassButton>
                 </>
               ) : (
                 <>
                   <Link href={getDashboardPath(userSession)} onClick={() => setMobileOpen(false)}>
-                    <GlassButton variant="primary" className="w-full">
+                    <GlassButton variant="primary" className="w-full justify-center">
                       {getDashboardLabel(userSession)}
                     </GlassButton>
                   </Link>
                   <Link href="/profile" onClick={() => setMobileOpen(false)}>
-                    <GlassButton variant="secondary" className="w-full">
+                    <GlassButton variant="secondary" className="w-full justify-center">
                       Profile
                     </GlassButton>
                   </Link>
-                  <GlassButton variant="ghost" className="w-full" onClick={handleLogout}>
+                  <GlassButton variant="ghost" className="w-full justify-center" onClick={handleLogout}>
                     Logout
                   </GlassButton>
                 </>
