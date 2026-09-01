@@ -85,13 +85,16 @@ export class SMTPEmailProvider implements IEmailProvider {
   private transporter: nodemailer.Transporter;
 
   constructor() {
+    const port = Number(process.env.SMTP_PORT) || 587;
+    const isSecure = process.env.SMTP_SECURE === "true" || port === 465;
+
     this.transporter = nodemailer.createTransport({
-      host: process.env.SMTP_HOST || "localhost",
-      port: Number(process.env.SMTP_PORT) || 587,
-      secure: process.env.SMTP_SECURE === "true",
+      host: process.env.SMTP_HOST || "smtp.gmail.com",
+      port: port,
+      secure: isSecure,
       auth: {
         user: process.env.SMTP_USER || "",
-        pass: process.env.SMTP_PASSWORD || "",
+        pass: process.env.SMTP_PASSWORD ? process.env.SMTP_PASSWORD.replace(/\s+/g, "") : "",
       },
     });
   }
@@ -99,8 +102,9 @@ export class SMTPEmailProvider implements IEmailProvider {
   async sendVerificationEmail(payload: SendEmailPayload): Promise<boolean> {
     try {
       const html = generateVerificationEmailHtml(payload.templateParams);
+      const from = process.env.EMAIL_FROM || (process.env.SMTP_USER ? `EduConnect <${process.env.SMTP_USER}>` : "EduConnect <no-reply@educonnect.com>");
       await this.transporter.sendMail({
-        from: process.env.EMAIL_FROM || "EduConnect <no-reply@educonnect.com>",
+        from: from,
         to: payload.to,
         subject: payload.subject || "Your EduConnect Verification Code 🎓",
         html: html,
@@ -119,8 +123,9 @@ export class SMTPEmailProvider implements IEmailProvider {
         firstName: payload.firstName,
         resetUrl: payload.resetUrl,
       });
+      const from = process.env.EMAIL_FROM || (process.env.SMTP_USER ? `EduConnect <${process.env.SMTP_USER}>` : "EduConnect <no-reply@educonnect.com>");
       await this.transporter.sendMail({
-        from: process.env.EMAIL_FROM || "EduConnect <no-reply@educonnect.com>",
+        from: from,
         to: payload.to,
         subject: payload.subject || "Reset your EduConnect password",
         html: html,
@@ -135,8 +140,9 @@ export class SMTPEmailProvider implements IEmailProvider {
   async sendNotificationEmail(params: NotificationEmailParams): Promise<boolean> {
     try {
       const html = generateNotificationEmailHtml(params);
+      const from = process.env.EMAIL_FROM || (process.env.SMTP_USER ? `EduConnect <${process.env.SMTP_USER}>` : "EduConnect <no-reply@educonnect.com>");
       await this.transporter.sendMail({
-        from: process.env.EMAIL_FROM || "EduConnect <no-reply@educonnect.com>",
+        from: from,
         to: params.email,
         subject: params.subject,
         html: html,
@@ -151,20 +157,23 @@ export class SMTPEmailProvider implements IEmailProvider {
 
 /**
  * Factory function returning configured Email Provider based on environment variables.
- * Prioritizes Resend whenever RESEND_API_KEY is present or EMAIL_PROVIDER="resend".
  */
 export function getEmailProvider(): IEmailProvider {
   const providerType = process.env.EMAIL_PROVIDER?.toLowerCase() || "";
   const hasResendKey = !!(process.env.RESEND_API_KEY && process.env.RESEND_API_KEY.trim() !== "");
 
-  if (providerType === "resend" || (hasResendKey && providerType !== "console")) {
+  if (providerType === "smtp") {
+    return new SMTPEmailProvider();
+  }
+
+  if (providerType === "console") {
+    return new ConsoleEmailProvider();
+  }
+
+  if (providerType === "resend" || (hasResendKey && !providerType)) {
     // Dynamic require/import to instantiate ResendEmailProvider
     const { ResendEmailProvider } = require("./resend-provider");
     return new ResendEmailProvider();
-  }
-
-  if (providerType === "smtp") {
-    return new SMTPEmailProvider();
   }
 
   return new ConsoleEmailProvider();
