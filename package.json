@@ -10,7 +10,7 @@
     "lint": "next lint",
     "db:push": "prisma db push",
     "db:seed": "tsx database/seed/seed.ts",
-    "test": "tsx tests/auth.test.ts && tsx tests/discovery.test.ts && tsx tests/auth-module3.test.ts && tsx tests/module4-verification.test.ts && tsx tests/otp-resend.test.ts && tsx tests/module6-classroom.test.ts && tsx tests/module7-lms.test.ts && tsx tests/module8-payments.test.ts && tsx tests/module9-analytics-notifications.test.ts && tsx tests/module10-admin.test.ts && tsx tests/module11-security-qa.test.ts"
+    "test": "tsx tests/auth.test.ts && tsx tests/registration-otp-flow.test.ts && tsx tests/discovery.test.ts && tsx tests/auth-module3.test.ts && tsx tests/module4-verification.test.ts && tsx tests/otp-resend.test.ts && tsx tests/module6-classroom.test.ts && tsx tests/module7-lms.test.ts && tsx tests/module8-payments.test.ts && tsx tests/module9-analytics-notifications.test.ts && tsx tests/module10-admin.test.ts && tsx tests/module11-security-qa.test.ts"
   },
   "dependencies": {
     "@hookform/resolvers": "^3.9.0",

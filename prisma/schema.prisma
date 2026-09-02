@@ -872,4 +872,23 @@ model CourseModerationHistory {
   @@map("course_moderation_histories")
 }
 
+model PendingRegistration {
+  id               String   @id @default(uuid())
+  email            String   @unique
+  passwordHash     String
+  role             String   @default("STUDENT") // ADMIN | TEACHER | STUDENT
+  firstName        String
+  lastName         String
+  registrationData String?  // JSON string containing role-specific fields (headline, subjects, experienceYears, hourlyRate, qualifications, languages, teachingMode, gradeLevel, interests, learningPreferences, etc.)
+  codeHash         String   // Hashed 6-digit OTP (SHA-256)
+  tokenHash        String?  @unique // Hashed URL token for direct email click link
+  expiresAt        DateTime
+  attempts         Int      @default(0)
+  createdAt        DateTime @default(now())
+  updatedAt        DateTime @updatedAt
+
+  @@index([email])
+  @@map("pending_registrations")
+}
+
 

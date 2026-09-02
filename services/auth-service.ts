@@ -13,7 +13,8 @@ const RESET_TOKEN_EXPIRY_HOURS = 1;
 
 export class AuthService {
   /**
-   * Registers a new user, creates role-specific profile, logs audit event, and sends initial verification email.
+   * Registers a new user by storing registration info in temporary pending_registrations storage
+   * with an OTP and expiration time. The user account is NOT created in the main database until OTP is verified.
    */
   static async registerUser(input: RegisterInput & {
     headline?: string;
@@ -28,75 +29,105 @@ export class AuthService {
     learningPreferences?: string;
     emergencyContact?: string;
   }) {
+    const normalizedEmail = input.email.toLowerCase().trim();
+
+    // 1. Check if user already exists and is fully verified in the main users database
     const existingUser = await prisma.user.findUnique({
-      where: { email: input.email.toLowerCase() },
+      where: { email: normalizedEmail },
     });
 
     if (existingUser) {
-      throw new Error("An account with this email already exists.");
+      if (existingUser.emailVerified) {
+        throw new Error("An account with this email already exists.");
+      } else {
+        // Legacy unverified account from prior flawed flow: clean up so user can freshly register
+        await prisma.user.delete({
+          where: { id: existingUser.id },
+        });
+      }
     }
 
-    const passwordHash = await hashPassword(input.password);
     const role = input.role as UserRole;
-
     if (role === "ADMIN") {
       throw new Error("Public registration is disabled for administrative accounts.");
     }
 
-    // Transactionally create User and corresponding Profile
-    const user = await prisma.user.create({
-      data: {
-        email: input.email.toLowerCase(),
+    const passwordHash = await hashPassword(input.password);
+    const expiryMinutes = getOtpExpiryMinutes();
+    const expiresAt = new Date(Date.now() + expiryMinutes * 60 * 1000);
+
+    const otp = generateOTP();
+    const rawToken = generateVerificationToken();
+    const codeHash = hashToken(otp);
+    const tokenHash = hashToken(rawToken);
+
+    // Package role-specific registration fields
+    const extraData = {
+      headline: input.headline,
+      subjects: input.subjects,
+      experienceYears: input.experienceYears,
+      hourlyRate: input.hourlyRate,
+      qualifications: input.qualifications,
+      languages: input.languages,
+      teachingMode: input.teachingMode,
+      gradeLevel: input.gradeLevel,
+      interests: input.interests,
+      learningPreferences: input.learningPreferences,
+      emergencyContact: input.emergencyContact,
+    };
+
+    // Store strictly in pending_registrations temporary storage.
+    // If a pending registration already exists for this email, update it with fresh OTP & credentials.
+    const pending = await prisma.pendingRegistration.upsert({
+      where: { email: normalizedEmail },
+      create: {
+        email: normalizedEmail,
         passwordHash,
         role,
-        emailVerified: false,
-        profile: {
-          create: {
-            firstName: input.firstName,
-            lastName: input.lastName,
-          },
-        },
-        ...(role === "TEACHER" && {
-          teacherProfile: {
-            create: {
-              headline: input.headline || "Educator",
-              subjects: input.subjects || "Mathematics",
-              experienceYears: input.experienceYears || 0,
-              hourlyRate: input.hourlyRate || 40.0,
-              qualifications: input.qualifications,
-              languages: input.languages || "English",
-              teachingMode: input.teachingMode || "ONLINE",
-              verificationStatus: "PENDING",
-            },
-          },
-        }),
-        ...(role === "STUDENT" && {
-          studentProfile: {
-            create: {
-              gradeLevel: input.gradeLevel || "Grade 10",
-              interests: input.interests,
-              learningPreferences: input.learningPreferences,
-            },
-          },
-        }),
+        firstName: input.firstName,
+        lastName: input.lastName,
+        registrationData: JSON.stringify(extraData),
+        codeHash,
+        tokenHash,
+        expiresAt,
+        attempts: 0,
       },
-      include: {
-        profile: true,
+      update: {
+        passwordHash,
+        role,
+        firstName: input.firstName,
+        lastName: input.lastName,
+        registrationData: JSON.stringify(extraData),
+        codeHash,
+        tokenHash,
+        expiresAt,
+        attempts: 0,
       },
     });
 
-    await logAuditEvent(user.id, "USER_REGISTERED", { role, email: user.email });
+    // Send verification email with OTP and direct verification link
+    const baseUrl = process.env.APP_URL || process.env.NEXTAUTH_URL || "http://localhost:3000";
+    const verificationUrl = `${baseUrl}/verify-email?token=${rawToken}&email=${encodeURIComponent(normalizedEmail)}`;
 
-    // Send verification email
-    await this.createAndSendVerification(user.id, user.email, input.firstName);
+    const sent = await EmailService.sendVerificationOTP({
+      email: normalizedEmail,
+      userName: input.firstName,
+      otp,
+      verificationUrl,
+      expiresInMinutes: expiryMinutes,
+    });
+
+    if (!sent && process.env.NODE_ENV === "production") {
+      console.error("❌ Failed to deliver verification OTP email via Resend provider.");
+    }
 
     return {
-      id: user.id,
-      email: user.email,
-      role: user.role as UserRole,
-      emailVerified: user.emailVerified,
-      firstName: user.profile?.firstName || input.firstName,
-      lastName: user.profile?.lastName || input.lastName,
+      id: pending.id,
+      email: pending.email,
+      role: pending.role as UserRole,
+      emailVerified: false,
+      firstName: pending.firstName,
+      lastName: pending.lastName,
     };
   }
 
@@ -159,17 +190,66 @@ export class AuthService {
 
   /**
    * Resends verification email enforcing rate-limiting cooldown.
+   * Handles both pending registrations and existing users (e.g. login OTP).
    */
   static async resendVerification(email: string) {
+    const normalizedEmail = email.toLowerCase().trim();
     const cooldownSeconds = getResendCooldownSeconds();
+    const expiryMinutes = getOtpExpiryMinutes();
 
+    // 1. Check if there is an active pending registration
+    const pending = await prisma.pendingRegistration.findUnique({
+      where: { email: normalizedEmail },
+    });
+
+    if (pending) {
+      const secondsSinceLast = Math.floor((Date.now() - pending.updatedAt.getTime()) / 1000);
+      if (secondsSinceLast < cooldownSeconds) {
+        const waitTime = cooldownSeconds - secondsSinceLast;
+        throw new Error(`Please wait ${waitTime} seconds before requesting another code.`);
+      }
+
+      const otp = generateOTP();
+      const rawToken = generateVerificationToken();
+      const codeHash = hashToken(otp);
+      const tokenHash = hashToken(rawToken);
+      const expiresAt = new Date(Date.now() + expiryMinutes * 60 * 1000);
+
+      await prisma.pendingRegistration.update({
+        where: { email: normalizedEmail },
+        data: {
+          codeHash,
+          tokenHash,
+          expiresAt,
+          attempts: 0,
+        },
+      });
+
+      const baseUrl = process.env.APP_URL || process.env.NEXTAUTH_URL || "http://localhost:3000";
+      const verificationUrl = `${baseUrl}/verify-email?token=${rawToken}&email=${encodeURIComponent(normalizedEmail)}`;
+
+      await EmailService.sendVerificationOTP({
+        email: normalizedEmail,
+        userName: pending.firstName,
+        otp,
+        verificationUrl,
+        expiresInMinutes: expiryMinutes,
+      });
+
+      return {
+        success: true,
+        message: "Verification email sent successfully.",
+      };
+    }
+
+    // 2. Check main users database (e.g. login OTP flow)
     const user = await prisma.user.findUnique({
-      where: { email: email.toLowerCase() },
+      where: { email: normalizedEmail },
       include: { profile: true, emailVerifications: { orderBy: { createdAt: "desc" }, take: 1 } },
     });
 
     if (!user) {
-      throw new Error("No account found with this email address.");
+      throw new Error("No pending registration or account found with this email address.");
     }
 
     const latestVerification = user.emailVerifications[0];
@@ -191,12 +271,152 @@ export class AuthService {
 
   /**
    * Validates a 6-digit OTP entered by user. Enforces single active OTP, attempt limits, and expiration.
+   * If OTP is for pending registration, creates the user and profile in the main database transactionally.
+   * If OTP is for login of existing user, validates and issues session.
    */
   static async verifyOTP(email: string, otp: string): Promise<VerificationResult> {
+    const normalizedEmail = email.toLowerCase().trim();
     const maxAttempts = getMaxAttempts();
+    const now = new Date();
 
+    // 1. Check if there is a pending registration
+    const pending = await prisma.pendingRegistration.findUnique({
+      where: { email: normalizedEmail },
+    });
+
+    if (pending) {
+      // Check attempt count limit
+      if (pending.attempts >= maxAttempts) {
+        await prisma.pendingRegistration.update({
+          where: { id: pending.id },
+          data: { expiresAt: now },
+        });
+        throw new Error("Too many incorrect attempts. Please request a new verification code.");
+      }
+
+      // Check expiration
+      if (now > pending.expiresAt) {
+        throw new Error("This verification code has expired. Please request a new code.");
+      }
+
+      const isValid = verifyTokenHash(otp, pending.codeHash);
+      if (!isValid) {
+        const newAttempts = pending.attempts + 1;
+        await prisma.pendingRegistration.update({
+          where: { id: pending.id },
+          data: {
+            attempts: newAttempts,
+            ...(newAttempts >= maxAttempts ? { expiresAt: now } : {}),
+          },
+        });
+
+        if (newAttempts >= maxAttempts) {
+          throw new Error("Too many incorrect attempts. Please request a new verification code.");
+        }
+
+        throw new Error("Incorrect verification code. Please check your email and try again.");
+      }
+
+      // OTP is valid! Parse extra fields
+      let extra: any = {};
+      if (pending.registrationData) {
+        try {
+          extra = JSON.parse(pending.registrationData);
+        } catch {
+          extra = {};
+        }
+      }
+
+      const role = pending.role as UserRole;
+
+      // Transactionally create User and Profile in main database, and clean up pending registration
+      const createdUser = await prisma.$transaction(async (tx) => {
+        const newUser = await tx.user.create({
+          data: {
+            email: normalizedEmail,
+            passwordHash: pending.passwordHash,
+            role,
+            emailVerified: true,
+            emailVerifiedAt: now,
+            profile: {
+              create: {
+                firstName: pending.firstName,
+                lastName: pending.lastName,
+              },
+            },
+            ...(role === "TEACHER" && {
+              teacherProfile: {
+                create: {
+                  headline: extra.headline || "Educator",
+                  subjects: extra.subjects || "Mathematics",
+                  experienceYears: extra.experienceYears || 0,
+                  hourlyRate: extra.hourlyRate || 40.0,
+                  qualifications: extra.qualifications,
+                  languages: extra.languages || "English",
+                  teachingMode: extra.teachingMode || "ONLINE",
+                  verificationStatus: "PENDING",
+                },
+              },
+            }),
+            ...(role === "STUDENT" && {
+              studentProfile: {
+                create: {
+                  gradeLevel: extra.gradeLevel || "Grade 10",
+                  interests: extra.interests,
+                  learningPreferences: extra.learningPreferences,
+                },
+              },
+            }),
+          },
+          include: {
+            profile: true,
+            teacherProfile: true,
+            studentProfile: true,
+          },
+        });
+
+        await tx.pendingRegistration.delete({
+          where: { id: pending.id },
+        });
+
+        return newUser;
+      }, {
+        maxWait: 10000,
+        timeout: 20000,
+      });
+
+      await logAuditEvent(createdUser.id, "USER_REGISTERED", { role, email: createdUser.email });
+      await logAuditEvent(createdUser.id, "EMAIL_VERIFIED", { email: createdUser.email });
+      await logAuditEvent(createdUser.id, "LOGIN_SUCCESS", { role: createdUser.role });
+
+      await EmailService.sendWelcomeEmail({
+        email: createdUser.email,
+        userName: createdUser.profile?.firstName,
+      });
+
+      const userSession: UserSession = {
+        id: createdUser.id,
+        userId: createdUser.id,
+        email: createdUser.email,
+        role: createdUser.role as UserRole,
+        emailVerified: true,
+        firstName: createdUser.profile?.firstName || "User",
+        lastName: createdUser.profile?.lastName || "",
+      };
+
+      const redirectPath = createdUser.role === "ADMIN" ? "/admin" : `/${createdUser.role.toLowerCase()}/dashboard`;
+
+      return {
+        success: true,
+        message: "OTP successfully verified!",
+        user: userSession,
+        redirectPath,
+      };
+    }
+
+    // 2. Check main users database (e.g. login OTP verification for registered users)
     const user = await prisma.user.findUnique({
-      where: { email: email.toLowerCase() },
+      where: { email: normalizedEmail },
       include: {
         profile: true,
         emailVerifications: {
@@ -208,7 +428,7 @@ export class AuthService {
     });
 
     if (!user) {
-      throw new Error("Account not found.");
+      throw new Error("No pending registration or account found for this email address.");
     }
 
     const record = user.emailVerifications[0];
@@ -221,13 +441,13 @@ export class AuthService {
       // Invalidate expired/exhausted OTP
       await prisma.emailVerification.update({
         where: { id: record.id },
-        data: { expiresAt: new Date() },
+        data: { expiresAt: now },
       });
       throw new Error("Too many incorrect attempts. Please request a new verification code.");
     }
 
     // Check expiration
-    if (new Date() > record.expiresAt) {
+    if (now > record.expiresAt) {
       throw new Error("This verification code has expired. Please request a new code.");
     }
 
@@ -240,7 +460,7 @@ export class AuthService {
         where: { id: record.id },
         data: {
           attempts: newAttempts,
-          ...(newAttempts >= maxAttempts ? { expiresAt: new Date() } : {}),
+          ...(newAttempts >= maxAttempts ? { expiresAt: now } : {}),
         },
       });
 
@@ -250,8 +470,6 @@ export class AuthService {
 
       throw new Error("Incorrect verification code. Please check your email and try again.");
     }
-
-    const now = new Date();
 
     // Transactionally verify user and mark verification record
     await prisma.$transaction([
@@ -290,10 +508,122 @@ export class AuthService {
 
   /**
    * Validates a link verification token from email.
+   * Handles both pending registrations and existing email verifications.
    */
   static async verifyToken(token: string, email: string): Promise<VerificationResult> {
+    const normalizedEmail = email.toLowerCase().trim();
     const hashed = hashToken(token);
+    const now = new Date();
 
+    // 1. Check pending registration
+    const pending = await prisma.pendingRegistration.findFirst({
+      where: {
+        email: normalizedEmail,
+        tokenHash: hashed,
+      },
+    });
+
+    if (pending) {
+      if (now > pending.expiresAt) {
+        throw new Error("This verification code has expired. Please request a new code.");
+      }
+
+      let extra: any = {};
+      if (pending.registrationData) {
+        try {
+          extra = JSON.parse(pending.registrationData);
+        } catch {
+          extra = {};
+        }
+      }
+
+      const role = pending.role as UserRole;
+
+      const createdUser = await prisma.$transaction(async (tx) => {
+        const newUser = await tx.user.create({
+          data: {
+            email: normalizedEmail,
+            passwordHash: pending.passwordHash,
+            role,
+            emailVerified: true,
+            emailVerifiedAt: now,
+            profile: {
+              create: {
+                firstName: pending.firstName,
+                lastName: pending.lastName,
+              },
+            },
+            ...(role === "TEACHER" && {
+              teacherProfile: {
+                create: {
+                  headline: extra.headline || "Educator",
+                  subjects: extra.subjects || "Mathematics",
+                  experienceYears: extra.experienceYears || 0,
+                  hourlyRate: extra.hourlyRate || 40.0,
+                  qualifications: extra.qualifications,
+                  languages: extra.languages || "English",
+                  teachingMode: extra.teachingMode || "ONLINE",
+                  verificationStatus: "PENDING",
+                },
+              },
+            }),
+            ...(role === "STUDENT" && {
+              studentProfile: {
+                create: {
+                  gradeLevel: extra.gradeLevel || "Grade 10",
+                  interests: extra.interests,
+                  learningPreferences: extra.learningPreferences,
+                },
+              },
+            }),
+          },
+          include: {
+            profile: true,
+            teacherProfile: true,
+            studentProfile: true,
+          },
+        });
+
+        await tx.pendingRegistration.delete({
+          where: { id: pending.id },
+        });
+
+        return newUser;
+      }, {
+        maxWait: 10000,
+        timeout: 20000,
+      });
+
+      await logAuditEvent(createdUser.id, "USER_REGISTERED", { role, email: createdUser.email });
+      await logAuditEvent(createdUser.id, "EMAIL_VERIFIED", { email: createdUser.email });
+      await logAuditEvent(createdUser.id, "LOGIN_SUCCESS", { role: createdUser.role });
+
+      await EmailService.sendWelcomeEmail({
+        email: createdUser.email,
+        userName: createdUser.profile?.firstName,
+      });
+
+      const userSession: UserSession = {
+        id: createdUser.id,
+        userId: createdUser.id,
+        email: createdUser.email,
+        role: createdUser.role as UserRole,
+        emailVerified: true,
+        firstName: createdUser.profile?.firstName || "User",
+        lastName: createdUser.profile?.lastName || "",
+      };
+
+      const redirectPath = createdUser.role === "ADMIN" ? "/admin" : `/${createdUser.role.toLowerCase()}/dashboard`;
+
+      return {
+        success: true,
+        message: "Email successfully verified via verification link!",
+        user: userSession,
+        redirectPath,
+      };
+    }
+
+    // 2. Check main database email verifications
     const record = await prisma.emailVerification.findFirst({
       where: {
         tokenHash: hashed,
@@ -306,11 +636,9 @@ export class AuthService {
       throw new Error("Invalid or expired verification link.");
     }
 
-    if (new Date() > record.expiresAt) {
+    if (now > record.expiresAt) {
       throw new Error("This verification code has expired. Please request a new code.");
     }
-
-    const now = new Date();
 
     await prisma.$transaction([
       prisma.user.update({
@@ -345,6 +673,7 @@ export class AuthService {
       redirectPath,
     };
   }
+
 
   /**
    * Initiates forgot password reset token generation and Resend email dispatch.

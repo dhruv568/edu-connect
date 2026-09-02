@@ -22,7 +22,20 @@ async function runModule3Tests() {
   });
   assert.strictEqual(teacher.role, "TEACHER");
   assert.strictEqual(teacher.emailVerified, false);
-  console.log("✅ Passed: Teacher registration created user & teacher profile.");
+
+  // Complete OTP verification to create the teacher in the main database
+  const teacherOTP = "123456";
+  const { hashToken } = await import("../lib/auth/tokens");
+  const { prisma } = await import("../lib/prisma");
+  await prisma.pendingRegistration.update({
+    where: { email: teacherEmail },
+    data: { codeHash: hashToken(teacherOTP) },
+  });
+  const verifiedTeacher = await AuthService.verifyOTP(teacherEmail, teacherOTP);
+  assert.strictEqual(verifiedTeacher.success, true);
+  assert.ok(verifiedTeacher.user);
+  assert.strictEqual(verifiedTeacher.user.emailVerified, true);
+  console.log("✅ Passed: Teacher registration created user & teacher profile after OTP verification.");
 
   // Test 2: Student Registration
   console.log("\nTest 2: Testing Student Registration with Preferences...");
@@ -63,7 +76,7 @@ async function runModule3Tests() {
 
   // Test 5: Audit Event Logging
   console.log("\nTest 5: Testing Audit Event Logging...");
-  await logAuditEvent(teacher.id, "LOGIN_SUCCESS", { role: "TEACHER" });
+  await logAuditEvent(verifiedTeacher.user.id, "LOGIN_SUCCESS", { role: "TEACHER" });
   console.log("✅ Passed: Audit log recorded successfully.");
 
   console.log("\n🎉 ALL MODULE 03 AUTH & PROFILE TESTS PASSED SUCCESSFULLY! 🚀\n");
