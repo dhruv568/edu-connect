@@ -64,6 +64,10 @@ export default function StudentRegistrationPage() {
       const data = await res.json();
       if (!res.ok) throw new Error(data.error || "Student registration failed.");
 
+      if (data.data?.user?.devOtp && typeof window !== "undefined") {
+        sessionStorage.setItem("educonnect_dev_otp", data.data.user.devOtp);
+      }
+
       showToast("Account Created!", "6-digit verification code sent to your email.", "success", true);
       router.push(`/verify-email?email=${encodeURIComponent(email)}`);
     } catch (err: any) {

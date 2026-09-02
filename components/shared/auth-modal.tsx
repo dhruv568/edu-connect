@@ -51,6 +51,10 @@ export function AuthModal({ isOpen, onClose, initialRole = "STUDENT", initialMod
         const data = await res.json();
         if (!res.ok) throw new Error(data.error || "Registration failed.");
 
+        if (data.data?.user?.devOtp && typeof window !== "undefined") {
+          sessionStorage.setItem("educonnect_dev_otp", data.data.user.devOtp);
+        }
+
         showToast("Account Created!", "Verification code sent to your email.", "success", true);
         onClose();
         router.push(`/verify-email?email=${encodeURIComponent(email)}`);

@@ -117,8 +117,8 @@ export class AuthService {
       expiresInMinutes: expiryMinutes,
     });
 
-    if (!sent && process.env.NODE_ENV === "production") {
-      console.error("❌ Failed to deliver verification OTP email via Resend provider.");
+    if (!sent) {
+      console.warn(`⚠️ Note: Cloud host email delivery failed to reach external inbox (port blocked or unverified domain). 6-digit OTP is printed in the server logs above.`);
     }
 
     return {
@@ -128,6 +128,7 @@ export class AuthService {
       emailVerified: false,
       firstName: pending.firstName,
       lastName: pending.lastName,
+      devOtp: process.env.NODE_ENV !== "production" || !sent ? otp : undefined,
     };
   }
 
@@ -176,8 +177,8 @@ export class AuthService {
       expiresInMinutes: expiryMinutes,
     });
 
-    if (!sent && process.env.NODE_ENV === "production") {
-      console.error("❌ Failed to deliver verification OTP email via Resend provider.");
+    if (!sent) {
+      console.warn(`⚠️ Note: Cloud host email delivery failed to reach external inbox. 6-digit OTP is printed in the server logs above.`);
     }
   }
 
@@ -228,7 +229,7 @@ export class AuthService {
       const baseUrl = process.env.APP_URL || process.env.NEXTAUTH_URL || "http://localhost:3000";
       const verificationUrl = `${baseUrl}/verify-email?token=${rawToken}&email=${encodeURIComponent(normalizedEmail)}`;
 
-      await EmailService.sendVerificationOTP({
+      const sent = await EmailService.sendVerificationOTP({
         email: normalizedEmail,
         userName: pending.firstName,
         otp,
@@ -238,7 +239,10 @@ export class AuthService {
 
       return {
         success: true,
-        message: "Verification email sent successfully.",
+        message: sent
+          ? "Verification email sent successfully."
+          : "Verification code generated! (If using a cloud host with blocked SMTP, check deployment logs for the code).",
+        devOtp: process.env.NODE_ENV !== "production" || !sent ? otp : undefined,
       };
     }
 

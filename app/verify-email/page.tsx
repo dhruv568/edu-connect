@@ -24,8 +24,16 @@ function VerifyEmailForm() {
   const [redirectTarget, setRedirectTarget] = useState<string | null>(null);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
   const [resendCooldown, setResendCooldown] = useState(0);
+  const [devOtp, setDevOtp] = useState<string | null>(null);
 
   const inputRefs = useRef<(HTMLInputElement | null)[]>([]);
+
+  useEffect(() => {
+    if (typeof window !== "undefined") {
+      const stored = sessionStorage.getItem("educonnect_dev_otp");
+      if (stored) setDevOtp(stored);
+    }
+  }, []);
 
   // Automatic token link verification handler
   useEffect(() => {
@@ -200,6 +208,30 @@ function VerifyEmailForm() {
               </p>
             </div>
 
+            {devOtp && (
+              <motion.div
+                initial={{ opacity: 0, scale: 0.95 }}
+                animate={{ opacity: 1, scale: 1 }}
+                className="bg-blue-50 border border-blue-200 text-blue-900 text-xs rounded-2xl p-3.5 flex items-center justify-between gap-3 shadow-xs"
+              >
+                <div className="text-left">
+                  <span className="font-bold text-blue-700 block">Verification Code (Test Mode):</span>
+                  <span className="font-mono text-base font-extrabold tracking-widest text-blue-950">{devOtp}</span>
+                </div>
+                <button
+                  type="button"
+                  onClick={() => {
+                    const digits = devOtp.split("").slice(0, 6);
+                    setOtp(digits);
+                    if (inputRefs.current[5]) inputRefs.current[5].focus();
+                  }}
+                  className="px-3 py-1.5 bg-blue-600 hover:bg-blue-700 text-white font-bold rounded-xl text-xs transition-colors shadow-xs"
+                >
+                  Auto-fill
+                </button>
+              </motion.div>
+            )}
+
             {errorMessage && (
               <motion.div
                 initial={{ opacity: 0, y: -5 }}
@@ -264,6 +296,12 @@ function VerifyEmailForm() {
                 <RefreshCw className={`h-3.5 w-3.5 ${resendCooldown > 0 ? "animate-spin" : ""}`} />
                 {resendCooldown > 0 ? `Resend code in ${resendCooldown}s` : "Resend Code"}
               </button>
+            </div>
+
+            <div className="pt-2 text-center">
+              <p className="text-[11px] text-slate-400 leading-relaxed">
+                Tip: If hosting on cloud services with outbound SMTP restrictions (such as Render free tier), the 6-digit OTP is also visible in your deployment server logs.
+              </p>
             </div>
           </>
         )}

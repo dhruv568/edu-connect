@@ -79,6 +79,7 @@ export class ConsoleEmailProvider implements IEmailProvider {
 
 /**
  * SMTP Email Provider powered by Nodemailer.
+ * Configured with strict timeouts to prevent hanging on cloud hosts (e.g. Render free tier) that block SMTP ports.
  */
 export class SMTPEmailProvider implements IEmailProvider {
   name = "SMTP (Nodemailer)";
@@ -92,6 +93,9 @@ export class SMTPEmailProvider implements IEmailProvider {
       host: process.env.SMTP_HOST || "smtp.gmail.com",
       port: port,
       secure: isSecure,
+      connectionTimeout: 4000, // 4 seconds max connection timeout
+      greetingTimeout: 4000,   // 4 seconds max greeting timeout
+      socketTimeout: 5000,     // 5 seconds max socket timeout
       auth: {
         user: process.env.SMTP_USER || "",
         pass: process.env.SMTP_PASSWORD ? process.env.SMTP_PASSWORD.replace(/\s+/g, "") : "",
@@ -103,15 +107,20 @@ export class SMTPEmailProvider implements IEmailProvider {
     try {
       const html = generateVerificationEmailHtml(payload.templateParams);
       const from = process.env.EMAIL_FROM || (process.env.SMTP_USER ? `EduConnect <${process.env.SMTP_USER}>` : "EduConnect <no-reply@educonnect.com>");
-      await this.transporter.sendMail({
-        from: from,
-        to: payload.to,
-        subject: payload.subject || "Your EduConnect Verification Code 🎓",
-        html: html,
-      });
+      await Promise.race([
+        this.transporter.sendMail({
+          from: from,
+          to: payload.to,
+          subject: payload.subject || "Your EduConnect Verification Code 🎓",
+          html: html,
+        }),
+        new Promise((_, reject) =>
+          setTimeout(() => reject(new Error("SMTP connection timed out after 4000ms")), 4000)
+        ),
+      ]);
       return true;
-    } catch (error) {
-      console.error("❌ SMTP Delivery Error:", error);
+    } catch (error: any) {
+      console.error("❌ SMTP Delivery Error:", error?.message || error);
       return false;
     }
   }
@@ -124,15 +133,20 @@ export class SMTPEmailProvider implements IEmailProvider {
         resetUrl: payload.resetUrl,
       });
       const from = process.env.EMAIL_FROM || (process.env.SMTP_USER ? `EduConnect <${process.env.SMTP_USER}>` : "EduConnect <no-reply@educonnect.com>");
-      await this.transporter.sendMail({
-        from: from,
-        to: payload.to,
-        subject: payload.subject || "Reset your EduConnect password",
-        html: html,
-      });
+      await Promise.race([
+        this.transporter.sendMail({
+          from: from,
+          to: payload.to,
+          subject: payload.subject || "Reset your EduConnect password",
+          html: html,
+        }),
+        new Promise((_, reject) =>
+          setTimeout(() => reject(new Error("SMTP password reset timed out after 4000ms")), 4000)
+        ),
+      ]);
       return true;
-    } catch (error) {
-      console.error("❌ SMTP Password Reset Error:", error);
+    } catch (error: any) {
+      console.error("❌ SMTP Password Reset Error:", error?.message || error);
       return false;
     }
   }
@@ -141,17 +155,154 @@ export class SMTPEmailProvider implements IEmailProvider {
     try {
       const html = generateNotificationEmailHtml(params);
       const from = process.env.EMAIL_FROM || (process.env.SMTP_USER ? `EduConnect <${process.env.SMTP_USER}>` : "EduConnect <no-reply@educonnect.com>");
-      await this.transporter.sendMail({
-        from: from,
-        to: params.email,
-        subject: params.subject,
-        html: html,
-      });
+      await Promise.race([
+        this.transporter.sendMail({
+          from: from,
+          to: params.email,
+          subject: params.subject,
+          html: html,
+        }),
+        new Promise((_, reject) =>
+          setTimeout(() => reject(new Error("SMTP notification timed out after 4000ms")), 4000)
+        ),
+      ]);
       return true;
-    } catch (error) {
-      console.error("❌ SMTP Notification Error:", error);
+    } catch (error: any) {
+      console.error("❌ SMTP Notification Error:", error?.message || error);
       return false;
     }
+  }
+}
+
+/**
+ * Resilient Smart Multi-Provider.
+ * 1. Always logs OTP to server console (critical for cloud hosts like Render that block SMTP).
+ * 2. Tries Resend over HTTPS port 443 first (never blocked by cloud firewalls).
+ * 3. Falls back to SMTP with strict 4s timeout (succeeds on localhost/VPS, fails fast on blocked hosts).
+ */
+export class SmartEmailProvider implements IEmailProvider {
+  name = "Smart Multi-Provider (Resend + SMTP Fallback)";
+  private resendProvider?: IEmailProvider;
+  private smtpProvider?: SMTPEmailProvider;
+
+  constructor() {
+    if (process.env.RESEND_API_KEY && process.env.RESEND_API_KEY.trim() !== "") {
+      try {
+        const { ResendEmailProvider } = require("./resend-provider");
+        this.resendProvider = new ResendEmailProvider();
+      } catch (err) {
+        console.warn("⚠️ Could not load ResendEmailProvider:", err);
+      }
+    }
+
+    if (process.env.SMTP_USER && process.env.SMTP_PASSWORD) {
+      try {
+        this.smtpProvider = new SMTPEmailProvider();
+      } catch (err) {
+        console.warn("⚠️ Could not load SMTPEmailProvider:", err);
+      }
+    }
+  }
+
+  async sendVerificationEmail(payload: SendEmailPayload): Promise<boolean> {
+    // ALWAYS print OTP to server console (ensures developer/user on Render can retrieve it)
+    console.log("\n==================================================");
+    console.log("✉️ [EDUCONNECT OTP DISPATCH]");
+    console.log(`To: ${payload.to}`);
+    console.log(`Recipient: ${payload.templateParams.firstName || "Learner"}`);
+    console.log(`🔑 6-Digit OTP: >>> ${payload.templateParams.otp} <<<`);
+    if (payload.templateParams.verificationUrl) {
+      console.log(`Verification URL: ${payload.templateParams.verificationUrl}`);
+    }
+    console.log(`⏱️ Expiry: ${payload.templateParams.expiresInMinutes || 10} minutes`);
+    console.log("==================================================\n");
+
+    // 1. Try Resend via HTTPS (port 443 - never blocked by cloud firewalls)
+    if (this.resendProvider) {
+      try {
+        let resendTimer: NodeJS.Timeout | undefined;
+        const resendTimeout = new Promise<boolean>((resolve) => {
+          resendTimer = setTimeout(() => resolve(false), 3500);
+        });
+        const sent = await Promise.race([
+          this.resendProvider.sendVerificationEmail(payload),
+          resendTimeout,
+        ]);
+        if (resendTimer) clearTimeout(resendTimer);
+        if (sent) {
+          console.log(`✅ Verification email successfully delivered via Resend to ${payload.to}`);
+          return true;
+        }
+      } catch (err: any) {
+        console.warn(`⚠️ Resend attempt failed (${err?.message || err}). Trying SMTP fallback...`);
+      }
+    }
+
+    // 2. Try SMTP fallback (with strict 4s timeout)
+    if (this.smtpProvider) {
+      try {
+        const sent = await this.smtpProvider.sendVerificationEmail(payload);
+        if (sent) {
+          console.log(`✅ Verification email successfully delivered via SMTP to ${payload.to}`);
+          return true;
+        }
+      } catch (err: any) {
+        console.warn(`⚠️ SMTP attempt failed (${err?.message || err}).`);
+      }
+    }
+
+    console.warn(`⚠️ Cloud email delivery restricted (port blocked or domain unverified). OTP is printed above in server logs.`);
+    return false;
+  }
+
+  async sendPasswordResetEmail(payload: SendPasswordResetPayload): Promise<boolean> {
+    console.log("\n==================================================");
+    console.log("🔑 [EDUCONNECT PASSWORD RESET DISPATCH]");
+    console.log(`To: ${payload.to}`);
+    console.log(`Reset URL: ${payload.resetUrl}`);
+    console.log("==================================================\n");
+
+    if (this.resendProvider) {
+      try {
+        const sent = await this.resendProvider.sendPasswordResetEmail(payload);
+        if (sent) return true;
+      } catch (err) {
+        // Fall back to SMTP
+      }
+    }
+
+    if (this.smtpProvider) {
+      try {
+        const sent = await this.smtpProvider.sendPasswordResetEmail(payload);
+        if (sent) return true;
+      } catch (err) {
+        // Handled
+      }
+    }
+
+    return false;
+  }
+
+  async sendNotificationEmail(params: NotificationEmailParams): Promise<boolean> {
+    if (this.resendProvider) {
+      try {
+        const sent = await this.resendProvider.sendNotificationEmail(params);
+        if (sent) return true;
+      } catch (err) {
+        // Fall back to SMTP
+      }
+    }
+
+    if (this.smtpProvider) {
+      try {
+        const sent = await this.smtpProvider.sendNotificationEmail(params);
+        if (sent) return true;
+      } catch (err) {
+        // Handled
+      }
+    }
+
+    return false;
   }
 }
 
@@ -160,23 +311,22 @@ export class SMTPEmailProvider implements IEmailProvider {
  */
 export function getEmailProvider(): IEmailProvider {
   const providerType = process.env.EMAIL_PROVIDER?.toLowerCase() || "";
-  const hasResendKey = !!(process.env.RESEND_API_KEY && process.env.RESEND_API_KEY.trim() !== "");
-
-  if (providerType === "smtp") {
-    return new SMTPEmailProvider();
-  }
 
   if (providerType === "console") {
     return new ConsoleEmailProvider();
   }
 
-  if (providerType === "resend" || (hasResendKey && !providerType)) {
-    // Dynamic require/import to instantiate ResendEmailProvider
+  if (providerType === "smtp") {
+    return new SMTPEmailProvider();
+  }
+
+  if (providerType === "resend") {
     const { ResendEmailProvider } = require("./resend-provider");
     return new ResendEmailProvider();
   }
 
-  return new ConsoleEmailProvider();
+  // Default to Smart Multi-Provider for maximum resilience across local, Render, Vercel
+  return new SmartEmailProvider();
 }
 
 /**
@@ -191,18 +341,37 @@ export class EmailService {
     expiresInMinutes?: number;
   }): Promise<boolean> {
     const provider = getEmailProvider();
-    return provider.sendVerificationEmail({
-      to: params.email,
-      subject: "Your EduConnect Verification Code 🎓",
-      templateParams: {
-        recipientEmail: params.email,
-        firstName: params.userName,
-        otp: params.otp,
-        verificationUrl: params.verificationUrl,
-        expiresInMinutes: params.expiresInMinutes || Number(process.env.OTP_EXPIRY_MINUTES) || 10,
-        appUrl: process.env.APP_URL || process.env.NEXTAUTH_URL || "http://localhost:3000",
-      },
-    });
+    try {
+      let timer: NodeJS.Timeout | undefined;
+      const timeoutPromise = new Promise<boolean>((resolve) => {
+        timer = setTimeout(() => {
+          console.warn("⏱️ Email dispatch safety timeout reached (4500ms). Responding to UI.");
+          resolve(false);
+        }, 4500);
+      });
+
+      const result = await Promise.race([
+        provider.sendVerificationEmail({
+          to: params.email,
+          subject: "Your EduConnect Verification Code 🎓",
+          templateParams: {
+            recipientEmail: params.email,
+            firstName: params.userName,
+            otp: params.otp,
+            verificationUrl: params.verificationUrl,
+            expiresInMinutes: params.expiresInMinutes || Number(process.env.OTP_EXPIRY_MINUTES) || 10,
+            appUrl: process.env.APP_URL || process.env.NEXTAUTH_URL || "http://localhost:3000",
+          },
+        }),
+        timeoutPromise,
+      ]);
+
+      if (timer) clearTimeout(timer);
+      return result;
+    } catch (err) {
+      console.error("❌ EmailService.sendVerificationOTP error:", err);
+      return false;
+    }
   }
 
   static async sendPasswordResetEmail(params: {
