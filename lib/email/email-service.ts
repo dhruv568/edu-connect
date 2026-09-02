@@ -222,19 +222,24 @@ export class SMTPEmailProvider implements IEmailProvider {
  * Defaults to SMTPEmailProvider for full inbox delivery.
  */
 export function getEmailProvider(): IEmailProvider {
-  const providerType = process.env.EMAIL_PROVIDER?.toLowerCase() || "smtp";
+  const providerType = process.env.EMAIL_PROVIDER?.toLowerCase() || "";
+  const hasResendKey = !!(process.env.RESEND_API_KEY && process.env.RESEND_API_KEY.trim() !== "");
 
   if (providerType === "console") {
     return new ConsoleEmailProvider();
   }
 
-  if (providerType === "resend") {
+  if (providerType === "smtp") {
+    return new SMTPEmailProvider();
+  }
+
+  if (providerType === "resend" || hasResendKey) {
     const { ResendEmailProvider } = require("./resend-provider");
     return new ResendEmailProvider();
   }
 
-  // Default to SMTP
-  return new SMTPEmailProvider();
+  const { ResendEmailProvider } = require("./resend-provider");
+  return new ResendEmailProvider();
 }
 
 /**

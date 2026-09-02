@@ -9,6 +9,7 @@ export class ResendEmailProvider implements IEmailProvider {
   private resend: Resend;
   private defaultFrom: string;
   private domainId?: string;
+  private smtpFallback?: IEmailProvider;
 
   constructor() {
     const apiKey = process.env.RESEND_API_KEY || "";
@@ -16,10 +17,10 @@ export class ResendEmailProvider implements IEmailProvider {
     this.domainId = process.env.RESEND_DOMAIN_ID;
 
     const fromName = process.env.RESEND_FROM_NAME || "EduConnect";
-    let fromEmail = process.env.RESEND_FROM_EMAIL || process.env.EMAIL_FROM || "onboarding@resend.dev";
+    let fromEmail = process.env.RESEND_FROM_EMAIL || "onboarding@resend.dev";
     
-    // If using unverified placeholder domain, fallback to Resend onboarding sender
-    if (fromEmail.includes("no-reply@educonnect.com") || fromEmail.includes("example.com")) {
+    // If using placeholder or non-custom sender, fallback to Resend onboarding sender
+    if (fromEmail.includes("no-reply@educonnect.com") || fromEmail.includes("example.com") || fromEmail.includes("@gmail.com")) {
       fromEmail = "onboarding@resend.dev";
     }
     
@@ -27,6 +28,15 @@ export class ResendEmailProvider implements IEmailProvider {
       this.defaultFrom = fromEmail;
     } else {
       this.defaultFrom = `${fromName} <${fromEmail}>`;
+    }
+
+    if (process.env.SMTP_USER && process.env.SMTP_PASSWORD) {
+      try {
+        const { SMTPEmailProvider } = require("./email-service");
+        this.smtpFallback = new SMTPEmailProvider();
+      } catch {
+        // Handled
+      }
     }
   }
 
@@ -53,14 +63,22 @@ export class ResendEmailProvider implements IEmailProvider {
         ...(headers ? { headers } : {}),
       });
 
-      if (error) {
-        console.error("❌ Resend API Error (Verification Email):", error.message || error);
-        return false;
+      if (!error && data?.id) {
+        console.log(`✅ [Resend] Verification email delivered to ${payload.to} (ID: ${data.id})`);
+        return true;
       }
 
-      return true;
+      console.warn(`⚠️ [Resend API Error]: ${error?.message || "Delivery rejected"}`);
+      if (this.smtpFallback) {
+        console.log(`🔄 Attempting SMTP fallback for ${payload.to}...`);
+        return await this.smtpFallback.sendVerificationEmail(payload);
+      }
+      return false;
     } catch (err: any) {
       console.error("❌ Unexpected error in ResendEmailProvider.sendVerificationEmail:", err.message || err);
+      if (this.smtpFallback) {
+        return await this.smtpFallback.sendVerificationEmail(payload);
+      }
       return false;
     }
   }
@@ -83,14 +101,21 @@ export class ResendEmailProvider implements IEmailProvider {
         ...(headers ? { headers } : {}),
       });
 
-      if (error) {
-        console.error("❌ Resend API Error (Password Reset Email):", error.message || error);
-        return false;
+      if (!error && data?.id) {
+        console.log(`✅ [Resend] Password reset email delivered to ${payload.to} (ID: ${data.id})`);
+        return true;
       }
 
-      return true;
+      console.warn(`⚠️ [Resend API Error]: ${error?.message || "Delivery rejected"}`);
+      if (this.smtpFallback) {
+        return await this.smtpFallback.sendPasswordResetEmail(payload);
+      }
+      return false;
     } catch (err: any) {
       console.error("❌ Unexpected error in ResendEmailProvider.sendPasswordResetEmail:", err.message || err);
+      if (this.smtpFallback) {
+        return await this.smtpFallback.sendPasswordResetEmail(payload);
+      }
       return false;
     }
   }
@@ -108,14 +133,21 @@ export class ResendEmailProvider implements IEmailProvider {
         ...(headers ? { headers } : {}),
       });
 
-      if (error) {
-        console.error("❌ Resend API Error (Notification Email):", error.message || error);
-        return false;
+      if (!error && data?.id) {
+        console.log(`✅ [Resend] Notification email delivered to ${params.email} (ID: ${data.id})`);
+        return true;
       }
 
-      return true;
+      console.warn(`⚠️ [Resend API Error]: ${error?.message || "Delivery rejected"}`);
+      if (this.smtpFallback) {
+        return await this.smtpFallback.sendNotificationEmail(params);
+      }
+      return false;
     } catch (err: any) {
       console.error("❌ Unexpected error in ResendEmailProvider.sendNotificationEmail:", err.message || err);
+      if (this.smtpFallback) {
+        return await this.smtpFallback.sendNotificationEmail(params);
+      }
       return false;
     }
   }
