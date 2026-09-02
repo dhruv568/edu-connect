@@ -65,10 +65,6 @@ export default function TeacherRegistrationPage() {
       const data = await res.json();
       if (!res.ok) throw new Error(data.error || "Teacher registration failed.");
 
-      if (data.data?.user?.devOtp && typeof window !== "undefined") {
-        sessionStorage.setItem("educonnect_dev_otp", data.data.user.devOtp);
-      }
-
       showToast("Registration Complete!", "6-digit OTP code sent to your email.", "success", true);
       router.push(`/verify-email?email=${encodeURIComponent(email)}`);
     } catch (err: any) {

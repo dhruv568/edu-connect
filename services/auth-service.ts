@@ -128,7 +128,6 @@ export class AuthService {
       emailVerified: false,
       firstName: pending.firstName,
       lastName: pending.lastName,
-      devOtp: process.env.NODE_ENV !== "production" || !sent ? otp : undefined,
     };
   }
 
@@ -239,10 +238,7 @@ export class AuthService {
 
       return {
         success: true,
-        message: sent
-          ? "Verification email sent successfully."
-          : "Verification code generated! (If using a cloud host with blocked SMTP, check deployment logs for the code).",
-        devOtp: process.env.NODE_ENV !== "production" || !sent ? otp : undefined,
+        message: "Verification email sent successfully.",
       };
     }
 
