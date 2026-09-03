@@ -6,6 +6,7 @@ import { Card } from "@/components/ui/card";
 import { StatusBadge } from "@/components/ui/status-badge";
 import { GlassButton } from "@/components/glass/glass-button";
 import { Search, Filter, ChevronLeft, ChevronRight, Loader2, RotateCcw, CheckCircle2, XCircle, X } from "lucide-react";
+import { formatCurrency } from "@/lib/currency";
 
 export default function AdminRefundsPage() {
   const [refunds, setRefunds] = useState<any[]>([]);
@@ -156,7 +157,7 @@ export default function AdminRefundsPage() {
                     <tr key={ref.id} className="hover:bg-slate-50/80 dark:hover:bg-slate-800/40 transition-colors">
                       <td className="p-4 font-mono font-bold text-slate-800 dark:text-slate-200">{ref.id.substring(0, 8)}...</td>
                       <td className="p-4 font-extrabold text-slate-900 dark:text-slate-100">{ref.requestedBy}</td>
-                      <td className="p-4 font-extrabold text-emerald-600">₹{ref.amountRupees.toFixed(2)}</td>
+                      <td className="p-4 font-extrabold text-emerald-600">{formatCurrency(ref.amountRupees)}</td>
                       <td className="p-4 text-slate-600 dark:text-slate-400 max-w-xs truncate">{ref.reason || "N/A"}</td>
                       <td className="p-4">
                         <StatusBadge status={ref.status} size="sm" />
@@ -223,7 +224,7 @@ export default function AdminRefundsPage() {
                 </div>
                 <div>
                   <span className="text-slate-400 block font-semibold">Refund Amount</span>
-                  <div className="font-black text-emerald-600 text-base">₹{selectedRefund.amountRupees.toFixed(2)}</div>
+                  <div className="font-black text-emerald-600 text-base">{formatCurrency(selectedRefund.amountRupees)}</div>
                 </div>
                 <div>
                   <span className="text-slate-400 block font-semibold">Stated Reason</span>

@@ -1,4 +1,5 @@
 import { prisma } from "@/lib/prisma";
+import { formatPaise } from "@/lib/currency";
 
 export class AnalyticsService {
   /**
@@ -336,7 +337,7 @@ export class AnalyticsService {
       recentPayments: recentPayments.map((p) => ({
         id: p.id,
         type: p.type,
-        amountFormatted: `₹${(p.amountPaise / 100).toFixed(2)}`,
+        amountFormatted: formatPaise(p.amountPaise),
         status: p.status,
         date: p.createdAt,
       })),

@@ -7,6 +7,7 @@ import { DashboardLayout } from "@/components/layout/dashboard-layout";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { useToast } from "@/components/ui/toast";
+import { formatCurrency } from "@/lib/currency";
 import {
   ArrowLeft,
   Edit,
@@ -150,7 +151,7 @@ export default function TeacherCourseDetailsPage() {
                       </div>
                       <div className="flex justify-between">
                         <span className="text-slate-400">Price:</span>
-                        <span className="font-bold">${course.price}</span>
+                        <span className="font-bold">{formatCurrency(course.price)}</span>
                       </div>
                       <div className="flex justify-between">
                         <span className="text-slate-400">Level:</span>

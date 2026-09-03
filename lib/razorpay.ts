@@ -1,4 +1,5 @@
 import crypto from "crypto";
+import { DEFAULT_CURRENCY } from "@/lib/currency";
 
 export interface RazorpayOrderOptions {
   amountPaise: number;
@@ -148,7 +149,7 @@ export class RazorpayClient {
         amount: options.amountPaise,
         amount_paid: 0,
         amount_due: options.amountPaise,
-        currency: options.currency || "INR",
+        currency: options.currency || DEFAULT_CURRENCY,
         receipt: options.receipt,
         status: "created",
         attempts: 0,
@@ -166,7 +167,7 @@ export class RazorpayClient {
         },
         body: JSON.stringify({
           amount: options.amountPaise,
-          currency: options.currency || "INR",
+          currency: options.currency || DEFAULT_CURRENCY,
           receipt: options.receipt,
           notes: options.notes || {},
         }),
@@ -187,7 +188,7 @@ export class RazorpayClient {
           amount: options.amountPaise,
           amount_paid: 0,
           amount_due: options.amountPaise,
-          currency: options.currency || "INR",
+          currency: options.currency || DEFAULT_CURRENCY,
           receipt: options.receipt,
           status: "created",
           attempts: 0,
@@ -208,7 +209,7 @@ export class RazorpayClient {
         id: paymentId,
         entity: "payment",
         amount: 79900,
-        currency: "INR",
+        currency: DEFAULT_CURRENCY,
         status: "captured",
         order_id: "order_mock_123",
         international: false,
@@ -244,7 +245,7 @@ export class RazorpayClient {
         id: `rfnd_${crypto.randomBytes(8).toString("hex")}`,
         entity: "refund",
         amount: params.amountPaise || 79900,
-        currency: "INR",
+        currency: DEFAULT_CURRENCY,
         payment_id: params.paymentId,
         notes: params.notes,
         status: "processed",
@@ -291,7 +292,7 @@ export class RazorpayClient {
         source: params.paymentId,
         recipient: params.accountId,
         amount: params.amountPaise,
-        currency: params.currency || "INR",
+        currency: params.currency || DEFAULT_CURRENCY,
         amount_reversed: 0,
         notes: params.notes,
         created_at: Math.floor(Date.now() / 1000),
@@ -310,7 +311,7 @@ export class RazorpayClient {
           {
             account: params.accountId,
             amount: params.amountPaise,
-            currency: params.currency || "INR",
+            currency: params.currency || DEFAULT_CURRENCY,
             notes: params.notes || {},
           },
         ],

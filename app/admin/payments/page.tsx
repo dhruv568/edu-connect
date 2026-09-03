@@ -1,7 +1,8 @@
 "use client";
 
 import React, { useState, useEffect } from "react";
-import { DollarSign, TrendingUp, RefreshCw, ShieldCheck, Search, Filter, CheckCircle2, AlertCircle, Settings, ArrowUpRight } from "lucide-react";
+import { IndianRupee, TrendingUp, RefreshCw, ShieldCheck, Search, Filter, CheckCircle2, AlertCircle, Settings, ArrowUpRight } from "lucide-react";
+import { formatCurrency } from "@/lib/currency";
 
 export default function AdminPaymentsPage() {
   const [data, setData] = useState<any>(null);
@@ -100,7 +101,7 @@ export default function AdminPaymentsPage() {
       <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 border-b border-slate-800/80 pb-6">
         <div>
           <h1 className="text-3xl font-extrabold text-white tracking-tight flex items-center gap-3">
-            <DollarSign className="w-8 h-8 text-blue-500" /> Admin Financial System & Reconciliation
+            <IndianRupee className="w-8 h-8 text-blue-500" /> Admin Financial System & Reconciliation
           </h1>
           <p className="text-sm text-slate-400 mt-1">
             System-wide platform revenue, teacher payouts, commission settings, and Razorpay transaction reconciliation.
@@ -135,31 +136,31 @@ export default function AdminPaymentsPage() {
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-4">
         <div className="p-5 rounded-3xl bg-slate-900/70 border border-slate-800/80 space-y-1.5 shadow-xl">
           <span className="text-slate-400 text-xs font-semibold">Total Revenue</span>
-          <p className="text-2xl font-black text-white">₹{summary.totalRevenue.toLocaleString()}</p>
+          <p className="text-2xl font-black text-white">{formatCurrency(summary.totalRevenue)}</p>
           <p className="text-[10px] text-emerald-400">Platform gross turnover</p>
         </div>
 
         <div className="p-5 rounded-3xl bg-slate-900/70 border border-slate-800/80 space-y-1.5 shadow-xl">
           <span className="text-slate-400 text-xs font-semibold">Today&apos;s Revenue</span>
-          <p className="text-2xl font-black text-blue-400">₹{summary.todayRevenue.toLocaleString()}</p>
+          <p className="text-2xl font-black text-blue-400">{formatCurrency(summary.todayRevenue)}</p>
           <p className="text-[10px] text-slate-400">24-hour total</p>
         </div>
 
         <div className="p-5 rounded-3xl bg-slate-900/70 border border-slate-800/80 space-y-1.5 shadow-xl">
           <span className="text-slate-400 text-xs font-semibold">Platform Commission</span>
-          <p className="text-2xl font-black text-emerald-400">₹{summary.totalCommission.toLocaleString()}</p>
+          <p className="text-2xl font-black text-emerald-400">{formatCurrency(summary.totalCommission)}</p>
           <p className="text-[10px] text-slate-400">EduConnect net share</p>
         </div>
 
         <div className="p-5 rounded-3xl bg-slate-900/70 border border-slate-800/80 space-y-1.5 shadow-xl">
           <span className="text-slate-400 text-xs font-semibold">Teacher Earnings</span>
-          <p className="text-2xl font-black text-purple-400">₹{summary.totalTeacherEarnings.toLocaleString()}</p>
+          <p className="text-2xl font-black text-purple-400">{formatCurrency(summary.totalTeacherEarnings)}</p>
           <p className="text-[10px] text-slate-400">Educator payout pool</p>
         </div>
 
         <div className="p-5 rounded-3xl bg-slate-900/70 border border-slate-800/80 space-y-1.5 shadow-xl">
           <span className="text-slate-400 text-xs font-semibold">Total Refunded</span>
-          <p className="text-2xl font-black text-red-400">₹{summary.totalRefunded.toLocaleString()}</p>
+          <p className="text-2xl font-black text-red-400">{formatCurrency(summary.totalRefunded)}</p>
           <p className="text-[10px] text-slate-400">Customer refunds</p>
         </div>
       </div>
@@ -277,7 +278,7 @@ export default function AdminPaymentsPage() {
                       <div className="truncate max-w-[180px] font-semibold">{t.productTitle}</div>
                       <div className="text-[10px] text-slate-500 capitalize">{t.type.replace("_", " ")}</div>
                     </td>
-                    <td className="px-6 py-4 font-bold text-white">₹{t.amount}</td>
+                    <td className="px-6 py-4 font-bold text-white">{formatCurrency(t.amount)}</td>
                     <td className="px-6 py-4">
                       <span
                         className={`inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-[10px] font-bold ${

@@ -16,11 +16,12 @@ import {
   CheckCircle2,
   AlertOctagon,
   Loader2,
-  DollarSign,
+  IndianRupee,
   BookOpen,
   BarChart2,
   TrendingUp,
 } from "lucide-react";
+import { formatCurrency } from "@/lib/currency";
 
 export default function AdminDashboardPage() {
   const [metrics, setMetrics] = useState({
@@ -119,9 +120,9 @@ export default function AdminDashboardPage() {
 
           <MetricCard
             title="Gross Revenue"
-            value={loading ? "..." : `₹${financials.grossRevenueRupees.toLocaleString()}`}
-            subtitle={`Commission: ₹${financials.platformCommissionRupees.toLocaleString()}`}
-            icon={<DollarSign className="h-5 w-5 text-emerald-600" />}
+            value={loading ? "..." : formatCurrency(financials.grossRevenueRupees)}
+            subtitle={`Commission: ${formatCurrency(financials.platformCommissionRupees)}`}
+            icon={<IndianRupee className="h-5 w-5 text-emerald-600" />}
             variant="emerald"
           />
 

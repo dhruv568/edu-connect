@@ -7,6 +7,7 @@ import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { MetricCard } from "@/components/analytics/metric-card";
 import { BookOpen, Users, CheckCircle2, Star, ArrowLeft, Loader2 } from "lucide-react";
+import { formatCurrency } from "@/lib/currency";
 
 export default function SingleCourseAnalyticsPage({ params }: { params: { id: string } }) {
   const [loading, setLoading] = useState(true);
@@ -63,7 +64,7 @@ export default function SingleCourseAnalyticsPage({ params }: { params: { id: st
           <MetricCard
             title="Total Enrollments"
             value={data.analytics.totalEnrollments}
-            subtitle={`Price: ₹${data.course.price}`}
+            subtitle={`Price: ${formatCurrency(data.course.price)}`}
             icon={<Users className="h-5 w-5 text-blue-600" />}
             variant="blue"
           />

@@ -7,6 +7,7 @@ import { Card } from "@/components/ui/card";
 import { GlassButton } from "@/components/glass/glass-button";
 import { StatusBadge } from "@/components/ui/status-badge";
 import { Search, Filter, ChevronLeft, ChevronRight, Loader2, ArrowRight, ShieldCheck } from "lucide-react";
+import { formatCurrency } from "@/lib/currency";
 
 export default function AdminTeachersPage() {
   const [teachers, setTeachers] = useState<any[]>([]);
@@ -142,7 +143,7 @@ export default function AdminTeachersPage() {
                       </td>
                       <td className="p-4">
                         <div className="font-bold text-slate-800">{t.subjects.join(", ") || "General"}</div>
-                        <div className="text-[11px] text-slate-500">{t.experienceYears} Years Exp • ${t.hourlyRate}/hr</div>
+                        <div className="text-[11px] text-slate-500">{t.experienceYears} Years Exp • {formatCurrency(t.hourlyRate)}/hr</div>
                       </td>
                       <td className="p-4">
                         <StatusBadge status={t.verificationStatus} size="sm" />

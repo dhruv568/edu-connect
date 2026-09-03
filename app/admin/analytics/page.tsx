@@ -10,7 +10,7 @@ import { AnalyticsChart } from "@/components/analytics/analytics-chart";
 import {
   BarChart2,
   Users,
-  DollarSign,
+  IndianRupee,
   BookOpen,
   Video,
   Download,
@@ -18,6 +18,7 @@ import {
   Star,
   CheckCircle2,
 } from "lucide-react";
+import { formatCurrency } from "@/lib/currency";
 
 export default function AdminAnalyticsPage() {
   const [range, setRange] = useState("30d");
@@ -103,9 +104,9 @@ export default function AdminAnalyticsPage() {
 
           <MetricCard
             title="Period Gross Revenue"
-            value={loading ? "..." : `₹${(analytics?.revenueStats?.periodGrossRevenueRupees || 0).toLocaleString()}`}
+            value={loading ? "..." : formatCurrency(analytics?.revenueStats?.periodGrossRevenueRupees || 0)}
             subtitle={`${analytics?.revenueStats?.transactionCount || 0} transactions captured`}
-            icon={<DollarSign className="h-5 w-5 text-emerald-600" />}
+            icon={<IndianRupee className="h-5 w-5 text-emerald-600" />}
             variant="emerald"
           />
 
@@ -171,7 +172,7 @@ export default function AdminAnalyticsPage() {
                     <tr key={c.id}>
                       <td className="py-3 px-2 font-bold text-slate-900 dark:text-slate-100">{c.title}</td>
                       <td className="py-3 px-2 text-slate-500">{c.teacherName}</td>
-                      <td className="py-3 px-2 font-bold">₹{c.priceRupees}</td>
+                      <td className="py-3 px-2 font-bold">{formatCurrency(c.priceRupees)}</td>
                       <td className="py-3 px-2 text-blue-600 font-bold">{c.enrollmentCount}</td>
                       <td className="py-3 px-2 text-amber-500 font-bold">★ {c.rating.toFixed(1)}</td>
                     </tr>

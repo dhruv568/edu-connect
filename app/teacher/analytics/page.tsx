@@ -13,12 +13,13 @@ import {
   BookOpen,
   Video,
   Users,
-  DollarSign,
+  IndianRupee,
   Download,
   Calendar,
   Loader2,
   CheckCircle2,
 } from "lucide-react";
+import { formatCurrency } from "@/lib/currency";
 
 export default function TeacherAnalyticsPage() {
   const [range, setRange] = useState("30d");
@@ -124,9 +125,9 @@ export default function TeacherAnalyticsPage() {
 
           <MetricCard
             title="Period Earnings"
-            value={loading ? "..." : `₹${(analytics?.financialMetrics?.periodEarningsRupees || 0).toLocaleString()}`}
+            value={loading ? "..." : formatCurrency(analytics?.financialMetrics?.periodEarningsRupees || 0)}
             subtitle="Calculated from ledger"
-            icon={<DollarSign className="h-5 w-5 text-amber-500" />}
+            icon={<IndianRupee className="h-5 w-5 text-amber-500" />}
             variant="amber"
           />
         </div>
@@ -190,7 +191,7 @@ export default function TeacherAnalyticsPage() {
                           {course.status}
                         </span>
                       </td>
-                      <td className="py-3 px-2">₹{course.price}</td>
+                      <td className="py-3 px-2">{formatCurrency(course.price)}</td>
                       <td className="py-3 px-2 font-bold">{course.totalEnrollments}</td>
                       <td className="py-3 px-2 text-blue-600 font-bold">{course.periodEnrollments}</td>
                       <td className="py-3 px-2">{course.averageProgressPercent}%</td>

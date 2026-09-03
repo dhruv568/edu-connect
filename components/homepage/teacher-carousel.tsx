@@ -25,7 +25,7 @@ export function TeacherCarousel({ onOpenAuth }: TeacherCarouselProps) {
       rating: 4.95,
       reviewsCount: 38,
       experience: "8+ Years",
-      rate: "$45.00",
+      rate: "₹450",
       status: "VERIFIED",
     },
     {
@@ -37,7 +37,7 @@ export function TeacherCarousel({ onOpenAuth }: TeacherCarouselProps) {
       rating: 4.98,
       reviewsCount: 52,
       experience: "12+ Years",
-      rate: "$55.00",
+      rate: "₹550",
       status: "VERIFIED",
     },
     {
@@ -49,7 +49,7 @@ export function TeacherCarousel({ onOpenAuth }: TeacherCarouselProps) {
       rating: 4.92,
       reviewsCount: 29,
       experience: "6+ Years",
-      rate: "$40.00",
+      rate: "₹400",
       status: "VERIFIED",
     },
   ];

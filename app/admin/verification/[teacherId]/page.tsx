@@ -10,6 +10,7 @@ import { StatusBadge } from "@/components/ui/status-badge";
 import { useToast } from "@/components/ui/toast";
 import { DocumentViewerModal } from "@/components/shared/document-viewer-modal";
 import { DocumentItem } from "@/types/auth";
+import { formatCurrency } from "@/lib/currency";
 import {
   ShieldCheck,
   CheckCircle2,
@@ -379,7 +380,7 @@ export default function AdminTeacherReviewPage() {
                 </div>
                 <div>
                   <span className="text-slate-500 font-semibold block">Hourly Rate</span>
-                  <span className="font-extrabold text-slate-900">${professional.hourlyRate} / hr</span>
+                  <span className="font-extrabold text-slate-900">{formatCurrency(professional.hourlyRate)} / hr</span>
                 </div>
                 <div>
                   <span className="text-slate-500 font-semibold block">Teaching Mode</span>

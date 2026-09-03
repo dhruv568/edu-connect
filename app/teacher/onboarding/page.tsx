@@ -10,6 +10,7 @@ import { Input } from "@/components/ui/input";
 import { useToast } from "@/components/ui/toast";
 import { DocumentViewerModal } from "@/components/shared/document-viewer-modal";
 import { QualificationItem, CertificateItem, DocumentItem, VerificationStatus } from "@/types/auth";
+import { formatCurrency } from "@/lib/currency";
 import {
   CheckCircle2,
   User,
@@ -146,7 +147,7 @@ export default function TeacherOnboardingPage() {
         return { valid: false, reason: "Years of experience is required." };
       }
       if (!professional.hourlyRate || professional.hourlyRate <= 0) {
-        return { valid: false, reason: "Hourly rate must be greater than $0." };
+        return { valid: false, reason: "Hourly rate must be greater than ₹0." };
       }
       return { valid: true };
     }
@@ -669,7 +670,7 @@ export default function TeacherOnboardingPage() {
                 />
 
                 <Input
-                  label="Hourly Rate ($ USD) *"
+                  label="Hourly Rate (₹ INR) *"
                   type="number"
                   min={10}
                   value={professional.hourlyRate}
@@ -1026,7 +1027,7 @@ export default function TeacherOnboardingPage() {
                     </div>
                     <div>
                       <span className="text-slate-500 font-semibold block">Hourly Rate</span>
-                      <span className="font-bold text-slate-900">${professional.hourlyRate} / hr</span>
+                      <span className="font-bold text-slate-900">{formatCurrency(professional.hourlyRate)} / hr</span>
                     </div>
                   </div>
                 </div>

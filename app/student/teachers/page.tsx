@@ -23,9 +23,10 @@ import {
   CheckCircle2,
   AlertCircle,
   Loader2,
-  DollarSign,
+  IndianRupee,
   Sparkles,
 } from "lucide-react";
+import { formatCurrency } from "@/lib/currency";
 
 export default function StudentFindTeachersPage() {
   const router = useRouter();
@@ -235,7 +236,7 @@ export default function StudentFindTeachersPage() {
               <div className="space-y-2">
                 <div className="flex justify-between text-xs font-bold">
                   <span className="text-slate-700 uppercase tracking-wider">Max Hourly Rate</span>
-                  <span className="text-blue-600 font-black">${maxPrice}/hr</span>
+                  <span className="text-blue-600 font-black">{formatCurrency(maxPrice)}/hr</span>
                 </div>
                 <input
                   type="range"
@@ -247,8 +248,8 @@ export default function StudentFindTeachersPage() {
                   className="w-full accent-blue-600 cursor-pointer"
                 />
                 <div className="flex justify-between text-[10px] text-slate-400 font-semibold">
-                  <span>$20/hr</span>
-                  <span>$100+/hr</span>
+                  <span>{formatCurrency(20)}/hr</span>
+                  <span>{formatCurrency(100)}+/hr</span>
                 </div>
               </div>
 
@@ -415,7 +416,7 @@ export default function StudentFindTeachersPage() {
                     <div className="pt-4 border-t border-slate-100 flex items-center justify-between gap-3">
                       <div>
                         <span className="text-[10px] uppercase font-bold text-slate-400">Trial Rate</span>
-                        <div className="text-lg font-black text-slate-900">${t.hourlyRate}/hr</div>
+                        <div className="text-lg font-black text-slate-900">{formatCurrency(t.hourlyRate)}/hr</div>
                       </div>
 
                       <Button
@@ -474,7 +475,7 @@ export default function StudentFindTeachersPage() {
                     <div className="flex items-center justify-center sm:justify-start gap-4 text-xs text-slate-500 font-semibold">
                       <span className="text-amber-500 font-bold">★ {teacherDetail.rating.toFixed(1)} Rating</span>
                       <span>• {teacherDetail.experienceYears} Years Experience</span>
-                      <span className="font-extrabold text-slate-900">${teacherDetail.hourlyRate}/hr</span>
+                      <span className="font-extrabold text-slate-900">{formatCurrency(teacherDetail.hourlyRate)}/hr</span>
                     </div>
                   </div>
                 </div>
@@ -565,7 +566,7 @@ export default function StudentFindTeachersPage() {
                       <div>
                         <div className="text-xs font-bold text-indigo-900">Standard Private Tutoring Rate</div>
                         <div className="text-sm font-extrabold text-indigo-700">
-                          ${teacherDetail.hourlyRate} / hour (Includes notes & homework check)
+                          {formatCurrency(teacherDetail.hourlyRate)} / hour (Includes notes & homework check)
                         </div>
                       </div>
                       <Button
@@ -630,7 +631,7 @@ export default function StudentFindTeachersPage() {
                             <div className="text-right">
                               <span className="text-[10px] text-slate-400 uppercase font-bold">Fee</span>
                               <div className="text-sm font-black text-slate-900">
-                                {slot.price === 0 ? "FREE" : `₹${slot.price}`}
+                                {slot.price === 0 ? "FREE" : formatCurrency(slot.price)}
                               </div>
                             </div>
 
@@ -697,7 +698,7 @@ export default function StudentFindTeachersPage() {
                             <div className="text-right">
                               <span className="text-[10px] text-slate-400 uppercase font-bold">Course Price</span>
                               <div className="text-sm font-black text-slate-900">
-                                {course.price === 0 ? "FREE" : `₹${course.price}`}
+                                {course.price === 0 ? "FREE" : formatCurrency(course.price)}
                               </div>
                             </div>
 

@@ -2,6 +2,7 @@ import { prisma } from "@/lib/prisma";
 import { razorpayClient } from "@/lib/razorpay";
 import { LedgerService } from "@/services/ledger-service";
 import { RouteService } from "@/services/route-service";
+import { DEFAULT_CURRENCY, toPaise } from "@/lib/currency";
 import crypto from "crypto";
 
 export interface CreateOrderParams {
@@ -72,7 +73,7 @@ export class PaymentService {
       }
 
       // Price calculation directly from DB (Integer paise)
-      amountPaise = Math.round(course.price * 100);
+      amountPaise = toPaise(course.price);
       title = course.title;
       teacherId = course.teacherId;
       refCourseId = course.id;
@@ -106,7 +107,7 @@ export class PaymentService {
       }
 
       // Price calculation directly from DB
-      amountPaise = Math.round(slot.price * 100);
+      amountPaise = toPaise(slot.price);
       title = slot.title;
       teacherId = slot.teacherId;
       refSlotId = slot.id;
@@ -136,7 +137,7 @@ export class PaymentService {
             type,
             status: "CAPTURED",
             amountPaise: 0,
-            currency: "INR",
+            currency: DEFAULT_CURRENCY,
             provider: "INTERNAL_FREE",
             providerOrderId: `FREE_ORD_${Date.now()}`,
             providerPaymentId: `FREE_PAY_${Date.now()}`,
@@ -169,7 +170,7 @@ export class PaymentService {
             type,
             status: "CAPTURED",
             amountPaise: 0,
-            currency: "INR",
+            currency: DEFAULT_CURRENCY,
             provider: "INTERNAL_FREE",
             providerOrderId: `FREE_ORD_${Date.now()}`,
             providerPaymentId: `FREE_PAY_${Date.now()}`,
@@ -194,7 +195,7 @@ export class PaymentService {
     const receipt = `rcpt_${internalReference}`;
     const rzpOrder = await razorpayClient.createOrder({
       amountPaise,
-      currency: "INR",
+      currency: DEFAULT_CURRENCY,
       receipt,
       notes: {
         userId,
@@ -215,7 +216,7 @@ export class PaymentService {
         provider: "RAZORPAY",
         providerOrderId: rzpOrder.id,
         amountPaise,
-        currency: "INR",
+        currency: DEFAULT_CURRENCY,
         status: "CREATED",
         receipt,
       },
@@ -228,7 +229,7 @@ export class PaymentService {
         type,
         status: "PENDING",
         amountPaise,
-        currency: "INR",
+        currency: DEFAULT_CURRENCY,
         provider: "RAZORPAY",
         providerOrderId: rzpOrder.id,
         internalReference,
@@ -243,7 +244,7 @@ export class PaymentService {
       orderId: orderRecord.id,
       razorpayOrderId: rzpOrder.id,
       amountPaise,
-      currency: "INR",
+      currency: DEFAULT_CURRENCY,
       internalReference,
       transactionId: transactionRecord.id,
     };

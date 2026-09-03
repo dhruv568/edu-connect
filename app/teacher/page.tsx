@@ -20,11 +20,12 @@ import {
   XCircle,
   AlertOctagon,
   BookOpen,
-  DollarSign,
+  IndianRupee,
   Calendar,
   BarChart2,
   Loader2,
 } from "lucide-react";
+import { formatCurrency } from "@/lib/currency";
 
 export default function TeacherDashboardPage() {
   const [loading, setLoading] = useState(true);
@@ -150,9 +151,9 @@ export default function TeacherDashboardPage() {
 
           <MetricCard
             title="Monthly Earnings"
-            value={loading ? "..." : `₹${data.metrics.monthlyEarningsRupees.toLocaleString()}`}
-            subtitle={`Total: ₹${data.metrics.totalEarningsRupees.toLocaleString()}`}
-            icon={<DollarSign className="h-5 w-5 text-amber-500" />}
+            value={loading ? "..." : formatCurrency(data.metrics.monthlyEarningsRupees)}
+            subtitle={`Total: ${formatCurrency(data.metrics.totalEarningsRupees)}`}
+            icon={<IndianRupee className="h-5 w-5 text-amber-500" />}
             variant="amber"
           />
         </div>
@@ -299,7 +300,7 @@ export default function TeacherDashboardPage() {
 
           <Link href="/teacher/earnings">
             <Card className="p-5 hover:border-amber-500 transition cursor-pointer space-y-2">
-              <DollarSign className="h-6 w-6 text-amber-500" />
+              <IndianRupee className="h-6 w-6 text-amber-500" />
               <h4 className="text-sm font-extrabold text-slate-900 dark:text-slate-100">View Earnings</h4>
               <p className="text-xs text-slate-500">Financial ledger entries & Razorpay payouts.</p>
             </Card>

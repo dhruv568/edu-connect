@@ -1,4 +1,5 @@
 import { prisma } from "@/lib/prisma";
+import { DEFAULT_CURRENCY } from "@/lib/currency";
 
 export class LedgerService {
   /**
@@ -44,7 +45,7 @@ export class LedgerService {
     currency?: string;
     description?: string;
   }) {
-    const currency = params.currency || "INR";
+    const currency = params.currency || DEFAULT_CURRENCY;
     const commissionPercent = await this.getDefaultCommissionPercent();
 
     const commissionPaise = Math.round((params.grossAmountPaise * commissionPercent) / 100);
@@ -109,7 +110,7 @@ export class LedgerService {
     refundAmountPaise: number;
     currency?: string;
   }) {
-    const currency = params.currency || "INR";
+    const currency = params.currency || DEFAULT_CURRENCY;
     const commissionPercent = await this.getDefaultCommissionPercent();
     const teacherRefundDeduction = Math.round(
       (params.refundAmountPaise * (100 - commissionPercent)) / 100

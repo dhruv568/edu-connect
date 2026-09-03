@@ -6,6 +6,7 @@ import { Card } from "@/components/ui/card";
 import { StatusBadge } from "@/components/ui/status-badge";
 import { GlassButton } from "@/components/glass/glass-button";
 import { Search, Filter, ChevronLeft, ChevronRight, Loader2, Video, Calendar, Clock, AlertTriangle, X } from "lucide-react";
+import { formatCurrency } from "@/lib/currency";
 
 export default function AdminLiveClassesPage() {
   const [classes, setClasses] = useState<any[]>([]);
@@ -180,7 +181,7 @@ export default function AdminLiveClassesPage() {
                         {cls.bookedCount} / {cls.maxCapacity}
                       </td>
                       <td className="p-4 font-extrabold text-emerald-600">
-                        {cls.price > 0 ? `₹${cls.price}` : "FREE"}
+                        {cls.price > 0 ? formatCurrency(cls.price) : "FREE"}
                       </td>
                       <td className="p-4">
                         <StatusBadge status={cls.status} size="sm" />

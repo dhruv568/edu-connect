@@ -22,7 +22,7 @@ export default function TeacherRegistrationPage() {
   const [headline, setHeadline] = useState("");
   const [subjects, setSubjects] = useState("Mathematics");
   const [experienceYears, setExperienceYears] = useState(5);
-  const [hourlyRate, setHourlyRate] = useState(45);
+  const [hourlyRate, setHourlyRate] = useState(500);
   const [teachingMode, setTeachingMode] = useState("ONLINE");
   const [loading, setLoading] = useState(false);
 
@@ -122,7 +122,7 @@ export default function TeacherRegistrationPage() {
 
               <div className="grid grid-cols-2 gap-3">
                 <Input label="Years Experience" type="number" min={0} value={experienceYears} onChange={(e) => setExperienceYears(Number(e.target.value))} required />
-                <Input label="Hourly Rate ($)" type="number" min={10} value={hourlyRate} onChange={(e) => setHourlyRate(Number(e.target.value))} required />
+                <Input label="Hourly Rate (₹)" type="number" min={10} value={hourlyRate} onChange={(e) => setHourlyRate(Number(e.target.value))} required />
               </div>
 
               <div className="space-y-1.5">

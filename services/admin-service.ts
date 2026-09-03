@@ -1,5 +1,6 @@
 import { prisma } from "@/lib/prisma";
 import { AuditLogger } from "@/lib/audit-logger";
+import { DEFAULT_CURRENCY } from "@/lib/currency";
 
 export interface UserFilterOptions {
   search?: string;
@@ -859,7 +860,7 @@ export class AdminService {
         transactionId: refund.transactionId,
         type: "REFUND",
         amountPaise: refund.amountPaise,
-        currency: "INR",
+        currency: DEFAULT_CURRENCY,
         direction: "DEBIT",
         status: "COMPLETED",
         description: `Refund approved by Admin for transaction ${refund.transactionId}`,

@@ -3,6 +3,7 @@ import { EmailService } from "@/lib/email/email-service";
 import { generateNotificationEmailHtml } from "@/lib/email/templates/verification-templates";
 import { getEmailProvider } from "@/lib/email/email-service";
 import { prisma } from "@/lib/prisma";
+import { formatPaise } from "@/lib/currency";
 
 export type EventType =
   | "auth.welcome"
@@ -257,7 +258,7 @@ export class EventService {
         }
 
         case "payment.captured": {
-          const amountFormatted = `₹${((data.amountPaise || 0) / 100).toFixed(2)}`;
+          const amountFormatted = formatPaise(data.amountPaise);
           const title = data.title || "EduConnect Order";
           await NotificationService.create({
             userId,
@@ -299,7 +300,7 @@ export class EventService {
         }
 
         case "refund.processed": {
-          const amountFormatted = `₹${((data.amountPaise || 0) / 100).toFixed(2)}`;
+          const amountFormatted = formatPaise(data.amountPaise);
           await NotificationService.create({
             userId,
             type: "REFUND_PROCESSED",

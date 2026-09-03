@@ -4,6 +4,7 @@ import React, { useState, useEffect } from "react";
 import { useParams, useRouter } from "next/navigation";
 import Link from "next/link";
 import { ArrowLeft, Printer, ShieldCheck, CheckCircle2, AlertCircle, RefreshCw, Sparkles } from "lucide-react";
+import { formatCurrency } from "@/lib/currency";
 
 export default function StudentPaymentReceiptPage() {
   const params = useParams();
@@ -147,7 +148,7 @@ export default function StudentPaymentReceiptPage() {
               <thead className="bg-slate-950/60 print:bg-gray-100 text-slate-400 print:text-gray-700 font-semibold border-b border-slate-800 print:border-gray-300">
                 <tr>
                   <th className="px-4 py-3">Description</th>
-                  <th className="px-4 py-3 text-right">Price</th>
+                  <th className="px-4 py-3 text-right">Price (₹)</th>
                 </tr>
               </thead>
               <tbody>
@@ -159,7 +160,7 @@ export default function StudentPaymentReceiptPage() {
                     </div>
                   </td>
                   <td className="px-4 py-3.5 text-right font-extrabold text-white print:text-black">
-                    ₹{receipt.amount}
+                    {formatCurrency(receipt.amount)}
                   </td>
                 </tr>
               </tbody>

@@ -4,6 +4,7 @@ import React, { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { Search, X, GraduationCap, BookOpen, ArrowRight, ShieldCheck } from "lucide-react";
 import { useRouter } from "next/navigation";
+import { formatCurrency } from "@/lib/currency";
 
 export interface GlobalSearchModalProps {
   isOpen: boolean;
@@ -161,7 +162,7 @@ export function GlobalSearchModal({ isOpen, onClose }: GlobalSearchModalProps) {
                             <h5 className="text-xs font-bold text-slate-900">{c.title}</h5>
                             <p className="text-[11px] text-slate-500">{c.subject} • {c.lessonCount} Lessons</p>
                           </div>
-                          <span className="text-xs font-bold text-emerald-600">${c.price}</span>
+                          <span className="text-xs font-bold text-emerald-600">{c.price === 0 ? "FREE" : formatCurrency(c.price)}</span>
                         </div>
                       ))}
                     </div>

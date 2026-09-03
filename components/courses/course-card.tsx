@@ -5,6 +5,7 @@ import Link from "next/link";
 import Image from "next/image";
 import { Star, Clock, BookOpen, CheckCircle2, ShieldCheck, ArrowRight, User } from "lucide-react";
 import { GlassCard } from "@/components/glass/glass-card";
+import { formatCurrency } from "@/lib/currency";
 
 export interface CourseCardProps {
   id: string;
@@ -159,7 +160,7 @@ export function CourseCard({
           ) : (
             <div className="flex items-baseline gap-1">
               <span className="text-xl font-black text-slate-900 dark:text-slate-100">
-                ₹{price.toLocaleString("en-IN")}
+                {formatCurrency(price)}
               </span>
             </div>
           )}

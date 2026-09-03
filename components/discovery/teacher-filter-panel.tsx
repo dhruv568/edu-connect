@@ -3,6 +3,7 @@
 import React from "react";
 import { Filter, RotateCcw } from "lucide-react";
 import { GlassButton } from "@/components/glass/glass-button";
+import { formatCurrency } from "@/lib/currency";
 
 export interface TeacherFilterState {
   subject: string;
@@ -62,7 +63,7 @@ export function TeacherFilterPanel({ filters, onChange, onReset }: TeacherFilter
       <div className="space-y-2">
         <div className="flex justify-between text-xs font-bold">
           <span className="text-slate-700 uppercase tracking-wider">Max Hourly Rate</span>
-          <span className="text-blue-600">${filters.priceMax}/hr</span>
+          <span className="text-blue-600">{formatCurrency(filters.priceMax)}/hr</span>
         </div>
         <input
           type="range"

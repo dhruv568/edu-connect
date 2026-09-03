@@ -2,7 +2,8 @@
 
 import React, { useState, useEffect } from "react";
 import Link from "next/link";
-import { ArrowLeft, ListFilter, CheckCircle2, DollarSign, Search } from "lucide-react";
+import { ArrowLeft, ListFilter, CheckCircle2, IndianRupee, Search } from "lucide-react";
+import { formatCurrency } from "@/lib/currency";
 
 export default function TeacherTransactionsPage() {
   const [transactions, setTransactions] = useState<any[]>([]);
@@ -100,9 +101,9 @@ export default function TeacherTransactionsPage() {
                       <div className="text-[10px] font-normal text-slate-400 font-mono">{t.internalReference}</div>
                     </td>
                     <td className="px-6 py-4 text-slate-300">{t.studentName}</td>
-                    <td className="px-6 py-4 font-bold text-slate-200">₹{t.grossAmount}</td>
-                    <td className="px-6 py-4 text-slate-400">-₹{t.commissionAmount}</td>
-                    <td className="px-6 py-4 font-extrabold text-emerald-400">₹{t.teacherEarningAmount}</td>
+                    <td className="px-6 py-4 font-bold text-slate-200">{formatCurrency(t.grossAmount)}</td>
+                    <td className="px-6 py-4 text-slate-400">-{formatCurrency(t.commissionAmount)}</td>
+                    <td className="px-6 py-4 font-extrabold text-emerald-400">{formatCurrency(t.teacherEarningAmount)}</td>
                     <td className="px-6 py-4">
                       <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-[10px] font-bold bg-emerald-500/10 text-emerald-400 border border-emerald-500/20">
                         <CheckCircle2 className="w-3 h-3" /> {t.status}

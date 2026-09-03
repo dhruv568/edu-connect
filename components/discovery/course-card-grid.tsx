@@ -6,6 +6,7 @@ import { GlassBadge } from "@/components/glass/glass-badge";
 import { GlassButton } from "@/components/glass/glass-button";
 import { PlayCircle, Clock, BookOpen, Star, ArrowRight } from "lucide-react";
 import { UserRole } from "@/types/auth";
+import { formatCurrency } from "@/lib/currency";
 
 export interface CourseCardGridProps {
   courses: any[];
@@ -71,7 +72,7 @@ export function CourseCardGrid({ courses, loading = false, onOpenAuth }: CourseC
           </div>
 
           <div className="pt-3 border-t border-slate-100 flex items-center justify-between">
-            <div className="text-lg font-black text-slate-900">${c.price}</div>
+            <div className="text-lg font-black text-slate-900">{c.price === 0 ? "FREE" : formatCurrency(c.price)}</div>
             <GlassButton
               variant="primary"
               size="sm"

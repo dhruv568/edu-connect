@@ -6,6 +6,7 @@ import { X, ShieldCheck, Star, Calendar, Clock, Award, BookOpen, ArrowRight } fr
 import { GlassBadge } from "@/components/glass/glass-badge";
 import { GlassButton } from "@/components/glass/glass-button";
 import { UserRole } from "@/types/auth";
+import { formatCurrency } from "@/lib/currency";
 
 export interface TeacherPreviewModalProps {
   teacher: any | null;
@@ -52,7 +53,7 @@ export function TeacherPreviewModal({ teacher, isOpen, onClose, onOpenAuth }: Te
               <div className="flex items-center gap-2 text-xs text-slate-500 mt-1 font-semibold">
                 <span className="text-amber-500">★ {teacher.rating}</span>
                 <span>• {teacher.experienceYears} Years Exp</span>
-                <span>• ${teacher.hourlyRate}/hr</span>
+                <span>• {formatCurrency(teacher.hourlyRate)}/hr</span>
               </div>
             </div>
           </div>
@@ -81,7 +82,7 @@ export function TeacherPreviewModal({ teacher, isOpen, onClose, onOpenAuth }: Te
           <div className="pt-4 border-t border-slate-100 flex flex-col sm:flex-row items-center justify-between gap-4">
             <div>
               <div className="text-xs text-slate-500 font-medium">Trial Session Rate</div>
-              <div className="text-lg font-black text-slate-900">${teacher.hourlyRate} / Session</div>
+              <div className="text-lg font-black text-slate-900">{formatCurrency(teacher.hourlyRate)} / Session</div>
             </div>
             <GlassButton
               variant="primary"

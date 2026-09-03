@@ -2,7 +2,8 @@
 
 import React, { useState, useEffect } from "react";
 import Link from "next/link";
-import { DollarSign, TrendingUp, Clock, CheckCircle2, ShieldCheck, ArrowRight, ListFilter, CreditCard } from "lucide-react";
+import { IndianRupee, TrendingUp, Clock, CheckCircle2, ShieldCheck, ArrowRight, ListFilter, CreditCard } from "lucide-react";
+import { formatCurrency } from "@/lib/currency";
 
 export default function TeacherEarningsPage() {
   const [data, setData] = useState<any>(null);
@@ -49,7 +50,7 @@ export default function TeacherEarningsPage() {
       <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 border-b border-slate-800/80 pb-6">
         <div>
           <h1 className="text-3xl font-extrabold text-white tracking-tight flex items-center gap-3">
-            <DollarSign className="w-8 h-8 text-emerald-400" /> Educator Earnings & Revenue
+            <IndianRupee className="w-8 h-8 text-emerald-400" /> Educator Earnings & Revenue
           </h1>
           <p className="text-sm text-slate-400 mt-1">
             Real-time track of your course sales, live class earnings, platform commission, and payouts.
@@ -58,17 +59,16 @@ export default function TeacherEarningsPage() {
 
         <div className="flex items-center gap-3">
           <Link
-            href="/teacher/earnings/setup"
-            className="px-4 py-2.5 bg-slate-900 hover:bg-slate-800 text-slate-200 text-xs font-semibold rounded-xl border border-slate-800 flex items-center gap-2 transition-all"
-          >
-            <CreditCard className="w-4 h-4 text-purple-400" /> Payout Setup ({payoutAccount.status})
-          </Link>
-
-          <Link
             href="/teacher/earnings/transactions"
-            className="px-4 py-2.5 bg-purple-600 hover:bg-purple-500 text-white text-xs font-semibold rounded-xl flex items-center gap-2 transition-all shadow-md shadow-purple-500/20"
+            className="px-4 py-2 rounded-xl bg-slate-900 border border-slate-800 hover:bg-slate-800 text-xs font-bold text-slate-300 flex items-center gap-2 transition-all shadow-sm"
           >
-            <ListFilter className="w-4 h-4" /> Transaction Ledger
+            <ListFilter className="w-4 h-4 text-slate-400" /> Transaction Ledger
+          </Link>
+          <Link
+            href="/teacher/earnings/setup"
+            className="px-4 py-2 rounded-xl bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-500 hover:to-indigo-500 text-xs font-bold text-white flex items-center gap-2 transition-all shadow-lg shadow-blue-500/20"
+          >
+            <CreditCard className="w-4 h-4" /> Manage Payouts
           </Link>
         </div>
       </div>
@@ -78,9 +78,9 @@ export default function TeacherEarningsPage() {
         <div className="p-6 rounded-3xl bg-slate-900/70 border border-slate-800/80 backdrop-blur-xl space-y-2 shadow-xl">
           <div className="flex justify-between items-center text-slate-400 text-xs font-semibold">
             <span>Total Gross Earnings</span>
-            <DollarSign className="w-4 h-4 text-emerald-400" />
+            <IndianRupee className="w-4 h-4 text-emerald-400" />
           </div>
-          <p className="text-3xl font-black text-white">₹{summary.totalEarnings.toLocaleString()}</p>
+          <p className="text-3xl font-black text-white">{formatCurrency(summary.totalEarnings)}</p>
           <p className="text-[11px] text-emerald-400 font-medium flex items-center gap-1">
             <TrendingUp className="w-3 h-3" /> Cumulative earnings to date
           </p>
@@ -91,7 +91,7 @@ export default function TeacherEarningsPage() {
             <span>This Month</span>
             <TrendingUp className="w-4 h-4 text-blue-400" />
           </div>
-          <p className="text-3xl font-black text-blue-400">₹{summary.thisMonthEarnings.toLocaleString()}</p>
+          <p className="text-3xl font-black text-blue-400">{formatCurrency(summary.thisMonthEarnings)}</p>
           <p className="text-[11px] text-slate-400">Current calendar month sales</p>
         </div>
 
@@ -100,7 +100,7 @@ export default function TeacherEarningsPage() {
             <span>Pending Payout</span>
             <Clock className="w-4 h-4 text-amber-400" />
           </div>
-          <p className="text-3xl font-black text-amber-400">₹{summary.pendingAmount.toLocaleString()}</p>
+          <p className="text-3xl font-black text-amber-400">{formatCurrency(summary.pendingAmount)}</p>
           <p className="text-[11px] text-slate-400">Processing or awaiting settlement</p>
         </div>
 
@@ -109,7 +109,7 @@ export default function TeacherEarningsPage() {
             <span>Available for Payout</span>
             <CheckCircle2 className="w-4 h-4 text-purple-400" />
           </div>
-          <p className="text-3xl font-black text-purple-400">₹{summary.availableAmount.toLocaleString()}</p>
+          <p className="text-3xl font-black text-purple-400">{formatCurrency(summary.availableAmount)}</p>
           <p className="text-[11px] text-slate-400">Eligible for Route transfer</p>
         </div>
       </div>

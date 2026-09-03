@@ -23,6 +23,7 @@ import {
   Sparkles,
 } from "lucide-react";
 import { Navbar } from "@/components/layout/navbar";
+import { formatCurrency } from "@/lib/currency";
 import { Footer } from "@/components/layout/footer";
 
 export default function CourseDetailPage() {
@@ -232,7 +233,7 @@ export default function CourseDetailPage() {
                     <span className="text-3xl font-black text-emerald-400">FREE</span>
                   ) : (
                     <span className="text-3xl font-black text-slate-50">
-                      ₹{course.price.toLocaleString("en-IN")}
+                      {formatCurrency(course.price)}
                     </span>
                   )}
                 </div>
@@ -460,7 +461,7 @@ export default function CourseDetailPage() {
         <div>
           <div className="text-xs text-slate-400">Total Price</div>
           <div className="text-lg font-black text-slate-100">
-            {course.price === 0 ? "FREE" : `₹${course.price.toLocaleString("en-IN")}`}
+            {course.price === 0 ? "FREE" : formatCurrency(course.price)}
           </div>
         </div>
 

@@ -4,6 +4,7 @@ import React, { useState, useEffect, Suspense } from "react";
 import { useSearchParams } from "next/navigation";
 import Link from "next/link";
 import { CheckCircle2, ArrowRight, Download } from "lucide-react";
+import { formatCurrency } from "@/lib/currency";
 
 function PaymentSuccessContent() {
   const searchParams = useSearchParams();
@@ -72,7 +73,7 @@ function PaymentSuccessContent() {
 
             <div className="flex justify-between items-center text-sm font-semibold">
               <span className="text-slate-300">Amount Paid</span>
-              <span className="text-emerald-400 font-bold">₹{payment.amount}</span>
+              <span className="text-emerald-400 font-bold">{formatCurrency(payment.amount)}</span>
             </div>
 
             <div className="flex justify-between items-center text-xs text-slate-400 pt-2 border-t border-slate-800">

@@ -4,6 +4,7 @@ import React, { useState, useEffect, Suspense } from "react";
 import { useSearchParams, useRouter } from "next/navigation";
 import Link from "next/link";
 import { Lock, ShieldCheck, CheckCircle2, AlertCircle, ArrowLeft, CreditCard, Sparkles } from "lucide-react";
+import { formatPaise } from "@/lib/currency";
 
 function CheckoutContent() {
   const searchParams = useSearchParams();
@@ -145,7 +146,7 @@ function CheckoutContent() {
               <div className="border-t border-slate-800/80 pt-3 flex justify-between items-center">
                 <span className="text-base font-semibold text-white">Total Amount</span>
                 <span className="text-2xl font-extrabold text-blue-400">
-                  ₹{orderData.amountPaise / 100}
+                  {formatPaise(orderData.amountPaise)}
                 </span>
               </div>
             </div>
@@ -173,7 +174,7 @@ function CheckoutContent() {
                 </>
               ) : (
                 <>
-                  <CreditCard className="w-5 h-5" /> Pay ₹{orderData.amountPaise / 100} Securely
+                  <CreditCard className="w-5 h-5" /> Pay {formatPaise(orderData.amountPaise)} Securely
                 </>
               )}
             </button>

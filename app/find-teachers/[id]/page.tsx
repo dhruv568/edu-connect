@@ -10,6 +10,7 @@ import { GlassButton } from "@/components/glass/glass-button";
 import { AuthModal } from "@/components/shared/auth-modal";
 import { ShieldCheck, Star, ArrowLeft, Calendar, BookOpen, Clock } from "lucide-react";
 import { UserRole } from "@/types/auth";
+import { formatCurrency } from "@/lib/currency";
 
 export default function PublicTeacherProfilePage() {
   const { id } = useParams();
@@ -67,7 +68,7 @@ export default function PublicTeacherProfilePage() {
                 <div className="flex items-center justify-center sm:justify-start gap-3 text-xs text-slate-600 font-semibold">
                   <span className="text-amber-500">★ {teacher.rating} Rating</span>
                   <span>• {teacher.experienceYears} Years Experience</span>
-                  <span className="text-slate-900 font-extrabold">${teacher.hourlyRate}/hr</span>
+                  <span className="text-slate-900 font-extrabold">{formatCurrency(teacher.hourlyRate)}/hr</span>
                 </div>
               </div>
             </div>
@@ -93,7 +94,7 @@ export default function PublicTeacherProfilePage() {
             <div className="pt-6 border-t border-slate-100 flex flex-col sm:flex-row items-center justify-between gap-4">
               <div>
                 <span className="text-xs text-slate-500">Hourly Trial Rate</span>
-                <div className="text-2xl font-black text-slate-900">${teacher.hourlyRate}</div>
+                <div className="text-2xl font-black text-slate-900">{formatCurrency(teacher.hourlyRate)}</div>
               </div>
               <GlassButton variant="primary" size="lg" onClick={() => setAuthModalOpen(true)}>
                 Book Introductory Demo Session

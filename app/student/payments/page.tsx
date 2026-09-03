@@ -3,6 +3,7 @@
 import React, { useState, useEffect } from "react";
 import Link from "next/link";
 import { CreditCard, CheckCircle2, AlertCircle, RefreshCw, Receipt, Search, ArrowRight, ExternalLink } from "lucide-react";
+import { formatCurrency } from "@/lib/currency";
 
 export default function StudentPaymentsPage() {
   const [payments, setPayments] = useState<any[]>([]);
@@ -131,7 +132,7 @@ export default function StudentPaymentsPage() {
                     </td>
                     <td className="px-6 py-4 font-mono text-[11px] text-slate-400">{p.internalReference}</td>
                     <td className="px-6 py-4 text-slate-300">{p.teacherName}</td>
-                    <td className="px-6 py-4 font-bold text-slate-100">₹{p.amount}</td>
+                    <td className="px-6 py-4 font-bold text-slate-100">{formatCurrency(p.amount)}</td>
                     <td className="px-6 py-4">
                       <span
                         className={`inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-[10px] font-bold ${

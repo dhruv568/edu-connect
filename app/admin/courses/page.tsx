@@ -13,6 +13,7 @@ import {
 } from "lucide-react";
 import { Navbar } from "@/components/layout/navbar";
 import { Footer } from "@/components/layout/footer";
+import { formatCurrency } from "@/lib/currency";
 
 export default function AdminCoursesModerationPage() {
   const [courses, setCourses] = useState<any[]>([]);
@@ -131,7 +132,7 @@ export default function AdminCoursesModerationPage() {
                       <td className="p-4">
                         <div>{c.subject}</div>
                         <div className="font-bold text-slate-100">
-                          {c.price === 0 ? "FREE" : `₹${c.price}`}
+                          {c.price === 0 ? "FREE" : formatCurrency(c.price)}
                         </div>
                       </td>
                       <td className="p-4 text-slate-400">

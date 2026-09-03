@@ -7,6 +7,7 @@ import { DashboardLayout } from "@/components/layout/dashboard-layout";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { useToast } from "@/components/ui/toast";
+import { formatCurrency } from "@/lib/currency";
 import {
   Plus,
   BookOpen,
@@ -312,7 +313,7 @@ export default function TeacherCoursesDashboardPage() {
                       <div className="flex items-center justify-between text-[11px] font-bold text-slate-500 uppercase tracking-wider">
                         <span>{c.level || "Beginner"}</span>
                         <span className={c.price > 0 ? "text-blue-600 font-extrabold" : "text-emerald-600 font-extrabold"}>
-                          {c.price > 0 ? `$${c.price}` : "FREE"}
+                          {c.price > 0 ? formatCurrency(c.price) : "FREE"}
                         </span>
                       </div>
 
@@ -444,7 +445,7 @@ export default function TeacherCoursesDashboardPage() {
                 </div>
 
                 <div>
-                  <label className="text-xs font-bold text-slate-700 block mb-1">Price ($ - set 0 for Free)</label>
+                  <label className="text-xs font-bold text-slate-700 block mb-1">Price (₹ - set 0 for Free)</label>
                   <input
                     type="number"
                     min="0"

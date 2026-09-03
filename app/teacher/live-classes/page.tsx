@@ -7,6 +7,7 @@ import { DashboardLayout } from "@/components/layout/dashboard-layout";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { useToast } from "@/components/ui/toast";
+import { formatCurrency } from "@/lib/currency";
 import {
   Video,
   Plus,
@@ -679,7 +680,7 @@ export default function TeacherLiveClassesPage() {
                   </div>
 
                   <div>
-                    <label className="text-xs font-bold text-slate-700 block mb-1">Class Fee ($ - set 0 for Free)</label>
+                    <label className="text-xs font-bold text-slate-700 block mb-1">Class Fee (₹ - set 0 for Free)</label>
                     <input
                       type="number"
                       min="0"
@@ -760,7 +761,7 @@ export default function TeacherLiveClassesPage() {
                       <span className="font-bold">Type:</span> {classType} (Max {maxCapacity})
                     </div>
                     <div>
-                      <span className="font-bold">Price:</span> ${price}
+                      <span className="font-bold">Price:</span> {formatCurrency(price)}
                     </div>
                   </div>
                 </div>

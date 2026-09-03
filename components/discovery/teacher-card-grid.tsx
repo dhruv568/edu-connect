@@ -7,6 +7,7 @@ import { GlassButton } from "@/components/glass/glass-button";
 import { Star, ShieldCheck, ArrowRight } from "lucide-react";
 import { TeacherPreviewModal } from "./teacher-preview-modal";
 import { UserRole } from "@/types/auth";
+import { formatCurrency } from "@/lib/currency";
 
 export interface TeacherCardGridProps {
   teachers: any[];
@@ -79,7 +80,7 @@ export function TeacherCardGrid({ teachers, loading = false, onOpenAuth }: Teach
               <div className="flex items-center justify-between text-xs bg-slate-50 p-3 rounded-2xl border border-slate-100">
                 <span className="font-bold text-amber-500">★ {t.rating}</span>
                 <span className="font-semibold text-slate-600">{t.experienceYears} Years Exp</span>
-                <span className="font-black text-slate-900">${t.hourlyRate}/hr</span>
+                <span className="font-black text-slate-900">{formatCurrency(t.hourlyRate)}/hr</span>
               </div>
             </div>
 
