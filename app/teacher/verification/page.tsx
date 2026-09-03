@@ -68,7 +68,7 @@ export default function TeacherVerificationStatusPage() {
 
   if (loading) {
     return (
-      <DashboardLayout role="TEACHER" userName="Teacher" userEmail="teacher@educonnect.com">
+      <DashboardLayout role="TEACHER">
         <div className="flex flex-col items-center justify-center min-h-[60vh] space-y-4">
           <Loader2 className="h-10 w-10 text-blue-600 animate-spin" />
           <p className="text-sm font-semibold text-slate-600">Loading Verification Status...</p>
@@ -80,7 +80,7 @@ export default function TeacherVerificationStatusPage() {
   const { verificationStatus, submittedAt, verifiedAt, rejectionReason, suspensionReason, history } = statusData;
 
   return (
-    <DashboardLayout role="TEACHER" userName="Teacher" userEmail="teacher@educonnect.com">
+    <DashboardLayout role="TEACHER">
       <div className="space-y-8 max-w-4xl mx-auto pb-16">
         {/* Header */}
         <div className="flex items-center justify-between">

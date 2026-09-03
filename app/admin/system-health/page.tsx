@@ -27,7 +27,7 @@ export default function AdminSystemHealthPage() {
   }, []);
 
   return (
-    <DashboardLayout role="ADMIN" userName="System Health">
+    <DashboardLayout role="ADMIN">
       <div className="max-w-4xl mx-auto space-y-6 pb-16">
         <div className="flex items-center justify-between">
           <div>

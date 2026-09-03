@@ -50,7 +50,7 @@ export default function AdminAnalyticsPage() {
   }));
 
   return (
-    <DashboardLayout role="ADMIN" userName="Platform Analytics">
+    <DashboardLayout role="ADMIN">
       <div className="space-y-8 pb-16">
         <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
           <div>

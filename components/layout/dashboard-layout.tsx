@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import {
@@ -38,6 +38,47 @@ export function DashboardLayout({ role, userName, userEmail, children }: Dashboa
   const router = useRouter();
   const pathname = usePathname();
   const { showToast } = useToast();
+
+  const [currentUserName, setCurrentUserName] = useState<string>(userName || "");
+  const [currentUserEmail, setCurrentUserEmail] = useState<string>(userEmail || "");
+  const [avatarUrl, setAvatarUrl] = useState<string | null>(null);
+
+  useEffect(() => {
+    if (userName && userName !== "User" && userName !== "Loading...") {
+      setCurrentUserName(userName);
+    }
+    if (userEmail && userEmail !== "..." && userEmail !== "loading...") {
+      setCurrentUserEmail(userEmail);
+    }
+
+    const needsName = !userName || userName === "User" || userName === "Loading...";
+    const needsEmail = !userEmail || userEmail === "..." || userEmail === "loading...";
+
+    if (needsName || needsEmail) {
+      fetch("/api/auth/me")
+        .then((res) => (res.ok ? res.json() : null))
+        .then((json) => {
+          if (json?.data?.user) {
+            const u = json.data.user;
+            const resolvedName =
+              u.name ||
+              [u.firstName, u.lastName].filter(Boolean).join(" ").trim() ||
+              (u.email ? u.email.split("@")[0] : "");
+
+            if (resolvedName) {
+              setCurrentUserName(resolvedName);
+            }
+            if (u.email) {
+              setCurrentUserEmail(u.email);
+            }
+            if (u.avatarUrl) {
+              setAvatarUrl(u.avatarUrl);
+            }
+          }
+        })
+        .catch(() => {});
+    }
+  }, [userName, userEmail]);
 
   const roleColors = {
     ADMIN: "admin",
@@ -180,12 +221,26 @@ export function DashboardLayout({ role, userName, userEmail, children }: Dashboa
             <NotificationPopover />
 
             <div className="flex items-center gap-3 pl-4 border-l border-slate-200">
-              <div className="w-9 h-9 rounded-full bg-blue-600 text-white font-bold flex items-center justify-center text-sm shadow-sm uppercase">
-                {userName ? userName.charAt(0) : "U"}
-              </div>
+              {avatarUrl ? (
+                <img
+                  src={avatarUrl}
+                  alt={currentUserName || "User"}
+                  className="w-9 h-9 rounded-full object-cover shadow-sm ring-1 ring-slate-200"
+                />
+              ) : (
+                <div className="w-9 h-9 rounded-full bg-blue-600 text-white font-bold flex items-center justify-center text-sm shadow-sm uppercase">
+                  {currentUserName ? currentUserName.trim().charAt(0) : "U"}
+                </div>
+              )}
               <div className="hidden md:block text-left">
-                <div className="text-xs font-bold text-slate-900">{userName || "User"}</div>
-                <div className="text-[10px] text-slate-500">{userEmail}</div>
+                <div className="text-xs font-bold text-slate-900">
+                  {currentUserName || "User"}
+                </div>
+                {currentUserEmail && (
+                  <div className="text-[10px] text-slate-500 truncate max-w-[160px]">
+                    {currentUserEmail}
+                  </div>
+                )}
               </div>
             </div>
           </div>

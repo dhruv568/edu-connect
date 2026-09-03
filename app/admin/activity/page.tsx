@@ -34,7 +34,7 @@ export default function AdminActivityPage() {
   }, [page, actionFilter]);
 
   return (
-    <DashboardLayout role="ADMIN" userName="Activity Logs">
+    <DashboardLayout role="ADMIN">
       <div className="max-w-5xl mx-auto space-y-6 pb-16">
         <div>
           <h1 className="text-2xl lg:text-3xl font-black text-slate-900 dark:text-slate-100 tracking-tight">
