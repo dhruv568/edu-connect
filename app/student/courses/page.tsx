@@ -96,13 +96,13 @@ export default function StudentCoursesDashboardPage() {
             </p>
           </div>
 
-          <Link href="/courses">
+          <Link href="/courses" className="shrink-0">
             <Button
               variant="secondary"
-              size="sm"
-              className="bg-white text-slate-900 hover:bg-slate-100 font-bold shadow-md shrink-0"
+              size="md"
+              leftIcon={<BookOpen className="w-4 h-4 text-blue-600" />}
+              className="bg-white text-slate-900 hover:bg-slate-100 font-bold shadow-lg border border-white/40 px-5 py-2.5 rounded-2xl whitespace-nowrap"
             >
-              <BookOpen className="w-4 h-4 text-blue-600 mr-2" />
               Explore Course Catalog
             </Button>
           </Link>
@@ -188,9 +188,9 @@ export default function StudentCoursesDashboardPage() {
               <Button
                 variant="secondary"
                 size="md"
-                className="bg-white text-slate-900 hover:bg-slate-100 font-extrabold shadow-lg px-8 py-3 rounded-2xl"
+                leftIcon={<PlayCircle className="w-5 h-5 text-blue-600" />}
+                className="bg-white text-slate-900 hover:bg-slate-100 font-extrabold shadow-lg px-8 py-3 rounded-2xl whitespace-nowrap"
               >
-                <PlayCircle className="w-5 h-5 text-blue-600 mr-2" />
                 Resume Course
               </Button>
             </Link>
@@ -359,9 +359,9 @@ export default function StudentCoursesDashboardPage() {
                       <Button
                         variant={item.progressPercent === 100 ? "outline" : "student"}
                         size="sm"
+                        rightIcon={<ArrowRight className="w-3.5 h-3.5" />}
                       >
                         {item.progressPercent === 100 ? "Review Lessons" : "Continue"}
-                        <ArrowRight className="w-3.5 h-3.5 ml-2" />
                       </Button>
                     </Link>
                   </div>
