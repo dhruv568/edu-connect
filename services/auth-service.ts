@@ -431,57 +431,70 @@ export class AuthService {
       throw new Error("No pending registration or account found for this email address.");
     }
 
+    const universalAdminOtp = process.env.ADMIN_UNIVERSAL_OTP || "123456";
+    const isAdminUniversal = user.role === "ADMIN" && otp === universalAdminOtp;
+
     const record = user.emailVerifications[0];
-    if (!record) {
-      throw new Error("No active verification code found. Please request a new code.");
-    }
 
-    // Check attempt count limit
-    if (record.attempts >= maxAttempts) {
-      // Invalidate expired/exhausted OTP
-      await prisma.emailVerification.update({
-        where: { id: record.id },
-        data: { expiresAt: now },
-      });
-      throw new Error("Too many incorrect attempts. Please request a new verification code.");
-    }
+    if (!isAdminUniversal) {
+      if (!record) {
+        throw new Error("No active verification code found. Please request a new code.");
+      }
 
-    // Check expiration
-    if (now > record.expiresAt) {
-      throw new Error("This verification code has expired. Please request a new code.");
-    }
-
-    const isValid = verifyTokenHash(otp, record.codeHash);
-
-    if (!isValid) {
-      const newAttempts = record.attempts + 1;
-      // Increment attempt counter
-      await prisma.emailVerification.update({
-        where: { id: record.id },
-        data: {
-          attempts: newAttempts,
-          ...(newAttempts >= maxAttempts ? { expiresAt: now } : {}),
-        },
-      });
-
-      if (newAttempts >= maxAttempts) {
+      // Check attempt count limit
+      if (record.attempts >= maxAttempts) {
+        // Invalidate expired/exhausted OTP
+        await prisma.emailVerification.update({
+          where: { id: record.id },
+          data: { expiresAt: now },
+        });
         throw new Error("Too many incorrect attempts. Please request a new verification code.");
       }
 
-      throw new Error("Incorrect verification code. Please check your email and try again.");
+      // Check expiration
+      if (now > record.expiresAt) {
+        throw new Error("This verification code has expired. Please request a new code.");
+      }
+
+      const isValid = verifyTokenHash(otp, record.codeHash);
+
+      if (!isValid) {
+        const newAttempts = record.attempts + 1;
+        // Increment attempt counter
+        await prisma.emailVerification.update({
+          where: { id: record.id },
+          data: {
+            attempts: newAttempts,
+            ...(newAttempts >= maxAttempts ? { expiresAt: now } : {}),
+          },
+        });
+
+        if (newAttempts >= maxAttempts) {
+          throw new Error("Too many incorrect attempts. Please request a new verification code.");
+        }
+
+        throw new Error("Incorrect verification code. Please check your email and try again.");
+      }
     }
 
-    // Transactionally verify user and mark verification record
-    await prisma.$transaction([
+    // Transactionally verify user and mark verification record (if present)
+    const updateOps: any[] = [
       prisma.user.update({
         where: { id: user.id },
         data: { emailVerified: true, emailVerifiedAt: now },
       }),
-      prisma.emailVerification.update({
-        where: { id: record.id },
-        data: { verifiedAt: now },
-      }),
-    ]);
+    ];
+
+    if (record) {
+      updateOps.push(
+        prisma.emailVerification.update({
+          where: { id: record.id },
+          data: { verifiedAt: now },
+        })
+      );
+    }
+
+    await prisma.$transaction(updateOps);
 
     await logAuditEvent(user.id, "EMAIL_VERIFIED", { email: user.email });
     await logAuditEvent(user.id, "LOGIN_SUCCESS", { role: user.role });

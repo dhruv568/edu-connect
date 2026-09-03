@@ -22,9 +22,11 @@ export async function verifyRoomAccess(
     return { authorized: false, reason: "Unauthenticated. Please log in." };
   }
 
-  // 1. Fetch session and slot details
-  const liveSession = await prisma.liveClassSession.findUnique({
-    where: { id: sessionId },
+  // 1. Fetch session and slot details (support lookup by session ID or slot ID)
+  let liveSession = await prisma.liveClassSession.findFirst({
+    where: {
+      OR: [{ id: sessionId }, { liveClassSlotId: sessionId }],
+    },
     include: {
       liveClassSlot: true,
       teacher: {
@@ -36,6 +38,47 @@ export async function verifyRoomAccess(
       },
     },
   });
+
+  // If session record does not exist yet but valid slot exists, auto-create it
+  if (!liveSession) {
+    const slot = await prisma.liveClassSlot.findUnique({
+      where: { id: sessionId },
+      include: {
+        teacher: {
+          include: {
+            user: {
+              include: { profile: true },
+            },
+          },
+        },
+      },
+    });
+
+    if (slot && slot.status !== "CANCELLED") {
+      const roomId = `room-${slot.id.substring(0, 8)}`;
+      liveSession = await prisma.liveClassSession.create({
+        data: {
+          liveClassSlotId: slot.id,
+          teacherId: slot.teacherId,
+          roomId,
+          status: "OPEN",
+          scheduledStartAt: slot.startTime,
+          scheduledEndAt: slot.endTime,
+          studentCanDraw: slot.whiteboardAllowed,
+        },
+        include: {
+          liveClassSlot: true,
+          teacher: {
+            include: {
+              user: {
+                include: { profile: true },
+              },
+            },
+          },
+        },
+      });
+    }
+  }
 
   if (!liveSession) {
     return { authorized: false, reason: "Classroom session not found." };

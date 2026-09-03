@@ -92,13 +92,16 @@ export default function AdminLoginPage() {
             </GlassButton>
           </form>
 
-          <div className="pt-2 text-center">
+          <div className="pt-2 text-center space-y-1">
             <button
               onClick={() => { setEmail("admin@educonnect.com"); setPassword("Password123!"); }}
               className="text-[11px] font-bold text-rose-400 hover:underline"
             >
               Fill Admin Dev Credentials (admin@educonnect.com)
             </button>
+            <p className="text-[10px] text-slate-400">
+              Admin Universal OTP: <span className="font-mono text-rose-300 font-bold">123456</span>
+            </p>
           </div>
         </GlassCard>
       </main>

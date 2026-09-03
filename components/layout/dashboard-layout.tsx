@@ -69,9 +69,9 @@ export function DashboardLayout({ role, userName, userEmail, children }: Dashboa
     ],
     STUDENT: [
       { label: "Student Hub", icon: LayoutDashboard, href: "/student" },
-      { label: "Find Teachers", icon: TeacherIcon, href: "/find-teachers" },
-      { label: "My Live Classes", icon: Video, href: "/student" },
-      { label: "Enrolled Courses", icon: BookOpen, href: "/student" },
+      { label: "Find Teachers", icon: TeacherIcon, href: "/student/teachers" },
+      { label: "My Live Classes", icon: Video, href: "/student/live-classes" },
+      { label: "Enrolled Courses", icon: BookOpen, href: "/student/courses" },
     ],
   };
 
@@ -120,7 +120,12 @@ export function DashboardLayout({ role, userName, userEmail, children }: Dashboa
 
         <nav className="flex-1 p-4 space-y-1 overflow-y-auto">
           {(navItems[role] || []).map((item, idx) => {
-            const isActive = pathname === item.href || (item.href !== "/admin" && item.href !== "/teacher" && pathname.startsWith(item.href));
+            const isActive =
+              pathname === item.href ||
+              (item.href !== "/admin" &&
+                item.href !== "/teacher" &&
+                item.href !== "/student" &&
+                pathname.startsWith(item.href));
             return (
               <Link
                 key={idx}

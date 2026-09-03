@@ -506,4 +506,128 @@ export class LiveClassService {
 
     return this.getTeacherAvailability(userId);
   }
+
+  /**
+   * Get all live class bookings for an authenticated student
+   */
+  static async getStudentLiveClasses(studentUserId: string) {
+    const now = new Date();
+    const startOfToday = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+    const endOfToday = new Date(now.getFullYear(), now.getMonth(), now.getDate(), 23, 59, 59, 999);
+
+    const bookings = await prisma.booking.findMany({
+      where: {
+        studentId: studentUserId,
+      },
+      include: {
+        liveClassSlot: {
+          include: {
+            teacher: {
+              include: {
+                user: {
+                  include: { profile: true },
+                },
+              },
+            },
+            session: true,
+          },
+        },
+      },
+      orderBy: {
+        liveClassSlot: { startTime: "asc" },
+      },
+    });
+
+    const formatClass = (b: any) => {
+      const slot = b.liveClassSlot;
+      const startTime = new Date(slot.startTime);
+      const endTime = new Date(slot.endTime);
+      const joinBeforeMinutes = slot.joinBeforeMinutes ?? 15;
+      const joinWindowStart = new Date(startTime.getTime() - joinBeforeMinutes * 60 * 1000);
+
+      const isLiveNow = slot.status === "LIVE" || slot.session?.status === "LIVE" || slot.session?.status === "OPEN";
+      const isWithinWindow = now >= joinWindowStart && now <= endTime;
+      const canJoin = (isLiveNow || isWithinWindow) && slot.status !== "CANCELLED" && b.status !== "CANCELLED";
+
+      const teacherProfile = slot.teacher?.user?.profile;
+      const teacherName = teacherProfile
+        ? `${teacherProfile.firstName || ""} ${teacherProfile.lastName || ""}`.trim() || "Educator"
+        : "Educator";
+
+      // Calculate minutes until starts
+      const minutesUntilStart = Math.round((startTime.getTime() - now.getTime()) / (60 * 1000));
+
+      return {
+        bookingId: b.id,
+        bookingStatus: b.status,
+        bookedAt: b.createdAt,
+        slotId: slot.id,
+        sessionId: slot.session?.id || null,
+        roomId: slot.session?.roomId || null,
+        meetingUrl: `/classroom/${slot.session?.id || slot.id}`,
+        title: slot.title,
+        description: slot.description,
+        subject: slot.subject,
+        level: slot.level,
+        language: slot.language,
+        classType: slot.classType,
+        price: slot.price,
+        maxCapacity: slot.maxCapacity,
+        slotStatus: slot.status,
+        startTime: slot.startTime.toISOString(),
+        endTime: slot.endTime.toISOString(),
+        durationMinutes: slot.durationMinutes,
+        timezone: slot.timezone,
+        canJoin,
+        isLiveNow,
+        minutesUntilStart,
+        teacher: {
+          id: slot.teacher.id,
+          userId: slot.teacher.userId,
+          name: teacherName,
+          headline: slot.teacher.headline || "Educator",
+          avatarUrl: teacherProfile?.avatarUrl || null,
+          rating: slot.teacher.rating,
+        },
+      };
+    };
+
+    const formattedBookings = bookings.map(formatClass);
+
+    // Grouping
+    const upcoming = formattedBookings.filter((c) => {
+      const end = new Date(c.endTime);
+      return end >= now && c.bookingStatus !== "CANCELLED" && c.slotStatus !== "CANCELLED" && c.slotStatus !== "COMPLETED";
+    });
+
+    const today = formattedBookings.filter((c) => {
+      const start = new Date(c.startTime);
+      return start >= startOfToday && start <= endOfToday && c.bookingStatus !== "CANCELLED" && c.slotStatus !== "CANCELLED";
+    });
+
+    const completed = formattedBookings.filter((c) => {
+      const end = new Date(c.endTime);
+      return (
+        end < now ||
+        c.bookingStatus === "ATTENDED" ||
+        c.slotStatus === "COMPLETED" ||
+        c.bookingStatus === "CANCELLED" ||
+        c.slotStatus === "CANCELLED"
+      );
+    }).reverse(); // Most recent completed first
+
+    return {
+      stats: {
+        total: formattedBookings.length,
+        upcomingCount: upcoming.length,
+        todayCount: today.length,
+        completedCount: completed.length,
+      },
+      upcoming,
+      today,
+      completed,
+      all: formattedBookings,
+    };
+  }
 }
+

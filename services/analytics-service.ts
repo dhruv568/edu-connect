@@ -209,11 +209,121 @@ export class AnalyticsService {
       },
     });
 
+    // 6. Recent Activity Timeline
+    const [recentLessonProgress, recentBookingsList, recentEnrollmentsList, unreadNotificationsCount] = await Promise.all([
+      prisma.lessonProgress.findMany({
+        where: { enrollment: { studentId: userId }, completed: true },
+        orderBy: { updatedAt: "desc" },
+        take: 3,
+        include: {
+          lesson: true,
+          enrollment: { include: { course: true } },
+        },
+      }),
+      prisma.booking.findMany({
+        where: { studentId: userId },
+        orderBy: { createdAt: "desc" },
+        take: 3,
+        include: {
+          liveClassSlot: {
+            include: {
+              teacher: { include: { user: { include: { profile: true } } } },
+            },
+          },
+        },
+      }),
+      prisma.enrollment.findMany({
+        where: { studentId: userId },
+        orderBy: { enrolledAt: "desc" },
+        take: 3,
+        include: { course: true },
+      }),
+      prisma.notification.count({
+        where: { userId, isRead: false },
+      }),
+    ]);
+
+    const activityList: Array<{
+      id: string;
+      type: "LESSON_COMPLETED" | "CLASS_BOOKED" | "COURSE_ENROLLED";
+      title: string;
+      subtitle: string;
+      timestamp: Date;
+    }> = [];
+
+    recentLessonProgress.forEach((lp) => {
+      activityList.push({
+        id: `lp-${lp.id}`,
+        type: "LESSON_COMPLETED",
+        title: `Completed: ${lp.lesson.title}`,
+        subtitle: lp.enrollment.course.title,
+        timestamp: lp.updatedAt,
+      });
+    });
+
+    recentBookingsList.forEach((b) => {
+      const teacherName = b.liveClassSlot.teacher.user.profile
+        ? `${b.liveClassSlot.teacher.user.profile.firstName} ${b.liveClassSlot.teacher.user.profile.lastName}`.trim()
+        : "Educator";
+      activityList.push({
+        id: `bk-${b.id}`,
+        type: "CLASS_BOOKED",
+        title: `Booked: ${b.liveClassSlot.title}`,
+        subtitle: `Tutor: ${teacherName} • ${b.liveClassSlot.subject}`,
+        timestamp: b.createdAt,
+      });
+    });
+
+    recentEnrollmentsList.forEach((e) => {
+      activityList.push({
+        id: `en-${e.id}`,
+        type: "COURSE_ENROLLED",
+        title: `Enrolled: ${e.course.title}`,
+        subtitle: `${e.course.level} • ${e.course.subject}`,
+        timestamp: e.enrolledAt,
+      });
+    });
+
+    activityList.sort((a, b) => b.timestamp.getTime() - a.timestamp.getTime());
+    const recentActivity = activityList.slice(0, 5);
+
+    // 7. Enrolled Courses Quick Summary
+    const enrolledCoursesSummary = enrollments.slice(0, 4).map((e) => {
+      const allLessons = e.course.sections.flatMap((s) => s.lessons);
+      const totalLessons = allLessons.length;
+      const completedCount = e.lessonProgresses.filter((p) => p.completed).length;
+      const progressPercent = totalLessons > 0 ? Math.round((completedCount / totalLessons) * 100) : 0;
+      const teacherName = e.course.teacher.user.profile
+        ? `${e.course.teacher.user.profile.firstName} ${e.course.teacher.user.profile.lastName}`.trim()
+        : "Educator";
+
+      return {
+        enrollmentId: e.id,
+        courseId: e.course.id,
+        title: e.course.title,
+        slug: e.course.slug,
+        subject: e.course.subject,
+        level: e.course.level,
+        thumbnailUrl: e.course.thumbnailUrl || "/images/course-placeholder.jpg",
+        teacherName,
+        progressPercent,
+        completedLessons: completedCount,
+        totalLessons,
+        status: e.status,
+      };
+    });
+
     return {
       userName,
+      userEmail: user.email,
+      avatarUrl: user.profile?.avatarUrl || null,
       gradeLevel: user.studentProfile?.gradeLevel || null,
+      interests: user.studentProfile?.interests || null,
+      unreadNotificationsCount,
       continueLearning,
       upcomingClasses,
+      enrolledCourses: enrolledCoursesSummary,
+      recentActivity,
       stats: {
         enrolledCount,
         completedCoursesCount,

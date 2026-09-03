@@ -8,6 +8,7 @@ export async function GET(request: NextRequest, { params }: { params: { id: stri
   try {
     const { id } = params;
 
+    const now = new Date();
     const user = await prisma.user.findFirst({
       where: {
         OR: [{ id }, { teacherProfile: { id } }],
@@ -16,7 +17,34 @@ export async function GET(request: NextRequest, { params }: { params: { id: stri
       include: {
         profile: true,
         teacherProfile: {
-          include: { courses: true },
+          include: {
+            courses: {
+              where: { status: "PUBLISHED" },
+              select: {
+                id: true,
+                title: true,
+                slug: true,
+                subject: true,
+                level: true,
+                price: true,
+                thumbnailUrl: true,
+                enrollmentCount: true,
+              },
+            },
+            liveClassSlots: {
+              where: {
+                endTime: { gte: now },
+                status: { in: ["SCHEDULED", "OPEN"] },
+              },
+              orderBy: { startTime: "asc" },
+              include: {
+                bookings: {
+                  where: { status: "CONFIRMED" },
+                  select: { id: true, studentId: true },
+                },
+              },
+            },
+          },
         },
       },
     });
@@ -38,6 +66,20 @@ export async function GET(request: NextRequest, { params }: { params: { id: stri
       rating: user.teacherProfile.rating,
       verificationStatus: user.teacherProfile.verificationStatus,
       courses: user.teacherProfile.courses,
+      liveClassSlots: user.teacherProfile.liveClassSlots.map((s) => ({
+        id: s.id,
+        title: s.title,
+        description: s.description,
+        subject: s.subject,
+        level: s.level,
+        startTime: s.startTime.toISOString(),
+        endTime: s.endTime.toISOString(),
+        durationMinutes: s.durationMinutes,
+        price: s.price,
+        maxCapacity: s.maxCapacity,
+        bookedCount: s.bookings.length,
+        isFull: s.bookings.length >= s.maxCapacity,
+      })),
     };
 
     return apiSuccess({ teacher });
