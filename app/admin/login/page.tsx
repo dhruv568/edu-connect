@@ -20,11 +20,14 @@ import {
   FileCode2,
   Server,
   Fingerprint,
+  Eye,
+  EyeOff,
 } from "lucide-react";
 
 export default function AdminLoginPage() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [showPassword, setShowPassword] = useState(false);
   const [loading, setLoading] = useState(false);
 
   const router = useRouter();
@@ -185,14 +188,15 @@ export default function AdminLoginPage() {
                     Admin Email Address
                   </label>
                   <div className="relative">
-                    <Mail className="absolute left-3.5 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-400" />
+                    <Mail className="absolute left-3.5 top-1/2 -translate-y-1/2 h-4 w-4 text-blue-400" />
                     <input
                       type="email"
                       placeholder="admin@educonnect.com"
                       value={email}
                       onChange={(e) => setEmail(e.target.value)}
                       required
-                      className="w-full pl-10 pr-4 py-2.5 bg-slate-800/90 text-white placeholder-slate-500 text-sm rounded-xl border border-slate-700 focus:outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 font-medium transition-all"
+                      style={{ color: "#ffffff", WebkitTextFillColor: "#ffffff" }}
+                      className="w-full pl-10 pr-4 py-2.5 bg-slate-800 text-white placeholder:text-slate-400 text-sm rounded-xl border border-slate-600 focus:outline-none focus:border-blue-400 focus:ring-2 focus:ring-blue-500/30 font-medium transition-all dark-input-crisp"
                     />
                   </div>
                 </div>
@@ -202,15 +206,25 @@ export default function AdminLoginPage() {
                     Admin Password
                   </label>
                   <div className="relative">
-                    <Lock className="absolute left-3.5 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-400" />
+                    <Lock className="absolute left-3.5 top-1/2 -translate-y-1/2 h-4 w-4 text-blue-400" />
                     <input
-                      type="password"
+                      type={showPassword ? "text" : "password"}
                       placeholder="••••••••"
                       value={password}
                       onChange={(e) => setPassword(e.target.value)}
                       required
-                      className="w-full pl-10 pr-4 py-2.5 bg-slate-800/90 text-white placeholder-slate-500 text-sm rounded-xl border border-slate-700 focus:outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 font-medium transition-all"
+                      style={{ color: "#ffffff", WebkitTextFillColor: "#ffffff" }}
+                      className="w-full pl-10 pr-10 py-2.5 bg-slate-800 text-white placeholder:text-slate-400 text-sm rounded-xl border border-slate-600 focus:outline-none focus:border-blue-400 focus:ring-2 focus:ring-blue-500/30 font-medium transition-all dark-input-crisp"
                     />
+                    <button
+                      type="button"
+                      tabIndex={-1}
+                      onClick={() => setShowPassword(!showPassword)}
+                      className="absolute right-3.5 top-1/2 -translate-y-1/2 text-slate-400 hover:text-white p-1 transition-colors"
+                      aria-label={showPassword ? "Hide password" : "Show password"}
+                    >
+                      {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+                    </button>
                   </div>
                 </div>
 

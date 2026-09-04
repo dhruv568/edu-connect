@@ -46,7 +46,10 @@ export const Input = React.forwardRef<HTMLInputElement, InputProps>(
             id={inputId}
             type={effectiveType}
             className={cn(
-              "w-full h-11 px-4 text-sm bg-white border border-slate-200 rounded-xl text-slate-900 placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all shadow-sm",
+              "w-full h-11 px-4 text-sm rounded-xl transition-all shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500",
+              className?.includes("bg-slate-") || className?.includes("text-white")
+                ? "bg-slate-800/95 border border-slate-700 text-white placeholder:text-slate-400 dark-input-crisp"
+                : "bg-white border border-slate-200 text-slate-900 placeholder:text-slate-400 focus:border-transparent",
               leftIcon && "pl-10",
               (rightIcon || hasPasswordToggle) && "pr-10",
               error && "border-red-500 focus:ring-red-500",

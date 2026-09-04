@@ -185,15 +185,64 @@ select.text-white option,
   padding: 10px 14px;
 }
 
-/* Chrome/Safari Autofill Fix for Select & Input */
-select:-webkit-autofill,
-select:-webkit-autofill:hover,
-select:-webkit-autofill:focus,
+/* Chrome/Safari/Edge Autofill Fix for Dark & Light Inputs */
 input:-webkit-autofill,
 input:-webkit-autofill:hover,
-input:-webkit-autofill:focus {
-  -webkit-text-fill-color: inherit !important;
+input:-webkit-autofill:focus,
+textarea:-webkit-autofill,
+textarea:-webkit-autofill:hover,
+textarea:-webkit-autofill:focus,
+select:-webkit-autofill,
+select:-webkit-autofill:hover,
+select:-webkit-autofill:focus {
+  -webkit-text-fill-color: #0f172a !important;
+  color: #0f172a !important;
+  caret-color: #0f172a !important;
   transition: background-color 5000s ease-in-out 0s;
+}
+
+/* Dark Theme & Dark Inputs Autofill Text Color Fix (CRITICAL) */
+.dark input:-webkit-autofill,
+.dark input:-webkit-autofill:hover,
+.dark input:-webkit-autofill:focus,
+.bg-slate-950 input:-webkit-autofill,
+.bg-slate-950 input:-webkit-autofill:hover,
+.bg-slate-950 input:-webkit-autofill:focus,
+.bg-slate-900 input:-webkit-autofill,
+.bg-slate-900 input:-webkit-autofill:hover,
+.bg-slate-900 input:-webkit-autofill:focus,
+.bg-slate-800 input:-webkit-autofill,
+.bg-slate-800 input:-webkit-autofill:hover,
+.bg-slate-800 input:-webkit-autofill:focus,
+input.text-white:-webkit-autofill,
+input.text-white:-webkit-autofill:hover,
+input.text-white:-webkit-autofill:focus,
+input[class*="text-white"]:-webkit-autofill,
+input[class*="text-white"]:-webkit-autofill:hover,
+input[class*="text-white"]:-webkit-autofill:focus,
+input[class*="bg-slate-800"]:-webkit-autofill,
+input[class*="bg-slate-800"]:-webkit-autofill:hover,
+input[class*="bg-slate-800"]:-webkit-autofill:focus,
+input[class*="bg-slate-900"]:-webkit-autofill,
+input[class*="bg-slate-900"]:-webkit-autofill:hover,
+input[class*="bg-slate-900"]:-webkit-autofill:focus,
+.text-white input:-webkit-autofill,
+.text-white input:-webkit-autofill:hover,
+.text-white input:-webkit-autofill:focus,
+.dark-input-crisp:-webkit-autofill,
+.dark-input-crisp:-webkit-autofill:hover,
+.dark-input-crisp:-webkit-autofill:focus {
+  -webkit-text-fill-color: #ffffff !important;
+  -webkit-box-shadow: 0 0 0px 1000px #1e293b inset !important;
+  box-shadow: 0 0 0px 1000px #1e293b inset !important;
+  color: #ffffff !important;
+  caret-color: #ffffff !important;
+}
+
+.dark-input-crisp {
+  color: #ffffff !important;
+  -webkit-text-fill-color: #ffffff !important;
+  caret-color: #ffffff !important;
 }
 
 /* Glass Dropdown Popover Container */
