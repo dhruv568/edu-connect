@@ -27,19 +27,37 @@ export default function RoleSelectionPage() {
           <Link href="/register/teacher">
             <GlassCard
               glowColor="rgba(99, 102, 241, 0.2)"
-              className="group cursor-pointer p-8 space-y-6 border-2 border-white/90 hover:border-indigo-400 transition-all flex flex-col justify-between h-full"
+              className="group cursor-pointer p-8 space-y-6 border-2 border-white/90 hover:border-indigo-400 transition-all flex flex-col justify-between h-full shadow-lg"
             >
               <div className="space-y-4">
-                <div className="p-4 bg-indigo-100 text-indigo-600 rounded-2xl w-fit group-hover:scale-110 transition-transform">
-                  <GraduationCap className="h-8 w-8" />
-                </div>
-                <div>
+                <div className="flex items-center justify-between">
+                  <div className="p-4 bg-indigo-100 text-indigo-600 rounded-2xl w-fit group-hover:scale-110 transition-transform">
+                    <GraduationCap className="h-8 w-8" />
+                  </div>
                   <GlassBadge variant="indigo" size="sm">FOR EDUCATORS</GlassBadge>
+                </div>
+
+                <div>
                   <h2 className="text-2xl font-black text-slate-900 mt-1">Teacher / Educator</h2>
                   <p className="text-xs font-bold text-indigo-600 italic mt-0.5">&ldquo;Teach. Inspire. Grow.&rdquo;</p>
                   <p className="text-xs text-slate-600 mt-2 leading-relaxed">
-                    Create your verified profile, set hourly rates, host live class slots, and offer demo trial sessions.
+                    Create your verified profile, set hourly rates, host live class slots, offer trial sessions, and upload LMS courses.
                   </p>
+                </div>
+
+                <div className="space-y-1.5 pt-2">
+                  <div className="flex items-center gap-2 text-[11px] font-semibold text-slate-700">
+                    <span className="w-1.5 h-1.5 rounded-full bg-indigo-500" />
+                    <span>Set your own hourly rates & availability</span>
+                  </div>
+                  <div className="flex items-center gap-2 text-[11px] font-semibold text-slate-700">
+                    <span className="w-1.5 h-1.5 rounded-full bg-indigo-500" />
+                    <span>Built-in browser classroom with whiteboard & chat</span>
+                  </div>
+                  <div className="flex items-center gap-2 text-[11px] font-semibold text-slate-700">
+                    <span className="w-1.5 h-1.5 rounded-full bg-indigo-500" />
+                    <span>Automated escrow payouts directly to bank</span>
+                  </div>
                 </div>
               </div>
 
@@ -54,19 +72,37 @@ export default function RoleSelectionPage() {
           <Link href="/register/student">
             <GlassCard
               glowColor="rgba(16, 185, 129, 0.2)"
-              className="group cursor-pointer p-8 space-y-6 border-2 border-white/90 hover:border-emerald-400 transition-all flex flex-col justify-between h-full"
+              className="group cursor-pointer p-8 space-y-6 border-2 border-white/90 hover:border-emerald-400 transition-all flex flex-col justify-between h-full shadow-lg"
             >
               <div className="space-y-4">
-                <div className="p-4 bg-emerald-100 text-emerald-600 rounded-2xl w-fit group-hover:scale-110 transition-transform">
-                  <BookOpen className="h-8 w-8" />
-                </div>
-                <div>
+                <div className="flex items-center justify-between">
+                  <div className="p-4 bg-emerald-100 text-emerald-600 rounded-2xl w-fit group-hover:scale-110 transition-transform">
+                    <BookOpen className="h-8 w-8" />
+                  </div>
                   <GlassBadge variant="emerald" size="sm">FOR LEARNERS</GlassBadge>
+                </div>
+
+                <div>
                   <h2 className="text-2xl font-black text-slate-900 mt-1">Student / Learner</h2>
                   <p className="text-xs font-bold text-emerald-600 italic mt-0.5">&ldquo;Learn. Practice. Achieve.&rdquo;</p>
                   <p className="text-xs text-slate-600 mt-2 leading-relaxed">
                     Find top verified tutors, book introductory trial demos, join live classes, and track your streak.
                   </p>
+                </div>
+
+                <div className="space-y-1.5 pt-2">
+                  <div className="flex items-center gap-2 text-[11px] font-semibold text-slate-700">
+                    <span className="w-1.5 h-1.5 rounded-full bg-emerald-500" />
+                    <span>1-on-1 trial demo slots with zero commitment</span>
+                  </div>
+                  <div className="flex items-center gap-2 text-[11px] font-semibold text-slate-700">
+                    <span className="w-1.5 h-1.5 rounded-full bg-emerald-500" />
+                    <span>Pay only for live classes you attend</span>
+                  </div>
+                  <div className="flex items-center gap-2 text-[11px] font-semibold text-slate-700">
+                    <span className="w-1.5 h-1.5 rounded-full bg-emerald-500" />
+                    <span>24/7 on-demand courses & certificates</span>
+                  </div>
                 </div>
               </div>
 
@@ -76,6 +112,15 @@ export default function RoleSelectionPage() {
               </div>
             </GlassCard>
           </Link>
+        </div>
+
+        {/* Reassurance Strip */}
+        <div className="flex flex-wrap items-center justify-center gap-6 text-xs text-slate-500 pt-2 font-medium">
+          <span>✓ Free registration</span>
+          <span>•</span>
+          <span>✓ 100% verified educators</span>
+          <span>•</span>
+          <span>✓ Encrypted WebRTC sessions</span>
         </div>
 
         <div className="text-center pt-4 border-t border-slate-200/80 text-sm font-semibold">

@@ -1,6 +1,7 @@
 "use client";
 
 import React, { useState } from "react";
+import Link from "next/link";
 import { FloatingNavbar } from "@/components/homepage/floating-navbar";
 import { PremiumFooter } from "@/components/homepage/premium-footer";
 import { GlassCard } from "@/components/glass/glass-card";
@@ -60,14 +61,43 @@ export default function ContactPage() {
         </div>
 
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-8">
-          {/* Contact Info */}
+          {/* Contact Info & Quick Shortcuts */}
           <div className="lg:col-span-5 space-y-6">
+            {/* Live Support Indicator */}
+            <div className="p-4 rounded-2xl bg-white border border-slate-200/90 shadow-xs flex items-center justify-between">
+              <div className="flex items-center gap-3">
+                <span className="relative flex h-3 w-3">
+                  <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75" />
+                  <span className="relative inline-flex rounded-full h-3 w-3 bg-emerald-500" />
+                </span>
+                <div>
+                  <h4 className="text-xs font-black text-slate-900">Student Support: Online</h4>
+                  <p className="text-[11px] text-slate-500">Average response &lt; 15 mins</p>
+                </div>
+              </div>
+              <div className="flex items-center -space-x-1.5">
+                <img
+                  src="https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=80&auto=format&fit=crop&q=80"
+                  alt="Counselor"
+                  className="w-6 h-6 rounded-full object-cover ring-2 ring-white"
+                />
+                <img
+                  src="https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?w=80&auto=format&fit=crop&q=80"
+                  alt="Counselor"
+                  className="w-6 h-6 rounded-full object-cover ring-2 ring-white"
+                />
+                <div className="w-6 h-6 rounded-full bg-blue-600 text-white text-[9px] font-bold flex items-center justify-center ring-2 ring-white">
+                  +3
+                </div>
+              </div>
+            </div>
+
             <GlassCard glowColor="rgba(37, 99, 235, 0.15)" className="p-6 space-y-6 border border-white/80">
-              <h3 className="text-lg font-bold text-slate-900">Direct Support Channels</h3>
+              <h3 className="text-base font-bold text-slate-900">Direct Support Channels</h3>
 
               <div className="space-y-4">
                 <div className="flex items-start gap-4">
-                  <div className="p-3 bg-blue-50 text-blue-600 rounded-2xl border border-blue-100">
+                  <div className="p-3 bg-blue-50 text-blue-600 rounded-2xl border border-blue-100 shrink-0">
                     <Mail className="h-5 w-5" />
                   </div>
                   <div>
@@ -78,7 +108,7 @@ export default function ContactPage() {
                 </div>
 
                 <div className="flex items-start gap-4">
-                  <div className="p-3 bg-indigo-50 text-indigo-600 rounded-2xl border border-indigo-100">
+                  <div className="p-3 bg-indigo-50 text-indigo-600 rounded-2xl border border-indigo-100 shrink-0">
                     <Phone className="h-5 w-5" />
                   </div>
                   <div>
@@ -89,7 +119,7 @@ export default function ContactPage() {
                 </div>
 
                 <div className="flex items-start gap-4">
-                  <div className="p-3 bg-purple-50 text-purple-600 rounded-2xl border border-purple-100">
+                  <div className="p-3 bg-purple-50 text-purple-600 rounded-2xl border border-purple-100 shrink-0">
                     <MapPin className="h-5 w-5" />
                   </div>
                   <div>
@@ -100,6 +130,27 @@ export default function ContactPage() {
                 </div>
               </div>
             </GlassCard>
+
+            {/* Quick Resolution Shortcuts */}
+            <div className="p-5 rounded-2xl bg-blue-50/60 border border-blue-100 space-y-2.5">
+              <h4 className="text-xs font-bold uppercase tracking-wider text-blue-900">Immediate Actions</h4>
+              <div className="space-y-1.5 text-xs">
+                <Link
+                  href="/find-teachers"
+                  className="p-2 rounded-xl bg-white text-slate-800 font-semibold flex items-center justify-between border border-blue-100 hover:border-blue-300 transition-colors"
+                >
+                  <span>Reschedule a Demo Session</span>
+                  <span className="text-blue-600 font-bold">→</span>
+                </Link>
+                <Link
+                  href="/refund"
+                  className="p-2 rounded-xl bg-white text-slate-800 font-semibold flex items-center justify-between border border-blue-100 hover:border-blue-300 transition-colors"
+                >
+                  <span>Instant Class Cancellation & Refund</span>
+                  <span className="text-blue-600 font-bold">→</span>
+                </Link>
+              </div>
+            </div>
           </div>
 
           {/* Form */}

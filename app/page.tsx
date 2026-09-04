@@ -8,6 +8,7 @@ import { LiquidLearningModels } from "@/components/homepage/liquid-learning-mode
 import { TeacherCarousel } from "@/components/homepage/teacher-carousel";
 import { LiveClassroomPreview } from "@/components/homepage/live-classroom-preview";
 import { CourseExperienceSection } from "@/components/homepage/course-experience-section";
+import { SocialProofTestimonials } from "@/components/homepage/social-proof-testimonials";
 import { LearningJourneyPath } from "@/components/homepage/learning-journey-path";
 import { PremiumFooter } from "@/components/homepage/premium-footer";
 import { AuthModal } from "@/components/shared/auth-modal";
@@ -46,7 +47,10 @@ export default function EduConnectHomePage() {
         {/* 7. Structured Pre-Recorded LMS Courses */}
         <CourseExperienceSection onOpenAuth={handleOpenAuth} />
 
-        {/* 8. Flowing Animated Learning Journey */}
+        {/* 8. Social Proof & Verified Learning Outcomes */}
+        <SocialProofTestimonials onOpenAuth={handleOpenAuth} />
+
+        {/* 9. Flowing Animated Learning Journey */}
         <LearningJourneyPath />
       </main>
 

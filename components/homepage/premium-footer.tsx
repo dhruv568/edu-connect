@@ -5,7 +5,11 @@ import Link from "next/link";
 import { GraduationCap, Heart, Shield, ArrowRight } from "lucide-react";
 import { GlassButton } from "@/components/glass/glass-button";
 
-export function PremiumFooter() {
+export interface PremiumFooterProps {
+  showCta?: boolean;
+}
+
+export function PremiumFooter({ showCta = true }: PremiumFooterProps = {}) {
   return (
     <footer className="bg-slate-900 text-slate-300 pt-20 pb-12 border-t border-slate-800 relative overflow-hidden">
       {/* Background Glow */}
@@ -13,17 +17,21 @@ export function PremiumFooter() {
 
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10 space-y-16">
         {/* Top CTA Banner */}
-        <div className="glass-surface-dark p-5 sm:p-8 md:p-12 rounded-3xl border border-white/10 flex flex-col md:flex-row items-center justify-between gap-6 sm:gap-8 shadow-2xl">
-          <div className="space-y-2 text-center md:text-left">
-            <h3 className="text-xl sm:text-2xl md:text-3xl font-black text-white">Ready to transform your learning?</h3>
-            <p className="text-sm text-slate-400 max-w-lg">
-              Join thousands of teachers and students building connected education futures on EduConnect.
-            </p>
+        {showCta && (
+          <div className="glass-surface-dark p-5 sm:p-8 md:p-12 rounded-3xl border border-white/10 flex flex-col md:flex-row items-center justify-between gap-6 sm:gap-8 shadow-2xl">
+            <div className="space-y-2 text-center md:text-left">
+              <h3 className="text-xl sm:text-2xl md:text-3xl font-black text-white">Ready to transform your learning?</h3>
+              <p className="text-sm text-slate-400 max-w-lg">
+                Join thousands of teachers and students building connected education futures on EduConnect.
+              </p>
+            </div>
+            <Link href="/register">
+              <GlassButton variant="primary" size="lg" rightIcon={<ArrowRight className="h-4 w-4" />}>
+                Get Started Free
+              </GlassButton>
+            </Link>
           </div>
-          <GlassButton variant="primary" size="lg" rightIcon={<ArrowRight className="h-4 w-4" />}>
-            Get Started Free
-          </GlassButton>
-        </div>
+        )}
 
         {/* Links Grid */}
         <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-5 gap-8 sm:gap-10 pb-12 border-b border-slate-800">

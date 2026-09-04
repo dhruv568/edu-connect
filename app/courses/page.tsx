@@ -16,8 +16,8 @@ import {
   Layers,
 } from "lucide-react";
 import { CourseCard } from "@/components/courses/course-card";
-import { Navbar } from "@/components/layout/navbar";
-import { Footer } from "@/components/layout/footer";
+import { FloatingNavbar } from "@/components/homepage/floating-navbar";
+import { PremiumFooter } from "@/components/homepage/premium-footer";
 
 const SUBJECTS = ["All", "Mathematics", "Science", "Physics", "Chemistry", "Biology", "Computer Science", "English", "Economics"];
 const LEVELS = [
@@ -85,7 +85,7 @@ export default function CourseMarketplacePage() {
 
   return (
     <div className="min-h-screen flex flex-col bg-slate-50 dark:bg-slate-950 text-slate-900 dark:text-slate-100 font-sans selection:bg-blue-500 selection:text-white">
-      <Navbar />
+      <FloatingNavbar />
 
       {/* Hero Header Section */}
       <section className="relative pt-28 pb-16 overflow-hidden bg-gradient-to-b from-blue-900/10 via-indigo-950/5 to-transparent">
@@ -349,7 +349,7 @@ export default function CourseMarketplacePage() {
         </div>
       </main>
 
-      <Footer />
+      <PremiumFooter />
     </div>
   );
 }

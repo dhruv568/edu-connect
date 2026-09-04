@@ -200,7 +200,7 @@ export function FloatingNavbar() {
           {/* Mobile/Tablet: compact icon-only search button */}
           <button
             onClick={() => setSearchModalOpen(true)}
-            className="lg:hidden p-2 sm:p-2.5 rounded-2xl glass-surface border border-white/80 text-slate-600 hover:text-blue-600 hover:border-blue-300 transition-all shadow-sm flex items-center justify-center"
+            className="lg:hidden p-2 sm:p-2.5 rounded-2xl bg-white/95 border border-slate-200/90 text-slate-700 hover:text-blue-600 hover:border-blue-300 transition-all shadow-sm flex items-center justify-center"
             aria-label="Open Search"
           >
             <Search className="h-4 w-4" />
@@ -209,15 +209,15 @@ export function FloatingNavbar() {
           {/* Large Desktop: expanded search bar */}
           <button
             onClick={() => setSearchModalOpen(true)}
-            className="hidden lg:flex w-52 xl:w-64 px-3.5 py-2.5 rounded-2xl glass-surface border border-white/80 text-slate-600 hover:text-blue-600 hover:border-blue-300 transition-all text-xs font-semibold items-center justify-between shadow-sm group"
+            className="hidden lg:flex w-52 xl:w-64 px-3.5 py-2.5 rounded-2xl bg-white/95 border border-slate-200/90 text-slate-700 hover:text-blue-600 hover:border-blue-400 hover:shadow-md transition-all text-xs font-semibold items-center justify-between shadow-sm group"
           >
-            <div className="flex items-center gap-2 overflow-hidden">
-              <Search className="h-4 w-4 text-slate-400 group-hover:text-blue-600 shrink-0 transition-colors" />
-              <span className="text-slate-400 group-hover:text-slate-600 transition-colors truncate">
+            <div className="flex items-center gap-2.5 overflow-hidden">
+              <Search className="h-4 w-4 text-slate-500 group-hover:text-blue-600 shrink-0 transition-colors" />
+              <span className="text-slate-700 font-semibold group-hover:text-blue-600 transition-colors truncate">
                 Search tutors, courses...
               </span>
             </div>
-            <kbd className="hidden xl:inline-block bg-slate-100 px-1.5 py-0.5 rounded text-[10px] text-slate-500 font-mono border border-slate-200 shrink-0">
+            <kbd className="hidden xl:inline-block bg-slate-100 px-1.5 py-0.5 rounded text-[10px] text-slate-700 font-mono font-bold border border-slate-200/90 shadow-2xs shrink-0">
               ⌘K
             </kbd>
           </button>
@@ -322,13 +322,13 @@ export function FloatingNavbar() {
                 setMobileOpen(false);
                 setSearchModalOpen(true);
               }}
-              className="w-full flex items-center justify-between px-4 py-2.5 rounded-2xl bg-slate-100/90 text-slate-600 text-xs font-semibold hover:bg-blue-50 hover:text-blue-600 transition-colors border border-slate-200/80"
+              className="w-full flex items-center justify-between px-4 py-2.5 rounded-2xl bg-white text-slate-700 text-xs font-semibold hover:bg-blue-50 hover:text-blue-600 transition-colors border border-slate-200 shadow-xs"
             >
               <div className="flex items-center gap-2">
-                <Search className="h-4 w-4 text-slate-400" />
-                <span>Search tutors, courses...</span>
+                <Search className="h-4 w-4 text-slate-500" />
+                <span className="text-slate-700 font-semibold">Search tutors, courses...</span>
               </div>
-              <span className="text-[10px] bg-white px-2 py-0.5 rounded-md text-blue-600 font-bold shadow-xs">
+              <span className="text-[10px] bg-blue-50 px-2 py-0.5 rounded-md text-blue-600 font-bold border border-blue-100">
                 Search
               </span>
             </button>
