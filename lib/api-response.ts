@@ -37,6 +37,10 @@ export function apiBadRequest(error = "Invalid request payload", status = 400) {
   return apiError(error, status);
 }
 
+export function apiNotFound(error = "Resource not found", status = 404) {
+  return apiError(error, status);
+}
+
 export function handleApiError(error: any, fallbackMessage = "An error occurred", defaultStatus = 400) {
   const msg = error?.message || fallbackMessage;
   if (msg.includes("UNAUTHORIZED")) {

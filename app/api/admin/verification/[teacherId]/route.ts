@@ -1,6 +1,6 @@
 import { NextRequest } from "next/server";
 import { prisma } from "@/lib/prisma";
-import { requireRole } from "@/lib/auth/guards";
+import { requirePermission } from "@/lib/permissions/permission-engine";
 import { apiSuccess, apiError, handleApiError } from "@/lib/api-response";
 
 export const dynamic = "force-dynamic";
@@ -10,7 +10,7 @@ export async function GET(
   { params }: { params: { teacherId: string } }
 ) {
   try {
-    await requireRole(["ADMIN"]);
+    await requirePermission("verification.view");
 
     const targetId = params.teacherId;
 

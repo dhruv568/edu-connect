@@ -1,11 +1,11 @@
 import { NextRequest } from "next/server";
-import { requireRole } from "@/lib/auth/guards";
+import { requirePermission } from "@/lib/permissions/permission-engine";
 import { AnalyticsService } from "@/services/analytics-service";
 import { apiError, apiSuccess } from "@/lib/api-response";
 
 export async function GET(req: NextRequest) {
   try {
-    await requireRole(["ADMIN"]);
+    const { auth } = await requirePermission("dashboard.view");
     const dashboardData = await AnalyticsService.getAdminDashboardData();
 
     return apiSuccess(dashboardData);

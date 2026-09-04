@@ -1,11 +1,11 @@
 import { NextRequest } from "next/server";
-import { requireRole } from "@/lib/auth/guards";
+import { requirePermission } from "@/lib/permissions/permission-engine";
 import { AnalyticsService } from "@/services/analytics-service";
 import { apiError, apiSuccess } from "@/lib/api-response";
 
 export async function GET(req: NextRequest) {
   try {
-    await requireRole(["ADMIN"]);
+    await requirePermission("analytics.view");
     const { searchParams } = new URL(req.url);
 
     const range = searchParams.get("range") || "30d";

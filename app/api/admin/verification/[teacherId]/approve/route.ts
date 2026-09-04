@@ -1,6 +1,6 @@
 import { NextRequest } from "next/server";
 import { prisma } from "@/lib/prisma";
-import { requireRole } from "@/lib/auth/guards";
+import { requirePermission } from "@/lib/permissions/permission-engine";
 import { apiSuccess, apiError, handleApiError } from "@/lib/api-response";
 import { logAuditEvent } from "@/lib/audit-logger";
 import { getEmailProvider } from "@/lib/email/email-service";
@@ -12,7 +12,7 @@ export async function POST(
   { params }: { params: { teacherId: string } }
 ) {
   try {
-    const adminSession = await requireRole(["ADMIN"]);
+    const { userId } = await requirePermission("verification.approve");
     const body = await request.json().catch(() => ({}));
     const note = body.note || "Application reviewed and approved by administrator";
 
@@ -43,14 +43,14 @@ export async function POST(
     await prisma.teacherVerificationHistory.create({
       data: {
         teacherId: tp.id,
-        adminId: adminSession.id,
+        adminId: userId,
         previousStatus,
         newStatus: "VERIFIED",
         reason: note,
       },
     });
 
-    await logAuditEvent(adminSession.id, "TEACHER_APPROVED", {
+    await logAuditEvent(userId, "TEACHER_APPROVED", {
       teacherProfileId: tp.id,
       teacherUserId: tp.userId,
       previousStatus,
@@ -61,7 +61,7 @@ export async function POST(
       const { EventService } = require("@/services/event-service");
       await EventService.emit("teacher.verified", {
         userId: tp.userId,
-        actorId: adminSession.id,
+        actorId: userId,
         actorRole: "ADMIN",
         data: {
           teacherProfileId: tp.id,

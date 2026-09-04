@@ -1,12 +1,12 @@
 import { NextRequest } from "next/server";
-import { requireRole } from "@/lib/auth/guards";
+import { requirePermission } from "@/lib/permissions/permission-engine";
 import { apiSuccess, handleApiError } from "@/lib/api-response";
 import { prisma } from "@/lib/prisma";
 import { LedgerService } from "@/services/ledger-service";
 
 export async function GET(request: NextRequest) {
   try {
-    await requireRole(["ADMIN"]);
+    await requirePermission("payments.view");
 
     const searchParams = request.nextUrl.searchParams;
     const search = searchParams.get("search") || "";

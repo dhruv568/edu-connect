@@ -1,5 +1,5 @@
 import { NextRequest } from "next/server";
-import { requireRole } from "@/lib/auth/guards";
+import { requirePermission } from "@/lib/permissions/permission-engine";
 import { apiSuccess, handleApiError } from "@/lib/api-response";
 import { AdminService } from "@/services/admin-service";
 
@@ -7,7 +7,7 @@ export const dynamic = "force-dynamic";
 
 export async function GET(request: NextRequest) {
   try {
-    await requireRole(["ADMIN"]);
+    await requirePermission("reports.view");
 
     const { searchParams } = new URL(request.url);
     const status = searchParams.get("status") || undefined;

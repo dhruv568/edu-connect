@@ -10,10 +10,12 @@ import {
   Eye,
   Search,
   Shield,
+  Trash2,
 } from "lucide-react";
 import { Navbar } from "@/components/layout/navbar";
 import { Footer } from "@/components/layout/footer";
 import { formatCurrency } from "@/lib/currency";
+import { PermissionProvider, PermissionGuard } from "@/components/shared/permission-guard";
 
 export default function AdminCoursesModerationPage() {
   const [courses, setCourses] = useState<any[]>([]);
@@ -54,6 +56,20 @@ export default function AdminCoursesModerationPage() {
     }
   };
 
+  const handleDeleteCourse = async (courseId: string, title: string) => {
+    if (!confirm(`Are you sure you want to permanently delete course "${title}"?`)) return;
+    try {
+      const res = await fetch(`/api/admin/courses/${courseId}`, {
+        method: "DELETE",
+      });
+      if (res.ok) {
+        fetchAdminCourses();
+      }
+    } catch (err) {
+      console.error("Failed to delete course:", err);
+    }
+  };
+
   const filtered = courses.filter((c) => {
     if (!searchTerm) return true;
     const q = searchTerm.toLowerCase();
@@ -66,8 +82,9 @@ export default function AdminCoursesModerationPage() {
   });
 
   return (
-    <div className="min-h-screen flex flex-col bg-slate-950 text-slate-100 selection:bg-blue-500 selection:text-white">
-      <Navbar />
+    <PermissionProvider>
+      <div className="min-h-screen flex flex-col bg-slate-950 text-slate-100 selection:bg-blue-500 selection:text-white">
+        <Navbar />
 
       <main className="flex-1 max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 pt-28 pb-16 space-y-8">
         <div className="pb-6 border-b border-slate-800 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
@@ -164,32 +181,48 @@ export default function AdminCoursesModerationPage() {
                           </Link>
 
                           {c.status !== "PUBLISHED" && (
-                            <button
-                              onClick={() => handleStatusChange(c.id, "PUBLISHED")}
-                              className="px-3 py-1.5 text-[11px] font-bold rounded-lg bg-emerald-600 text-white"
-                            >
-                              Approve & Publish
-                            </button>
+                            <PermissionGuard permission="courses.approve">
+                              <button
+                                onClick={() => handleStatusChange(c.id, "PUBLISHED")}
+                                className="px-3 py-1.5 text-[11px] font-bold rounded-lg bg-emerald-600 text-white"
+                              >
+                                Approve & Publish
+                              </button>
+                            </PermissionGuard>
                           )}
 
                           {c.status === "PUBLISHED" && (
-                            <button
-                              onClick={() => handleStatusChange(c.id, "UNPUBLISHED")}
-                              className="px-3 py-1.5 text-[11px] font-bold rounded-lg bg-amber-600 text-white"
-                            >
-                              Unpublish
-                            </button>
+                            <PermissionGuard permission="courses.reject">
+                              <button
+                                onClick={() => handleStatusChange(c.id, "UNPUBLISHED")}
+                                className="px-3 py-1.5 text-[11px] font-bold rounded-lg bg-amber-600 text-white"
+                              >
+                                Unpublish
+                              </button>
+                            </PermissionGuard>
                           )}
 
                           {c.status !== "ARCHIVED" && (
-                            <button
-                              onClick={() => handleStatusChange(c.id, "ARCHIVED")}
-                              className="p-2 rounded-lg bg-slate-800 text-slate-400 hover:text-red-400"
-                              title="Archive Course"
-                            >
-                              <Archive className="w-4 h-4" />
-                            </button>
+                            <PermissionGuard permission="courses.reject">
+                              <button
+                                onClick={() => handleStatusChange(c.id, "ARCHIVED")}
+                                className="p-2 rounded-lg bg-slate-800 text-slate-400 hover:text-red-400"
+                                title="Archive Course"
+                              >
+                                <Archive className="w-4 h-4" />
+                              </button>
+                            </PermissionGuard>
                           )}
+
+                          <PermissionGuard permission="courses.delete">
+                            <button
+                              onClick={() => handleDeleteCourse(c.id, c.title)}
+                              className="p-2 rounded-lg bg-slate-800 text-rose-400 hover:text-rose-300 hover:bg-rose-950/40"
+                              title="Delete Course Permanently"
+                            >
+                              <Trash2 className="w-4 h-4" />
+                            </button>
+                          </PermissionGuard>
                         </div>
                       </td>
                     </tr>
@@ -201,7 +234,8 @@ export default function AdminCoursesModerationPage() {
         )}
       </main>
 
-      <Footer />
-    </div>
+        <Footer />
+      </div>
+    </PermissionProvider>
   );
 }

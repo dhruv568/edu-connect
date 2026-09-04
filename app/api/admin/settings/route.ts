@@ -1,5 +1,5 @@
 import { NextRequest } from "next/server";
-import { requireRole } from "@/lib/auth/guards";
+import { requirePermission } from "@/lib/permissions/permission-engine";
 import { apiSuccess, handleApiError } from "@/lib/api-response";
 import { AdminService } from "@/services/admin-service";
 
@@ -7,7 +7,7 @@ export const dynamic = "force-dynamic";
 
 export async function GET(request: NextRequest) {
   try {
-    await requireRole(["ADMIN"]);
+    await requirePermission("settings.view");
     const settings = await AdminService.getPlatformSettings();
     return apiSuccess(settings);
   } catch (error: any) {
@@ -17,10 +17,10 @@ export async function GET(request: NextRequest) {
 
 export async function PUT(request: NextRequest) {
   try {
-    const admin = await requireRole(["ADMIN"]);
+    const { userId } = await requirePermission("settings.manage");
     const body = await request.json();
 
-    const updatedSettings = await AdminService.updatePlatformSettings(admin.userId, body);
+    const updatedSettings = await AdminService.updatePlatformSettings(userId, body);
     return apiSuccess({ message: "Platform settings updated successfully.", settings: updatedSettings });
   } catch (error: any) {
     return handleApiError(error);

@@ -20,11 +20,18 @@ import {
   FileCheck,
   UserCheck,
   GraduationCap as TeacherIcon,
+  IndianRupee,
+  AlertOctagon,
+  BarChart2,
+  Activity,
+  Server,
+  ShieldAlert,
 } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { UserRole } from "@/types/auth";
 import { useToast } from "@/components/ui/toast";
 import { NotificationPopover } from "@/components/layout/notification-popover";
+import { PermissionProvider } from "@/components/shared/permission-guard";
 
 export interface DashboardLayoutProps {
   role: UserRole;
@@ -41,7 +48,9 @@ export function DashboardLayout({ role, userName, userEmail, children }: Dashboa
 
   const [currentUserName, setCurrentUserName] = useState<string>(userName || "");
   const [currentUserEmail, setCurrentUserEmail] = useState<string>(userEmail || "");
+  const [currentRoleTitle, setCurrentRoleTitle] = useState<string>(role === "ADMIN" ? "SUPER ADMIN" : role === "STAFF" ? "STAFF" : role);
   const [avatarUrl, setAvatarUrl] = useState<string | null>(null);
+  const [dynamicNav, setDynamicNav] = useState<any[] | null>(null);
 
   useEffect(() => {
     if (userName && userName !== "User" && userName !== "Loading...") {
@@ -51,42 +60,64 @@ export function DashboardLayout({ role, userName, userEmail, children }: Dashboa
       setCurrentUserEmail(userEmail);
     }
 
-    const needsName = !userName || userName === "User" || userName === "Loading...";
-    const needsEmail = !userEmail || userEmail === "..." || userEmail === "loading...";
+    // Always fetch auth info to resolve role name, avatar, and dynamic navigation for staff/admin
+    fetch("/api/auth/me")
+      .then((res) => (res.ok ? res.json() : null))
+      .then((json) => {
+        if (json?.data?.user) {
+          const u = json.data.user;
+          const resolvedName =
+            u.name ||
+            [u.firstName, u.lastName].filter(Boolean).join(" ").trim() ||
+            (u.email ? u.email.split("@")[0] : "");
 
-    if (needsName || needsEmail) {
-      fetch("/api/auth/me")
-        .then((res) => (res.ok ? res.json() : null))
-        .then((json) => {
-          if (json?.data?.user) {
-            const u = json.data.user;
-            const resolvedName =
-              u.name ||
-              [u.firstName, u.lastName].filter(Boolean).join(" ").trim() ||
-              (u.email ? u.email.split("@")[0] : "");
-
-            if (resolvedName) {
-              setCurrentUserName(resolvedName);
-            }
-            if (u.email) {
-              setCurrentUserEmail(u.email);
-            }
-            if (u.avatarUrl) {
-              setAvatarUrl(u.avatarUrl);
-            }
+          if (resolvedName) {
+            setCurrentUserName(resolvedName);
           }
-        })
-        .catch(() => {});
-    }
+          if (u.email) {
+            setCurrentUserEmail(u.email);
+          }
+          if (u.avatarUrl) {
+            setAvatarUrl(u.avatarUrl);
+          }
+          if (u.roleName) {
+            setCurrentRoleTitle(u.roleName.toUpperCase());
+          }
+          if (Array.isArray(u.navigation) && u.navigation.length > 0) {
+            setDynamicNav(u.navigation);
+          }
+        }
+      })
+      .catch(() => {});
   }, [userName, userEmail]);
 
-  const roleColors = {
+  const roleColors: Record<string, "admin" | "teacher" | "student"> = {
     ADMIN: "admin",
+    STAFF: "admin",
     TEACHER: "teacher",
     STUDENT: "student",
-  } as const;
+  };
 
-  const navItems = {
+  const iconMap: Record<string, any> = {
+    LayoutDashboard,
+    Users,
+    GraduationCap,
+    TeacherIcon,
+    ShieldCheck,
+    BookOpen,
+    Video,
+    FileCheck,
+    IndianRupee,
+    AlertOctagon,
+    BarChart2,
+    Activity,
+    Server,
+    ShieldAlert,
+    UserCheck,
+    Settings,
+  };
+
+  const staticNavItems = {
     ADMIN: [
       { label: "Overview Dashboard", icon: LayoutDashboard, href: "/admin" },
       { label: "User Governance", icon: Users, href: "/admin/users" },
@@ -97,9 +128,15 @@ export function DashboardLayout({ role, userName, userEmail, children }: Dashboa
       { label: "Payment Ledger", icon: FileCheck, href: "/admin/payments" },
       { label: "Refund Management", icon: FileCheck, href: "/admin/refunds" },
       { label: "Report Moderation", icon: ShieldCheck, href: "/admin/reports" },
-      { label: "Platform Settings", icon: Settings, href: "/admin/settings" },
+      { label: "Platform Analytics", icon: BarChart2, href: "/admin/analytics" },
       { label: "Activity Audit Logs", icon: FileCheck, href: "/admin/activity" },
+      { label: "Role Management", icon: ShieldAlert, href: "/admin/roles" },
+      { label: "Staff Management", icon: UserCheck, href: "/admin/staff" },
+      { label: "Platform Settings", icon: Settings, href: "/admin/settings" },
       { label: "System Health", icon: Settings, href: "/admin/system-health" },
+    ],
+    STAFF: [
+      { label: "Staff Dashboard", icon: LayoutDashboard, href: "/staff/dashboard" },
     ],
     TEACHER: [
       { label: "Teacher Dashboard", icon: LayoutDashboard, href: "/teacher" },
@@ -116,6 +153,18 @@ export function DashboardLayout({ role, userName, userEmail, children }: Dashboa
     ],
   };
 
+  // Compile active navigation
+  let activeNav: Array<{ label: string; icon: any; href: string }> = [];
+  if ((role === "ADMIN" || role === "STAFF") && dynamicNav) {
+    activeNav = dynamicNav.map((item) => ({
+      label: item.label,
+      icon: iconMap[item.icon] || LayoutDashboard,
+      href: role === "STAFF" && item.href === "/admin" ? "/staff/dashboard" : item.href,
+    }));
+  } else {
+    activeNav = staticNavItems[role] || [];
+  }
+
   const handleLogout = async () => {
     try {
       await fetch("/api/auth/logout", { method: "POST" });
@@ -127,7 +176,8 @@ export function DashboardLayout({ role, userName, userEmail, children }: Dashboa
   };
 
   return (
-    <div className="min-h-screen flex bg-slate-50">
+    <PermissionProvider>
+      <div className="min-h-screen flex bg-slate-50">
       {/* Mobile Backdrop & Sidebar */}
       {sidebarOpen && (
         <div
@@ -150,7 +200,7 @@ export function DashboardLayout({ role, userName, userEmail, children }: Dashboa
             <div>
               <h1 className="text-lg font-black text-white tracking-tight">EDUCONNECT</h1>
               <Badge variant={roleColors[role] || "student"} size="sm">
-                {role} PORTAL
+                {currentRoleTitle}
               </Badge>
             </div>
           </div>
@@ -160,13 +210,15 @@ export function DashboardLayout({ role, userName, userEmail, children }: Dashboa
         </div>
 
         <nav className="flex-1 p-4 space-y-1 overflow-y-auto">
-          {(navItems[role] || []).map((item, idx) => {
+          {activeNav.map((item, idx) => {
             const isActive =
               pathname === item.href ||
               (item.href !== "/admin" &&
+                item.href !== "/staff/dashboard" &&
                 item.href !== "/teacher" &&
                 item.href !== "/student" &&
                 pathname.startsWith(item.href));
+            const IconComponent = item.icon || LayoutDashboard;
             return (
               <Link
                 key={idx}
@@ -178,7 +230,7 @@ export function DashboardLayout({ role, userName, userEmail, children }: Dashboa
                     : "text-slate-300 hover:bg-slate-800 hover:text-white"
                 }`}
               >
-                <item.icon className={`h-4 w-4 ${isActive ? "text-white" : "text-slate-400"}`} />
+                <IconComponent className={`h-4 w-4 ${isActive ? "text-white" : "text-slate-400"}`} />
                 <span>{item.label}</span>
               </Link>
             );
@@ -250,5 +302,6 @@ export function DashboardLayout({ role, userName, userEmail, children }: Dashboa
         <main className="flex-1 p-6 lg:p-8 max-w-7xl w-full mx-auto">{children}</main>
       </div>
     </div>
+    </PermissionProvider>
   );
 }

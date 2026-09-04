@@ -17,6 +17,8 @@ export function middleware(request: NextRequest) {
   const isPublicPath =
     pathname === "/" ||
     pathname === "/login" ||
+    pathname === "/staff/login" ||
+    pathname.startsWith("/staff/invite") ||
     pathname.startsWith("/register") ||
     pathname.startsWith("/forgot-password") ||
     pathname.startsWith("/reset-password") ||
@@ -41,6 +43,9 @@ export function middleware(request: NextRequest) {
       return NextResponse.next();
     }
     // Unauthenticated user attempting to access protected route
+    if (pathname.startsWith("/staff")) {
+      return NextResponse.redirect(new URL("/staff/login", request.url));
+    }
     if (pathname.startsWith("/admin")) {
       return NextResponse.redirect(new URL("/admin/login", request.url));
     }
@@ -61,6 +66,9 @@ export function middleware(request: NextRequest) {
   if (!userSession) {
     if (isPublicPath) {
       return NextResponse.next();
+    }
+    if (pathname.startsWith("/staff")) {
+      return NextResponse.redirect(new URL("/staff/login", request.url));
     }
     if (pathname.startsWith("/admin")) {
       return NextResponse.redirect(new URL("/admin/login", request.url));
@@ -84,8 +92,14 @@ export function middleware(request: NextRequest) {
   }
 
   // Verified user role-protected route guards
+  if (pathname.startsWith("/staff") && pathname !== "/staff/login" && !pathname.startsWith("/staff/invite")) {
+    if (userSession.role !== "STAFF" && userSession.role !== "ADMIN") {
+      return NextResponse.redirect(new URL("/staff/login", request.url));
+    }
+  }
+
   if (pathname.startsWith("/admin") && pathname !== "/admin/login") {
-    if (userSession.role !== "ADMIN") {
+    if (userSession.role !== "ADMIN" && userSession.role !== "STAFF") {
       return NextResponse.redirect(new URL("/admin/login", request.url));
     }
   }

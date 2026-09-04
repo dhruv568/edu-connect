@@ -1,4 +1,4 @@
-export type UserRole = "ADMIN" | "TEACHER" | "STUDENT";
+export type UserRole = "ADMIN" | "STAFF" | "TEACHER" | "STUDENT";
 
 export type VerificationStatus = "PENDING" | "VERIFIED" | "REJECTED" | "SUSPENDED";
 
@@ -14,6 +14,20 @@ export interface UserSession {
   emailVerified: boolean;
   firstName: string;
   lastName: string;
+  status?: string;
+  roleId?: string | null;
+  roleName?: string | null;
+  permissions?: string[];
+  features?: string[];
+}
+
+export interface DynamicNavItem {
+  key: string;
+  label: string;
+  href: string;
+  icon: string;
+  moduleGroup: string;
+  sortOrder: number;
 }
 
 export interface ApiResponse<T = any> {

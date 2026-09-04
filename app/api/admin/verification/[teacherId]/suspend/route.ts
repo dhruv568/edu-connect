@@ -2,7 +2,7 @@ export const dynamic = "force-dynamic";
 
 import { NextRequest } from "next/server";
 import { prisma } from "@/lib/prisma";
-import { requireRole } from "@/lib/auth/guards";
+import { requirePermission } from "@/lib/permissions/permission-engine";
 import { apiSuccess, apiError, handleApiError } from "@/lib/api-response";
 import { logAuditEvent } from "@/lib/audit-logger";
 import { getEmailProvider } from "@/lib/email/email-service";
@@ -12,7 +12,7 @@ export async function POST(
   { params }: { params: { teacherId: string } }
 ) {
   try {
-    const adminSession = await requireRole(["ADMIN"]);
+    const { userId } = await requirePermission("verification.suspend");
     const body = await request.json();
     const reason = body.reason;
 
@@ -46,14 +46,14 @@ export async function POST(
     await prisma.teacherVerificationHistory.create({
       data: {
         teacherId: tp.id,
-        adminId: adminSession.id,
+        adminId: userId,
         previousStatus,
         newStatus: "SUSPENDED",
         reason: reason.trim(),
       },
     });
 
-    await logAuditEvent(adminSession.id, "TEACHER_SUSPENDED", {
+    await logAuditEvent(userId, "TEACHER_SUSPENDED", {
       teacherProfileId: tp.id,
       teacherUserId: tp.userId,
       reason: reason.trim(),

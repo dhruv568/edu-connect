@@ -1,5 +1,6 @@
 import { getSession } from "@/lib/auth/session";
 import { UserRole, UserSession } from "@/types/auth";
+import { prisma } from "@/lib/prisma";
 
 export async function requireAuth(): Promise<UserSession & { userId: string }> {
   const session = await getSession();
@@ -7,7 +8,22 @@ export async function requireAuth(): Promise<UserSession & { userId: string }> {
     throw new Error("UNAUTHORIZED: Session expired or invalid.");
   }
   const userId = session.userId || session.id;
-  return { ...session, userId };
+
+  // Real-time verification of user active status
+  const dbUser = await prisma.user.findUnique({
+    where: { id: userId },
+    select: { status: true, role: true },
+  });
+
+  if (!dbUser) {
+    throw new Error("UNAUTHORIZED: User account not found.");
+  }
+
+  if (dbUser.status !== "ACTIVE") {
+    throw new Error("FORBIDDEN: User account is deactivated or suspended. Access denied.");
+  }
+
+  return { ...session, userId, role: dbUser.role as UserRole };
 }
 
 export async function requireVerifiedEmail(): Promise<UserSession & { userId: string }> {
@@ -25,4 +41,18 @@ export async function requireRole(allowedRoles: UserRole[]): Promise<UserSession
   }
   return session;
 }
+
+export async function requireStaffOrAdmin(): Promise<UserSession & { userId: string }> {
+  return requireRole(["ADMIN", "STAFF"]);
+}
+
+export {
+  requirePermission,
+  requireAnyPermission,
+  requireFeature,
+  getUserAuthorization,
+  hasPermission,
+  hasFeature,
+} from "@/lib/permissions/permission-engine";
+
 

@@ -13,13 +13,17 @@ model User {
   id                    String              @id @default(uuid())
   email                 String              @unique
   passwordHash          String
-  role                  String              @default("STUDENT") // ADMIN | TEACHER | STUDENT
+  role                  String              @default("STUDENT") // ADMIN | STAFF | TEACHER | STUDENT
+  roleId                String?
   status                String              @default("ACTIVE") // ACTIVE | SUSPENDED | DEACTIVATED
   emailVerified         Boolean             @default(false)
   emailVerifiedAt       DateTime?
   createdAt             DateTime            @default(now())
   updatedAt             DateTime            @updatedAt
 
+  customRole            Role?               @relation("UserRole", fields: [roleId], references: [id], onDelete: SetNull)
+  rolesCreated          Role[]              @relation("RolesCreatedBy")
+  staffInvitationsSent  StaffInvitation[]   @relation("StaffInvitedBy")
   profile               Profile?
   teacherProfile        TeacherProfile?
   studentProfile        StudentProfile?
@@ -890,5 +894,117 @@ model PendingRegistration {
   @@index([email])
   @@map("pending_registrations")
 }
+
+model Role {
+  id          String   @id @default(uuid())
+  name        String   @unique
+  description String?
+  status      String   @default("ACTIVE") // ACTIVE | INACTIVE
+  isSystem    Boolean  @default(false)    // Predefined template/system roles
+  createdById String?
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  createdBy       User?            @relation("RolesCreatedBy", fields: [createdById], references: [id], onDelete: SetNull)
+  users           User[]           @relation("UserRole")
+  roleFeatures    RoleFeature[]
+  rolePermissions RolePermission[]
+  invitations     StaffInvitation[]
+
+  @@map("roles")
+}
+
+model Feature {
+  id                 String   @id @default(uuid())
+  key                String   @unique // dashboard, courses, teachers, users, live_classes, payments, refunds, reports, analytics, activity, system_health, settings, roles, staff
+  name               String
+  description        String?
+  moduleGroup        String   // Core | Academic | Finance | Governance | Operations | Administration
+  route              String
+  icon               String   // Lucide icon name
+  sortOrder          Int      @default(0)
+  status             String   @default("ACTIVE") // ACTIVE | INACTIVE
+  parentFeatureId    String?
+  dashboardWidgetKey String?
+
+  parent       Feature?       @relation("FeatureHierarchy", fields: [parentFeatureId], references: [id], onDelete: Cascade)
+  children     Feature[]      @relation("FeatureHierarchy")
+  roleFeatures RoleFeature[]
+  permissions  Permission[]
+
+  createdAt    DateTime       @default(now())
+  updatedAt    DateTime       @updatedAt
+
+  @@map("features")
+}
+
+model Permission {
+  id          String   @id @default(uuid())
+  key         String   @unique // courses.view, courses.create, courses.update, courses.delete, courses.approve, etc.
+  name        String
+  description String?
+  moduleGroup String
+  action      String   // view, create, update, delete, approve, reject, manage, cancel, export, etc.
+  featureId   String?
+  sortOrder   Int      @default(0)
+
+  feature         Feature?         @relation(fields: [featureId], references: [id], onDelete: Cascade)
+  rolePermissions RolePermission[]
+
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  @@map("permissions")
+}
+
+model RoleFeature {
+  id        String   @id @default(uuid())
+  roleId    String
+  featureId String
+
+  role      Role     @relation(fields: [roleId], references: [id], onDelete: Cascade)
+  feature   Feature  @relation(fields: [featureId], references: [id], onDelete: Cascade)
+
+  createdAt DateTime @default(now())
+
+  @@unique([roleId, featureId])
+  @@map("role_features")
+}
+
+model RolePermission {
+  id           String     @id @default(uuid())
+  roleId       String
+  permissionId String
+
+  role         Role       @relation(fields: [roleId], references: [id], onDelete: Cascade)
+  permission   Permission @relation(fields: [permissionId], references: [id], onDelete: Cascade)
+
+  createdAt    DateTime   @default(now())
+
+  @@unique([roleId, permissionId])
+  @@map("role_permissions")
+}
+
+model StaffInvitation {
+  id          String    @id @default(uuid())
+  email       String
+  fullName    String?
+  roleId      String
+  invitedById String
+  tokenHash   String    @unique
+  status      String    @default("PENDING") // PENDING | ACCEPTED | EXPIRED | REVOKED
+  expiresAt   DateTime
+  acceptedAt  DateTime?
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+
+  role        Role      @relation(fields: [roleId], references: [id], onDelete: Cascade)
+  invitedBy   User      @relation("StaffInvitedBy", fields: [invitedById], references: [id], onDelete: Cascade)
+
+  @@index([email])
+  @@index([status])
+  @@map("staff_invitations")
+}
+
 
 

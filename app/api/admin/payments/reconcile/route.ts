@@ -1,11 +1,11 @@
 import { NextRequest } from "next/server";
-import { requireRole } from "@/lib/auth/guards";
+import { requirePermission } from "@/lib/permissions/permission-engine";
 import { apiSuccess, handleApiError } from "@/lib/api-response";
 import { prisma } from "@/lib/prisma";
 
 export async function POST(request: NextRequest) {
   try {
-    await requireRole(["ADMIN"]);
+    await requirePermission("payments.reconcile");
     const body = await request.json().catch(() => ({}));
     const { transactionId } = body;
 

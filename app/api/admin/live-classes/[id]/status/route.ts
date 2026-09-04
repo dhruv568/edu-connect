@@ -1,11 +1,11 @@
 import { NextRequest } from "next/server";
-import { requireRole } from "@/lib/auth/guards";
+import { requirePermission } from "@/lib/permissions/permission-engine";
 import { apiSuccess, apiError, handleApiError } from "@/lib/api-response";
 import { AdminService } from "@/services/admin-service";
 
 export async function PATCH(request: NextRequest, { params }: { params: { id: string } }) {
   try {
-    const admin = await requireRole(["ADMIN"]);
+    const { userId } = await requirePermission("live_classes.cancel");
     const body = await request.json();
     const { action, reason } = body;
 
@@ -13,7 +13,7 @@ export async function PATCH(request: NextRequest, { params }: { params: { id: st
       if (!reason) {
         return apiError("VALIDATION_ERROR: Cancellation reason is required.", 400);
       }
-      const updatedSlot = await AdminService.cancelLiveClass(admin.userId, params.id, reason);
+      const updatedSlot = await AdminService.cancelLiveClass(userId, params.id, reason);
       return apiSuccess({ message: "Live class slot cancelled by administrator.", slot: updatedSlot });
     }
 

@@ -3,7 +3,7 @@ import { VerificationStatus } from "@/types/auth";
 import { ShieldCheck, Clock, XCircle, AlertOctagon, CheckCircle2 } from "lucide-react";
 
 interface StatusBadgeProps {
-  status: VerificationStatus | "EMAIL_VERIFIED" | "EMAIL_UNVERIFIED";
+  status: VerificationStatus | "EMAIL_VERIFIED" | "EMAIL_UNVERIFIED" | "ACTIVE" | "INACTIVE" | "DEACTIVATED" | "ACCEPTED" | "EXPIRED" | "REVOKED" | string;
   size?: "sm" | "md" | "lg";
   className?: string;
 }
@@ -22,6 +22,60 @@ export function StatusBadge({ status, size = "md", className = "" }: StatusBadge
   };
 
   switch (status) {
+    case "ACTIVE":
+      return (
+        <span
+          className={`inline-flex items-center font-bold rounded-full bg-emerald-50 text-emerald-700 border border-emerald-200/80 shadow-xs ${sizeClasses[size]} ${className}`}
+        >
+          <CheckCircle2 className={`${iconSizes[size]} text-emerald-600`} />
+          ACTIVE
+        </span>
+      );
+    case "INACTIVE":
+      return (
+        <span
+          className={`inline-flex items-center font-bold rounded-full bg-slate-100 text-slate-600 border border-slate-200 ${sizeClasses[size]} ${className}`}
+        >
+          <Clock className={`${iconSizes[size]} text-slate-400`} />
+          INACTIVE
+        </span>
+      );
+    case "DEACTIVATED":
+      return (
+        <span
+          className={`inline-flex items-center font-bold rounded-full bg-rose-50 text-rose-700 border border-rose-200 ${sizeClasses[size]} ${className}`}
+        >
+          <XCircle className={`${iconSizes[size]} text-rose-600`} />
+          DEACTIVATED
+        </span>
+      );
+    case "ACCEPTED":
+      return (
+        <span
+          className={`inline-flex items-center font-bold rounded-full bg-emerald-50 text-emerald-700 border border-emerald-200 ${sizeClasses[size]} ${className}`}
+        >
+          <CheckCircle2 className={`${iconSizes[size]} text-emerald-600`} />
+          ACCEPTED
+        </span>
+      );
+    case "EXPIRED":
+      return (
+        <span
+          className={`inline-flex items-center font-bold rounded-full bg-amber-50 text-amber-700 border border-amber-200 ${sizeClasses[size]} ${className}`}
+        >
+          <Clock className={`${iconSizes[size]} text-amber-600`} />
+          EXPIRED
+        </span>
+      );
+    case "REVOKED":
+      return (
+        <span
+          className={`inline-flex items-center font-bold rounded-full bg-slate-100 text-slate-500 border border-slate-200 line-through ${sizeClasses[size]} ${className}`}
+        >
+          <XCircle className={`${iconSizes[size]} text-slate-400`} />
+          REVOKED
+        </span>
+      );
     case "VERIFIED":
       return (
         <span
@@ -77,6 +131,12 @@ export function StatusBadge({ status, size = "md", className = "" }: StatusBadge
         </span>
       );
     default:
-      return null;
+      return (
+        <span
+          className={`inline-flex items-center font-semibold rounded-full bg-slate-100 text-slate-700 border border-slate-200 ${sizeClasses[size]} ${className}`}
+        >
+          {status}
+        </span>
+      );
   }
 }
