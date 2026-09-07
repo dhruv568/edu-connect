@@ -24,7 +24,7 @@ export default function RoleSelectionPage() {
 
         <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
           {/* TEACHER ROLE CARD */}
-          <Link href="/register/teacher">
+          <Link href="/teacher/register">
             <GlassCard
               glowColor="rgba(99, 102, 241, 0.2)"
               className="group cursor-pointer p-8 space-y-6 border-2 border-white/90 hover:border-indigo-400 transition-all flex flex-col justify-between h-full shadow-lg"
@@ -69,7 +69,7 @@ export default function RoleSelectionPage() {
           </Link>
 
           {/* STUDENT ROLE CARD */}
-          <Link href="/register/student">
+          <Link href="/student/register">
             <GlassCard
               glowColor="rgba(16, 185, 129, 0.2)"
               className="group cursor-pointer p-8 space-y-6 border-2 border-white/90 hover:border-emerald-400 transition-all flex flex-col justify-between h-full shadow-lg"

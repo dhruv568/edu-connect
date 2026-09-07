@@ -4,6 +4,7 @@ import React, { useState } from "react";
 import { FloatingNavbar } from "@/components/homepage/floating-navbar";
 import { InteractiveHeroCanvas } from "@/components/homepage/interactive-hero-canvas";
 import { TrustChips } from "@/components/homepage/trust-chips";
+import { RoleGatewaySection } from "@/components/homepage/role-gateway-section";
 import { LiquidLearningModels } from "@/components/homepage/liquid-learning-models";
 import { TeacherCarousel } from "@/components/homepage/teacher-carousel";
 import { LiveClassroomPreview } from "@/components/homepage/live-classroom-preview";
@@ -34,6 +35,9 @@ export default function EduConnectsHomePage() {
 
         {/* 3. Floating Trust Chips */}
         <TrustChips />
+
+        {/* 3.5 Role Selection Gateway (Student / Teacher Paths) */}
+        <RoleGatewaySection />
 
         {/* 4. Three Liquid Learning Models */}
         <LiquidLearningModels onOpenAuth={handleOpenAuth} />

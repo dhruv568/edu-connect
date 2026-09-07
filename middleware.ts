@@ -16,6 +16,12 @@ export function middleware(request: NextRequest) {
   // Public paths accessible without authentication and accessible to unverified/verified users
   const isPublicPath =
     pathname === "/" ||
+    pathname === "/student" ||
+    pathname === "/teacher" ||
+    pathname === "/student/login" ||
+    pathname === "/teacher/login" ||
+    pathname === "/student/register" ||
+    pathname === "/teacher/register" ||
     pathname === "/login" ||
     pathname === "/staff/login" ||
     pathname.startsWith("/staff/invite") ||
@@ -48,6 +54,16 @@ export function middleware(request: NextRequest) {
     }
     if (pathname.startsWith("/admin")) {
       return NextResponse.redirect(new URL("/admin/login", request.url));
+    }
+    if (pathname.startsWith("/student")) {
+      const loginUrl = new URL("/student/login", request.url);
+      loginUrl.searchParams.set("redirectTo", pathname);
+      return NextResponse.redirect(loginUrl);
+    }
+    if (pathname.startsWith("/teacher")) {
+      const loginUrl = new URL("/teacher/login", request.url);
+      loginUrl.searchParams.set("redirectTo", pathname);
+      return NextResponse.redirect(loginUrl);
     }
     const loginUrl = new URL("/login", request.url);
     loginUrl.searchParams.set("redirectTo", pathname);
@@ -104,15 +120,27 @@ export function middleware(request: NextRequest) {
     }
   }
 
-  if (pathname.startsWith("/teacher")) {
+  // Protect private teacher subroutes (allow public /teacher, /teacher/login, /teacher/register)
+  if (
+    pathname.startsWith("/teacher") &&
+    pathname !== "/teacher" &&
+    pathname !== "/teacher/login" &&
+    pathname !== "/teacher/register"
+  ) {
     if (userSession.role !== "TEACHER") {
-      return NextResponse.redirect(new URL("/login", request.url));
+      return NextResponse.redirect(new URL("/teacher/login", request.url));
     }
   }
 
-  if (pathname.startsWith("/student")) {
+  // Protect private student subroutes (allow public /student, /student/login, /student/register)
+  if (
+    pathname.startsWith("/student") &&
+    pathname !== "/student" &&
+    pathname !== "/student/login" &&
+    pathname !== "/student/register"
+  ) {
     if (userSession.role !== "STUDENT") {
-      return NextResponse.redirect(new URL("/login", request.url));
+      return NextResponse.redirect(new URL("/student/login", request.url));
     }
   }
 

@@ -139,14 +139,14 @@ export function DashboardLayout({ role, userName, userEmail, children }: Dashboa
       { label: "Staff Dashboard", icon: LayoutDashboard, href: "/staff/dashboard" },
     ],
     TEACHER: [
-      { label: "Teacher Dashboard", icon: LayoutDashboard, href: "/teacher" },
+      { label: "Teacher Dashboard", icon: LayoutDashboard, href: "/teacher/dashboard" },
       { label: "Profile Onboarding", icon: FileCheck, href: "/teacher/onboarding" },
       { label: "Verification Status", icon: ShieldCheck, href: "/teacher/verification" },
       { label: "Live Class Slots", icon: Video, href: "/teacher/live-classes" },
       { label: "Courses & Content", icon: BookOpen, href: "/teacher/courses" },
     ],
     STUDENT: [
-      { label: "Student Hub", icon: LayoutDashboard, href: "/student" },
+      { label: "Student Hub", icon: LayoutDashboard, href: "/student/dashboard" },
       { label: "Find Teachers", icon: TeacherIcon, href: "/student/teachers" },
       { label: "My Live Classes", icon: Video, href: "/student/live-classes" },
       { label: "Enrolled Courses", icon: BookOpen, href: "/student/courses" },
@@ -215,8 +215,8 @@ export function DashboardLayout({ role, userName, userEmail, children }: Dashboa
               pathname === item.href ||
               (item.href !== "/admin" &&
                 item.href !== "/staff/dashboard" &&
-                item.href !== "/teacher" &&
-                item.href !== "/student" &&
+                item.href !== "/teacher/dashboard" &&
+                item.href !== "/student/dashboard" &&
                 pathname.startsWith(item.href));
             const IconComponent = item.icon || LayoutDashboard;
             return (

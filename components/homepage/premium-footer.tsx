@@ -65,8 +65,10 @@ export function PremiumFooter({ showCta = true }: PremiumFooterProps = {}) {
           <div>
             <h4 className="text-xs font-extrabold text-white uppercase tracking-wider mb-4">Portals</h4>
             <ul className="space-y-2.5 text-xs text-slate-400">
-              <li><Link href="/teacher" className="hover:text-white transition-colors">Teacher Portal</Link></li>
-              <li><Link href="/student" className="hover:text-white transition-colors">Student Dashboard</Link></li>
+              <li><Link href="/student" className="hover:text-white transition-colors">Student Experience</Link></li>
+              <li><Link href="/teacher" className="hover:text-white transition-colors">Teacher Experience</Link></li>
+              <li><Link href="/student/dashboard" className="hover:text-white transition-colors">Student Dashboard</Link></li>
+              <li><Link href="/teacher/dashboard" className="hover:text-white transition-colors">Teacher Dashboard</Link></li>
               <li><Link href="/admin" className="hover:text-white transition-colors">Admin Governance</Link></li>
             </ul>
           </div>

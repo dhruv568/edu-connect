@@ -32,7 +32,7 @@ export function ClassSummary({
   summaryStats,
   attendances = [],
 }: ClassSummaryProps) {
-  const redirectUrl = isTeacher ? "/teacher" : "/student";
+  const redirectUrl = isTeacher ? "/teacher/dashboard" : "/student/dashboard";
 
   return (
     <div className="min-h-screen bg-slate-950 text-slate-100 flex items-center justify-center p-4 md:p-8">

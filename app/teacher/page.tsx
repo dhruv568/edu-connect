@@ -2,311 +2,845 @@
 
 import React, { useState, useEffect } from "react";
 import Link from "next/link";
-import { DashboardLayout } from "@/components/layout/dashboard-layout";
-import { Card } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
-import { Badge } from "@/components/ui/badge";
-import { StatusBadge } from "@/components/ui/status-badge";
-import { MetricCard } from "@/components/analytics/metric-card";
+import { motion, AnimatePresence } from "framer-motion";
+import { FloatingNavbar } from "@/components/homepage/floating-navbar";
+import { PremiumFooter } from "@/components/homepage/premium-footer";
+import { GlassCard } from "@/components/glass/glass-card";
+import { GlassBadge } from "@/components/glass/glass-badge";
+import { GlassButton } from "@/components/glass/glass-button";
+import { AuthModal } from "@/components/shared/auth-modal";
 import {
-  Video,
-  Users,
-  Award,
-  ShieldCheck,
-  Plus,
+  GraduationCap,
+  Sparkles,
   ArrowRight,
-  FileCheck,
-  Clock,
-  XCircle,
-  AlertOctagon,
+  ShieldCheck,
+  Video,
   BookOpen,
   IndianRupee,
   Calendar,
   BarChart2,
-  Loader2,
+  Users,
+  CheckCircle2,
+  Clock,
+  Award,
+  ChevronDown,
+  Layers,
+  Upload,
+  Globe,
+  Settings,
+  HelpCircle,
+  FileCheck,
+  Zap,
+  TrendingUp,
+  LayoutDashboard,
 } from "lucide-react";
 import { formatCurrency } from "@/lib/currency";
+import { UserRole, UserSession } from "@/types/auth";
 
-export default function TeacherDashboardPage() {
-  const [loading, setLoading] = useState(true);
-  const [data, setData] = useState<{
-    userName: string;
-    verificationStatus: string;
-    metrics: {
-      todayClassesCount: number;
-      upcomingClassesCount: number;
-      activeStudentsCount: number;
-      activeCoursesCount: number;
-      totalEarningsRupees: number;
-      monthlyEarningsRupees: number;
-    };
-    todaySchedule: any[];
-    upcomingClasses: any[];
-  }>({
-    userName: "Educator",
-    verificationStatus: "PENDING",
-    metrics: {
-      todayClassesCount: 0,
-      upcomingClassesCount: 0,
-      activeStudentsCount: 0,
-      activeCoursesCount: 0,
-      totalEarningsRupees: 0,
-      monthlyEarningsRupees: 0,
-    },
-    todaySchedule: [],
-    upcomingClasses: [],
-  });
+export default function TeacherLandingPage() {
+  const [authModalOpen, setAuthModalOpen] = useState(false);
+  const [openFaqIndex, setOpenFaqIndex] = useState<number | null>(0);
+  const [userSession, setUserSession] = useState<UserSession | null>(null);
 
+  // Interactive Earnings Calculator State
+  const [hourlyRate, setHourlyRate] = useState(800);
+  const [hoursPerWeek, setHoursPerWeek] = useState(12);
+  const [coursesSoldPerMonth, setCoursesSoldPerMonth] = useState(10);
+  const [courseAvgPrice, setCourseAvgPrice] = useState(1499);
+
+  // Check auth status
   useEffect(() => {
-    fetch("/api/teacher/dashboard")
-      .then((res) => res.json())
+    fetch("/api/auth/me")
+      .then((res) => (res.ok ? res.json() : null))
       .then((json) => {
-        if (json.data) {
-          setData(json.data);
+        if (json?.data?.user) {
+          setUserSession(json.data.user);
         }
       })
-      .catch((err) => console.error("Failed to load teacher dashboard:", err))
-      .finally(() => setLoading(false));
+      .catch(() => {});
   }, []);
 
+  // Calculate estimated monthly income (assuming 4.3 weeks/month + LMS course revenue)
+  const monthlyLiveHours = hoursPerWeek * 4.3;
+  const liveIncome = monthlyLiveHours * hourlyRate;
+  const courseIncome = coursesSoldPerMonth * courseAvgPrice;
+  const totalEstimatedMonthly = Math.round(liveIncome + courseIncome);
+
+  const teacherBenefits = [
+    {
+      icon: Award,
+      title: "Complete Curriculum Freedom",
+      desc: "Create courses, set your own syllabi, attach practice PDFs, and teach your own signature methodology.",
+      badge: "Full IP Ownership",
+    },
+    {
+      icon: IndianRupee,
+      title: "Set Your Own Pricing",
+      desc: "Set your own hourly rate and course fees. Track real-time earnings with transparent platform commission.",
+      badge: "Keep Majority Revenue",
+    },
+    {
+      icon: Calendar,
+      title: "Flexible Scheduling",
+      desc: "Define your working days, block personal hours, and open 1-on-1 trial or group live class slots at your convenience.",
+      badge: "Total Control",
+    },
+    {
+      icon: Video,
+      title: "Built-In LiveKit Classroom",
+      desc: "No third-party subscriptions required. Conduct HD live classes with digital whiteboard, chat, and screen share.",
+      badge: "Zero Setup Cost",
+    },
+    {
+      icon: Globe,
+      title: "Direct Student Marketplace",
+      desc: "Gain instant visibility to thousands of active learners searching for expert tutors across subjects.",
+      badge: "Instant Reach",
+    },
+    {
+      icon: TrendingUp,
+      title: "Detailed Teaching Analytics",
+      desc: "Track student retention, lesson completion rates, revenue charts, and review scores in your educator portal.",
+      badge: "Data-Driven Growth",
+    },
+  ];
+
+  const howItWorksSteps = [
+    {
+      step: "01",
+      title: "Create Educator Profile",
+      desc: "Register your account, outline your academic background, headline, teaching subjects, and hourly rate.",
+      icon: GraduationCap,
+    },
+    {
+      step: "02",
+      title: "Admin Verification",
+      desc: "Submit identity and qualification documents for verification to earn the verified educator trust badge.",
+      icon: ShieldCheck,
+    },
+    {
+      step: "03",
+      title: "Build Courses & Schedule Slots",
+      desc: "Upload structured video lessons, set weekly live class availability, or offer 1-on-1 trial demo slots.",
+      icon: BookOpen,
+    },
+    {
+      step: "04",
+      title: "Teach & Inspire Students",
+      desc: "Conduct interactive classes inside the browser using our built-in video classroom and shared whiteboard.",
+      icon: Video,
+    },
+    {
+      step: "05",
+      title: "Automated Bank Payouts",
+      desc: "Track every completed session in your financial ledger and receive automatic direct deposits via Razorpay.",
+      icon: IndianRupee,
+    },
+  ];
+
+  const teacherFaqs = [
+    {
+      question: "How do I become a verified teacher on EduConnects?",
+      answer:
+        "Simply sign up as an educator, complete your professional profile (headline, subjects, experience, hourly rate), and submit your educational degrees or certificates in our multi-step onboarding portal. Our administration team audits each application within 24-48 hours.",
+    },
+    {
+      question: "How do live classes work for teachers?",
+      answer:
+        "You define your weekly availability and schedule live class slots (1-on-1 or group). When a student books, both of you receive instant notifications. At class time, enter the built-in LiveKit classroom directly from your dashboard with HD video, interactive whiteboard, and chat.",
+    },
+    {
+      question: "How do I create and sell on-demand video courses?",
+      answer:
+        "Our course builder allows you to organize your curriculum into sections, upload high-definition video lessons with automated Mux video processing, attach supplementary PDF study notes, set a course price, and publish to the marketplace.",
+    },
+    {
+      question: "How and when do I receive payouts?",
+      answer:
+        "All earnings from enrolled courses and completed live sessions are logged in your Teacher Ledger. Payouts are transferred automatically to your verified bank account via Razorpay Route without manual invoicing.",
+    },
+    {
+      question: "Can I offer both 1-on-1 trial demos and group classes?",
+      answer:
+        "Yes! You can configure introductory demo sessions for new students to assess fit, as well as recurring group classes with custom capacity limits (e.g. 5 to 30 students per class).",
+    },
+    {
+      question: "Can I teach on EduConnects part-time alongside a full-time job?",
+      answer:
+        "Absolutely. You have 100% control over your availability calendar. Set your schedule for evenings, weekends, or specific hours that fit your personal lifestyle.",
+    },
+  ];
+
   return (
-    <DashboardLayout role="TEACHER" userName={data.userName}>
-      <div className="space-y-8 pb-16">
-        {/* Dynamic Verification Status Banner */}
-        {data.verificationStatus === "VERIFIED" && (
-          <div className="bg-emerald-600 text-white rounded-3xl p-6 shadow-lg flex flex-col md:flex-row items-center justify-between gap-4">
-            <div className="flex items-center gap-4">
-              <div className="p-3 bg-white/10 rounded-2xl">
-                <ShieldCheck className="h-8 w-8 text-white" />
-              </div>
-              <div>
-                <div className="flex items-center gap-2">
-                  <h2 className="text-xl font-bold">Verification Status: Verified Educator</h2>
-                  <StatusBadge status="VERIFIED" />
-                </div>
-                <p className="text-xs text-emerald-100 mt-1">
-                  Your profile is published on the EduConnects marketplace. You are eligible for demo bookings, live classes, and courses.
-                </p>
-              </div>
-            </div>
-            <div className="flex items-center gap-2">
-              <Link href="/teacher/analytics">
-                <Button variant="secondary" size="sm" rightIcon={<BarChart2 className="h-4 w-4" />}>
-                  View Teaching Analytics
-                </Button>
-              </Link>
-            </div>
+    <div className="min-h-screen flex flex-col bg-slate-50 relative overflow-hidden font-sans text-slate-900">
+      {/* 1. Teacher-Oriented Role Navbar */}
+      <FloatingNavbar variant="teacher" />
+
+      <main className="flex-1">
+        {/* ========================================================================= */}
+        {/* 1. HERO SECTION */}
+        {/* ========================================================================= */}
+        <section className="relative pt-32 sm:pt-36 lg:pt-44 pb-20 lg:pb-28 overflow-hidden bg-gradient-to-b from-indigo-50/60 via-slate-50 to-white">
+          {/* Subtle Background Glow Elements */}
+          <div className="absolute top-20 left-1/2 -translate-x-1/2 w-full max-w-7xl h-[500px] pointer-events-none -z-10">
+            <div className="absolute top-10 left-10 w-96 h-96 bg-indigo-500/10 rounded-full blur-3xl" />
+            <div className="absolute top-20 right-10 w-96 h-96 bg-purple-500/10 rounded-full blur-3xl" />
           </div>
-        )}
 
-        {data.verificationStatus === "PENDING" && (
-          <div className="bg-amber-500 text-white rounded-3xl p-6 shadow-lg flex flex-col md:flex-row items-center justify-between gap-4">
-            <div className="flex items-center gap-4">
-              <div className="p-3 bg-white/10 rounded-2xl">
-                <Clock className="h-8 w-8 text-white animate-pulse" />
-              </div>
-              <div>
-                <div className="flex items-center gap-2">
-                  <h2 className="text-xl font-bold">Verification Status: Application Pending</h2>
-                  <StatusBadge status="PENDING" />
+          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div className="grid grid-cols-1 lg:grid-cols-12 gap-12 lg:gap-8 items-center">
+              {/* Left Column: Copy & CTAs */}
+              <div className="lg:col-span-7 space-y-6 text-center lg:text-left">
+                <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-indigo-100/80 border border-indigo-200 text-indigo-700 text-xs font-extrabold uppercase tracking-wider shadow-2xs">
+                  <Sparkles className="h-3.5 w-3.5 text-indigo-600" />
+                  <span>The Platform Built for Independent Educators</span>
                 </div>
-                <p className="text-xs text-amber-100 mt-1">
-                  Your profile has been submitted and is currently being audited by EduConnects administration.
+
+                <h1 className="text-4xl sm:text-5xl lg:text-6xl font-black text-slate-900 tracking-tight leading-[1.15]">
+                  Turn your knowledge into impact. <br />
+                  <span className="bg-gradient-to-r from-indigo-600 via-purple-600 to-amber-600 bg-clip-text text-transparent">
+                    Teach. Grow. Earn.
+                  </span>
+                </h1>
+
+                <p className="text-base sm:text-lg text-slate-600 max-w-2xl mx-auto lg:mx-0 leading-relaxed font-normal">
+                  Build your verified educator brand, conduct high-definition live classes in the browser, sell recorded video courses, and receive automated direct bank payouts.
                 </p>
+
+                {/* Hero CTAs */}
+                <div className="flex flex-col sm:flex-row items-center justify-center lg:justify-start gap-4 pt-2">
+                  {userSession?.role === "TEACHER" ? (
+                    <Link href="/teacher/dashboard" className="w-full sm:w-auto">
+                      <GlassButton
+                        variant="primary"
+                        size="lg"
+                        className="w-full sm:w-auto bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-700 hover:to-purple-700 text-white shadow-xl shadow-indigo-500/25 text-sm font-bold"
+                        leftIcon={<LayoutDashboard className="h-4 w-4" />}
+                      >
+                        Go to Teacher Dashboard
+                      </GlassButton>
+                    </Link>
+                  ) : (
+                    <Link href="/teacher/register" className="w-full sm:w-auto">
+                      <GlassButton
+                        variant="primary"
+                        size="lg"
+                        className="w-full sm:w-auto bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-700 hover:to-purple-700 text-white shadow-xl shadow-indigo-500/25 text-sm font-bold"
+                        rightIcon={<ArrowRight className="h-4 w-4" />}
+                      >
+                        Start Teaching
+                      </GlassButton>
+                    </Link>
+                  )}
+
+                  <Link href="#how-it-works" className="w-full sm:w-auto">
+                    <GlassButton
+                      variant="secondary"
+                      size="lg"
+                      className="w-full sm:w-auto text-sm"
+                      leftIcon={<FileCheck className="h-4 w-4 text-slate-600" />}
+                    >
+                      Learn How It Works
+                    </GlassButton>
+                  </Link>
+                </div>
+
+                {/* Educator Trust Stats */}
+                <div className="pt-6 border-t border-slate-200/80 grid grid-cols-3 gap-4 text-left max-w-lg mx-auto lg:mx-0">
+                  <div>
+                    <div className="text-2xl lg:text-3xl font-black text-indigo-600">85%+</div>
+                    <div className="text-xs text-slate-500 font-medium">Revenue Share</div>
+                  </div>
+                  <div>
+                    <div className="text-2xl lg:text-3xl font-black text-slate-900">Direct</div>
+                    <div className="text-xs text-slate-500 font-medium">Razorpay Payouts</div>
+                  </div>
+                  <div>
+                    <div className="text-2xl lg:text-3xl font-black text-emerald-600">100%</div>
+                    <div className="text-xs text-slate-500 font-medium">Content Ownership</div>
+                  </div>
+                </div>
               </div>
-            </div>
-            <Link href="/teacher/onboarding">
-              <Button variant="secondary" size="sm" rightIcon={<FileCheck className="h-4 w-4" />}>
-                Edit Profile Info
-              </Button>
-            </Link>
-          </div>
-        )}
 
-        {/* Educator Stats Metrics Grid */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
-          <MetricCard
-            title="Today's Classes"
-            value={loading ? "..." : data.metrics.todayClassesCount}
-            subtitle={`${data.metrics.upcomingClassesCount} upcoming total`}
-            icon={<Video className="h-5 w-5 text-blue-600" />}
-            variant="blue"
-          />
-
-          <MetricCard
-            title="Active Students"
-            value={loading ? "..." : data.metrics.activeStudentsCount}
-            subtitle="Enrolled in your courses"
-            icon={<Users className="h-5 w-5 text-emerald-600" />}
-            variant="emerald"
-          />
-
-          <MetricCard
-            title="Published Courses"
-            value={loading ? "..." : data.metrics.activeCoursesCount}
-            subtitle="Self-paced LMS courses"
-            icon={<BookOpen className="h-5 w-5 text-purple-600" />}
-            variant="purple"
-          />
-
-          <MetricCard
-            title="Monthly Earnings"
-            value={loading ? "..." : formatCurrency(data.metrics.monthlyEarningsRupees)}
-            subtitle={`Total: ${formatCurrency(data.metrics.totalEarningsRupees)}`}
-            icon={<IndianRupee className="h-5 w-5 text-amber-500" />}
-            variant="amber"
-          />
-        </div>
-
-        {/* Schedule & Upcoming Sessions Grid */}
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-          {/* Today's Schedule */}
-          <Card className="p-6 space-y-4 border-l-4 border-l-blue-600">
-            <div className="flex items-center justify-between">
-              <div className="flex items-center gap-2">
-                <Calendar className="h-5 w-5 text-blue-600" />
-                <h3 className="text-base font-bold text-slate-900 dark:text-slate-100">
-                  Today's Schedule
-                </h3>
-              </div>
-              <Link href="/teacher/live-classes">
-                <Button variant="outline" size="sm" rightIcon={<ArrowRight className="h-4 w-4" />}>
-                  Manage Slots
-                </Button>
-              </Link>
-            </div>
-
-            {loading ? (
-              <div className="p-6 text-center">
-                <Loader2 className="h-6 w-6 text-blue-600 animate-spin mx-auto" />
-              </div>
-            ) : data.todaySchedule.length === 0 ? (
-              <div className="p-6 text-center bg-slate-50 dark:bg-slate-900/40 rounded-2xl border border-slate-200/80">
-                <Clock className="h-8 w-8 text-slate-300 dark:text-slate-600 mx-auto mb-2" />
-                <p className="text-xs font-semibold text-slate-500">No live classes scheduled for today.</p>
-              </div>
-            ) : (
-              <div className="space-y-3">
-                {data.todaySchedule.map((slot) => (
-                  <div
-                    key={slot.slotId}
-                    className="p-4 rounded-2xl bg-slate-50 dark:bg-slate-800/60 border border-slate-200/80 flex items-center justify-between gap-4"
+              {/* Right Column: Interactive Educator Dashboard Preview Card */}
+              <div className="lg:col-span-5 relative">
+                <div className="relative mx-auto max-w-md lg:max-w-none">
+                  <GlassCard
+                    glowColor="rgba(99, 102, 241, 0.25)"
+                    className="p-6 border-2 border-white shadow-2xl space-y-5 rounded-3xl bg-white/90 backdrop-blur-xl"
                   >
-                    <div>
-                      <h4 className="text-sm font-extrabold text-slate-900 dark:text-slate-100">
-                        {slot.title}
-                      </h4>
-                      <p className="text-xs text-slate-500 mt-0.5">
-                        {new Date(slot.startTime).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })} •{" "}
-                        {slot.bookedCount} / {slot.maxCapacity} Students
-                      </p>
+                    {/* Header with Verification Status */}
+                    <div className="flex items-center justify-between border-b border-slate-100 pb-3">
+                      <div className="flex items-center gap-3">
+                        <img
+                          src="https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=100&auto=format&fit=crop&q=80"
+                          alt="Educator avatar"
+                          className="w-10 h-10 rounded-2xl object-cover ring-2 ring-indigo-500/20 shadow-sm"
+                        />
+                        <div>
+                          <div className="text-xs font-black text-slate-900">Dr. Kavita Narang</div>
+                          <div className="text-[10px] text-slate-500 font-semibold">Senior Mathematics Educator</div>
+                        </div>
+                      </div>
+                      <span className="px-2.5 py-1 rounded-full text-[10px] font-extrabold bg-emerald-100 text-emerald-800 border border-emerald-200 flex items-center gap-1">
+                        <ShieldCheck className="h-3 w-3 text-emerald-600" />
+                        Verified
+                      </span>
                     </div>
 
-                    <Link href={`/classroom/${slot.slotId}`}>
-                      <Button variant="primary" size="sm">
-                        Enter Classroom
-                      </Button>
-                    </Link>
-                  </div>
-                ))}
-              </div>
-            )}
-          </Card>
+                    {/* Educator Metrics Row Preview */}
+                    <div className="grid grid-cols-2 gap-3">
+                      <div className="p-3.5 rounded-2xl bg-indigo-50/80 border border-indigo-100 space-y-1">
+                        <div className="flex items-center justify-between">
+                          <span className="text-[10px] font-extrabold uppercase text-indigo-700">This Month</span>
+                          <IndianRupee className="h-3.5 w-3.5 text-indigo-600" />
+                        </div>
+                        <div className="text-xl font-black text-slate-900">₹72,400</div>
+                        <div className="text-[10px] text-slate-500 font-medium">+18% vs last month</div>
+                      </div>
 
-          {/* Upcoming Live Classes */}
-          <Card className="p-6 space-y-4 border-l-4 border-l-emerald-600">
-            <div className="flex items-center justify-between">
-              <div className="flex items-center gap-2">
-                <Video className="h-5 w-5 text-emerald-600" />
-                <h3 className="text-base font-bold text-slate-900 dark:text-slate-100">
-                  Upcoming Classes
-                </h3>
+                      <div className="p-3.5 rounded-2xl bg-purple-50/80 border border-purple-100 space-y-1">
+                        <div className="flex items-center justify-between">
+                          <span className="text-[10px] font-extrabold uppercase text-purple-700">Enrolled Students</span>
+                          <Users className="h-3.5 w-3.5 text-purple-600" />
+                        </div>
+                        <div className="text-xl font-black text-slate-900">148</div>
+                        <div className="text-[10px] text-slate-500 font-medium">Active learners</div>
+                      </div>
+                    </div>
+
+                    {/* Upcoming Class Schedule Snippet */}
+                    <div className="p-4 rounded-2xl bg-slate-50 border border-slate-200/80 space-y-2">
+                      <div className="flex items-center justify-between text-xs font-bold text-slate-700">
+                        <span className="flex items-center gap-1.5">
+                          <Clock className="w-3.5 h-3.5 text-indigo-600" />
+                          Next Live Session
+                        </span>
+                        <span className="text-[10px] bg-emerald-100 text-emerald-800 font-bold px-2 py-0.5 rounded-md">
+                          Starts in 25m
+                        </span>
+                      </div>
+                      <div className="text-xs font-extrabold text-slate-900">
+                        JEE Advanced: Calculus Problem Solving Batch A
+                      </div>
+                      <div className="text-[11px] text-slate-500 flex items-center justify-between pt-1">
+                        <span>18 / 20 Students Confirmed</span>
+                        <span className="font-bold text-indigo-600">Enter Classroom →</span>
+                      </div>
+                    </div>
+                  </GlassCard>
+
+                  {/* Floating Trust Badge */}
+                  <div className="absolute -bottom-5 -right-5 bg-white p-3.5 rounded-2xl shadow-xl border border-slate-200/90 flex items-center gap-3 hidden sm:flex">
+                    <div className="p-2 bg-indigo-100 text-indigo-600 rounded-xl">
+                      <Zap className="h-5 w-5" />
+                    </div>
+                    <div className="text-left">
+                      <div className="text-xs font-extrabold text-slate-900">Zero Technical Overhead</div>
+                      <div className="text-[10px] text-slate-500 font-medium">We host, stream, and process payments</div>
+                    </div>
+                  </div>
+                </div>
               </div>
-              <Link href="/teacher/live-classes">
-                <Button variant="primary" size="sm" leftIcon={<Plus className="h-4 w-4" />}>
-                  Create Slot
-                </Button>
+            </div>
+          </div>
+        </section>
+
+        {/* ========================================================================= */}
+        {/* 2. TEACHER FEATURES & CORE CAPABILITIES */}
+        {/* ========================================================================= */}
+        <section id="courses" className="py-20 bg-white border-y border-slate-200">
+          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 space-y-16">
+            <div className="text-center max-w-3xl mx-auto space-y-3">
+              <GlassBadge variant="indigo">YOUR COMPLETE TEACHING TOOLKIT</GlassBadge>
+              <h2 className="text-3xl sm:text-4xl font-black text-slate-900 tracking-tight">
+                Everything to Run a Thriving Online Teaching Business
+              </h2>
+              <p className="text-sm sm:text-base text-slate-600">
+                Teach live, publish recorded courses, set your rates, and let EduConnects handle the heavy lifting.
+              </p>
+            </div>
+
+            {/* Feature 1: Profile & Marketplace Listing */}
+            <div className="grid grid-cols-1 lg:grid-cols-12 gap-12 items-center">
+              <div className="lg:col-span-6 space-y-5">
+                <div className="p-3 bg-indigo-100 text-indigo-600 rounded-2xl w-fit">
+                  <GraduationCap className="h-6 w-6" />
+                </div>
+                <h3 className="text-2xl sm:text-3xl font-black text-slate-900">
+                  Build Your Verified Educator Brand
+                </h3>
+                <p className="text-sm text-slate-600 leading-relaxed">
+                  Stand out in our student search directory with verified credentials, custom headlines, subject specializations, and direct booking links.
+                </p>
+                <div className="space-y-2.5 text-xs sm:text-sm text-slate-700 font-semibold">
+                  <div className="flex items-center gap-2">
+                    <CheckCircle2 className="h-4 w-4 text-emerald-600 shrink-0" />
+                    <span>Display verified degrees, certificates, and years of experience</span>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <CheckCircle2 className="h-4 w-4 text-emerald-600 shrink-0" />
+                    <span>Set custom hourly rates in ₹ INR for live 1-on-1 tutoring</span>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <CheckCircle2 className="h-4 w-4 text-emerald-600 shrink-0" />
+                    <span>Collect ratings and reviews from verified attending students</span>
+                  </div>
+                </div>
+              </div>
+
+              <div className="lg:col-span-6">
+                <div className="p-6 rounded-3xl bg-slate-50 border border-slate-200/90 shadow-lg space-y-4">
+                  <div className="flex items-center justify-between border-b border-slate-200 pb-3">
+                    <span className="text-xs font-bold uppercase text-slate-500">Marketplace Search Preview</span>
+                    <span className="text-xs font-bold text-indigo-600">⭐ 4.98 (84 Reviews)</span>
+                  </div>
+                  <div className="space-y-2">
+                    <div className="text-sm font-extrabold text-slate-900">
+                      Senior STEM Educator & Olympiad Coach
+                    </div>
+                    <div className="flex flex-wrap gap-1.5">
+                      {["Mathematics", "Physics", "Calculus", "Competitive Exam Prep"].map((s) => (
+                        <span key={s} className="px-2 py-0.5 rounded-md text-[10px] font-bold bg-indigo-100 text-indigo-700">
+                          {s}
+                        </span>
+                      ))}
+                    </div>
+                    <p className="text-xs text-slate-600 pt-1 leading-relaxed">
+                      "10+ years coaching students for CBSE board exams, JEE Advanced, and International Math Olympiads."
+                    </p>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            {/* Feature 2: Structured Course Creation */}
+            <div className="grid grid-cols-1 lg:grid-cols-12 gap-12 items-center">
+              <div className="lg:col-span-6 order-2 lg:order-1">
+                <div className="p-6 rounded-3xl bg-slate-50 border border-slate-200/90 shadow-lg space-y-3">
+                  <div className="flex items-center justify-between border-b border-slate-200 pb-2 text-xs font-bold text-slate-700">
+                    <span>LMS Course Builder</span>
+                    <span className="text-emerald-600">Status: Published</span>
+                  </div>
+                  <div className="space-y-2 text-xs">
+                    <div className="p-3 bg-white rounded-xl border border-slate-200 flex items-center justify-between font-bold">
+                      <span>Section 1: Functions, Limits & Continuity</span>
+                      <span className="text-slate-400">4 Video Lessons</span>
+                    </div>
+                    <div className="p-3 bg-white rounded-xl border border-slate-200 flex items-center justify-between font-bold">
+                      <span>Section 2: Differential Calculus & Applications</span>
+                      <span className="text-slate-400">6 Video Lessons</span>
+                    </div>
+                    <div className="p-3 bg-white rounded-xl border border-slate-200 flex items-center justify-between font-bold">
+                      <span>Section 3: Integral Calculus & Area Under Curves</span>
+                      <span className="text-slate-400">5 Video Lessons</span>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <div className="lg:col-span-6 order-1 lg:order-2 space-y-5">
+                <div className="p-3 bg-purple-100 text-purple-600 rounded-2xl w-fit">
+                  <BookOpen className="h-6 w-6" />
+                </div>
+                <h3 className="text-2xl sm:text-3xl font-black text-slate-900">
+                  Publish On-Demand Video Courses
+                </h3>
+                <p className="text-sm text-slate-600 leading-relaxed">
+                  Turn your knowledge into evergreen revenue. Upload HD lessons, organize structured curriculum sections, and attach practice exercises.
+                </p>
+                <div className="space-y-2.5 text-xs sm:text-sm text-slate-700 font-semibold">
+                  <div className="flex items-center gap-2">
+                    <CheckCircle2 className="h-4 w-4 text-emerald-600 shrink-0" />
+                    <span>Fast video uploads with automated streaming encoding</span>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <CheckCircle2 className="h-4 w-4 text-emerald-600 shrink-0" />
+                    <span>Set one-time course purchase pricing in ₹ INR</span>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <CheckCircle2 className="h-4 w-4 text-emerald-600 shrink-0" />
+                    <span>Automatic student progress tracking and completion certificates</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            {/* Feature 3: Live Classes & Availability Scheduler */}
+            <div id="live-classes" className="grid grid-cols-1 lg:grid-cols-12 gap-12 items-center">
+              <div className="lg:col-span-6 space-y-5">
+                <div className="p-3 bg-emerald-100 text-emerald-600 rounded-2xl w-fit">
+                  <Video className="h-6 w-6" />
+                </div>
+                <h3 className="text-2xl sm:text-3xl font-black text-slate-900">
+                  Schedule Live Classes with Built-In Whiteboard
+                </h3>
+                <p className="text-sm text-slate-600 leading-relaxed">
+                  Host 1-on-1 private tutorials or high-capacity group classes directly in the browser with LiveKit WebRTC video.
+                </p>
+                <div className="space-y-2.5 text-xs sm:text-sm text-slate-700 font-semibold">
+                  <div className="flex items-center gap-2">
+                    <CheckCircle2 className="h-4 w-4 text-emerald-600 shrink-0" />
+                    <span>Interactive whiteboard with pen, shapes, and drawing permission control</span>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <CheckCircle2 className="h-4 w-4 text-emerald-600 shrink-0" />
+                    <span>In-session group chat and instant homework PDF sharing</span>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <CheckCircle2 className="h-4 w-4 text-emerald-600 shrink-0" />
+                    <span>Automated student attendance tracking and session logs</span>
+                  </div>
+                </div>
+              </div>
+
+              <div className="lg:col-span-6">
+                <div className="p-6 rounded-3xl bg-slate-900 text-white shadow-xl space-y-4">
+                  <div className="flex items-center justify-between text-xs border-b border-slate-800 pb-3 font-semibold">
+                    <span>Weekly Availability Schedule</span>
+                    <span className="text-emerald-400">● 6 Slots Available This Week</span>
+                  </div>
+                  <div className="space-y-2 text-xs">
+                    <div className="p-3 bg-slate-800/80 rounded-xl flex items-center justify-between">
+                      <span>Mon, Wed, Fri (4:00 PM - 7:00 PM)</span>
+                      <span className="text-indigo-400 font-mono">1-on-1 Demos</span>
+                    </div>
+                    <div className="p-3 bg-slate-800/80 rounded-xl flex items-center justify-between">
+                      <span>Saturday (10:00 AM - 1:00 PM)</span>
+                      <span className="text-emerald-400 font-mono">Group Live Class (Max 20)</span>
+                    </div>
+                    <div className="p-3 bg-slate-800/80 rounded-xl flex items-center justify-between">
+                      <span>Sunday (11:00 AM - 1:00 PM)</span>
+                      <span className="text-purple-400 font-mono">Doubt Resolution Clinic</span>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        {/* ========================================================================= */}
+        {/* 3. INTERACTIVE EARNINGS CALCULATOR */}
+        {/* ========================================================================= */}
+        <section id="earnings" className="py-20 lg:py-28 bg-slate-50 border-b border-slate-200">
+          <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 space-y-12">
+            <div className="text-center max-w-2xl mx-auto space-y-3">
+              <GlassBadge variant="amber">TRANSPARENT EDUCATOR ECONOMICS</GlassBadge>
+              <h2 className="text-3xl sm:text-4xl font-black text-slate-900 tracking-tight">
+                Estimate Your Monthly Teaching Income
+              </h2>
+              <p className="text-sm text-slate-600">
+                You set your own rates and course prices. Use our real-time calculator to project your monthly earnings.
+              </p>
+            </div>
+
+            <GlassCard className="p-8 sm:p-10 rounded-3xl border border-slate-200 bg-white shadow-xl space-y-8">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+                {/* Left: Inputs & Sliders */}
+                <div className="space-y-6">
+                  {/* Hourly Rate Slider */}
+                  <div className="space-y-2">
+                    <div className="flex items-center justify-between">
+                      <label className="text-xs font-bold text-slate-700 uppercase tracking-wider">
+                        Live Class Hourly Rate (₹)
+                      </label>
+                      <span className="text-base font-black text-indigo-600">₹{hourlyRate}/hr</span>
+                    </div>
+                    <input
+                      type="range"
+                      min={300}
+                      max={3000}
+                      step={50}
+                      value={hourlyRate}
+                      onChange={(e) => setHourlyRate(Number(e.target.value))}
+                      className="w-full h-2 bg-slate-200 rounded-lg appearance-none cursor-pointer accent-indigo-600"
+                    />
+                    <div className="flex justify-between text-[10px] text-slate-400 font-semibold">
+                      <span>₹300/hr</span>
+                      <span>₹1,500/hr</span>
+                      <span>₹3,000/hr</span>
+                    </div>
+                  </div>
+
+                  {/* Hours Per Week */}
+                  <div className="space-y-2">
+                    <div className="flex items-center justify-between">
+                      <label className="text-xs font-bold text-slate-700 uppercase tracking-wider">
+                        Live Teaching Hours / Week
+                      </label>
+                      <span className="text-base font-black text-indigo-600">{hoursPerWeek} hrs/wk</span>
+                    </div>
+                    <input
+                      type="range"
+                      min={2}
+                      max={40}
+                      step={1}
+                      value={hoursPerWeek}
+                      onChange={(e) => setHoursPerWeek(Number(e.target.value))}
+                      className="w-full h-2 bg-slate-200 rounded-lg appearance-none cursor-pointer accent-indigo-600"
+                    />
+                    <div className="flex justify-between text-[10px] text-slate-400 font-semibold">
+                      <span>2 hrs</span>
+                      <span>20 hrs</span>
+                      <span>40 hrs</span>
+                    </div>
+                  </div>
+
+                  {/* Course Sales Per Month */}
+                  <div className="space-y-2">
+                    <div className="flex items-center justify-between">
+                      <label className="text-xs font-bold text-slate-700 uppercase tracking-wider">
+                        Course Enrollments / Month
+                      </label>
+                      <span className="text-base font-black text-purple-600">{coursesSoldPerMonth} sales</span>
+                    </div>
+                    <input
+                      type="range"
+                      min={0}
+                      max={100}
+                      step={1}
+                      value={coursesSoldPerMonth}
+                      onChange={(e) => setCoursesSoldPerMonth(Number(e.target.value))}
+                      className="w-full h-2 bg-slate-200 rounded-lg appearance-none cursor-pointer accent-purple-600"
+                    />
+                    <div className="flex justify-between text-[10px] text-slate-400 font-semibold">
+                      <span>0</span>
+                      <span>50</span>
+                      <span>100</span>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Right: Projected Breakdown Card */}
+                <div className="p-7 rounded-3xl bg-gradient-to-br from-indigo-900 via-indigo-800 to-purple-900 text-white flex flex-col justify-between space-y-6 shadow-xl">
+                  <div className="space-y-2">
+                    <span className="text-[10px] font-extrabold uppercase tracking-widest text-indigo-300">
+                      Estimated Gross Monthly Revenue
+                    </span>
+                    <div className="text-4xl sm:text-5xl font-black text-white">
+                      {formatCurrency(totalEstimatedMonthly)}
+                    </div>
+                    <p className="text-xs text-indigo-200 leading-relaxed pt-1">
+                      Based on {hoursPerWeek} hrs/week live classes + {coursesSoldPerMonth} monthly course enrollments.
+                    </p>
+                  </div>
+
+                  <div className="space-y-2 pt-4 border-t border-indigo-700/60 text-xs">
+                    <div className="flex items-center justify-between text-indigo-200">
+                      <span>Live Tutoring Income:</span>
+                      <span className="font-bold text-white">{formatCurrency(Math.round(liveIncome))}</span>
+                    </div>
+                    <div className="flex items-center justify-between text-indigo-200">
+                      <span>Recorded Course Income:</span>
+                      <span className="font-bold text-white">{formatCurrency(Math.round(courseIncome))}</span>
+                    </div>
+                  </div>
+
+                  <Link href="/teacher/register" className="w-full">
+                    <GlassButton
+                      variant="secondary"
+                      className="w-full justify-center bg-white text-slate-900 hover:bg-slate-100 font-black text-xs"
+                      rightIcon={<ArrowRight className="h-4 w-4" />}
+                    >
+                      Start Teaching Now
+                    </GlassButton>
+                  </Link>
+                </div>
+              </div>
+            </GlassCard>
+          </div>
+        </section>
+
+        {/* ========================================================================= */}
+        {/* 4. STEP-BY-STEP HOW IT WORKS FLOW */}
+        {/* ========================================================================= */}
+        <section id="how-it-works" className="py-20 lg:py-28 bg-white border-b border-slate-200">
+          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 space-y-16">
+            <div className="text-center max-w-2xl mx-auto space-y-3">
+              <GlassBadge variant="indigo">SIMPLE & TRANSPARENT ONBOARDING</GlassBadge>
+              <h2 className="text-3xl sm:text-4xl font-black text-slate-900 tracking-tight">
+                How Teaching on EduConnects Works
+              </h2>
+              <p className="text-sm text-slate-600">
+                From initial registration to your first live class, our streamlined process gets you teaching quickly.
+              </p>
+            </div>
+
+            <div className="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-5 gap-6">
+              {howItWorksSteps.map((s, idx) => {
+                const IconComp = s.icon;
+                return (
+                  <div
+                    key={idx}
+                    className="p-6 rounded-3xl bg-slate-50 border border-slate-200 hover:border-indigo-300 hover:shadow-lg transition-all space-y-4 relative flex flex-col justify-between"
+                  >
+                    <div className="space-y-3">
+                      <div className="flex items-center justify-between">
+                        <span className="text-2xl font-black text-indigo-600/40">{s.step}</span>
+                        <div className="p-2.5 rounded-xl bg-indigo-100 text-indigo-600">
+                          <IconComp className="h-5 w-5" />
+                        </div>
+                      </div>
+                      <h3 className="text-base font-black text-slate-900">{s.title}</h3>
+                      <p className="text-xs text-slate-600 leading-relaxed">{s.desc}</p>
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+          </div>
+        </section>
+
+        {/* ========================================================================= */}
+        {/* 5. TEACHER BENEFITS GRID */}
+        {/* ========================================================================= */}
+        <section id="benefits" className="py-20 bg-slate-50 border-b border-slate-200">
+          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 space-y-12">
+            <div className="text-center max-w-2xl mx-auto space-y-3">
+              <GlassBadge variant="indigo">EDUCATOR ADVANTAGES</GlassBadge>
+              <h2 className="text-3xl sm:text-4xl font-black text-slate-900 tracking-tight">
+                Why Top Teachers Choose EduConnects
+              </h2>
+              <p className="text-sm text-slate-600">
+                Built specifically for independent educators, coaches, and subject experts.
+              </p>
+            </div>
+
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+              {teacherBenefits.map((b, idx) => {
+                const IconComp = b.icon;
+                return (
+                  <GlassCard
+                    key={idx}
+                    className="p-7 rounded-3xl border border-slate-200 bg-white hover:border-indigo-300 hover:shadow-xl transition-all flex flex-col justify-between space-y-4"
+                  >
+                    <div className="space-y-3">
+                      <div className="flex items-center justify-between">
+                        <div className="p-3 bg-indigo-100 text-indigo-600 rounded-2xl w-fit">
+                          <IconComp className="h-6 w-6" />
+                        </div>
+                        <span className="text-[10px] font-extrabold uppercase px-2.5 py-1 rounded-full bg-slate-100 text-slate-700">
+                          {b.badge}
+                        </span>
+                      </div>
+                      <h3 className="text-lg font-black text-slate-900">{b.title}</h3>
+                      <p className="text-xs sm:text-sm text-slate-600 leading-relaxed">{b.desc}</p>
+                    </div>
+                  </GlassCard>
+                );
+              })}
+            </div>
+          </div>
+        </section>
+
+        {/* ========================================================================= */}
+        {/* 6. TEACHER FAQ ACCORDION */}
+        {/* ========================================================================= */}
+        <section id="faq" className="py-20 lg:py-28 bg-white">
+          <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 space-y-12">
+            <div className="text-center space-y-3">
+              <GlassBadge variant="indigo">TEACHER FAQ</GlassBadge>
+              <h2 className="text-3xl sm:text-4xl font-black text-slate-900 tracking-tight">
+                Frequently Asked Questions for Educators
+              </h2>
+              <p className="text-sm text-slate-600">
+                Have questions before applying? Here is everything you need to know.
+              </p>
+            </div>
+
+            <div className="space-y-4">
+              {teacherFaqs.map((faq, idx) => {
+                const isOpen = openFaqIndex === idx;
+                return (
+                  <div
+                    key={idx}
+                    className="border border-slate-200 rounded-2xl overflow-hidden bg-slate-50/50 transition-colors"
+                  >
+                    <button
+                      onClick={() => setOpenFaqIndex(isOpen ? null : idx)}
+                      className="w-full p-5 text-left flex items-center justify-between gap-4 font-bold text-sm sm:text-base text-slate-900 hover:text-indigo-600 transition-colors"
+                    >
+                      <span>{faq.question}</span>
+                      <ChevronDown
+                        className={`w-5 h-5 text-slate-500 shrink-0 transition-transform duration-300 ${
+                          isOpen ? "rotate-180 text-indigo-600" : ""
+                        }`}
+                      />
+                    </button>
+                    {isOpen && (
+                      <div className="p-5 pt-0 text-xs sm:text-sm text-slate-600 leading-relaxed border-t border-slate-100 bg-white">
+                        {faq.answer}
+                      </div>
+                    )}
+                  </div>
+                );
+              })}
+            </div>
+          </div>
+        </section>
+
+        {/* ========================================================================= */}
+        {/* 7. FINAL CALL TO ACTION */}
+        {/* ========================================================================= */}
+        <section className="py-20 bg-gradient-to-r from-indigo-800 via-indigo-700 to-purple-900 text-white relative overflow-hidden">
+          <div className="max-w-5xl mx-auto px-4 sm:px-6 text-center space-y-6 relative z-10">
+            <span className="px-3.5 py-1.5 rounded-full bg-white/10 backdrop-blur-md text-indigo-200 text-xs font-bold uppercase tracking-wider border border-white/20">
+              Join EduConnects Educator Network
+            </span>
+
+            <h2 className="text-3xl sm:text-5xl font-black tracking-tight leading-tight">
+              Ready to Start Teaching?
+            </h2>
+
+            <p className="text-sm sm:text-base text-indigo-100 max-w-xl mx-auto font-medium">
+              Create your profile, submit your verification documents, and start earning by teaching students across India and beyond.
+            </p>
+
+            <div className="pt-4 flex flex-col sm:flex-row items-center justify-center gap-4">
+              <Link href="/teacher/register" className="w-full sm:w-auto">
+                <GlassButton
+                  variant="secondary"
+                  size="lg"
+                  className="w-full sm:w-auto bg-white text-slate-900 hover:bg-slate-100 font-black shadow-xl"
+                  rightIcon={<ArrowRight className="h-4 w-4" />}
+                >
+                  Become a Teacher
+                </GlassButton>
+              </Link>
+
+              <Link href="#how-it-works" className="w-full sm:w-auto">
+                <GlassButton
+                  variant="ghost"
+                  size="lg"
+                  className="w-full sm:w-auto text-white border border-white/30 hover:bg-white/10"
+                >
+                  Review Onboarding Steps
+                </GlassButton>
               </Link>
             </div>
 
-            {loading ? (
-              <div className="p-6 text-center">
-                <Loader2 className="h-6 w-6 text-emerald-600 animate-spin mx-auto" />
-              </div>
-            ) : data.upcomingClasses.length === 0 ? (
-              <div className="p-6 text-center bg-slate-50 dark:bg-slate-900/40 rounded-2xl border border-slate-200/80">
-                <Video className="h-8 w-8 text-slate-300 dark:text-slate-600 mx-auto mb-2" />
-                <p className="text-xs font-semibold text-slate-500">No upcoming live slots scheduled.</p>
-              </div>
-            ) : (
-              <div className="space-y-3">
-                {data.upcomingClasses.map((slot) => (
-                  <div
-                    key={slot.slotId}
-                    className="p-4 rounded-2xl bg-slate-50 dark:bg-slate-800/60 border border-slate-200/80 flex items-center justify-between gap-4"
-                  >
-                    <div>
-                      <h4 className="text-sm font-extrabold text-slate-900 dark:text-slate-100">
-                        {slot.title}
-                      </h4>
-                      <p className="text-xs text-slate-500 mt-0.5">
-                        {new Date(slot.startTime).toLocaleDateString([], {
-                          month: "short",
-                          day: "numeric",
-                          hour: "2-digit",
-                          minute: "2-digit",
-                        })}{" "}
-                        • {slot.bookedCount} / {slot.maxCapacity} Booked
-                      </p>
-                    </div>
+            <div className="pt-6 flex items-center justify-center gap-6 text-xs text-indigo-200">
+              <span>✓ Free application</span>
+              <span>•</span>
+              <span>✓ Verified Educator Badge</span>
+              <span>•</span>
+              <span>✓ Automated Razorpay bank transfers</span>
+            </div>
+          </div>
+        </section>
+      </main>
 
-                    <Link href={`/classroom/${slot.slotId}`}>
-                      <Button variant={slot.canEnter ? "primary" : "outline"} size="sm">
-                        {slot.canEnter ? "Enter Classroom" : "View Slot"}
-                      </Button>
-                    </Link>
-                  </div>
-                ))}
-              </div>
-            )}
-          </Card>
-        </div>
+      {/* Footer */}
+      <PremiumFooter />
 
-        {/* Quick Educator Actions */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
-          <Link href="/teacher/live-classes">
-            <Card className="p-5 hover:border-blue-500 transition cursor-pointer space-y-2">
-              <Video className="h-6 w-6 text-blue-600" />
-              <h4 className="text-sm font-extrabold text-slate-900 dark:text-slate-100">Create Live Class</h4>
-              <p className="text-xs text-slate-500">Schedule 1-on-1 or group live sessions.</p>
-            </Card>
-          </Link>
-
-          <Link href="/teacher/courses">
-            <Card className="p-5 hover:border-emerald-500 transition cursor-pointer space-y-2">
-              <BookOpen className="h-6 w-6 text-emerald-600" />
-              <h4 className="text-sm font-extrabold text-slate-900 dark:text-slate-100">Create Course</h4>
-              <p className="text-xs text-slate-500">Upload video lessons & study materials.</p>
-            </Card>
-          </Link>
-
-          <Link href="/teacher/analytics">
-            <Card className="p-5 hover:border-purple-500 transition cursor-pointer space-y-2">
-              <BarChart2 className="h-6 w-6 text-purple-600" />
-              <h4 className="text-sm font-extrabold text-slate-900 dark:text-slate-100">View Analytics</h4>
-              <p className="text-xs text-slate-500">Course completion & class attendance stats.</p>
-            </Card>
-          </Link>
-
-          <Link href="/teacher/earnings">
-            <Card className="p-5 hover:border-amber-500 transition cursor-pointer space-y-2">
-              <IndianRupee className="h-6 w-6 text-amber-500" />
-              <h4 className="text-sm font-extrabold text-slate-900 dark:text-slate-100">View Earnings</h4>
-              <p className="text-xs text-slate-500">Financial ledger entries & Razorpay payouts.</p>
-            </Card>
-          </Link>
-        </div>
-      </div>
-    </DashboardLayout>
+      {/* Auth Modal Trigger */}
+      <AuthModal
+        isOpen={authModalOpen}
+        onClose={() => setAuthModalOpen(false)}
+        initialRole="TEACHER"
+      />
+    </div>
   );
 }
+

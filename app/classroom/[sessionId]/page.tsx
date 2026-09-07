@@ -356,7 +356,7 @@ export default function VirtualClassroomPage() {
 
   const handleLeaveClass = async () => {
     if (providerRef.current) await providerRef.current.disconnect();
-    router.push(isTeacher ? "/teacher" : "/student");
+    router.push(isTeacher ? "/teacher/dashboard" : "/student/dashboard");
   };
 
   const handleSendMessage = async (text: string) => {
@@ -423,7 +423,7 @@ export default function VirtualClassroomPage() {
           <p className="text-xs text-red-300 mb-4">{error || "Unable to access this classroom."}</p>
           <button
             type="button"
-            onClick={() => router.push(isTeacher ? "/teacher" : "/student")}
+            onClick={() => router.push(isTeacher ? "/teacher/dashboard" : "/student/dashboard")}
             className="w-full h-10 bg-slate-800 hover:bg-slate-700 text-white font-semibold text-xs rounded-xl"
           >
             Return to Dashboard
