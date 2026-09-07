@@ -3,19 +3,19 @@ import { ContactSchema } from "../schemas/auth-schemas";
 import { trackEvent } from "../lib/analytics";
 
 async function runDiscoveryTests() {
-  console.log("🧪 Running EduConnect Module 02 Discovery & Public API Tests...\n");
+  console.log("🧪 Running EduConnects Module 02 Discovery & Public API Tests...\n");
 
   // Test 1: Contact Form Zod Schema Validation
   console.log("Test 1: Validating Contact Form Zod Schema...");
   const validContact = ContactSchema.parse({
     name: "Alex Morgan",
-    email: "alex@educonnect.com",
+    email: "alex@educonnects.com",
     subject: "Inquiry about demo classes",
     message: "I would like to know if trial calculus sessions are available on weekends.",
     roleType: "STUDENT",
   });
   assert.strictEqual(validContact.roleType, "STUDENT");
-  assert.strictEqual(validContact.email, "alex@educonnect.com");
+  assert.strictEqual(validContact.email, "alex@educonnects.com");
   console.log("✅ Passed: Contact form validation.");
 
   // Test 2: Contact Form Invalid Email Rejection

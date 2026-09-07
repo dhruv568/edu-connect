@@ -4,7 +4,7 @@ import { AnalyticsService } from "../services/analytics-service";
 import { hashPassword } from "../lib/auth/password";
 
 async function runModule10AdminTests() {
-  console.log("\n🧪 Running EduConnect Module 10 Admin Governance Automated Tests...\n");
+  console.log("\n🧪 Running EduConnects Module 10 Admin Governance Automated Tests...\n");
 
   let testAdminUser: any;
   let testStudentUser: any;
@@ -22,7 +22,7 @@ async function runModule10AdminTests() {
 
     testAdminUser = await prisma.user.create({
       data: {
-        email: `test.admin.${Date.now()}@educonnect.com`,
+        email: `test.admin.${Date.now()}@educonnects.com`,
         passwordHash,
         role: "ADMIN",
         status: "ACTIVE",
@@ -36,7 +36,7 @@ async function runModule10AdminTests() {
 
     testStudentUser = await prisma.user.create({
       data: {
-        email: `test.student.admin.${Date.now()}@educonnect.com`,
+        email: `test.student.admin.${Date.now()}@educonnects.com`,
         passwordHash,
         role: "STUDENT",
         status: "ACTIVE",
@@ -53,7 +53,7 @@ async function runModule10AdminTests() {
 
     testTeacherUser = await prisma.user.create({
       data: {
-        email: `test.teacher.admin.${Date.now()}@educonnect.com`,
+        email: `test.teacher.admin.${Date.now()}@educonnects.com`,
         passwordHash,
         role: "TEACHER",
         status: "ACTIVE",

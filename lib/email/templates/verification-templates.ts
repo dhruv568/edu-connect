@@ -40,7 +40,7 @@ export function generateNotificationEmailHtml(params: NotificationEmailParams): 
 </head>
 <body>
   <div class="container">
-    <div class="logo">EduConnect</div>
+    <div class="logo">EduConnects</div>
     <div><span class="badge">${params.statusBadgeText}</span></div>
     <h1>${params.headline}</h1>
     <p>Hello ${params.recipientName},</p>
@@ -51,7 +51,7 @@ export function generateNotificationEmailHtml(params: NotificationEmailParams): 
     ${params.actionUrl ? `<a href="${params.actionUrl}" class="cta-button">${params.actionText || 'View Account Portal'}</a>` : ''}
 
     <div class="footer">
-      <p>© ${new Date().getFullYear()} EduConnect Platform Inc. All rights reserved.<br>Empowering Quality Education Worldwide.</p>
+      <p>© ${new Date().getFullYear()} EduConnects Platform Inc. All rights reserved.<br>Empowering Quality Education Worldwide.</p>
     </div>
   </div>
 </body>

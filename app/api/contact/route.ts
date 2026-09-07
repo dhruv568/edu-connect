@@ -24,7 +24,7 @@ export async function POST(request: NextRequest) {
 
     return apiSuccess(
       { referenceId: `TICKET-${Math.floor(100000 + Math.random() * 900000)}` },
-      "Thank you for contacting EduConnect! Our support team will respond within 24 hours.",
+      "Thank you for contacting EduConnects! Our support team will respond within 24 hours.",
       201
     );
   } catch (error: any) {

@@ -368,7 +368,7 @@ export default function TeacherOnboardingPage() {
       const json = await res.json();
       if (!res.ok) throw new Error(json.error || "Failed to submit verification application");
 
-      showToast("Application Submitted! 🎓", "Your application is now PENDING REVIEW by EduConnect Admin.", "success");
+      showToast("Application Submitted! 🎓", "Your application is now PENDING REVIEW by EduConnects Admin.", "success");
       router.push("/teacher/verification");
     } catch (err: any) {
       showToast("Submission Failed", err.message, "error");
@@ -392,7 +392,7 @@ export default function TeacherOnboardingPage() {
       <DashboardLayout role="TEACHER" userName={personal.firstName || "Teacher"} userEmail={userInfo.email}>
         <div className="flex flex-col items-center justify-center min-h-[60vh] space-y-4">
           <Loader2 className="h-10 w-10 text-blue-600 animate-spin" />
-          <p className="text-sm font-semibold text-slate-600">Loading EduConnect Teacher Portal...</p>
+          <p className="text-sm font-semibold text-slate-600">Loading EduConnects Teacher Portal...</p>
         </div>
       </DashboardLayout>
     );
@@ -874,7 +874,7 @@ export default function TeacherOnboardingPage() {
                   <ShieldCheck className="h-6 w-6 text-emerald-400 shrink-0" />
                   <span>
                     <strong>Document Protection:</strong> All uploaded files are stored in private secure cloud storage.
-                    Direct access is strictly restricted to EduConnect verification admins.
+                    Direct access is strictly restricted to EduConnects verification admins.
                   </span>
                 </div>
               </div>

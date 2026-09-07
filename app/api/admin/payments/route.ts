@@ -68,7 +68,7 @@ export async function GET(request: NextRequest) {
         studentName,
         studentEmail: t.user.email,
         teacherName,
-        productTitle: t.course?.title || t.liveClassSlot?.title || "EduConnect Product",
+        productTitle: t.course?.title || t.liveClassSlot?.title || "EduConnects Product",
         createdAt: t.createdAt,
       };
     });

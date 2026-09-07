@@ -20,7 +20,7 @@ export async function GET(request: NextRequest) {
       const teacherObj = t.course?.teacher || t.liveClassSlot?.teacher;
       const teacherName = teacherObj?.user?.profile
         ? `${teacherObj.user.profile.firstName} ${teacherObj.user.profile.lastName}`
-        : "EduConnect Educator";
+        : "EduConnects Educator";
 
       return {
         id: t.id,
@@ -33,7 +33,7 @@ export async function GET(request: NextRequest) {
         providerOrderId: t.providerOrderId,
         providerPaymentId: t.providerPaymentId,
         internalReference: t.internalReference,
-        productTitle: t.course?.title || t.liveClassSlot?.title || "EduConnect Purchase",
+        productTitle: t.course?.title || t.liveClassSlot?.title || "EduConnects Purchase",
         courseSlug: t.course?.slug,
         teacherName,
         createdAt: t.createdAt,

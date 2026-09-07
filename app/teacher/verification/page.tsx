@@ -89,7 +89,7 @@ export default function TeacherVerificationStatusPage() {
               Teacher Verification Dashboard
             </h1>
             <p className="text-xs lg:text-sm text-slate-500 mt-1">
-              EduConnect Administrative Credential & Verification Status
+              EduConnects Administrative Credential & Verification Status
             </p>
           </div>
           <button
@@ -116,7 +116,7 @@ export default function TeacherVerificationStatusPage() {
                   <StatusBadge status="VERIFIED" />
                 </div>
                 <p className="text-xs text-emerald-800 leading-relaxed">
-                  Your identity documents, educational qualifications, and teacher credentials have been thoroughly reviewed and approved by EduConnect Platform Governance.
+                  Your identity documents, educational qualifications, and teacher credentials have been thoroughly reviewed and approved by EduConnects Platform Governance.
                 </p>
                 {verifiedAt && (
                   <p className="text-[11px] font-bold text-emerald-700">
@@ -155,7 +155,7 @@ export default function TeacherVerificationStatusPage() {
                   <StatusBadge status="PENDING" />
                 </div>
                 <p className="text-xs text-amber-800 leading-relaxed">
-                  Your teacher verification application has been submitted and is currently being audited by EduConnect Quality Assurance Administrators.
+                  Your teacher verification application has been submitted and is currently being audited by EduConnects Quality Assurance Administrators.
                 </p>
                 {submittedAt && (
                   <p className="text-[11px] font-bold text-amber-700">
@@ -229,7 +229,7 @@ export default function TeacherVerificationStatusPage() {
                   <StatusBadge status="SUSPENDED" />
                 </div>
                 <p className="text-xs text-slate-300 leading-relaxed">
-                  Your teacher account on EduConnect has been temporarily suspended by system administrators. Marketplace visibility and live class hosting are currently restricted.
+                  Your teacher account on EduConnects has been temporarily suspended by system administrators. Marketplace visibility and live class hosting are currently restricted.
                 </p>
               </div>
             </div>

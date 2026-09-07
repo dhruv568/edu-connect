@@ -16,11 +16,11 @@ export class ResendEmailProvider implements IEmailProvider {
     this.resend = new Resend(apiKey);
     this.domainId = process.env.RESEND_DOMAIN_ID;
 
-    const fromName = process.env.RESEND_FROM_NAME || "EduConnect";
+    const fromName = process.env.RESEND_FROM_NAME || "EduConnects";
     let fromEmail = process.env.RESEND_FROM_EMAIL || "onboarding@resend.dev";
     
     // If using placeholder or non-custom sender, fallback to Resend onboarding sender
-    if (fromEmail.includes("no-reply@educonnect.com") || fromEmail.includes("example.com") || fromEmail.includes("@gmail.com")) {
+    if (fromEmail.includes("no-reply@educonnects.com") || fromEmail.includes("example.com") || fromEmail.includes("@gmail.com")) {
       fromEmail = "onboarding@resend.dev";
     }
     
@@ -52,7 +52,7 @@ export class ResendEmailProvider implements IEmailProvider {
   async sendVerificationEmail(payload: SendEmailPayload): Promise<boolean> {
     try {
       const html = generateVerificationEmailHtml(payload.templateParams);
-      const subject = payload.subject || "Your EduConnect Verification Code 🎓";
+      const subject = payload.subject || "Your EduConnects Verification Code 🎓";
       const headers = this.getCustomHeaders();
 
       const { data, error } = await this.resend.emails.send({
@@ -90,7 +90,7 @@ export class ResendEmailProvider implements IEmailProvider {
         firstName: payload.firstName,
         resetUrl: payload.resetUrl,
       });
-      const subject = payload.subject || "Reset your EduConnect password";
+      const subject = payload.subject || "Reset your EduConnects password";
       const headers = this.getCustomHeaders();
 
       const { data, error } = await this.resend.emails.send({

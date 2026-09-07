@@ -15,10 +15,10 @@ export default function RoleSelectionPage() {
 
       <main className="flex-1 pt-32 pb-20 max-w-4xl mx-auto px-4 w-full space-y-12">
         <div className="text-center max-w-2xl mx-auto space-y-3">
-          <GlassBadge variant="blue">JOIN EDUCONNECT</GlassBadge>
+          <GlassBadge variant="blue">JOIN EDUCONNECTS</GlassBadge>
           <h1 className="text-4xl font-black text-slate-900 tracking-tight">Choose Your Role</h1>
           <p className="text-sm text-slate-600">
-            Select how you will participate in the EduConnect digital learning universe.
+            Select how you will participate in the EduConnects digital learning universe.
           </p>
         </div>
 
@@ -126,7 +126,7 @@ export default function RoleSelectionPage() {
         <div className="text-center pt-4 border-t border-slate-200/80 text-sm font-semibold">
           <span className="text-slate-600">Already have an account? </span>
           <Link href="/login" className="text-blue-600 hover:underline font-extrabold">
-            Sign In to EduConnect
+            Sign In to EduConnects
           </Link>
         </div>
       </main>

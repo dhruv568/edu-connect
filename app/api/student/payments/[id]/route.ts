@@ -23,7 +23,7 @@ export async function GET(request: NextRequest, { params }: { params: { id: stri
     const teacherObj = transaction.course?.teacher || transaction.liveClassSlot?.teacher;
     const teacherName = teacherObj?.user?.profile
       ? `${teacherObj.user.profile.firstName} ${teacherObj.user.profile.lastName}`
-      : "EduConnect Educator";
+      : "EduConnects Educator";
 
     const studentName = transaction.user.profile
       ? `${transaction.user.profile.firstName} ${transaction.user.profile.lastName}`
@@ -35,7 +35,7 @@ export async function GET(request: NextRequest, { params }: { params: { id: stri
         internalReference: transaction.internalReference,
         providerOrderId: transaction.providerOrderId,
         providerPaymentId: transaction.providerPaymentId,
-        productTitle: transaction.course?.title || transaction.liveClassSlot?.title || "EduConnect Product",
+        productTitle: transaction.course?.title || transaction.liveClassSlot?.title || "EduConnects Product",
         productType: transaction.type,
         studentName,
         studentEmail: transaction.user.email,

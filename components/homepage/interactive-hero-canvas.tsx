@@ -78,7 +78,7 @@ export function InteractiveHeroCanvas({ onOpenAuth }: InteractiveHeroCanvasProps
             className="inline-flex items-center gap-1.5 sm:gap-2 px-3 sm:px-4 py-1.5 sm:py-2 rounded-full glass-pill text-blue-700 text-[10px] sm:text-xs font-extrabold uppercase tracking-widest shadow-sm"
           >
             <Sparkles className="h-3.5 w-3.5 sm:h-4 sm:w-4 text-blue-600 animate-spin" style={{ animationDuration: "8s" }} />
-            <span>EduConnect Liquid Learning Canvas</span>
+            <span>EduConnects Liquid Learning Canvas</span>
           </motion.div>
 
           {/* Distinctive Hero Headline */}

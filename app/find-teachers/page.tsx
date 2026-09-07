@@ -111,7 +111,7 @@ function FindTeachersContent() {
               Teacher Marketplace Discovery
             </span>
             <h1 className="text-4xl font-black text-slate-900 tracking-tight">
-              Find Verified EduConnect Tutors
+              Find Verified EduConnects Tutors
             </h1>
             <p className="text-sm text-slate-600">
               Browse top educators, check experience credentials, and schedule 1-on-1 trial sessions.

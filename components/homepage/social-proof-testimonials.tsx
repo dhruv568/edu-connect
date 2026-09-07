@@ -85,7 +85,7 @@ export function SocialProofTestimonials({ onOpenAuth }: SocialProofTestimonialsP
       rating: 5,
       tutor: "Dr. Rahul Sharma",
       quote:
-        "My grades jumped from 78% to 95% in just 4 months. EduConnect's pay-per-class model meant my parents didn't have to lock into huge annual contracts, yet the teaching was world-class.",
+        "My grades jumped from 78% to 95% in just 4 months. EduConnects's pay-per-class model meant my parents didn't have to lock into huge annual contracts, yet the teaching was world-class.",
     },
   ];
 

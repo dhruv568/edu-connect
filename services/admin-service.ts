@@ -920,8 +920,8 @@ export class AdminService {
     });
 
     return {
-      siteName: settings.site_name || "EduConnect",
-      supportEmail: settings.support_email || "support@educonnect.com",
+      siteName: settings.site_name || "EduConnects",
+      supportEmail: settings.support_email || "support@educonnects.com",
       platformCommissionRate: settings.platform_commission_rate ? parseFloat(settings.platform_commission_rate) : 15,
       allowRegistration: settings.allow_registration !== "false",
       requireTeacherApproval: settings.require_teacher_approval !== "false",

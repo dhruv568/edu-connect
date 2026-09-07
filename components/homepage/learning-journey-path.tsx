@@ -18,10 +18,10 @@ export function LearningJourneyPath() {
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="text-center max-w-3xl mx-auto mb-16 space-y-3">
           <span className="text-xs font-extrabold text-blue-600 uppercase tracking-widest">
-            The EduConnect Experience
+            The EduConnects Experience
           </span>
           <h2 className="text-2xl sm:text-3xl md:text-4xl font-extrabold text-slate-900 tracking-tight">
-            How EduConnect Works
+            How EduConnects Works
           </h2>
           <p className="text-base text-slate-600">
             A continuous flowing journey built for student growth and interactive online learning.

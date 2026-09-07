@@ -1,4 +1,4 @@
-// EduConnect Database Schema
+// EduConnects Database Schema
 datasource db {
   provider = "postgresql"
   url      = env("DATABASE_URL")

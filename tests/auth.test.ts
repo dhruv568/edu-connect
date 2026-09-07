@@ -5,26 +5,26 @@ import { hashPassword, verifyPassword } from "../lib/auth/password";
 import { ConsoleEmailProvider } from "../lib/email/email-service";
 
 async function runTests() {
-  console.log("🧪 Running EduConnect Module 01 Architectural Verification Tests...\n");
+  console.log("🧪 Running EduConnects Module 01 Architectural Verification Tests...\n");
 
   // Test 1: Zod Registration Schema
   console.log("Test 1: Validating Zod Registration Schema...");
   const validRegister = RegisterSchema.parse({
-    email: "test.student@educonnect.com",
+    email: "test.student@educonnects.com",
     password: "Password123!",
     firstName: "Test",
     lastName: "Student",
     role: "STUDENT",
   });
   assert.strictEqual(validRegister.role, "STUDENT");
-  assert.strictEqual(validRegister.email, "test.student@educonnect.com");
+  assert.strictEqual(validRegister.email, "test.student@educonnects.com");
   console.log("✅ Passed: Zod Registration Schema validation.");
 
   // Test 2: Invalid Password Rejection
   console.log("\nTest 2: Verifying Zod Password Strength Enforcement...");
   try {
     RegisterSchema.parse({
-      email: "weak@educonnect.com",
+      email: "weak@educonnects.com",
       password: "weak",
       firstName: "Weak",
       lastName: "Pass",
@@ -69,7 +69,7 @@ async function runTests() {
   const provider = new ConsoleEmailProvider();
   const sent = await provider.sendVerificationEmail({
     to: "dhruv@gmail.com",
-    subject: "Verify your EduConnect email",
+    subject: "Verify your EduConnects email",
     templateParams: {
       recipientEmail: "dhruv@gmail.com",
       firstName: "Dhruv",
@@ -82,27 +82,27 @@ async function runTests() {
   // Test 7: LoginSchema & VerifyOTPSchema validation
   console.log("\nTest 7: Testing LoginSchema & VerifyOTPSchema Zod Constraints...");
   const validLogin = LoginSchema.parse({
-    email: "user@educonnect.com",
+    email: "user@educonnects.com",
     password: "Password123!",
   });
-  assert.strictEqual(validLogin.email, "user@educonnect.com");
+  assert.strictEqual(validLogin.email, "user@educonnects.com");
 
   const validLoginWithOtp = LoginSchema.parse({
-    email: "user@educonnect.com",
+    email: "user@educonnects.com",
     password: "Password123!",
     otp: "123456",
   });
   assert.strictEqual(validLoginWithOtp.otp, "123456");
 
   const validOtp = VerifyOTPSchema.parse({
-    email: "user@educonnect.com",
+    email: "user@educonnects.com",
     otp: "654321",
   });
   assert.strictEqual(validOtp.otp, "654321");
 
   try {
     VerifyOTPSchema.parse({
-      email: "user@educonnect.com",
+      email: "user@educonnects.com",
       otp: "12345", // too short
     });
     assert.fail("Should reject short OTP");
@@ -112,7 +112,7 @@ async function runTests() {
 
   try {
     VerifyOTPSchema.parse({
-      email: "user@educonnect.com",
+      email: "user@educonnects.com",
       otp: "12345a", // non numeric
     });
     assert.fail("Should reject non-numeric OTP");

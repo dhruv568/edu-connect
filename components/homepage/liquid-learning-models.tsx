@@ -188,7 +188,7 @@ export function LiquidLearningModels({ onOpenAuth }: LiquidLearningModelsProps) 
             Choose how you want to learn.
           </h2>
           <p className="text-base text-slate-600">
-            EduConnect keeps each learning model distinct so students and teachers get the optimal experience.
+            EduConnects keeps each learning model distinct so students and teachers get the optimal experience.
           </p>
         </div>
 

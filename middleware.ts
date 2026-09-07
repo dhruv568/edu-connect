@@ -35,7 +35,7 @@ export function middleware(request: NextRequest) {
     pathname === "/admin/login" ||
     pathname.startsWith("/api/");
 
-  const cookie = request.cookies.get("educonnect_session");
+  const cookie = request.cookies.get("educonnects_session");
 
   // If no session cookie present
   if (!cookie?.value) {

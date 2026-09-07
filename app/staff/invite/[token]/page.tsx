@@ -144,7 +144,7 @@ export default function StaffInvitePage() {
         throw new Error(json.error || "Account activation failed.");
       }
 
-      showToast("Account Activated", "Welcome to EduConnect! Redirecting to your dashboard...", "success");
+      showToast("Account Activated", "Welcome to EduConnects! Redirecting to your dashboard...", "success");
       setTimeout(() => {
         router.push(json.data?.redirectPath || "/staff/dashboard");
       }, 1000);
@@ -160,7 +160,7 @@ export default function StaffInvitePage() {
       {/* Branding Header */}
       <div className="mb-8 text-center">
         <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-blue-500/10 border border-blue-400/20 text-blue-300 text-xs font-bold uppercase tracking-wider mb-2">
-          <Building className="h-3.5 w-3.5" /> EduConnect Staff Portal
+          <Building className="h-3.5 w-3.5" /> EduConnects Staff Portal
         </div>
         <h1 className="text-2xl lg:text-3xl font-black text-white tracking-tight">
           Team Onboarding

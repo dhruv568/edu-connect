@@ -39,7 +39,7 @@ async function runDynamicRBACTests() {
     // Create Super Admin
     testAdminUser = await prisma.user.create({
       data: {
-        email: `super.admin.${timestamp}@educonnect.com`,
+        email: `super.admin.${timestamp}@educonnects.com`,
         passwordHash,
         role: "ADMIN",
         status: "ACTIVE",
@@ -122,7 +122,7 @@ async function runDynamicRBACTests() {
     // Create staff member 1 and assign Course Manager role
     testStaffUser1 = await prisma.user.create({
       data: {
-        email: `course.manager.${timestamp}@educonnect.com`,
+        email: `course.manager.${timestamp}@educonnects.com`,
         passwordHash,
         role: "STAFF",
         roleId: courseManagerRole.id,
@@ -303,7 +303,7 @@ async function runDynamicRBACTests() {
     // Create staff member 2
     testStaffUser2 = await prisma.user.create({
       data: {
-        email: `ops.exec.${timestamp}@educonnect.com`,
+        email: `ops.exec.${timestamp}@educonnects.com`,
         passwordHash,
         role: "STAFF",
         roleId: opsExecutiveRole.id,
@@ -411,7 +411,7 @@ async function runDynamicRBACTests() {
 
     const rawInviteToken = crypto.randomBytes(32).toString("hex");
     const tokenHash = crypto.createHash("sha256").update(rawInviteToken).digest("hex");
-    const inviteEmail = `invitee.${timestamp}@educonnect.com`;
+    const inviteEmail = `invitee.${timestamp}@educonnects.com`;
 
     testInvitation = await prisma.staffInvitation.create({
       data: {
@@ -438,7 +438,7 @@ async function runDynamicRBACTests() {
     const expiredTokenHash = crypto.createHash("sha256").update("expired_token_sample").digest("hex");
     const expiredInvitation = await prisma.staffInvitation.create({
       data: {
-        email: `expired.${timestamp}@educonnect.com`,
+        email: `expired.${timestamp}@educonnects.com`,
         fullName: "Expired Candidate",
         roleId: courseManagerRole.id,
         invitedById: testAdminUser.id,

@@ -73,7 +73,7 @@ export default function TeacherPayoutSetupPage() {
           {/* Steps */}
           <div className="space-y-3">
             {[
-              { step: 1, title: "Account Information", desc: "EduConnect educator verification complete" },
+              { step: 1, title: "Account Information", desc: "EduConnects educator verification complete" },
               { step: 2, title: "Razorpay Route Onboarding", desc: "Linked account metadata registration" },
               { step: 3, title: "KYC Verification", desc: "Secure Razorpay partner check" },
               { step: 4, title: "Active Settlements", desc: "Automatic payout transfers enabled" },

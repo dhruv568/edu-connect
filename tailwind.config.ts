@@ -24,7 +24,7 @@ const config: Config = {
         background: "hsl(var(--background))",
         foreground: "hsl(var(--foreground))",
         primary: {
-          DEFAULT: "#2563EB", // EduConnect Blue
+          DEFAULT: "#2563EB", // EduConnects Blue
           hover: "#1D4ED8",
           light: "#EFF6FF",
           foreground: "#FFFFFF",

@@ -168,7 +168,7 @@ export class LmsService {
       status: c.status,
       teacher: {
         id: c.teacher.id,
-        name: `${c.teacher.user.profile?.firstName || ""} ${c.teacher.user.profile?.lastName || ""}`.trim() || "EduConnect Instructor",
+        name: `${c.teacher.user.profile?.firstName || ""} ${c.teacher.user.profile?.lastName || ""}`.trim() || "EduConnects Instructor",
         avatarUrl: c.teacher.user.profile?.avatarUrl,
         headline: c.teacher.headline,
         isVerified: c.teacher.verificationStatus === "VERIFIED",
@@ -303,7 +303,7 @@ export class LmsService {
       userProgressPercentage,
       teacher: {
         id: course.teacher.id,
-        name: `${course.teacher.user.profile?.firstName || ""} ${course.teacher.user.profile?.lastName || ""}`.trim() || "EduConnect Instructor",
+        name: `${course.teacher.user.profile?.firstName || ""} ${course.teacher.user.profile?.lastName || ""}`.trim() || "EduConnects Instructor",
         avatarUrl: course.teacher.user.profile?.avatarUrl,
         headline: course.teacher.headline || "Passionate Educator",
         bio: course.teacher.bio || "Experienced teacher dedicated to student growth.",

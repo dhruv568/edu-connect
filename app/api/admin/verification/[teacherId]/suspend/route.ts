@@ -65,11 +65,11 @@ export async function POST(
       await emailProvider.sendNotificationEmail({
         email: tp.user.email,
         recipientName: tp.user.profile?.firstName || "Teacher",
-        subject: "Important Notice: EduConnect Teacher Account Suspended",
+        subject: "Important Notice: EduConnects Teacher Account Suspended",
         headline: "Teacher Account Temporarily Suspended",
         statusBadgeText: "SUSPENDED",
         statusBadgeVariant: "warning",
-        bodyText: "Your teacher account on EduConnect has been temporarily suspended by system governance. While suspended, public marketplace listings and live class hosting are disabled. Your profile data and course records remain safely preserved.",
+        bodyText: "Your teacher account on EduConnects has been temporarily suspended by system governance. While suspended, public marketplace listings and live class hosting are disabled. Your profile data and course records remain safely preserved.",
         reasonText: reason.trim(),
         actionUrl: `${process.env.NEXT_PUBLIC_APP_URL || "http://localhost:3000"}/contact`,
         actionText: "Contact Admin Support",

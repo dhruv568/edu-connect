@@ -17,14 +17,14 @@ export default function NotFound() {
           <span className="text-4xl font-black text-blue-600">404</span>
           <h1 className="text-2xl font-bold text-slate-900">Page Not Found</h1>
           <p className="text-sm text-slate-500 leading-relaxed">
-            Oops! The EduConnect page or learning resource you are looking for does not exist or has been moved.
+            Oops! The EduConnects page or learning resource you are looking for does not exist or has been moved.
           </p>
         </div>
 
         <div className="pt-2 flex flex-col gap-3">
           <Link href="/">
             <Button variant="gradient" className="w-full" leftIcon={<ArrowLeft className="h-4 w-4" />}>
-              Return to EduConnect Home
+              Return to EduConnects Home
             </Button>
           </Link>
         </div>

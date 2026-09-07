@@ -87,11 +87,11 @@ export async function POST(request: NextRequest) {
       await emailProvider.sendNotificationEmail({
         email: user.email,
         recipientName: `${p?.firstName || "Teacher"}`,
-        subject: "Application Submitted for Teacher Verification - EduConnect",
+        subject: "Application Submitted for Teacher Verification - EduConnects",
         headline: "Application Under Review 🎓",
         statusBadgeText: "PENDING REVIEW",
         statusBadgeVariant: "pending",
-        bodyText: "Your teacher profile and uploaded credentials have been successfully submitted to EduConnect Administration. Our verification team will review your application shortly.",
+        bodyText: "Your teacher profile and uploaded credentials have been successfully submitted to EduConnects Administration. Our verification team will review your application shortly.",
         actionUrl: `${process.env.NEXT_PUBLIC_APP_URL || "http://localhost:3000"}/teacher/verification`,
         actionText: "View Verification Status",
       });

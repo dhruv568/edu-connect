@@ -93,7 +93,7 @@ export default function AdminCoursesModerationPage() {
               <Shield className="w-7 h-7 text-blue-500" /> Admin Course Moderation
             </h1>
             <p className="text-xs sm:text-sm text-slate-400 mt-1">
-              Review and moderate all pre-recorded courses across the EduConnect platform.
+              Review and moderate all pre-recorded courses across the EduConnects platform.
             </p>
           </div>
 

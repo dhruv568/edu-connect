@@ -3,11 +3,11 @@ import { AuthService } from "../services/auth-service";
 import { logAuditEvent } from "../lib/audit-logger";
 
 async function runModule3Tests() {
-  console.log("🧪 Running EduConnect Module 03 Authentication & Profile Verification Tests...\n");
+  console.log("🧪 Running EduConnects Module 03 Authentication & Profile Verification Tests...\n");
 
   // Test 1: Teacher Registration with Professional Fields
   console.log("Test 1: Testing Multi-Step Teacher Registration...");
-  const teacherEmail = `test.teacher.${Date.now()}@educonnect.com`;
+  const teacherEmail = `test.teacher.${Date.now()}@educonnects.com`;
   const teacher = await AuthService.registerUser({
     firstName: "Elena",
     lastName: "Rostova",
@@ -39,7 +39,7 @@ async function runModule3Tests() {
 
   // Test 2: Student Registration
   console.log("\nTest 2: Testing Student Registration with Preferences...");
-  const studentEmail = `test.student.${Date.now()}@educonnect.com`;
+  const studentEmail = `test.student.${Date.now()}@educonnects.com`;
   const student = await AuthService.registerUser({
     firstName: "Marcus",
     lastName: "Vance",
@@ -58,7 +58,7 @@ async function runModule3Tests() {
     await AuthService.registerUser({
       firstName: "Malicious",
       lastName: "Admin",
-      email: "fake.admin@educonnect.com",
+      email: "fake.admin@educonnects.com",
       password: "Password123!",
       role: "ADMIN" as any,
     });

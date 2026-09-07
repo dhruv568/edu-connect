@@ -38,7 +38,7 @@ function VerifyEmailForm() {
             const target = data.data?.redirectPath || redirectTo || "/student/dashboard";
             setRedirectTarget(target);
             setVerified(true);
-            showToast("Email Verified!", "Welcome to EduConnect 🎓", "success", true);
+            showToast("Email Verified!", "Welcome to EduConnects 🎓", "success", true);
             setTimeout(() => {
               router.push(target);
             }, 1200);
@@ -121,7 +121,7 @@ function VerifyEmailForm() {
       const target = data.data?.redirectPath || redirectTo || "/student/dashboard";
       setRedirectTarget(target);
       setVerified(true);
-      showToast("Email Verified!", "Welcome to EduConnect 🎓 Your account is fully active.", "success", true);
+      showToast("Email Verified!", "Welcome to EduConnects 🎓 Your account is fully active.", "success", true);
       setTimeout(() => {
         router.push(target);
       }, 1000);
@@ -174,7 +174,7 @@ function VerifyEmailForm() {
             </div>
             <h2 className="text-2xl font-extrabold text-slate-900">Email Verified!</h2>
             <p className="text-sm text-slate-600">
-              Your EduConnect account is verified. Redirecting to your dashboard...
+              Your EduConnects account is verified. Redirecting to your dashboard...
             </p>
             <Button
               variant="gradient"

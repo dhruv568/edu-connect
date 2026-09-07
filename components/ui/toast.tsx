@@ -68,7 +68,7 @@ export function ToastProvider({ children }: { children: React.ReactNode }) {
                 {toast.message && <p className="text-xs text-slate-600 mt-0.5 leading-relaxed">{toast.message}</p>}
                 {toast.isCelebratory && (
                   <div className="mt-1 text-xs font-semibold text-emerald-600 flex items-center gap-1">
-                    <span>🎓 Welcome to EduConnect!</span>
+                    <span>🎓 Welcome to EduConnects!</span>
                   </div>
                 )}
               </div>

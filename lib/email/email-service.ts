@@ -44,7 +44,7 @@ export class ConsoleEmailProvider implements IEmailProvider {
     console.log("\n==================================================");
     console.log("✉️ [EMAIL SERVICE: VERIFICATION DISPATCH]");
     console.log(`To: ${to}`);
-    console.log(`Subject: ${payload.subject || "Your EduConnect Verification Code 🎓"}`);
+    console.log(`Subject: ${payload.subject || "Your EduConnects Verification Code 🎓"}`);
     console.log(`Recipient: ${templateParams.firstName || "User"}`);
     if (!isProduction) {
       console.log(`🔑 6-Digit OTP: >>> ${templateParams.otp} <<<`);
@@ -129,11 +129,11 @@ export class SMTPEmailProvider implements IEmailProvider {
 
   async sendVerificationEmail(payload: SendEmailPayload): Promise<boolean> {
     const html = generateVerificationEmailHtml(payload.templateParams);
-    const from = process.env.EMAIL_FROM || (process.env.SMTP_USER ? `EduConnect <${process.env.SMTP_USER}>` : "EduConnect <no-reply@educonnect.com>");
+    const from = process.env.EMAIL_FROM || (process.env.SMTP_USER ? `EduConnects <${process.env.SMTP_USER}>` : "EduConnects <no-reply@educonnects.com>");
     const mailOptions = {
       from,
       to: payload.to,
-      subject: payload.subject || "Your EduConnect Verification Code 🎓",
+      subject: payload.subject || "Your EduConnects Verification Code 🎓",
       html,
     };
 
@@ -163,11 +163,11 @@ export class SMTPEmailProvider implements IEmailProvider {
       firstName: payload.firstName,
       resetUrl: payload.resetUrl,
     });
-    const from = process.env.EMAIL_FROM || (process.env.SMTP_USER ? `EduConnect <${process.env.SMTP_USER}>` : "EduConnect <no-reply@educonnect.com>");
+    const from = process.env.EMAIL_FROM || (process.env.SMTP_USER ? `EduConnects <${process.env.SMTP_USER}>` : "EduConnects <no-reply@educonnects.com>");
     const mailOptions = {
       from,
       to: payload.to,
-      subject: payload.subject || "Reset your EduConnect password",
+      subject: payload.subject || "Reset your EduConnects password",
       html,
     };
 
@@ -191,7 +191,7 @@ export class SMTPEmailProvider implements IEmailProvider {
 
   async sendNotificationEmail(params: NotificationEmailParams): Promise<boolean> {
     const html = generateNotificationEmailHtml(params);
-    const from = process.env.EMAIL_FROM || (process.env.SMTP_USER ? `EduConnect <${process.env.SMTP_USER}>` : "EduConnect <no-reply@educonnect.com>");
+    const from = process.env.EMAIL_FROM || (process.env.SMTP_USER ? `EduConnects <${process.env.SMTP_USER}>` : "EduConnects <no-reply@educonnects.com>");
     const mailOptions = {
       from,
       to: params.email,
@@ -243,7 +243,7 @@ export function getEmailProvider(): IEmailProvider {
 }
 
 /**
- * Higher-level EduConnect Email Service API wrappers.
+ * Higher-level EduConnects Email Service API wrappers.
  */
 export class EmailService {
   static async sendVerificationOTP(params: {
@@ -266,7 +266,7 @@ export class EmailService {
       const result = await Promise.race([
         provider.sendVerificationEmail({
           to: params.email,
-          subject: "Your EduConnect Verification Code 🎓",
+          subject: "Your EduConnects Verification Code 🎓",
           templateParams: {
             recipientEmail: params.email,
             firstName: params.userName,
@@ -295,7 +295,7 @@ export class EmailService {
     const provider = getEmailProvider();
     return provider.sendPasswordResetEmail({
       to: params.email,
-      subject: "Reset your EduConnect password",
+      subject: "Reset your EduConnects password",
       firstName: params.userName,
       resetUrl: params.resetUrl,
     });
@@ -309,11 +309,11 @@ export class EmailService {
     return provider.sendNotificationEmail({
       email: params.email,
       recipientName: params.userName || "Learner",
-      subject: "Welcome to EduConnect! 🎓",
+      subject: "Welcome to EduConnects! 🎓",
       statusBadgeText: "WELCOME",
       statusBadgeVariant: "success",
-      headline: "Your EduConnect journey starts here!",
-      bodyText: "Explore top teachers, host live classes, and master new skills on EduConnect.",
+      headline: "Your EduConnects journey starts here!",
+      bodyText: "Explore top teachers, host live classes, and master new skills on EduConnects.",
     });
   }
 }

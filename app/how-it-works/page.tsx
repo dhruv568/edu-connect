@@ -195,7 +195,7 @@ export default function HowItWorksPage() {
     },
     {
       q: "Do I need to download Zoom or any third-party app?",
-      a: "No. EduConnect features full WebRTC live streaming directly inside modern desktop and mobile browsers. Everything from video calls, whiteboard, chat, and notes operates on our platform.",
+      a: "No. EduConnects features full WebRTC live streaming directly inside modern desktop and mobile browsers. Everything from video calls, whiteboard, chat, and notes operates on our platform.",
     },
     {
       q: "What happens if a teacher cancels or cannot make the class?",
@@ -223,7 +223,7 @@ export default function HowItWorksPage() {
           <h1 className="text-4xl sm:text-5xl font-black text-slate-900 tracking-tight leading-tight">
             How Learning Flows on{" "}
             <span className="bg-gradient-to-r from-blue-600 via-indigo-600 to-purple-600 bg-clip-text text-transparent">
-              EduConnect
+              EduConnects
             </span>
           </h1>
           <p className="text-base text-slate-600 max-w-2xl mx-auto">

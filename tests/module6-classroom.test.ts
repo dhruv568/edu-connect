@@ -2,7 +2,7 @@ import { prisma } from "../lib/prisma";
 import { decodeRoomToken, generateRoomToken } from "../lib/classroom/classroom-token";
 
 async function runModule6Tests() {
-  console.log("🧪 Starting EduConnect Module 06 — Live Classroom Test Suite...\n");
+  console.log("🧪 Starting EduConnects Module 06 — Live Classroom Test Suite...\n");
 
   let passedTests = 0;
   let failedTests = 0;

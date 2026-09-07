@@ -27,7 +27,7 @@ export async function GET(request: NextRequest, { params }: { params: { transact
     const teacherObj = transaction.course?.teacher || transaction.liveClassSlot?.teacher;
     const teacherName = teacherObj?.user?.profile
       ? `${teacherObj.user.profile.firstName} ${teacherObj.user.profile.lastName}`
-      : "EduConnect Educator";
+      : "EduConnects Educator";
 
     return apiSuccess({
       transaction: {

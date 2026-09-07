@@ -46,7 +46,7 @@ export default function UserProfilePage() {
         <div className="flex items-center justify-between">
           <div>
             <h1 className="text-2xl font-black text-slate-900">User Profile</h1>
-            <p className="text-xs text-slate-500">Manage your EduConnect account settings and preferences</p>
+            <p className="text-xs text-slate-500">Manage your EduConnects account settings and preferences</p>
           </div>
           <Link href="/profile/edit">
             <Button variant="outline" size="sm" leftIcon={<Edit className="h-4 w-4" />}>

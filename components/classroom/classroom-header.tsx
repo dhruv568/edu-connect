@@ -98,7 +98,7 @@ export function ClassroomHeader({
           <div className="w-8 h-8 rounded-xl bg-gradient-to-tr from-blue-600 to-indigo-600 flex items-center justify-center text-white shadow-md shadow-blue-500/20">
             <Shield className="h-4 w-4" />
           </div>
-          <span className="hidden sm:inline">EduConnect</span>
+          <span className="hidden sm:inline">EduConnects</span>
         </Link>
 
         <div className="h-6 w-px bg-slate-800 hidden sm:block shrink-0" />

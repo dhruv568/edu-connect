@@ -1,6 +1,6 @@
-# EduConnect — Technical Foundation & Architecture
+# EduConnects — Technical Foundation & Architecture
 
-EduConnect is a next-generation education platform connecting **Teachers**, **Students**, and **Administrators** across three independent learning models: **Demo Bookings**, **Live Class Slots**, and **Pre-recorded Courses**, with a production-grade WebRTC **Virtual Classroom**.
+EduConnects is a next-generation education platform connecting **Teachers**, **Students**, and **Administrators** across three independent learning models: **Demo Bookings**, **Live Class Slots**, and **Pre-recorded Courses**, with a production-grade WebRTC **Virtual Classroom**.
 
 ---
 
@@ -8,7 +8,7 @@ EduConnect is a next-generation education platform connecting **Teachers**, **St
 
 - **Frontend Framework**: Next.js 14/15 (App Router) & React 18
 - **Language**: TypeScript (Strict Mode)
-- **Styling & System**: Tailwind CSS & Custom **"EduConnect Playful Learning System"**
+- **Styling & System**: Tailwind CSS & Custom **"EduConnects Playful Learning System"**
 - **Animations**: Framer Motion & GSAP
 - **Real-Time Video**: WebRTC Provider Abstraction (`ClassroomProvider`, `WebRTCAdapter`)
 - **Icons**: Lucide React
@@ -116,11 +116,11 @@ npm run db:seed
 ```
 
 **Seeded Credentials (Password for all: `Password123!`):**
-- **Admin**: `admin@educonnect.com`
-- **Teacher**: `teacher@educonnect.com`
-- **Student**: `student@educonnect.com`
-- **Parent**: `parent@educonnect.com`
-- **Unverified Student**: `unverified@educonnect.com`
+- **Admin**: `admin@educonnects.com`
+- **Teacher**: `teacher@educonnects.com`
+- **Student**: `student@educonnects.com`
+- **Parent**: `parent@educonnects.com`
+- **Unverified Student**: `unverified@educonnects.com`
 
 ### 4. Run Architectural Verification Tests
 ```bash

@@ -6,7 +6,7 @@ import { verifyRazorpaySignature, verifyWebhookSignature } from "../lib/razorpay
 import { generateLiveKitRoomToken } from "../lib/classroom/livekit-server";
 
 async function runModule11SecurityQATests() {
-  console.log("\n🧪 Running EduConnect Module 11 Security, RBAC, IDOR & QA Tests...\n");
+  console.log("\n🧪 Running EduConnects Module 11 Security, RBAC, IDOR & QA Tests...\n");
 
   let studentSession: any;
   let teacherSession: any;
@@ -20,7 +20,7 @@ async function runModule11SecurityQATests() {
     // Setup Test Users
     testUserA = await prisma.user.create({
       data: {
-        email: `sec.student.a.${Date.now()}@educonnect.com`,
+        email: `sec.student.a.${Date.now()}@educonnects.com`,
         passwordHash,
         role: "STUDENT",
         emailVerified: true,
@@ -31,7 +31,7 @@ async function runModule11SecurityQATests() {
 
     testUserB = await prisma.user.create({
       data: {
-        email: `sec.student.b.${Date.now()}@educonnect.com`,
+        email: `sec.student.b.${Date.now()}@educonnects.com`,
         passwordHash,
         role: "STUDENT",
         emailVerified: true,
@@ -51,7 +51,7 @@ async function runModule11SecurityQATests() {
     teacherSession = {
       userId: `teacher-${Date.now()}`,
       id: `teacher-${Date.now()}`,
-      email: `sec.teacher.${Date.now()}@educonnect.com`,
+      email: `sec.teacher.${Date.now()}@educonnects.com`,
       role: "TEACHER",
       emailVerified: true,
     };
@@ -59,7 +59,7 @@ async function runModule11SecurityQATests() {
     unverifiedStudentSession = {
       userId: `unverified-${Date.now()}`,
       id: `unverified-${Date.now()}`,
-      email: `sec.unverified.${Date.now()}@educonnect.com`,
+      email: `sec.unverified.${Date.now()}@educonnects.com`,
       role: "STUDENT",
       emailVerified: false,
     };

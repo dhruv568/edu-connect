@@ -77,7 +77,7 @@ export default function AdminLiveClassesPage() {
   };
 
   return (
-    <DashboardLayout role="ADMIN" userName="System Administrator" userEmail="admin@educonnect.com">
+    <DashboardLayout role="ADMIN" userName="System Administrator" userEmail="admin@educonnects.com">
       <div className="space-y-6 pb-16">
         <div>
           <h1 className="text-2xl lg:text-3xl font-black text-slate-900 dark:text-slate-100 tracking-tight">

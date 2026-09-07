@@ -58,7 +58,7 @@ export async function GET(req: NextRequest) {
       status: 200,
       headers: {
         "Content-Type": "text/csv; charset=utf-8",
-        "Content-Disposition": `attachment; filename=educonnect-${reportType}-report.csv`,
+        "Content-Disposition": `attachment; filename=educonnects-${reportType}-report.csv`,
       },
     });
   } catch (error: any) {

@@ -5,7 +5,7 @@ export interface PasswordResetEmailParams {
 }
 
 /**
- * Generates responsive, branded HTML for EduConnect Password Reset requests.
+ * Generates responsive, branded HTML for EduConnects Password Reset requests.
  */
 export function generatePasswordResetEmailHtml(params: PasswordResetEmailParams): string {
   const { firstName, resetUrl } = params;
@@ -18,7 +18,7 @@ export function generatePasswordResetEmailHtml(params: PasswordResetEmailParams)
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <meta http-equiv="X-UA-Compatible" content="IE=edge">
-  <title>Reset your EduConnect password</title>
+  <title>Reset your EduConnects password</title>
   <style>
     body {
       font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
@@ -152,7 +152,7 @@ export function generatePasswordResetEmailHtml(params: PasswordResetEmailParams)
   <div class="wrapper">
     <div class="main-card">
       <div class="header-banner">
-        <h1 class="brand-title">EDUCONNECT</h1>
+        <h1 class="brand-title">EDUCONNECTS</h1>
         <p class="brand-tagline">Learn. Connect. Grow.</p>
       </div>
 
@@ -161,7 +161,7 @@ export function generatePasswordResetEmailHtml(params: PasswordResetEmailParams)
       <div class="content-body">
         <h2 class="greeting">Hello ${recipientName},</h2>
         <p class="body-text">
-          We received a request to reset your EduConnect password. Click the button below to choose a new password:
+          We received a request to reset your EduConnects password. Click the button below to choose a new password:
         </p>
 
         <div class="cta-container">
@@ -178,9 +178,9 @@ export function generatePasswordResetEmailHtml(params: PasswordResetEmailParams)
       </div>
 
       <div class="footer">
-        <p class="footer-brand">EduConnect</p>
+        <p class="footer-brand">EduConnects</p>
         <p class="footer-tagline">Learn. Connect. Grow.</p>
-        <p class="footer-copyright">&copy; ${currentYear} EduConnect. All rights reserved.</p>
+        <p class="footer-copyright">&copy; ${currentYear} EduConnects. All rights reserved.</p>
       </div>
     </div>
   </div>

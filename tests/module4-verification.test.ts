@@ -3,7 +3,7 @@ import bcrypt from "bcryptjs";
 import { saveDocumentToStorage, readDocumentFromStorage, deleteDocumentFromStorage } from "../lib/document-storage";
 
 async function runModule4Tests() {
-  console.log("🧪 Starting EduConnect Module 04 Verification & Admin Automated Tests...\n");
+  console.log("🧪 Starting EduConnects Module 04 Verification & Admin Automated Tests...\n");
 
   const defaultPasswordHash = await bcrypt.hash("Password123!", 10);
   const testId = Date.now();
@@ -12,7 +12,7 @@ async function runModule4Tests() {
     // 1. Create Test Admin
     const adminUser = await prisma.user.create({
       data: {
-        email: `admin.test.${testId}@educonnect.com`,
+        email: `admin.test.${testId}@educonnects.com`,
         passwordHash: defaultPasswordHash,
         role: "ADMIN",
         emailVerified: true,
@@ -25,7 +25,7 @@ async function runModule4Tests() {
     // 2. Create Test Teacher User
     const teacherUser = await prisma.user.create({
       data: {
-        email: `teacher.test.${testId}@educonnect.com`,
+        email: `teacher.test.${testId}@educonnects.com`,
         passwordHash: defaultPasswordHash,
         role: "TEACHER",
         emailVerified: true,
@@ -51,7 +51,7 @@ async function runModule4Tests() {
     console.log("✅ Test 1: Created Test Admin and Test Teacher User.");
 
     // 3. Test Secure Document Storage Utility
-    const dummyBuffer = Buffer.from("Test PDF Document Content for EduConnect Verification");
+    const dummyBuffer = Buffer.from("Test PDF Document Content for EduConnects Verification");
     const storedDoc = await saveDocumentToStorage(dummyBuffer, "passport_john_doe.pdf", "application/pdf");
 
     if (!storedDoc.storageKey || storedDoc.fileSize !== dummyBuffer.length) {
@@ -198,7 +198,7 @@ async function runModule4Tests() {
     // Create an UNVERIFIED teacher
     const unverifiedUser = await prisma.user.create({
       data: {
-        email: `unverified.teacher.${testId}@educonnect.com`,
+        email: `unverified.teacher.${testId}@educonnects.com`,
         passwordHash: defaultPasswordHash,
         role: "TEACHER",
         emailVerified: false,

@@ -8,7 +8,7 @@ export interface EmailTemplateParams {
 }
 
 /**
- * Generates a premium, responsive HTML template for EduConnect Email OTP Verification.
+ * Generates a premium, responsive HTML template for EduConnects Email OTP Verification.
  * Designed with liquid-glass aesthetic, soft gradients, high contrast, and robust mobile support.
  */
 export function generateVerificationEmailHtml(params: EmailTemplateParams): string {
@@ -27,7 +27,7 @@ export function generateVerificationEmailHtml(params: EmailTemplateParams): stri
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <meta http-equiv="X-UA-Compatible" content="IE=edge">
-  <title>Your EduConnect Verification Code 🎓</title>
+  <title>Your EduConnects Verification Code 🎓</title>
   <style>
     body {
       font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
@@ -206,7 +206,7 @@ export function generateVerificationEmailHtml(params: EmailTemplateParams): stri
     <div class="main-card">
       <!-- Header Banner -->
       <div class="header-banner">
-        <h1 class="brand-title">EDUCONNECT</h1>
+        <h1 class="brand-title">EDUCONNECTS</h1>
         <p class="brand-tagline">Learn. Connect. Grow.</p>
       </div>
 
@@ -217,7 +217,7 @@ export function generateVerificationEmailHtml(params: EmailTemplateParams): stri
       <div class="content-body">
         <h2 class="greeting">Hello ${recipientName},</h2>
         <p class="welcome-text">
-          Welcome to EduConnect! 🎓<br>
+          Welcome to EduConnects! 🎓<br>
           We're excited to have you with us. To verify your email address, please enter the verification code below:
         </p>
 
@@ -230,12 +230,12 @@ export function generateVerificationEmailHtml(params: EmailTemplateParams): stri
 
         <!-- Security Warning -->
         <div class="security-notice">
-          <strong>🔐 For your security:</strong> EduConnect will never ask you to share your verification code with anyone.
+          <strong>🔐 For your security:</strong> EduConnects will never ask you to share your verification code with anyone.
         </div>
 
         <!-- Call to Action Button -->
         <div class="cta-container">
-          <a href="${baseUrl}" class="cta-button" target="_blank">Open EduConnect</a>
+          <a href="${baseUrl}" class="cta-button" target="_blank">Open EduConnects</a>
         </div>
 
         <!-- Disregard Disclaimer -->
@@ -246,9 +246,9 @@ export function generateVerificationEmailHtml(params: EmailTemplateParams): stri
 
       <!-- Footer -->
       <div class="footer">
-        <p class="footer-brand">EduConnect</p>
+        <p class="footer-brand">EduConnects</p>
         <p class="footer-tagline">Learn. Connect. Grow.</p>
-        <p class="footer-copyright">&copy; ${currentYear} EduConnect. All rights reserved.</p>
+        <p class="footer-copyright">&copy; ${currentYear} EduConnects. All rights reserved.</p>
       </div>
     </div>
   </div>

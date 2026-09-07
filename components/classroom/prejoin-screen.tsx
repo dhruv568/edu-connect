@@ -154,7 +154,7 @@ export function PreJoinScreen({
         {/* Header */}
         <div className="text-center space-y-2">
           <div className="inline-flex items-center gap-2 bg-blue-500/10 border border-blue-500/30 px-3 py-1 rounded-full text-xs font-semibold text-blue-400">
-            <ShieldCheck className="h-4 w-4" /> EduConnect Virtual Classroom Setup
+            <ShieldCheck className="h-4 w-4" /> EduConnects Virtual Classroom Setup
           </div>
           <h1 className="text-2xl md:text-4xl font-extrabold text-white">
             {sessionDetails.title}

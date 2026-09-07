@@ -132,7 +132,7 @@ export default function StudentRegistrationPage() {
           <div className="pt-4 border-t border-slate-100 text-center text-xs">
             <span className="text-slate-500">Already have an account? </span>
             <Link href="/login" className="font-bold text-emerald-600 hover:underline">
-              Sign In to EduConnect
+              Sign In to EduConnects
             </Link>
           </div>
         </GlassCard>

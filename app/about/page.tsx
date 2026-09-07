@@ -107,7 +107,7 @@ export default function AboutPage() {
         <div className="text-center max-w-3xl mx-auto space-y-4">
           <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-blue-500/10 border border-blue-500/20 text-blue-700 text-xs font-bold uppercase tracking-wider">
             <Sparkles className="h-3.5 w-3.5 text-blue-600" />
-            <span>The EduConnect Vision</span>
+            <span>The EduConnects Vision</span>
           </div>
           <h1 className="text-4xl sm:text-5xl lg:text-6xl font-black text-slate-900 tracking-tight leading-tight">
             Connecting Education for{" "}
@@ -116,7 +116,7 @@ export default function AboutPage() {
             </span>
           </h1>
           <p className="text-base sm:text-lg text-slate-600 leading-relaxed max-w-2xl mx-auto">
-            EduConnect is built on the conviction that transparent flexible learning models, certified educators, and real-time interactive classrooms unlock academic excellence.
+            EduConnects is built on the conviction that transparent flexible learning models, certified educators, and real-time interactive classrooms unlock academic excellence.
           </p>
         </div>
 
@@ -166,10 +166,10 @@ export default function AboutPage() {
             <div className="space-y-3">
               <span className="text-xs font-extrabold text-indigo-600 uppercase tracking-widest">Our Core Philosophy</span>
               <h2 className="text-2xl sm:text-3xl font-extrabold text-slate-900 tracking-tight">
-                Why EduConnect Was Created
+                Why EduConnects Was Created
               </h2>
               <p className="text-sm text-slate-600 leading-relaxed">
-                Traditional tutoring platforms forced families into rigid, expensive annual subscriptions with little control over teaching quality. We built EduConnect around three transparent pillars:
+                Traditional tutoring platforms forced families into rigid, expensive annual subscriptions with little control over teaching quality. We built EduConnects around three transparent pillars:
               </p>
             </div>
 
@@ -221,7 +221,7 @@ export default function AboutPage() {
               The 4-Stage Educator Verification Protocol
             </h2>
             <p className="text-xs sm:text-sm text-slate-600">
-              Only the top 8% of applicants receive verified educator status on EduConnect.
+              Only the top 8% of applicants receive verified educator status on EduConnects.
             </p>
           </div>
 

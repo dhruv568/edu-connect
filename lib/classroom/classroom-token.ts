@@ -3,7 +3,7 @@ import { UserSession } from "@/types/auth";
 import { ClassroomTokenPayload } from "@/types/classroom";
 import crypto from "crypto";
 
-const TOKEN_SECRET = process.env.CLASSROOM_TOKEN_SECRET || "educonnect_classroom_secret_key_2026";
+const TOKEN_SECRET = process.env.CLASSROOM_TOKEN_SECRET || "educonnects_classroom_secret_key_2026";
 const TOKEN_TTL_SECONDS = 3600; // 1 hour token lifespan
 
 /**

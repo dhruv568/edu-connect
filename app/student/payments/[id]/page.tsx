@@ -112,7 +112,7 @@ export default function StudentPaymentReceiptPage() {
             <div>
               <div className="flex items-center gap-2">
                 <Sparkles className="w-5 h-5 text-blue-400 print:text-blue-600" />
-                <span className="text-xl font-black tracking-tight text-white print:text-black">EduConnect</span>
+                <span className="text-xl font-black tracking-tight text-white print:text-black">EduConnects</span>
               </div>
               <p className="text-xs text-slate-400 print:text-gray-500 mt-1">Official Payment Receipt</p>
             </div>
@@ -138,7 +138,7 @@ export default function StudentPaymentReceiptPage() {
             <div className="space-y-1 text-right">
               <span className="text-slate-500 print:text-gray-500 font-semibold uppercase">Educator</span>
               <p className="font-bold text-white print:text-black">{receipt.teacherName}</p>
-              <p className="text-slate-400 print:text-gray-600">EduConnect Verified Partner</p>
+              <p className="text-slate-400 print:text-gray-600">EduConnects Verified Partner</p>
             </div>
           </div>
 
@@ -170,7 +170,7 @@ export default function StudentPaymentReceiptPage() {
           {/* Identifiers */}
           <div className="p-4 rounded-2xl bg-slate-950/60 print:bg-gray-50 border border-slate-800 print:border-gray-300 space-y-2 text-xs">
             <div className="flex justify-between">
-              <span className="text-slate-500 print:text-gray-500">EduConnect Ref</span>
+              <span className="text-slate-500 print:text-gray-500">EduConnects Ref</span>
               <span className="font-mono text-slate-300 print:text-black font-semibold">{receipt.internalReference}</span>
             </div>
             {receipt.providerOrderId && (

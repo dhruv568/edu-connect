@@ -7,7 +7,7 @@ import { ToastProvider } from "@/components/ui/toast";
 const inter = Inter({ subsets: ["latin"] });
 
 export const metadata: Metadata = {
-  title: "EduConnect — Learn Better. Teach Smarter.",
+  title: "EduConnects — Learn Better. Teach Smarter.",
   description: "Next-generation education platform connecting teachers, students, and parents with flexible learning models.",
 };
 

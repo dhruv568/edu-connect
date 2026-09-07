@@ -22,7 +22,7 @@ export function PremiumFooter({ showCta = true }: PremiumFooterProps = {}) {
             <div className="space-y-2 text-center md:text-left">
               <h3 className="text-xl sm:text-2xl md:text-3xl font-black text-white">Ready to transform your learning?</h3>
               <p className="text-sm text-slate-400 max-w-lg">
-                Join thousands of teachers and students building connected education futures on EduConnect.
+                Join thousands of teachers and students building connected education futures on EduConnects.
               </p>
             </div>
             <Link href="/register">
@@ -46,7 +46,7 @@ export function PremiumFooter({ showCta = true }: PremiumFooterProps = {}) {
               </span>
             </Link>
             <p className="text-xs text-slate-400 leading-relaxed max-w-sm">
-              EduConnect is a next-generation education platform built around three independent learning models: Demo Sessions, Live Classes, and Pre-recorded Courses.
+              EduConnects is a next-generation education platform built around three independent learning models: Demo Sessions, Live Classes, and Pre-recorded Courses.
             </p>
           </div>
 
@@ -87,7 +87,7 @@ export function PremiumFooter({ showCta = true }: PremiumFooterProps = {}) {
 
         {/* Bottom Copyright */}
         <div className="flex flex-col md:flex-row items-center justify-between gap-4 text-xs text-slate-500">
-          <p className="text-center md:text-left">&copy; 2026 EduConnect Liquid Learning Platform Inc. All rights reserved.</p>
+          <p className="text-center md:text-left">&copy; 2026 EduConnects Liquid Learning Platform Inc. All rights reserved.</p>
           <div className="flex items-center gap-1">
             <span>Crafted for connected education</span>
             <Heart className="h-3.5 w-3.5 text-red-500 fill-red-500 ml-1" />

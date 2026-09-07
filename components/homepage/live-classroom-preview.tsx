@@ -38,7 +38,7 @@ export function LiveClassroomPreview({ onOpenAuth }: LiveClassroomPreviewProps) 
             Built-in Live Virtual Classroom
           </h2>
           <p className="text-base text-slate-600">
-            No third-party app downloads required. EduConnect hosts seamless live classes directly on the platform.
+            No third-party app downloads required. EduConnects hosts seamless live classes directly on the platform.
           </p>
         </div>
 

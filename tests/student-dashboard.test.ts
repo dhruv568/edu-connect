@@ -17,7 +17,7 @@ async function main() {
     console.log('Creating sample student for testing...');
     student = await prisma.user.create({
       data: {
-        email: 'test.student.dash@educonnect.com',
+        email: 'test.student.dash@educonnects.com',
         passwordHash: '',
         role: 'STUDENT',
         emailVerified: true,

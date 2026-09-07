@@ -98,10 +98,10 @@ export function AuthModal({ isOpen, onClose, initialRole = "STUDENT", initialMod
 
           <div className="mb-6">
             <span className="text-xs font-bold text-blue-600 uppercase tracking-widest">
-              EduConnect Access
+              EduConnects Access
             </span>
             <h2 className="text-2xl font-extrabold text-slate-900 mt-1">
-              {mode === "register" ? "Create Account" : "Sign In to EduConnect"}
+              {mode === "register" ? "Create Account" : "Sign In to EduConnects"}
             </h2>
             <p className="text-sm text-slate-500 mt-1">
               {mode === "register"

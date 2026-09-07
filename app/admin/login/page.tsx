@@ -82,7 +82,7 @@ export default function AdminLoginPage() {
           <div className="lg:col-span-7 space-y-6">
             <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-blue-500/10 border border-blue-500/25 text-blue-400 text-xs font-bold uppercase tracking-wider backdrop-blur-md">
               <ShieldCheck className="h-4 w-4 text-blue-400" />
-              <span>EduConnect Core Governance Portal</span>
+              <span>EduConnects Core Governance Portal</span>
             </div>
 
             <div className="space-y-3">
@@ -191,7 +191,7 @@ export default function AdminLoginPage() {
                     <Mail className="absolute left-3.5 top-1/2 -translate-y-1/2 h-4 w-4 text-blue-400" />
                     <input
                       type="email"
-                      placeholder="admin@educonnect.com"
+                      placeholder="admin@educonnects.com"
                       value={email}
                       onChange={(e) => setEmail(e.target.value)}
                       required
@@ -251,7 +251,7 @@ export default function AdminLoginPage() {
                 <button
                   type="button"
                   onClick={() => {
-                    setEmail("admin@educonnect.com");
+                    setEmail("admin@educonnects.com");
                     setPassword("Password123!");
                   }}
                   className="w-full py-2 px-3 rounded-xl bg-blue-500/10 hover:bg-blue-500/20 border border-blue-500/30 text-blue-300 hover:text-blue-200 text-xs font-bold transition-all flex items-center justify-center gap-2 group"

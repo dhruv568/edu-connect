@@ -53,7 +53,7 @@ export default function ContactPage() {
 
       <main className="flex-1 pt-32 pb-20 max-w-5xl mx-auto px-4 w-full space-y-12">
         <div className="text-center space-y-3">
-          <GlassBadge variant="blue">CONTACT EDUCONNECT</GlassBadge>
+          <GlassBadge variant="blue">CONTACT EDUCONNECTS</GlassBadge>
           <h1 className="text-4xl font-black text-slate-900 tracking-tight">Get in Touch with Our Team</h1>
           <p className="text-sm text-slate-600 max-w-xl mx-auto">
             Have a question about demo bookings, live classes, or teacher onboarding? We&apos;re here to help.
@@ -102,7 +102,7 @@ export default function ContactPage() {
                   </div>
                   <div>
                     <h4 className="text-xs font-bold text-slate-500 uppercase tracking-wider">Email Us</h4>
-                    <p className="text-sm font-bold text-slate-900">support@educonnect.com</p>
+                    <p className="text-sm font-bold text-slate-900">support@educonnects.com</p>
                     <p className="text-xs text-slate-500">24/7 dedicated support inbox</p>
                   </div>
                 </div>

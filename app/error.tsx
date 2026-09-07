@@ -13,7 +13,7 @@ export default function GlobalError({
   reset: () => void;
 }) {
   useEffect(() => {
-    console.error("EduConnect Application Error:", error);
+    console.error("EduConnects Application Error:", error);
   }, [error]);
 
   return (

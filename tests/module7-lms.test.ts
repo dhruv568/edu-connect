@@ -3,7 +3,7 @@ import { LmsService } from "../services/lms-service";
 import crypto from "crypto";
 
 async function runModule7LmsTests() {
-  console.log("🧪 Starting EduConnect Module 07 — LMS / Pre-recorded Courses Test Suite...\n");
+  console.log("🧪 Starting EduConnects Module 07 — LMS / Pre-recorded Courses Test Suite...\n");
 
   let passedTests = 0;
   let failedTests = 0;
@@ -24,7 +24,7 @@ async function runModule7LmsTests() {
     // Setup Test Users: Teacher & Student
     const teacherUser = await prisma.user.create({
       data: {
-        email: `teacher.lms.${randomSuffix}@educonnect.com`,
+        email: `teacher.lms.${randomSuffix}@educonnects.com`,
         passwordHash: "$2a$10$xyz",
         role: "TEACHER",
         emailVerified: true,
@@ -50,7 +50,7 @@ async function runModule7LmsTests() {
 
     const studentUser = await prisma.user.create({
       data: {
-        email: `student.lms.${randomSuffix}@educonnect.com`,
+        email: `student.lms.${randomSuffix}@educonnects.com`,
         passwordHash: "$2a$10$xyz",
         role: "STUDENT",
         emailVerified: true,

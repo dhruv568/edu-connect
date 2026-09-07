@@ -48,13 +48,13 @@ export default function AdminTeachersPage() {
   };
 
   return (
-    <DashboardLayout role="ADMIN" userName="System Administrator" userEmail="admin@educonnect.com">
+    <DashboardLayout role="ADMIN" userName="System Administrator" userEmail="admin@educonnects.com">
       <div className="space-y-6 pb-16">
         <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
           <div>
             <h1 className="text-2xl lg:text-3xl font-black text-slate-900 tracking-tight">Teacher Governance & Directory</h1>
             <p className="text-xs lg:text-sm text-slate-500 mt-1">
-              Review, approve, reject, or suspend teacher accounts across EduConnect.
+              Review, approve, reject, or suspend teacher accounts across EduConnects.
             </p>
           </div>
 

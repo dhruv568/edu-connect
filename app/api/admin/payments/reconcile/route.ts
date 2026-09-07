@@ -17,7 +17,7 @@ export async function POST(request: NextRequest) {
     });
 
     const reconciliationResults = transactions.map((t) => {
-      // Compare EduConnect internal state vs provider state
+      // Compare EduConnects internal state vs provider state
       const isMatched = t.status === "CAPTURED" || t.status === "REFUNDED" || t.status === "FAILED";
       const status = isMatched ? "MATCHED" : "REVIEW_REQUIRED";
 

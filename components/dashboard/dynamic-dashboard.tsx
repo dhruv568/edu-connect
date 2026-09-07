@@ -278,7 +278,7 @@ export function DynamicDashboard() {
       ) : (
         <div className="p-8 text-center bg-slate-100 dark:bg-slate-800/40 rounded-2xl border border-slate-200 dark:border-slate-800">
           <p className="text-sm font-semibold text-slate-600 dark:text-slate-300">
-            Welcome to EduConnect. Select a feature from the sidebar to begin.
+            Welcome to EduConnects. Select a feature from the sidebar to begin.
           </p>
         </div>
       )}

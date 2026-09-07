@@ -198,7 +198,7 @@ export function DashboardLayout({ role, userName, userEmail, children }: Dashboa
               <GraduationCap className="h-6 w-6" />
             </div>
             <div>
-              <h1 className="text-lg font-black text-white tracking-tight">EDUCONNECT</h1>
+              <h1 className="text-lg font-black text-white tracking-tight">EDUCONNECTS</h1>
               <Badge variant={roleColors[role] || "student"} size="sm">
                 {currentRoleTitle}
               </Badge>

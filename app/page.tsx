@@ -14,7 +14,7 @@ import { PremiumFooter } from "@/components/homepage/premium-footer";
 import { AuthModal } from "@/components/shared/auth-modal";
 import { UserRole } from "@/types/auth";
 
-export default function EduConnectHomePage() {
+export default function EduConnectsHomePage() {
   const [authModalOpen, setAuthModalOpen] = useState(false);
   const [selectedRole, setSelectedRole] = useState<UserRole>("STUDENT");
 

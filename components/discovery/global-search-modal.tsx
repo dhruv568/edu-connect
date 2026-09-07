@@ -109,7 +109,7 @@ export function GlobalSearchModal({ isOpen, onClose }: GlobalSearchModalProps) {
                 </div>
               </div>
             ) : loading ? (
-              <div className="py-8 text-center text-xs text-slate-500">Searching EduConnect repository...</div>
+              <div className="py-8 text-center text-xs text-slate-500">Searching EduConnects repository...</div>
             ) : (
               <>
                 {/* Teachers Match */}

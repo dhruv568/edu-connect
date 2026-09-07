@@ -6,7 +6,7 @@ import crypto from "crypto";
 
 async function runModule9Tests() {
   process.env.EMAIL_PROVIDER = "console";
-  console.log("🧪 Starting EduConnect Module 09 — Notifications, Dashboards & Analytics Test Suite...\n");
+  console.log("🧪 Starting EduConnects Module 09 — Notifications, Dashboards & Analytics Test Suite...\n");
 
   let passedTests = 0;
   let failedTests = 0;
@@ -31,7 +31,7 @@ async function runModule9Tests() {
 
     const teacherUser = await prisma.user.create({
       data: {
-        email: `teacher.mod9.${randomSuffix}@educonnect.com`,
+        email: `teacher.mod9.${randomSuffix}@educonnects.com`,
         passwordHash: "$2a$10$xyz",
         role: "TEACHER",
         emailVerified: true,
@@ -50,7 +50,7 @@ async function runModule9Tests() {
 
     const studentUser = await prisma.user.create({
       data: {
-        email: `student.mod9.${randomSuffix}@educonnect.com`,
+        email: `student.mod9.${randomSuffix}@educonnects.com`,
         passwordHash: "$2a$10$xyz",
         role: "STUDENT",
         emailVerified: true,
@@ -65,7 +65,7 @@ async function runModule9Tests() {
 
     const adminUser = await prisma.user.create({
       data: {
-        email: `admin.mod9.${randomSuffix}@educonnect.com`,
+        email: `admin.mod9.${randomSuffix}@educonnects.com`,
         passwordHash: "$2a$10$xyz",
         role: "ADMIN",
         emailVerified: true,

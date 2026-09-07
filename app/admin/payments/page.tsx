@@ -149,7 +149,7 @@ export default function AdminPaymentsPage() {
         <div className="p-5 rounded-3xl bg-slate-900/70 border border-slate-800/80 space-y-1.5 shadow-xl">
           <span className="text-slate-400 text-xs font-semibold">Platform Commission</span>
           <p className="text-2xl font-black text-emerald-400">{formatCurrency(summary.totalCommission)}</p>
-          <p className="text-[10px] text-slate-400">EduConnect net share</p>
+          <p className="text-[10px] text-slate-400">EduConnects net share</p>
         </div>
 
         <div className="p-5 rounded-3xl bg-slate-900/70 border border-slate-800/80 space-y-1.5 shadow-xl">

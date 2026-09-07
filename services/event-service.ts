@@ -66,7 +66,7 @@ export class EventService {
           await NotificationService.create({
             userId,
             type: "WELCOME",
-            title: "Welcome to EduConnect! 🎓",
+            title: "Welcome to EduConnects! 🎓",
             message: "Your account is set up. Explore courses or schedule live learning sessions.",
             actionUrl: "/courses",
             idempotencyKey,
@@ -91,7 +91,7 @@ export class EventService {
               recipientName: userName,
               subject: "Teacher Application Approved 🎉",
               headline: "Congratulations! You are now a Verified Educator",
-              bodyText: "Your credentials have been audited and approved by EduConnect Administration. You are now live on our educator marketplace.",
+              bodyText: "Your credentials have been audited and approved by EduConnects Administration. You are now live on our educator marketplace.",
               statusBadgeText: "APPROVED",
               statusBadgeVariant: "success",
               actionUrl: `${process.env.APP_URL || "http://localhost:3000"}/teacher/dashboard`,
@@ -117,7 +117,7 @@ export class EventService {
             await provider.sendNotificationEmail({
               email: user.email,
               recipientName: userName,
-              subject: "EduConnect Verification Update",
+              subject: "EduConnects Verification Update",
               headline: "Revisions Required for Educator Profile",
               bodyText: "Our administrative team reviewed your application and requested updating your documents or profile details.",
               statusBadgeText: "REVISIONS NEEDED",
@@ -259,7 +259,7 @@ export class EventService {
 
         case "payment.captured": {
           const amountFormatted = formatPaise(data.amountPaise);
-          const title = data.title || "EduConnect Order";
+          const title = data.title || "EduConnects Order";
           await NotificationService.create({
             userId,
             type: "PAYMENT_SUCCESS",
@@ -330,7 +330,7 @@ export class EventService {
           await NotificationService.create({
             userId,
             type: "INFO",
-            title: data.title || "EduConnect Update",
+            title: data.title || "EduConnects Update",
             message: data.message || "System event occurred.",
             actionUrl: data.actionUrl,
             data,

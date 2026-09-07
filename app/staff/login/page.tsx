@@ -95,7 +95,7 @@ export default function StaffLoginPage() {
         throw new Error(json.error || "Verification failed.");
       }
 
-      showToast("Login Successful", "Welcome back to EduConnect Operations.", "success");
+      showToast("Login Successful", "Welcome back to EduConnects Operations.", "success");
       const redirectPath =
         json.data?.user?.role === "ADMIN"
           ? "/admin"
@@ -117,7 +117,7 @@ export default function StaffLoginPage() {
       {/* Header */}
       <div className="mb-8 text-center">
         <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-blue-500/10 border border-blue-400/20 text-blue-300 text-xs font-bold uppercase tracking-wider mb-2">
-          <Building className="h-3.5 w-3.5" /> EduConnect Staff Portal
+          <Building className="h-3.5 w-3.5" /> EduConnects Staff Portal
         </div>
         <h1 className="text-2xl lg:text-3xl font-black text-white tracking-tight">
           Staff & Operations Sign In
@@ -235,7 +235,7 @@ export default function StaffLoginPage() {
           <div className="pt-4 border-t border-slate-100 dark:border-slate-800 text-center text-xs text-slate-500">
             <span>Are you a learner or educator? </span>
             <Link href="/" className="text-blue-600 hover:underline font-semibold">
-              Return to EduConnect Portal
+              Return to EduConnects Portal
             </Link>
           </div>
         </Card>

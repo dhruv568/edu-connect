@@ -11,8 +11,8 @@ export default function AdminSettingsPage() {
 
   // General Settings State
   const [generalSettings, setGeneralSettings] = useState({
-    siteName: "EduConnect",
-    supportEmail: "support@educonnect.com",
+    siteName: "EduConnects",
+    supportEmail: "support@educonnects.com",
     allowRegistration: true,
     requireTeacherApproval: true,
     maintenanceMode: false,
@@ -141,7 +141,7 @@ export default function AdminSettingsPage() {
   };
 
   return (
-    <DashboardLayout role="ADMIN" userName="System Administrator" userEmail="admin@educonnect.com">
+    <DashboardLayout role="ADMIN" userName="System Administrator" userEmail="admin@educonnects.com">
       <div className="space-y-6 pb-16">
         <div>
           <h1 className="text-2xl lg:text-3xl font-black text-slate-900 dark:text-slate-100 tracking-tight">
@@ -272,7 +272,7 @@ export default function AdminSettingsPage() {
             <div className="space-y-1 border-b border-slate-100 dark:border-slate-800 pb-3">
               <h3 className="text-lg font-black text-slate-900 dark:text-slate-100">Platform Revenue Commission</h3>
               <p className="text-xs text-slate-500">
-                Configure default percentage retained by EduConnect on course enrollments and live class bookings. Existing transactions maintain historical snapshot.
+                Configure default percentage retained by EduConnects on course enrollments and live class bookings. Existing transactions maintain historical snapshot.
               </p>
             </div>
 

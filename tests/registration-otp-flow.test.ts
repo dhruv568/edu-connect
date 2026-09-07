@@ -4,10 +4,10 @@ import { prisma } from "../lib/prisma";
 import { hashToken } from "../lib/auth/tokens";
 
 async function runRegistrationOTPFlowTests() {
-  console.log("🧪 Running EduConnect Fix Registration & OTP Verification Flow Tests...\n");
+  console.log("🧪 Running EduConnects Fix Registration & OTP Verification Flow Tests...\n");
 
   const timestamp = Date.now();
-  const testStudentEmail = `flow.student.${timestamp}@educonnect.com`;
+  const testStudentEmail = `flow.student.${timestamp}@educonnects.com`;
   const testPassword = "Password123!";
 
   // ------------------------------------------------------------------------
@@ -217,7 +217,7 @@ async function runRegistrationOTPFlowTests() {
   // Test 9: Multi-Step Teacher Registration & Profile Creation on Verification
   // ------------------------------------------------------------------------
   console.log("\nTest 9: Testing Multi-Step Teacher Pending Registration & Verification...");
-  const testTeacherEmail = `flow.teacher.${timestamp}@educonnect.com`;
+  const testTeacherEmail = `flow.teacher.${timestamp}@educonnects.com`;
   await AuthService.registerUser({
     firstName: "David",
     lastName: "Miller",

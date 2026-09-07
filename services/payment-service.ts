@@ -391,7 +391,7 @@ export class PaymentService {
         transactionId: transaction.id,
         teacherId,
         grossAmountPaise: transaction.amountPaise,
-        description: `Payment for ${transaction.course?.title || transaction.liveClassSlot?.title || "EduConnect Product"}`,
+        description: `Payment for ${transaction.course?.title || transaction.liveClassSlot?.title || "EduConnects Product"}`,
       });
 
       // 6. Execute Razorpay Route Transfer if enabled & teacher account active

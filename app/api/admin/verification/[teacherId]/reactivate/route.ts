@@ -61,11 +61,11 @@ export async function POST(
       await emailProvider.sendNotificationEmail({
         email: tp.user.email,
         recipientName: tp.user.profile?.firstName || "Teacher",
-        subject: "Account Reactivated - EduConnect Teacher Portal",
+        subject: "Account Reactivated - EduConnects Teacher Portal",
         headline: "Teacher Profile Reactivated 🎉",
         statusBadgeText: "VERIFIED EDUCATOR",
         statusBadgeVariant: "success",
-        bodyText: "Your teacher account has been successfully reactivated by EduConnect Administration. Full access to teacher portal tools, live classes, and marketplace listings has been restored.",
+        bodyText: "Your teacher account has been successfully reactivated by EduConnects Administration. Full access to teacher portal tools, live classes, and marketplace listings has been restored.",
         actionUrl: `${process.env.NEXT_PUBLIC_APP_URL || "http://localhost:3000"}/teacher`,
         actionText: "Go to Teacher Portal",
       });

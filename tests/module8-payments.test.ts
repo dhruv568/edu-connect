@@ -8,7 +8,7 @@ import crypto from "crypto";
 const prisma = new PrismaClient();
 
 async function runModule8PaymentTests() {
-  console.log("🧪 Starting EduConnect Module 08 — Payment & Financial System Test Suite...\n");
+  console.log("🧪 Starting EduConnects Module 08 — Payment & Financial System Test Suite...\n");
 
   let passedTests = 0;
   let failedTests = 0;
@@ -33,7 +33,7 @@ async function runModule8PaymentTests() {
 
     const teacherUser = await prisma.user.create({
       data: {
-        email: `teacher.pay.${randomSuffix}@educonnect.com`,
+        email: `teacher.pay.${randomSuffix}@educonnects.com`,
         passwordHash: "$2a$10$xyz",
         role: "TEACHER",
         emailVerified: true,
@@ -56,7 +56,7 @@ async function runModule8PaymentTests() {
 
     const studentUser = await prisma.user.create({
       data: {
-        email: `student.pay.${randomSuffix}@educonnect.com`,
+        email: `student.pay.${randomSuffix}@educonnects.com`,
         passwordHash: "$2a$10$xyz",
         role: "STUDENT",
         emailVerified: true,
@@ -71,7 +71,7 @@ async function runModule8PaymentTests() {
 
     const adminUser = await prisma.user.create({
       data: {
-        email: `admin.pay.${randomSuffix}@educonnect.com`,
+        email: `admin.pay.${randomSuffix}@educonnects.com`,
         passwordHash: "$2a$10$xyz",
         role: "ADMIN",
         emailVerified: true,

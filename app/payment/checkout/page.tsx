@@ -127,7 +127,7 @@ function CheckoutContent() {
             {/* Header */}
             <div className="text-center space-y-2">
               <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-blue-500/10 text-blue-400 text-xs font-semibold border border-blue-500/20">
-                <Sparkles className="w-3.5 h-3.5" /> Secure EduConnect Payment
+                <Sparkles className="w-3.5 h-3.5" /> Secure EduConnects Payment
               </div>
               <h1 className="text-2xl font-bold text-white tracking-tight">Complete Checkout</h1>
               <p className="text-xs text-slate-400">Review purchase details and pay securely</p>

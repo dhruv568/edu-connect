@@ -24,7 +24,7 @@ export default function PrivacyPage() {
           <section className="space-y-2">
             <h3 className="text-sm font-bold text-slate-900">1. Data Collection & Security</h3>
             <p>
-              EduConnect collects minimal personal data required for account registration, email verification, and learning progress monitoring. All passwords and tokens are securely hashed.
+              EduConnects collects minimal personal data required for account registration, email verification, and learning progress monitoring. All passwords and tokens are securely hashed.
             </p>
           </section>
 

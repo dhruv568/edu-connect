@@ -57,7 +57,7 @@ export default function LoginPage() {
           <div className="lg:col-span-6 space-y-6 hidden lg:block">
             <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-blue-500/10 border border-blue-500/20 text-blue-700 text-xs font-bold uppercase tracking-wider">
               <Sparkles className="h-3.5 w-3.5 text-blue-600" />
-              <span>Welcome Back to EduConnect</span>
+              <span>Welcome Back to EduConnects</span>
             </div>
 
             <div className="space-y-3">
@@ -109,8 +109,8 @@ export default function LoginPage() {
           {/* Right Column: Form */}
           <div className="lg:col-span-6 max-w-md mx-auto w-full space-y-6">
             <div className="text-center lg:text-left space-y-1">
-              <GlassBadge variant="blue" className="lg:hidden">EDUCONNECT AUTHENTICATION</GlassBadge>
-              <h2 className="text-2xl sm:text-3xl font-black text-slate-900">Sign In to EduConnect</h2>
+              <GlassBadge variant="blue" className="lg:hidden">EDUCONNECTS AUTHENTICATION</GlassBadge>
+              <h2 className="text-2xl sm:text-3xl font-black text-slate-900">Sign In to EduConnects</h2>
               <p className="text-xs text-slate-500">Access your Teacher or Student Dashboard</p>
             </div>
 
@@ -165,7 +165,7 @@ export default function LoginPage() {
                   <button
                     type="button"
                     onClick={() => {
-                      setEmail("teacher@educonnect.com");
+                      setEmail("teacher@educonnects.com");
                       setPassword("Password123!");
                     }}
                     className="px-2.5 py-1.5 bg-indigo-50 text-indigo-700 rounded-lg font-bold border border-indigo-100 hover:bg-indigo-100 transition-colors"
@@ -175,7 +175,7 @@ export default function LoginPage() {
                   <button
                     type="button"
                     onClick={() => {
-                      setEmail("student@educonnect.com");
+                      setEmail("student@educonnects.com");
                       setPassword("Password123!");
                     }}
                     className="px-2.5 py-1.5 bg-emerald-50 text-emerald-700 rounded-lg font-bold border border-emerald-100 hover:bg-emerald-100 transition-colors"

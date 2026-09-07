@@ -4,9 +4,9 @@ import { getEmailProvider, EmailService } from "../lib/email/email-service";
 import { prisma } from "../lib/prisma";
 
 async function runOTPTests() {
-  console.log("🧪 Running EduConnect Email OTP & Resend System Tests...\n");
+  console.log("🧪 Running EduConnects Email OTP & Resend System Tests...\n");
 
-  const testEmail = `otp.test.${Date.now()}@educonnect.com`;
+  const testEmail = `otp.test.${Date.now()}@educonnects.com`;
 
   // Test 1: Register User and generate initial OTP
   console.log("Test 1: Registering User and Generating Initial OTP...");

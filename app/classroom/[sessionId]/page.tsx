@@ -410,7 +410,7 @@ export default function VirtualClassroomPage() {
     return (
       <div className="min-h-screen bg-slate-950 flex flex-col items-center justify-center p-6 text-white space-y-4">
         <LoadingSkeleton className="w-16 h-16 rounded-full" />
-        <p className="text-sm font-semibold text-slate-400">Connecting to EduConnect Virtual Classroom...</p>
+        <p className="text-sm font-semibold text-slate-400">Connecting to EduConnects Virtual Classroom...</p>
       </div>
     );
   }

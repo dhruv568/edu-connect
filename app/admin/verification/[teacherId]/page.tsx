@@ -202,7 +202,7 @@ export default function AdminTeacherReviewPage() {
 
   if (loading) {
     return (
-      <DashboardLayout role="ADMIN" userName="System Administrator" userEmail="admin@educonnect.com">
+      <DashboardLayout role="ADMIN" userName="System Administrator" userEmail="admin@educonnects.com">
         <div className="flex flex-col items-center justify-center min-h-[60vh] space-y-4">
           <Loader2 className="h-10 w-10 text-blue-600 animate-spin" />
           <p className="text-sm font-semibold text-slate-600">Loading Application Review Bundle...</p>
@@ -213,7 +213,7 @@ export default function AdminTeacherReviewPage() {
 
   if (!application) {
     return (
-      <DashboardLayout role="ADMIN" userName="System Administrator" userEmail="admin@educonnect.com">
+      <DashboardLayout role="ADMIN" userName="System Administrator" userEmail="admin@educonnects.com">
         <div className="p-12 text-center space-y-4">
           <p className="text-sm font-bold text-slate-700">Teacher record not found.</p>
           <Link href="/admin/verification">
@@ -227,7 +227,7 @@ export default function AdminTeacherReviewPage() {
   const { profile, professional, user, verificationStatus, documents, qualifications, certificates, history, adminNotes } = application;
 
   return (
-    <DashboardLayout role="ADMIN" userName="System Administrator" userEmail="admin@educonnect.com">
+    <DashboardLayout role="ADMIN" userName="System Administrator" userEmail="admin@educonnects.com">
       <div className="space-y-6 pb-16 max-w-6xl mx-auto">
         {/* Top Back Link & Header */}
         <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">

@@ -24,7 +24,7 @@ export default function TermsPage() {
           <section className="space-y-2">
             <h3 className="text-sm font-bold text-slate-900">1. Acceptance of Terms</h3>
             <p>
-              By accessing or using the EduConnect platform, services, demo bookings, live classes, or pre-recorded LMS courses, you agree to be bound by these Terms and Conditions.
+              By accessing or using the EduConnects platform, services, demo bookings, live classes, or pre-recorded LMS courses, you agree to be bound by these Terms and Conditions.
             </p>
           </section>
 

@@ -1,7 +1,7 @@
 import { cookies } from "next/headers";
 import { UserSession } from "@/types/auth";
 
-const SESSION_COOKIE_NAME = "educonnect_session";
+const SESSION_COOKIE_NAME = "educonnects_session";
 const SESSION_DURATION_DAYS = 7;
 
 /**

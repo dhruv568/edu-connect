@@ -293,7 +293,7 @@ export default function PricingPage() {
           </div>
         </div>
 
-        {/* The EduConnect Pricing Guarantee Banner */}
+        {/* The EduConnects Pricing Guarantee Banner */}
         <div className="p-8 sm:p-10 rounded-3xl bg-slate-900 text-white border border-slate-800 space-y-6 shadow-xl">
           <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 pb-6 border-b border-slate-800">
             <div className="flex items-center gap-3">
@@ -301,7 +301,7 @@ export default function PricingPage() {
                 <ShieldCheck className="h-6 w-6" />
               </div>
               <div>
-                <h3 className="text-lg sm:text-xl font-bold">The EduConnect Consumer Safeguard</h3>
+                <h3 className="text-lg sm:text-xl font-bold">The EduConnects Consumer Safeguard</h3>
                 <p className="text-xs text-slate-400">Protected transactions with automated escrow.</p>
               </div>
             </div>

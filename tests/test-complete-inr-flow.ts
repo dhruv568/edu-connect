@@ -31,7 +31,7 @@ async function runEndToEndINRTest() {
   // Setup test teacher, student, and course
   const teacherUser = await prisma.user.create({
     data: {
-      email: `e2e_teacher_${Date.now()}@educonnect.test`,
+      email: `e2e_teacher_${Date.now()}@educonnects.test`,
       passwordHash: "mock_hash_teacher",
       role: "TEACHER",
       status: "ACTIVE",
@@ -55,7 +55,7 @@ async function runEndToEndINRTest() {
 
   const studentUser = await prisma.user.create({
     data: {
-      email: `e2e_student_${Date.now()}@educonnect.test`,
+      email: `e2e_student_${Date.now()}@educonnects.test`,
       passwordHash: "mock_hash_student",
       role: "STUDENT",
       status: "ACTIVE",

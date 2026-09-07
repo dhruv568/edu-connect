@@ -235,7 +235,7 @@ export class LedgerService {
       const grossPaise = t.amountPaise;
       const commissionPaise = Math.round((grossPaise * commissionPercent) / 100);
       const teacherEarningPaise = grossPaise - commissionPaise;
-      const productName = t.course?.title || t.liveClassSlot?.title || "EduConnect Product";
+      const productName = t.course?.title || t.liveClassSlot?.title || "EduConnects Product";
       const studentName = t.user?.profile
         ? `${t.user.profile.firstName} ${t.user.profile.lastName}`
         : t.user.email;

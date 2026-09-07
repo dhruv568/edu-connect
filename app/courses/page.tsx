@@ -94,7 +94,7 @@ export default function CourseMarketplacePage() {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10 text-center">
           <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-blue-500/10 border border-blue-500/20 text-blue-600 dark:text-blue-400 text-xs font-semibold uppercase tracking-wider mb-4 backdrop-blur-md">
             <Sparkles className="w-3.5 h-3.5" />
-            <span>EduConnect Course Marketplace</span>
+            <span>EduConnects Course Marketplace</span>
           </div>
 
           <h1 className="text-3xl sm:text-5xl font-black tracking-tight text-slate-900 dark:text-slate-100 max-w-3xl mx-auto">

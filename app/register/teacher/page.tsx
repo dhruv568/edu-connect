@@ -82,7 +82,7 @@ export default function TeacherRegistrationPage() {
         <div className="text-center space-y-2">
           <GlassBadge variant="indigo">STEP {step} OF 2 • TEACHER PORTAL</GlassBadge>
           <h1 className="text-3xl font-black text-slate-900">Create Educator Account</h1>
-          <p className="text-xs text-slate-500">Join EduConnect as a verified teacher</p>
+          <p className="text-xs text-slate-500">Join EduConnects as a verified teacher</p>
 
           {/* Progress Bar */}
           <div className="flex items-center justify-center gap-2 pt-2">
@@ -143,7 +143,7 @@ export default function TeacherRegistrationPage() {
           <div className="pt-4 border-t border-slate-100 text-center text-xs">
             <span className="text-slate-500">Already have an account? </span>
             <Link href="/login" className="font-bold text-indigo-600 hover:underline">
-              Sign In to EduConnect
+              Sign In to EduConnects
             </Link>
           </div>
         </GlassCard>

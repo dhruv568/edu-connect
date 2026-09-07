@@ -54,7 +54,7 @@ export function Footer() {
         </div>
 
         <div className="pt-8 flex flex-col md:flex-row items-center justify-between gap-4 text-xs text-slate-500">
-          <p>&copy; 2026 EduConnect. All rights reserved. Built with Next.js App Router & Prisma.</p>
+          <p>&copy; 2026 EduConnects. All rights reserved. Built with Next.js App Router & Prisma.</p>
           <div className="flex items-center gap-1">
             <span>Crafted with passion for joyful learning</span>
             <Heart className="h-3.5 w-3.5 text-red-500 fill-red-500 ml-1" />

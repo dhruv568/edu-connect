@@ -4,7 +4,7 @@ import bcrypt from "bcryptjs";
 const prisma = new PrismaClient();
 
 async function main() {
-  console.log("🌱 Starting EduConnect Database Seeding for Module 04...");
+  console.log("🌱 Starting EduConnects Database Seeding for Module 04...");
 
   // Clean existing data
   await prisma.classroomFile.deleteMany();
@@ -31,7 +31,7 @@ async function main() {
   // 1. Seed Admin User
   const admin = await prisma.user.create({
     data: {
-      email: "admin@educonnect.com",
+      email: "admin@educonnects.com",
       passwordHash: defaultPasswordHash,
       role: "ADMIN",
       emailVerified: true,
@@ -40,7 +40,7 @@ async function main() {
         create: {
           firstName: "System",
           lastName: "Administrator",
-          bio: "EduConnect Governance & Platform Administrator",
+          bio: "EduConnects Governance & Platform Administrator",
         },
       },
     },
@@ -50,7 +50,7 @@ async function main() {
   // 2. Seed Verified Teacher 1: Sarah Jenkins (Mathematics)
   const teacher1 = await prisma.user.create({
     data: {
-      email: "teacher@educonnect.com",
+      email: "teacher@educonnects.com",
       passwordHash: defaultPasswordHash,
       role: "TEACHER",
       emailVerified: true,
@@ -115,7 +115,7 @@ async function main() {
   // 3. Seed Pending Teacher Applicant: Marcus Vance
   const pendingTeacher = await prisma.user.create({
     data: {
-      email: "pending.teacher@educonnect.com",
+      email: "pending.teacher@educonnects.com",
       passwordHash: defaultPasswordHash,
       role: "TEACHER",
       emailVerified: true,
@@ -185,7 +185,7 @@ async function main() {
   // 4. Seed Rejected Teacher: Priya Patel
   const rejectedTeacher = await prisma.user.create({
     data: {
-      email: "rejected.teacher@educonnect.com",
+      email: "rejected.teacher@educonnects.com",
       passwordHash: defaultPasswordHash,
       role: "TEACHER",
       emailVerified: true,
@@ -216,7 +216,7 @@ async function main() {
   // 5. Seed Suspended Teacher: Alan Turing
   const suspendedTeacher = await prisma.user.create({
     data: {
-      email: "suspended.teacher@educonnect.com",
+      email: "suspended.teacher@educonnects.com",
       passwordHash: defaultPasswordHash,
       role: "TEACHER",
       emailVerified: true,
@@ -248,7 +248,7 @@ async function main() {
   // 6. Seed Student User
   const student = await prisma.user.create({
     data: {
-      email: "student@educonnect.com",
+      email: "student@educonnects.com",
       passwordHash: defaultPasswordHash,
       role: "STUDENT",
       emailVerified: true,
@@ -333,7 +333,7 @@ async function main() {
     console.log(`✅ Live Class Session Created: ${session.id} (Room: ${session.roomId})`);
   }
 
-  console.log("\n🎉 EduConnect Module 06 Database Seeding Completed Successfully!");
+  console.log("\n🎉 EduConnects Module 06 Database Seeding Completed Successfully!");
 }
 
 main()
