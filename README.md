@@ -22,7 +22,7 @@ EduConnects is a next-generation education platform connecting **Teachers**, **S
 ## 📂 Project Structure
 
 ```text
-educonnect_company/
+educonnects_company/
 │
 ├── app/
 │   ├── layout.tsx                # Root layout with ToastProvider and metadata

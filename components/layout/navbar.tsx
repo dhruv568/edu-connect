@@ -85,7 +85,7 @@ export function Navbar() {
               <GraduationCap className="h-6 w-6" />
             </div>
             <span className="text-xl font-extrabold text-slate-900 tracking-tight">
-              EDU<span className="text-blue-600">CONNECT</span>
+              EDU<span className="text-blue-600">CONNECTS</span>
             </span>
           </Link>
 

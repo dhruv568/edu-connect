@@ -90,7 +90,7 @@ export function FloatingNavbar() {
               <GraduationCap className="h-4 w-4 sm:h-5 sm:w-5" />
             </div>
             <span className="text-sm sm:text-base md:text-lg font-black text-slate-900 tracking-tight whitespace-nowrap">
-              EDU<span className="text-blue-600">CONNECT</span>
+              EDU<span className="text-blue-600">CONNECTS</span>
             </span>
           </Link>
         </motion.div>

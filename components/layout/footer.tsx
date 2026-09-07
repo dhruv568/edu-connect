@@ -14,7 +14,7 @@ export function Footer() {
                 <GraduationCap className="h-5 w-5" />
               </div>
               <span className="text-lg font-extrabold text-white tracking-tight">
-                EDU<span className="text-blue-500">CONNECT</span>
+                EDU<span className="text-blue-500">CONNECTS</span>
               </span>
             </Link>
             <p className="text-xs text-slate-400 leading-relaxed">

@@ -42,7 +42,7 @@ export function PremiumFooter({ showCta = true }: PremiumFooterProps = {}) {
                 <GraduationCap className="h-6 w-6" />
               </div>
               <span className="text-xl font-black text-white tracking-tight">
-                EDU<span className="text-blue-500">CONNECT</span>
+                EDU<span className="text-blue-500">CONNECTS</span>
               </span>
             </Link>
             <p className="text-xs text-slate-400 leading-relaxed max-w-sm">
