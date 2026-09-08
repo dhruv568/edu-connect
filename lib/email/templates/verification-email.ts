@@ -1,3 +1,5 @@
+import { getPublicAppUrl } from "../../app-url";
+
 export interface EmailTemplateParams {
   recipientEmail: string;
   firstName?: string;
@@ -15,7 +17,7 @@ export function generateVerificationEmailHtml(params: EmailTemplateParams): stri
   const { firstName, otp, expiresInMinutes = 10, appUrl } = params;
 
   const recipientName = firstName && firstName.trim() ? firstName.trim() : "there";
-  const baseUrl = appUrl || process.env.APP_URL || process.env.NEXTAUTH_URL || "http://localhost:3000";
+  const baseUrl = appUrl || getPublicAppUrl();
   const currentYear = new Date().getFullYear();
 
   // Format OTP code with visual spacing for email display (e.g. 4 8 2 9 1 3)

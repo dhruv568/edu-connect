@@ -6,6 +6,7 @@ import { requirePermission } from "@/lib/permissions/permission-engine";
 import { apiSuccess, apiError, handleApiError } from "@/lib/api-response";
 import { logAuditEvent } from "@/lib/audit-logger";
 import { getEmailProvider } from "@/lib/email/email-service";
+import { getPublicAppUrl } from "@/lib/app-url";
 
 export async function POST(
   request: NextRequest,
@@ -71,7 +72,7 @@ export async function POST(
         statusBadgeVariant: "danger",
         bodyText: "Your teacher verification submission requires changes before it can be approved. Please review the feedback below and update your profile and documents accordingly.",
         reasonText: reason.trim(),
-        actionUrl: `${process.env.NEXT_PUBLIC_APP_URL || "http://localhost:3000"}/teacher/onboarding`,
+        actionUrl: `${getPublicAppUrl()}/teacher/onboarding`,
         actionText: "Update Profile & Resubmit",
       });
     } catch (emailErr) {

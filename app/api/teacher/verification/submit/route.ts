@@ -6,6 +6,7 @@ import { requireRole } from "@/lib/auth/guards";
 import { apiSuccess, apiError, handleApiError } from "@/lib/api-response";
 import { logAuditEvent } from "@/lib/audit-logger";
 import { getEmailProvider } from "@/lib/email/email-service";
+import { getPublicAppUrl } from "@/lib/app-url";
 
 export async function POST(request: NextRequest) {
   try {
@@ -92,7 +93,7 @@ export async function POST(request: NextRequest) {
         statusBadgeText: "PENDING REVIEW",
         statusBadgeVariant: "pending",
         bodyText: "Your teacher profile and uploaded credentials have been successfully submitted to EduConnects Administration. Our verification team will review your application shortly.",
-        actionUrl: `${process.env.NEXT_PUBLIC_APP_URL || "http://localhost:3000"}/teacher/verification`,
+        actionUrl: `${getPublicAppUrl()}/teacher/verification`,
         actionText: "View Verification Status",
       });
     } catch (emailErr) {

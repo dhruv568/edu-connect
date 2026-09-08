@@ -4,6 +4,7 @@ import { generateNotificationEmailHtml } from "@/lib/email/templates/verificatio
 import { getEmailProvider } from "@/lib/email/email-service";
 import { prisma } from "@/lib/prisma";
 import { formatPaise } from "@/lib/currency";
+import { getPublicAppUrl } from "@/lib/app-url";
 
 export type EventType =
   | "auth.welcome"
@@ -94,7 +95,7 @@ export class EventService {
               bodyText: "Your credentials have been audited and approved by EduConnects Administration. You are now live on our educator marketplace.",
               statusBadgeText: "APPROVED",
               statusBadgeVariant: "success",
-              actionUrl: `${process.env.APP_URL || "http://localhost:3000"}/teacher/dashboard`,
+              actionUrl: `${getPublicAppUrl()}/teacher/dashboard`,
               actionText: "Go to Teacher Dashboard",
             });
           }
@@ -123,7 +124,7 @@ export class EventService {
               statusBadgeText: "REVISIONS NEEDED",
               statusBadgeVariant: "warning",
               reasonText: reason,
-              actionUrl: `${process.env.APP_URL || "http://localhost:3000"}/teacher/onboarding`,
+              actionUrl: `${getPublicAppUrl()}/teacher/onboarding`,
               actionText: "Update Application",
             });
           }
@@ -165,7 +166,7 @@ export class EventService {
               bodyText: `You have successfully reserved your seat for "${classTitle}". Make sure to join on time!`,
               statusBadgeText: "BOOKED",
               statusBadgeVariant: "success",
-              actionUrl: `${process.env.APP_URL || "http://localhost:3000"}/student/dashboard`,
+              actionUrl: `${getPublicAppUrl()}/student/dashboard`,
               actionText: "View My Schedule",
             });
           }
@@ -250,7 +251,7 @@ export class EventService {
               bodyText: `You successfully enrolled in "${courseTitle}". Access all lessons and resources inside your student dashboard.`,
               statusBadgeText: "ENROLLED",
               statusBadgeVariant: "success",
-              actionUrl: `${process.env.APP_URL || "http://localhost:3000"}/learn/${data.courseSlug || ""}`,
+              actionUrl: `${getPublicAppUrl()}/learn/${data.courseSlug || ""}`,
               actionText: "Start Learning Now",
             });
           }
@@ -292,7 +293,7 @@ export class EventService {
               bodyText: `Thank you for your purchase. We received your payment of ${amountFormatted} for "${title}". Order ID: ${data.orderId || "N/A"}.`,
               statusBadgeText: "SUCCESSFUL",
               statusBadgeVariant: "success",
-              actionUrl: `${process.env.APP_URL || "http://localhost:3000"}/student/payments`,
+              actionUrl: `${getPublicAppUrl()}/student/payments`,
               actionText: "View Payment Details",
             });
           }

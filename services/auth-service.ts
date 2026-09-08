@@ -5,6 +5,7 @@ import { EmailService } from "@/lib/email/email-service";
 import { RegisterInput, LoginInput } from "@/schemas/auth-schemas";
 import { UserRole, UserSession, VerificationResult } from "@/types/auth";
 import { logAuditEvent } from "@/lib/audit-logger";
+import { getVerificationUrl, getPasswordResetUrl } from "@/lib/app-url";
 
 const getOtpExpiryMinutes = () => Number(process.env.OTP_EXPIRY_MINUTES) || 10;
 const getMaxAttempts = () => Number(process.env.OTP_MAX_ATTEMPTS) || 5;
@@ -106,8 +107,7 @@ export class AuthService {
     });
 
     // Send verification email with OTP and direct verification link
-    const baseUrl = process.env.APP_URL || process.env.NEXTAUTH_URL || "http://localhost:3000";
-    const verificationUrl = `${baseUrl}/verify-email?token=${rawToken}&email=${encodeURIComponent(normalizedEmail)}`;
+    const verificationUrl = getVerificationUrl(rawToken, normalizedEmail);
 
     const sent = await EmailService.sendVerificationOTP({
       email: normalizedEmail,
@@ -165,8 +165,7 @@ export class AuthService {
       },
     });
 
-    const baseUrl = process.env.APP_URL || process.env.NEXTAUTH_URL || "http://localhost:3000";
-    const verificationUrl = `${baseUrl}/verify-email?token=${rawToken}&email=${encodeURIComponent(email)}`;
+    const verificationUrl = getVerificationUrl(rawToken, email);
 
     const sent = await EmailService.sendVerificationOTP({
       email,
@@ -225,8 +224,7 @@ export class AuthService {
         },
       });
 
-      const baseUrl = process.env.APP_URL || process.env.NEXTAUTH_URL || "http://localhost:3000";
-      const verificationUrl = `${baseUrl}/verify-email?token=${rawToken}&email=${encodeURIComponent(normalizedEmail)}`;
+      const verificationUrl = getVerificationUrl(rawToken, normalizedEmail);
 
       const sent = await EmailService.sendVerificationOTP({
         email: normalizedEmail,
@@ -716,8 +714,7 @@ export class AuthService {
 
     await logAuditEvent(user.id, "PASSWORD_RESET_REQUESTED", { email: user.email });
 
-    const baseUrl = process.env.APP_URL || process.env.NEXTAUTH_URL || "http://localhost:3000";
-    const resetUrl = `${baseUrl}/reset-password?token=${rawToken}&email=${encodeURIComponent(user.email)}`;
+    const resetUrl = getPasswordResetUrl(rawToken, user.email);
 
     await EmailService.sendPasswordResetEmail({
       email: user.email,

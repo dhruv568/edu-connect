@@ -4,6 +4,7 @@ import { requirePermission } from "@/lib/permissions/permission-engine";
 import { apiBadRequest, apiError, apiSuccess } from "@/lib/api-response";
 import { prisma } from "@/lib/prisma";
 import { logAuditEvent } from "@/lib/audit-logger";
+import { getStaffInviteUrl } from "@/lib/app-url";
 
 export const dynamic = "force-dynamic";
 
@@ -79,8 +80,7 @@ export async function POST(req: NextRequest) {
       },
     });
 
-    const baseUrl = process.env.APP_URL || process.env.NEXTAUTH_URL || "http://localhost:3000";
-    const inviteUrl = `${baseUrl}/staff/invite/${rawToken}`;
+    const inviteUrl = getStaffInviteUrl(rawToken);
 
     await logAuditEvent(userId, "STAFF_INVITED", {
       invitationId: invitation.id,
@@ -100,6 +100,7 @@ export async function POST(req: NextRequest) {
           expiresAt: invitation.expiresAt,
           inviteUrl,
         },
+        invitationUrl: inviteUrl,
       },
       "Staff invitation generated successfully.",
       201

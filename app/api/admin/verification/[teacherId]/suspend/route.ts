@@ -6,6 +6,7 @@ import { requirePermission } from "@/lib/permissions/permission-engine";
 import { apiSuccess, apiError, handleApiError } from "@/lib/api-response";
 import { logAuditEvent } from "@/lib/audit-logger";
 import { getEmailProvider } from "@/lib/email/email-service";
+import { getPublicAppUrl } from "@/lib/app-url";
 
 export async function POST(
   request: NextRequest,
@@ -71,7 +72,7 @@ export async function POST(
         statusBadgeVariant: "warning",
         bodyText: "Your teacher account on EduConnects has been temporarily suspended by system governance. While suspended, public marketplace listings and live class hosting are disabled. Your profile data and course records remain safely preserved.",
         reasonText: reason.trim(),
-        actionUrl: `${process.env.NEXT_PUBLIC_APP_URL || "http://localhost:3000"}/contact`,
+        actionUrl: `${getPublicAppUrl()}/contact`,
         actionText: "Contact Admin Support",
       });
     } catch (emailErr) {

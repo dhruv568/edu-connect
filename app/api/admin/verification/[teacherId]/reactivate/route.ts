@@ -6,6 +6,7 @@ import { requireRole } from "@/lib/auth/guards";
 import { apiSuccess, apiError, handleApiError } from "@/lib/api-response";
 import { logAuditEvent } from "@/lib/audit-logger";
 import { getEmailProvider } from "@/lib/email/email-service";
+import { getPublicAppUrl } from "@/lib/app-url";
 
 export async function POST(
   request: NextRequest,
@@ -66,7 +67,7 @@ export async function POST(
         statusBadgeText: "VERIFIED EDUCATOR",
         statusBadgeVariant: "success",
         bodyText: "Your teacher account has been successfully reactivated by EduConnects Administration. Full access to teacher portal tools, live classes, and marketplace listings has been restored.",
-        actionUrl: `${process.env.NEXT_PUBLIC_APP_URL || "http://localhost:3000"}/teacher`,
+        actionUrl: `${getPublicAppUrl()}/teacher`,
         actionText: "Go to Teacher Portal",
       });
     } catch (emailErr) {

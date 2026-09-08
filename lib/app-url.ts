@@ -1,0 +1,67 @@
+/**
+ * Centralized Application URL Configuration & Helpers
+ * 
+ * Provides environment-aware, normalized URL resolution across frontend
+ * and backend. Resolves production domain dynamically from NEXT_PUBLIC_APP_URL,
+ * with fallbacks to APP_URL, NEXTAUTH_URL, and localhost.
+ */
+
+/**
+ * Resolves the base public application URL.
+ * Automatically strips any trailing slashes and trims whitespace.
+ * 
+ * Resolution Priority:
+ * 1. NEXT_PUBLIC_APP_URL (standard for Next.js public client/server URL)
+ * 2. APP_URL (legacy server-side env)
+ * 3. NEXTAUTH_URL (legacy NextAuth env)
+ * 4. Fallback: "http://localhost:3000"
+ */
+export function getPublicAppUrl(): string {
+  const envUrl =
+    process.env.NEXT_PUBLIC_APP_URL ||
+    process.env.APP_URL ||
+    process.env.NEXTAUTH_URL ||
+    "http://localhost:3000";
+
+  const trimmed = (envUrl || "").trim();
+  if (!trimmed) {
+    return "http://localhost:3000";
+  }
+
+  // Remove any trailing slashes (e.g. "https://domain.com/" -> "https://domain.com")
+  return trimmed.replace(/\/+$/, "");
+}
+
+/**
+ * Alias for getPublicAppUrl()
+ */
+export function getAppUrl(): string {
+  return getPublicAppUrl();
+}
+
+/**
+ * Generates the complete, public staff invitation URL for a given token.
+ * 
+ * @param token - Raw cryptographically secure invitation token
+ * @returns Complete public invitation URL (e.g. "https://yourdomain.com/staff/invite/156052d209b703")
+ */
+export function getStaffInviteUrl(token: string): string {
+  const baseUrl = getPublicAppUrl();
+  return `${baseUrl}/staff/invite/${encodeURIComponent(token)}`;
+}
+
+/**
+ * Generates the email verification URL.
+ */
+export function getVerificationUrl(token: string, email: string): string {
+  const baseUrl = getPublicAppUrl();
+  return `${baseUrl}/verify-email?token=${encodeURIComponent(token)}&email=${encodeURIComponent(email)}`;
+}
+
+/**
+ * Generates the password reset URL.
+ */
+export function getPasswordResetUrl(token: string, email: string): string {
+  const baseUrl = getPublicAppUrl();
+  return `${baseUrl}/reset-password?token=${encodeURIComponent(token)}&email=${encodeURIComponent(email)}`;
+}

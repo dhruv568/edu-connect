@@ -9,6 +9,7 @@ import nodemailer from "nodemailer";
 import { generateVerificationEmailHtml, EmailTemplateParams } from "./templates/verification-email";
 import { generateNotificationEmailHtml, NotificationEmailParams } from "./templates/verification-templates";
 import { generatePasswordResetEmailHtml, PasswordResetEmailParams } from "./templates/password-reset-email";
+import { getPublicAppUrl } from "../app-url";
 
 export interface SendEmailPayload {
   to: string;
@@ -273,7 +274,7 @@ export class EmailService {
             otp: params.otp,
             verificationUrl: params.verificationUrl,
             expiresInMinutes: params.expiresInMinutes || Number(process.env.OTP_EXPIRY_MINUTES) || 10,
-            appUrl: process.env.APP_URL || process.env.NEXTAUTH_URL || "http://localhost:3000",
+            appUrl: getPublicAppUrl(),
           },
         }),
         timeoutPromise,
@@ -314,6 +315,27 @@ export class EmailService {
       statusBadgeVariant: "success",
       headline: "Your EduConnects journey starts here!",
       bodyText: "Explore top teachers, host live classes, and master new skills on EduConnects.",
+    });
+  }
+
+  static async sendStaffInvitationEmail(params: {
+    email: string;
+    recipientName?: string;
+    roleName: string;
+    inviteUrl: string;
+    expiresInDays?: number;
+  }): Promise<boolean> {
+    const provider = getEmailProvider();
+    return provider.sendNotificationEmail({
+      email: params.email,
+      recipientName: params.recipientName || "Staff Member",
+      subject: "You've been invited to join EduConnects Staff 🎓",
+      headline: "Welcome to the EduConnects Team!",
+      statusBadgeText: `ROLE: ${params.roleName.toUpperCase()}`,
+      statusBadgeVariant: "success",
+      bodyText: `You have been invited to join EduConnects as a ${params.roleName}. Click the button below to accept your invitation, verify your email, and set up your staff password. This link is valid for ${params.expiresInDays || 7} days.`,
+      actionUrl: params.inviteUrl,
+      actionText: "Accept Staff Invitation",
     });
   }
 }
