@@ -6,6 +6,8 @@ import { Card } from "@/components/ui/card";
 import { StatusBadge } from "@/components/ui/status-badge";
 import { GlassButton } from "@/components/glass/glass-button";
 import { Search, Filter, ChevronLeft, ChevronRight, Loader2, Video, Calendar, Clock, AlertTriangle, X } from "lucide-react";
+import { useToast } from "@/components/ui/toast";
+import { BackButton } from "@/components/ui/back-button";
 import { formatCurrency } from "@/lib/currency";
 
 export default function AdminLiveClassesPage() {
@@ -80,6 +82,12 @@ export default function AdminLiveClassesPage() {
     <DashboardLayout role="ADMIN" userName="System Administrator" userEmail="admin@educonnects.com">
       <div className="space-y-6 pb-16">
         <div>
+          <BackButton
+            fallbackUrl="/admin"
+            label="Back to Dashboard"
+            variant="default"
+            className="mb-3"
+          />
           <h1 className="text-2xl lg:text-3xl font-black text-slate-900 dark:text-slate-100 tracking-tight">
             Live Class Governance
           </h1>
