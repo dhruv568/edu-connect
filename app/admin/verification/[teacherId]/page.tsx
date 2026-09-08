@@ -11,6 +11,7 @@ import { useToast } from "@/components/ui/toast";
 import { DocumentViewerModal } from "@/components/shared/document-viewer-modal";
 import { DocumentItem } from "@/types/auth";
 import { formatCurrency } from "@/lib/currency";
+import { BackButton } from "@/components/ui/back-button";
 import {
   ShieldCheck,
   CheckCircle2,
@@ -232,12 +233,11 @@ export default function AdminTeacherReviewPage() {
         {/* Top Back Link & Header */}
         <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
           <div className="flex items-center gap-4">
-            <Link
-              href="/admin/verification"
-              className="p-2.5 rounded-2xl bg-white border border-slate-200 text-slate-600 hover:bg-slate-100 transition-colors shadow-2xs"
-            >
-              <ArrowLeft className="h-5 w-5" />
-            </Link>
+            <BackButton
+              fallbackUrl="/admin/verification"
+              label="Back to Queue"
+              variant="default"
+            />
             <div>
               <div className="flex items-center gap-3">
                 <h1 className="text-2xl lg:text-3xl font-black text-slate-900 tracking-tight">
