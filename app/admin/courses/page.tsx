@@ -22,6 +22,9 @@ export default function AdminCoursesModerationPage() {
   const [courses, setCourses] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState("");
+  const [actionLoading, setActionLoading] = useState<Record<string, boolean>>({});
+  const [errorMsg, setErrorMsg] = useState<string | null>(null);
+  const [successMsg, setSuccessMsg] = useState<string | null>(null);
 
   const fetchAdminCourses = async () => {
     setLoading(true);
@@ -43,17 +46,28 @@ export default function AdminCoursesModerationPage() {
   }, []);
 
   const handleStatusChange = async (courseId: string, newStatus: string) => {
+    setActionLoading((prev) => ({ ...prev, [courseId]: true }));
+    setErrorMsg(null);
+    setSuccessMsg(null);
     try {
       const res = await fetch(`/api/admin/courses/${courseId}/status`, {
         method: "PATCH",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ status: newStatus }),
       });
-      if (res.ok) {
-        fetchAdminCourses();
+      const data = await res.json();
+      if (!res.ok || !data.success) {
+        const message = data.error || data.message || "Failed to update course status.";
+        setErrorMsg(`Course Moderation Failed: ${message}`);
+      } else {
+        setSuccessMsg(`Course status updated to '${newStatus}' successfully.`);
+        await fetchAdminCourses();
       }
-    } catch (err) {
+    } catch (err: any) {
       console.error("Failed to update status:", err);
+      setErrorMsg(err.message || "Network error while updating status.");
+    } finally {
+      setActionLoading((prev) => ({ ...prev, [courseId]: false }));
     }
   };
 
@@ -117,6 +131,31 @@ export default function AdminCoursesModerationPage() {
           </div>
         </div>
 
+        {/* Error / Success Feedback Banners */}
+        {errorMsg && (
+          <div className="p-4 rounded-xl bg-rose-500/10 border border-rose-500/30 text-rose-400 text-xs flex items-center justify-between">
+            <div className="flex items-center gap-2">
+              <AlertCircle className="w-4 h-4 shrink-0" />
+              <span>{errorMsg}</span>
+            </div>
+            <button onClick={() => setErrorMsg(null)} className="text-xs text-rose-400 font-bold hover:underline ml-4">
+              Dismiss
+            </button>
+          </div>
+        )}
+
+        {successMsg && (
+          <div className="p-4 rounded-xl bg-emerald-500/10 border border-emerald-500/30 text-emerald-400 text-xs flex items-center justify-between">
+            <div className="flex items-center gap-2">
+              <CheckCircle2 className="w-4 h-4 shrink-0" />
+              <span>{successMsg}</span>
+            </div>
+            <button onClick={() => setSuccessMsg(null)} className="text-xs text-emerald-400 font-bold hover:underline ml-4">
+              Dismiss
+            </button>
+          </div>
+        )}
+
         {/* Courses Moderation Table */}
         {loading ? (
           <div className="space-y-4">
@@ -151,7 +190,7 @@ export default function AdminCoursesModerationPage() {
                       </td>
                       <td className="p-4">
                         <div className="font-semibold text-slate-200">{c.teacherName}</div>
-                        <div className="text-[11px] text-slate-500">{c.teacherEmail}</div>
+                        <div className="text-[11px] text-slate-500">{c.teacherEmail || ""}</div>
                       </td>
                       <td className="p-4">
                         <div>{c.subject}</div>
@@ -160,8 +199,8 @@ export default function AdminCoursesModerationPage() {
                         </div>
                       </td>
                       <td className="p-4 text-slate-400">
-                        <div>{c.sectionsCount} Sections</div>
-                        <div>{c.enrollmentsCount} Enrollments</div>
+                        <div>{c.sectionsCount ?? 0} Sections ({c.totalLessons ?? 0} Lessons)</div>
+                        <div>{c.enrollmentCount ?? c.enrollmentsCount ?? 0} Enrollments</div>
                       </td>
                       <td className="p-4">
                         <span
@@ -191,9 +230,10 @@ export default function AdminCoursesModerationPage() {
                             <PermissionGuard permission="courses.approve">
                               <button
                                 onClick={() => handleStatusChange(c.id, "PUBLISHED")}
-                                className="px-3 py-1.5 text-[11px] font-bold rounded-lg bg-emerald-600 text-white"
+                                disabled={actionLoading[c.id]}
+                                className="px-3 py-1.5 text-[11px] font-bold rounded-lg bg-emerald-600 hover:bg-emerald-500 disabled:opacity-50 text-white transition"
                               >
-                                Approve & Publish
+                                {actionLoading[c.id] ? "Updating..." : "Approve & Publish"}
                               </button>
                             </PermissionGuard>
                           )}
@@ -202,9 +242,10 @@ export default function AdminCoursesModerationPage() {
                             <PermissionGuard permission="courses.reject">
                               <button
                                 onClick={() => handleStatusChange(c.id, "UNPUBLISHED")}
-                                className="px-3 py-1.5 text-[11px] font-bold rounded-lg bg-amber-600 text-white"
+                                disabled={actionLoading[c.id]}
+                                className="px-3 py-1.5 text-[11px] font-bold rounded-lg bg-amber-600 hover:bg-amber-500 disabled:opacity-50 text-white transition"
                               >
-                                Unpublish
+                                {actionLoading[c.id] ? "Updating..." : "Unpublish"}
                               </button>
                             </PermissionGuard>
                           )}
@@ -213,7 +254,8 @@ export default function AdminCoursesModerationPage() {
                             <PermissionGuard permission="courses.reject">
                               <button
                                 onClick={() => handleStatusChange(c.id, "ARCHIVED")}
-                                className="p-2 rounded-lg bg-slate-800 text-slate-400 hover:text-red-400"
+                                disabled={actionLoading[c.id]}
+                                className="p-2 rounded-lg bg-slate-800 text-slate-400 hover:text-red-400 disabled:opacity-50"
                                 title="Archive Course"
                               >
                                 <Archive className="w-4 h-4" />
@@ -224,7 +266,8 @@ export default function AdminCoursesModerationPage() {
                           <PermissionGuard permission="courses.delete">
                             <button
                               onClick={() => handleDeleteCourse(c.id, c.title)}
-                              className="p-2 rounded-lg bg-slate-800 text-rose-400 hover:text-rose-300 hover:bg-rose-950/40"
+                              disabled={actionLoading[c.id]}
+                              className="p-2 rounded-lg bg-slate-800 text-rose-400 hover:text-rose-300 hover:bg-rose-950/40 disabled:opacity-50"
                               title="Delete Course Permanently"
                             >
                               <Trash2 className="w-4 h-4" />
