@@ -218,7 +218,7 @@ export default function AdminCoursesModerationPage() {
                       <td className="p-4 text-right">
                         <div className="flex items-center justify-end gap-2">
                           <Link
-                            href={`/courses/${c.slug}`}
+                            href={`/courses/${c.slug}/preview`}
                             target="_blank"
                             className="p-2 rounded-lg bg-slate-800 text-slate-300 hover:text-white"
                             title="Preview Course"

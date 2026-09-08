@@ -70,7 +70,7 @@ export async function POST(
         headline: "Teacher Account Temporarily Suspended",
         statusBadgeText: "SUSPENDED",
         statusBadgeVariant: "warning",
-        bodyText: "Your teacher account on EduConnects has been temporarily suspended by system governance. While suspended, public marketplace listings and live class hosting are disabled. Your profile data and course records remain safely preserved.",
+        bodyText: "Your teacher account on EduConnects has been temporarily suspended by system governance. While suspended, public platform listings and live class hosting are disabled. Your profile data and course records remain safely preserved.",
         reasonText: reason.trim(),
         actionUrl: `${getPublicAppUrl()}/contact`,
         actionText: "Contact Admin Support",

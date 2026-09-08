@@ -93,7 +93,7 @@ export default function TeacherLandingPage() {
     },
     {
       icon: Globe,
-      title: "Direct Student Marketplace",
+      title: "Direct Student Platform",
       desc: "Gain instant visibility to thousands of active learners searching for expert tutors across subjects.",
       badge: "Instant Reach",
     },
@@ -152,7 +152,7 @@ export default function TeacherLandingPage() {
     {
       question: "How do I create and sell on-demand video courses?",
       answer:
-        "Our course builder allows you to organize your curriculum into sections, upload high-definition video lessons with automated Mux video processing, attach supplementary PDF study notes, set a course price, and publish to the marketplace.",
+        "Our course builder allows you to organize your curriculum into sections, upload high-definition video lessons with automated Mux video processing, attach supplementary PDF study notes, set a course price, and publish to the platform.",
     },
     {
       question: "How and when do I receive payouts?",
@@ -361,7 +361,7 @@ export default function TeacherLandingPage() {
               </p>
             </div>
 
-            {/* Feature 1: Profile & Marketplace Listing */}
+            {/* Feature 1: Profile & Platform Listing */}
             <div className="grid grid-cols-1 lg:grid-cols-12 gap-12 items-center">
               <div className="lg:col-span-6 space-y-5">
                 <div className="p-3 bg-indigo-100 text-indigo-600 rounded-2xl w-fit">
@@ -392,7 +392,7 @@ export default function TeacherLandingPage() {
               <div className="lg:col-span-6">
                 <div className="p-6 rounded-3xl bg-slate-50 border border-slate-200/90 shadow-lg space-y-4">
                   <div className="flex items-center justify-between border-b border-slate-200 pb-3">
-                    <span className="text-xs font-bold uppercase text-slate-500">Marketplace Search Preview</span>
+                    <span className="text-xs font-bold uppercase text-slate-500">Platform Search Preview</span>
                     <span className="text-xs font-bold text-indigo-600">⭐ 4.98 (84 Reviews)</span>
                   </div>
                   <div className="space-y-2">

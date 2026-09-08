@@ -3,6 +3,7 @@
 import React, { useState, useEffect } from "react";
 import Link from "next/link";
 import { useParams, useRouter } from "next/navigation";
+import MuxPlayer from "@mux/mux-player-react";
 import {
   Star,
   Clock,
@@ -12,15 +13,14 @@ import {
   PlayCircle,
   Users,
   Globe,
-  Award,
   ChevronDown,
   ChevronUp,
-  FileText,
   User,
-  ArrowRight,
-  ShieldCheck,
   X,
   Sparkles,
+  Eye,
+  Loader2,
+  AlertTriangle,
 } from "lucide-react";
 import { Navbar } from "@/components/layout/navbar";
 import { formatCurrency } from "@/lib/currency";
@@ -37,8 +37,13 @@ export default function CourseDetailPage() {
   const [enrolling, setEnrolling] = useState(false);
   const [enrollMsg, setEnrollMsg] = useState("");
   const [openSections, setOpenSections] = useState<{ [key: string]: boolean }>({});
-  const [previewVideoUrl, setPreviewVideoUrl] = useState<string | null>(null);
+
+  // Preview Modal State
+  const [previewModalOpen, setPreviewModalOpen] = useState(false);
   const [previewTitle, setPreviewTitle] = useState("");
+  const [loadingPlayback, setLoadingPlayback] = useState(false);
+  const [playbackError, setPlaybackError] = useState("");
+  const [playbackData, setPlaybackData] = useState<any>(null);
 
   const fetchCourseDetails = async () => {
     setLoading(true);
@@ -47,7 +52,6 @@ export default function CourseDetailPage() {
       const data = await res.json();
       if (data.success && data.data.course) {
         setCourse(data.data.course);
-        // Expand first section by default
         if (data.data.course.sections?.length > 0) {
           setOpenSections({ [data.data.course.sections[0].id]: true });
         }
@@ -65,6 +69,30 @@ export default function CourseDetailPage() {
 
   const toggleSection = (id: string) => {
     setOpenSections((prev) => ({ ...prev, [id]: !prev[id] }));
+  };
+
+  const handleOpenLessonPreview = async (lesson: any) => {
+    if (!course) return;
+    setPreviewTitle(lesson.title);
+    setPreviewModalOpen(true);
+    setLoadingPlayback(true);
+    setPlaybackError("");
+    setPlaybackData(null);
+
+    try {
+      const res = await fetch(`/api/courses/${course.id}/lessons/${lesson.id}/playback`);
+      const data = await res.json();
+
+      if (data.success && data.data) {
+        setPlaybackData(data.data);
+      } else {
+        setPlaybackError(data.error || "Preview video is currently unavailable.");
+      }
+    } catch (err) {
+      setPlaybackError("Failed to fetch video playback stream.");
+    } finally {
+      setLoadingPlayback(false);
+    }
   };
 
   const handleEnroll = async () => {
@@ -87,7 +115,7 @@ export default function CourseDetailPage() {
         if (data.data.enrollment?.status === "ACTIVE") {
           router.push(`/learn/${slug}`);
         } else {
-          setEnrollMsg("Enrollment created (Payment Pending for Module 08). Redirecting to your learning portal...");
+          setEnrollMsg("Enrollment created. Redirecting to your learning portal...");
           setTimeout(() => {
             router.push(`/student/courses`);
           }, 1500);
@@ -230,11 +258,11 @@ export default function CourseDetailPage() {
                     alt={course.title}
                     className="w-full h-full object-cover"
                   />
-                  <div className="absolute inset-0 bg-slate-950/40 flex items-center justify-center">
-                    <div className="w-12 h-12 rounded-full bg-blue-600/90 text-white flex items-center justify-center backdrop-blur-md shadow-lg">
+                  <Link href={`/courses/${slug}/preview`} className="absolute inset-0 bg-slate-950/40 flex items-center justify-center group">
+                    <div className="w-12 h-12 rounded-full bg-blue-600/90 text-white flex items-center justify-center backdrop-blur-md shadow-lg group-hover:scale-110 transition">
                       <PlayCircle className="w-6 h-6 ml-0.5" />
                     </div>
-                  </div>
+                  </Link>
                 </div>
 
                 <div className="flex items-baseline justify-between">
@@ -253,22 +281,31 @@ export default function CourseDetailPage() {
                   </div>
                 )}
 
-                {course.isEnrolled ? (
+                <div className="space-y-3">
                   <Link
-                    href={`/learn/${slug}`}
-                    className="w-full py-3.5 px-4 rounded-xl bg-gradient-to-r from-blue-600 to-indigo-600 text-white font-bold text-center block shadow-lg shadow-blue-600/30 hover:scale-[1.02] transition"
+                    href={`/courses/${slug}/preview`}
+                    className="w-full py-3 px-4 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-100 font-bold text-center flex items-center justify-center gap-2 border border-slate-700 transition"
                   >
-                    Continue Learning
+                    <Eye className="w-4 h-4 text-blue-400" /> Preview Course
                   </Link>
-                ) : (
-                  <button
-                    onClick={handleEnroll}
-                    disabled={enrolling}
-                    className="w-full py-3.5 px-4 rounded-xl bg-gradient-to-r from-blue-600 to-indigo-600 text-white font-bold text-center shadow-lg shadow-blue-600/30 hover:scale-[1.02] transition disabled:opacity-50"
-                  >
-                    {enrolling ? "Enrolling..." : course.price === 0 ? "Enroll Now Free" : "Enroll Now"}
-                  </button>
-                )}
+
+                  {course.isEnrolled ? (
+                    <Link
+                      href={`/learn/${slug}`}
+                      className="w-full py-3.5 px-4 rounded-xl bg-gradient-to-r from-blue-600 to-indigo-600 text-white font-bold text-center block shadow-lg shadow-blue-600/30 hover:scale-[1.02] transition"
+                    >
+                      Continue Learning
+                    </Link>
+                  ) : (
+                    <button
+                      onClick={handleEnroll}
+                      disabled={enrolling}
+                      className="w-full py-3.5 px-4 rounded-xl bg-gradient-to-r from-blue-600 to-indigo-600 text-white font-bold text-center shadow-lg shadow-blue-600/30 hover:scale-[1.02] transition disabled:opacity-50"
+                    >
+                      {enrolling ? "Enrolling..." : course.price === 0 ? "Enroll Now Free" : "Enroll Now"}
+                    </button>
+                  )}
+                </div>
 
                 <div className="space-y-2.5 pt-2 text-xs text-slate-400 font-medium">
                   <div className="flex items-center gap-2">
@@ -281,11 +318,7 @@ export default function CourseDetailPage() {
                   </div>
                   <div className="flex items-center gap-2">
                     <CheckCircle2 className="w-4 h-4 text-emerald-400" />
-                    <span>Downloadable Lesson PDF Resources</span>
-                  </div>
-                  <div className="flex items-center gap-2">
-                    <CheckCircle2 className="w-4 h-4 text-emerald-400" />
-                    <span>Certificate of Completion</span>
+                    <span>Downloadable Lesson Resources</span>
                   </div>
                 </div>
               </div>
@@ -358,10 +391,7 @@ export default function CourseDetailPage() {
                               <div className="flex items-center gap-2">
                                 {les.isPreview && (
                                   <button
-                                    onClick={() => {
-                                      setPreviewVideoUrl(`/api/videos/${les.id}/stream`);
-                                      setPreviewTitle(les.title);
-                                    }}
+                                    onClick={() => handleOpenLessonPreview(les)}
                                     className="px-2.5 py-1 text-[11px] font-bold rounded-lg bg-blue-500/20 text-blue-400 border border-blue-500/30 hover:bg-blue-500/30"
                                   >
                                     Preview
@@ -382,84 +412,53 @@ export default function CourseDetailPage() {
                 })}
               </div>
             </div>
-
-            {/* Prerequisites */}
-            {course.requirements && course.requirements.length > 0 && (
-              <div className="space-y-3">
-                <h3 className="text-lg font-bold text-slate-100">Requirements & Prerequisites</h3>
-                <ul className="list-disc list-inside space-y-1.5 text-xs sm:text-sm text-slate-300">
-                  {course.requirements.map((req: string, i: number) => (
-                    <li key={i}>{req}</li>
-                  ))}
-                </ul>
-              </div>
-            )}
-
-            {/* Instructor Bio */}
-            <div className="p-6 rounded-2xl bg-slate-900/60 border border-slate-800 space-y-4">
-              <h3 className="text-lg font-bold text-slate-100">About the Instructor</h3>
-              <div className="flex items-start gap-4">
-                <div className="w-14 h-14 rounded-full overflow-hidden bg-slate-800 shrink-0 flex items-center justify-center text-slate-400">
-                  {course.teacher.avatarUrl ? (
-                    <img src={course.teacher.avatarUrl} alt={course.teacher.name} className="w-full h-full object-cover" />
-                  ) : (
-                    <User className="w-7 h-7" />
-                  )}
-                </div>
-                <div className="space-y-1">
-                  <h4 className="text-base font-bold text-slate-100 flex items-center gap-1.5">
-                    {course.teacher.name}
-                    {course.teacher.isVerified && (
-                      <span title="Verified Instructor"><CheckCircle2 className="w-4 h-4 text-blue-400 fill-blue-400/20" /></span>
-                    )}
-                  </h4>
-                  <p className="text-xs text-blue-400 font-medium">{course.teacher.headline}</p>
-                  <p className="text-xs text-slate-300 leading-relaxed pt-1">{course.teacher.bio}</p>
-                </div>
-              </div>
-            </div>
-
-            {/* Reviews */}
-            <div className="space-y-4">
-              <h3 className="text-lg font-bold text-slate-100">Student Reviews</h3>
-              {course.reviews.length === 0 ? (
-                <p className="text-xs text-slate-400">No reviews submitted yet. Be the first student to review this course after enrolling!</p>
-              ) : (
-                <div className="space-y-3">
-                  {course.reviews.map((r: any) => (
-                    <div key={r.id} className="p-4 rounded-xl bg-slate-900/60 border border-slate-800 space-y-2">
-                      <div className="flex items-center justify-between">
-                        <span className="text-xs font-bold text-slate-200">{r.studentName}</span>
-                        <div className="flex items-center gap-1 text-amber-400 text-xs">
-                          <Star className="w-3.5 h-3.5 fill-amber-400" />
-                          <span>{r.rating}</span>
-                        </div>
-                      </div>
-                      <p className="text-xs text-slate-300">{r.review}</p>
-                    </div>
-                  ))}
-                </div>
-              )}
-            </div>
           </div>
         </div>
       </main>
 
       {/* Video Preview Modal */}
-      {previewVideoUrl && (
+      {previewModalOpen && (
         <div className="fixed inset-0 z-50 bg-slate-950/80 backdrop-blur-md flex items-center justify-center p-4">
           <div className="relative w-full max-w-3xl bg-slate-900 border border-slate-800 rounded-2xl overflow-hidden shadow-2xl space-y-4 p-4">
             <div className="flex items-center justify-between pb-2 border-b border-slate-800">
               <h4 className="text-sm font-bold text-slate-100 flex items-center gap-2">
                 <PlayCircle className="w-4 h-4 text-blue-400" /> Preview: {previewTitle}
               </h4>
-              <button onClick={() => setPreviewVideoUrl(null)} className="text-slate-400 hover:text-slate-200">
+              <button
+                onClick={() => {
+                  setPreviewModalOpen(false);
+                  setPlaybackData(null);
+                }}
+                className="text-slate-400 hover:text-slate-200"
+              >
                 <X className="w-5 h-5" />
               </button>
             </div>
 
-            <div className="relative aspect-video rounded-xl overflow-hidden bg-slate-950">
-              <video src={previewVideoUrl} controls autoPlay className="w-full h-full" />
+            <div className="relative aspect-video rounded-xl overflow-hidden bg-slate-950 flex items-center justify-center">
+              {loadingPlayback ? (
+                <div className="flex flex-col items-center space-y-2 p-4 text-center">
+                  <Loader2 className="w-8 h-8 text-blue-500 animate-spin" />
+                  <span className="text-xs text-slate-400">Loading video stream...</span>
+                </div>
+              ) : playbackError ? (
+                <div className="p-6 text-center space-y-2">
+                  <AlertTriangle className="w-8 h-8 text-amber-400 mx-auto" />
+                  <p className="text-xs font-semibold text-amber-300">{playbackError}</p>
+                </div>
+              ) : playbackData?.isMux && playbackData.playbackId ? (
+                <MuxPlayer
+                  streamType="on-demand"
+                  playbackId={playbackData.playbackId}
+                  tokens={{ playback: playbackData.signedToken }}
+                  autoPlay={true}
+                  className="w-full h-full object-contain"
+                />
+              ) : playbackData?.playbackUrl ? (
+                <video src={playbackData.playbackUrl} controls autoPlay className="w-full h-full object-contain" />
+              ) : (
+                <div className="p-4 text-xs text-slate-400">Video content unavailable.</div>
+              )}
             </div>
           </div>
         </div>
@@ -474,13 +473,21 @@ export default function CourseDetailPage() {
           </div>
         </div>
 
-        <button
-          onClick={handleEnroll}
-          disabled={enrolling}
-          className="px-6 py-3 rounded-xl bg-gradient-to-r from-blue-600 to-indigo-600 text-white font-bold text-xs shadow-lg shadow-blue-600/30"
-        >
-          {enrolling ? "Enrolling..." : course.isEnrolled ? "Continue" : "Enroll Now"}
-        </button>
+        <div className="flex items-center gap-2">
+          <Link
+            href={`/courses/${slug}/preview`}
+            className="px-4 py-2.5 rounded-xl bg-slate-800 text-slate-200 font-bold text-xs border border-slate-700"
+          >
+            Preview
+          </Link>
+          <button
+            onClick={handleEnroll}
+            disabled={enrolling}
+            className="px-5 py-2.5 rounded-xl bg-gradient-to-r from-blue-600 to-indigo-600 text-white font-bold text-xs shadow-lg shadow-blue-600/30"
+          >
+            {enrolling ? "Enrolling..." : course.isEnrolled ? "Continue" : "Enroll"}
+          </button>
+        </div>
       </div>
 
       <Footer />

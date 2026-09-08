@@ -144,8 +144,8 @@ async function runModule7LmsTests() {
     assert(publishedCourse.status === "PUBLISHED", "Course status transitioned to PUBLISHED");
     assert(!!publishedCourse.publishedAt, "publishedAt timestamp recorded");
 
-    // Test 4: Public Marketplace Discovery & Search
-    console.log("\n🔍 4. Testing Course Marketplace Search, Filtering & Public View...");
+    // Test 4: Public Platform Discovery & Search
+    console.log("\n🔍 4. Testing Course Platform Search, Filtering & Public View...");
     const searchResult = await LmsService.getPublicCourses({
       search: "Mathematics",
       subject: "Mathematics",
@@ -153,11 +153,33 @@ async function runModule7LmsTests() {
     });
 
     assert(searchResult.totalCount >= 1, "Public course search returned published course");
-    assert(searchResult.courses[0].slug === draftCourse.slug, "Marketplace includes newly published course");
+    assert(searchResult.courses[0].slug === draftCourse.slug, "Platform includes newly published course");
 
     const publicDetail = await LmsService.getCourseBySlug(draftCourse.slug, studentUser.id);
     assert(publicDetail?.isEnrolled === false, "Student is not enrolled initially");
     assert(publicDetail?.sections[0].lessons[0].isPreview === true, "Preview lesson indicator visible to visitor");
+
+    const coursePreview = await LmsService.getCoursePreview(draftCourse.slug, { id: studentUser.id, role: "STUDENT" });
+    assert(coursePreview.title === courseInput.title, "Course preview returns valid course title");
+    assert(coursePreview.sections[0].lessons[0].isPreview === true, "Course preview includes preview-enabled lesson flag");
+
+    // Verify DRAFT course preview restrictions
+    const draft2 = await LmsService.createTeacherCourse(teacherUser.id, {
+      title: "Unpublished Draft Course",
+      description: "Secret preview course",
+      subject: "Science",
+      price: 100,
+    });
+    let draftAccessDenied = false;
+    try {
+      await LmsService.getCoursePreview(draft2.slug, null);
+    } catch {
+      draftAccessDenied = true;
+    }
+    assert(draftAccessDenied, "Public user denied preview access to UNPUBLISHED draft course");
+
+    const teacherDraftPreview = await LmsService.getCoursePreview(draft2.slug, { id: teacherUser.id, role: "TEACHER" });
+    assert(teacherDraftPreview.title === "Unpublished Draft Course", "Teacher owner allowed to preview own draft course");
 
     // Test 5: Authorization & Video Access Security
     console.log("\n🛡️ 5. Testing Content Authorization & Video Stream Security...");

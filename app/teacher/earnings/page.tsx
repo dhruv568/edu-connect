@@ -126,7 +126,7 @@ export default function TeacherEarningsPage() {
         <div className="space-y-1">
           <div className="flex items-center gap-2">
             <ShieldCheck className="w-5 h-5 text-purple-400" />
-            <h3 className="text-base font-bold text-white">Cashfree Split Marketplace Payouts</h3>
+            <h3 className="text-base font-bold text-white">Cashfree Split Platform Payouts</h3>
           </div>
           <p className="text-xs text-slate-300">
             {payoutAccount.status === "ACTIVE"

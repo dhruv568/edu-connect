@@ -137,7 +137,7 @@ export default function TeacherVerificationStatusPage() {
               <div className="flex items-center gap-3">
                 <CheckCircle2 className="h-6 w-6 text-emerald-600 shrink-0" />
                 <span className="text-xs font-bold text-emerald-900">
-                  Your profile is published on the Public Teacher Marketplace catalog!
+                  Your profile is published on the Public Teacher Platform catalog!
                 </span>
               </div>
               <Link href="/teacher">
@@ -236,7 +236,7 @@ export default function TeacherVerificationStatusPage() {
                   <StatusBadge status="SUSPENDED" />
                 </div>
                 <p className="text-xs text-slate-300 leading-relaxed">
-                  Your teacher account on EduConnects has been temporarily suspended by system administrators. Marketplace visibility and live class hosting are currently restricted.
+                  Your teacher account on EduConnects has been temporarily suspended by system administrators. Platform visibility and live class hosting are currently restricted.
                 </p>
               </div>
             </div>

@@ -92,7 +92,7 @@ export class EventService {
               recipientName: userName,
               subject: "Teacher Application Approved 🎉",
               headline: "Congratulations! You are now a Verified Educator",
-              bodyText: "Your credentials have been audited and approved by EduConnects Administration. You are now live on our educator marketplace.",
+              bodyText: "Your credentials have been audited and approved by EduConnects Administration. You are now live on our educator platform.",
               statusBadgeText: "APPROVED",
               statusBadgeVariant: "success",
               actionUrl: `${getPublicAppUrl()}/teacher/dashboard`,

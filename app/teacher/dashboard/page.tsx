@@ -85,7 +85,7 @@ export default function TeacherDashboardPage() {
                   <StatusBadge status="VERIFIED" />
                 </div>
                 <p className="text-xs text-emerald-100 mt-1">
-                  Your profile is published on the EduConnects marketplace. You are eligible for demo bookings, live classes, and courses.
+                  Your profile is published on the EduConnects platform. You are eligible for demo bookings, live classes, and courses.
                 </p>
               </div>
             </div>

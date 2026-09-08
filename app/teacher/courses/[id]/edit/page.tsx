@@ -378,7 +378,7 @@ export default function TeacherCourseEditorPage() {
             </button>
 
             <Link
-              href={`/courses/${course.slug}`}
+              href={`/courses/${course?.slug || courseId}/preview`}
               target="_blank"
               className="flex items-center gap-1.5 px-4 py-2 text-xs font-bold rounded-xl bg-slate-800 text-slate-200 hover:bg-slate-700 transition"
             >

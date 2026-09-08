@@ -106,7 +106,7 @@ export default function TeacherLoginPage() {
                 <div className="p-2 rounded-xl bg-emerald-100 text-emerald-700">
                   <ShieldCheck className="h-4 w-4" />
                 </div>
-                <span>Verified educator trust badge to stand out in marketplace searches</span>
+                <span>Verified educator trust badge to stand out in platform searches</span>
               </div>
             </div>
 

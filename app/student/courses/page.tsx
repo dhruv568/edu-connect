@@ -284,7 +284,7 @@ export default function StudentCoursesDashboardPage() {
               {enrolledCourses.length === 0 ? (
                 <Link href="/courses" className="inline-block pt-1">
                   <Button variant="primary" size="sm">
-                    Browse Course Marketplace
+                    Browse Course Platform
                   </Button>
                 </Link>
               ) : (

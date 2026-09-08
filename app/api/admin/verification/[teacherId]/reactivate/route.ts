@@ -66,7 +66,7 @@ export async function POST(
         headline: "Teacher Profile Reactivated 🎉",
         statusBadgeText: "VERIFIED EDUCATOR",
         statusBadgeVariant: "success",
-        bodyText: "Your teacher account has been successfully reactivated by EduConnects Administration. Full access to teacher portal tools, live classes, and marketplace listings has been restored.",
+        bodyText: "Your teacher account has been successfully reactivated by EduConnects Administration. Full access to teacher portal tools, live classes, and platform listings has been restored.",
         actionUrl: `${getPublicAppUrl()}/teacher`,
         actionText: "Go to Teacher Portal",
       });

@@ -530,7 +530,7 @@ export default function TeacherOnboardingPage() {
                 <div className="p-5 rounded-2xl bg-slate-50 border border-slate-200 space-y-2">
                   <span className="text-xs font-bold text-slate-500 uppercase tracking-wider">Platform Governance Role</span>
                   <div className="text-base font-extrabold text-slate-900">EDUCATOR / TUTOR (TEACHER)</div>
-                  <p className="text-xs text-slate-500">Authorized for profile verification & marketplace listing.</p>
+                  <p className="text-xs text-slate-500">Authorized for profile verification & platform listing.</p>
                 </div>
               </div>
 

@@ -1,8 +1,10 @@
-import { NextRequest, NextResponse } from "next/server";
+import { NextRequest } from "next/server";
 import { getSession } from "@/lib/auth/session";
 import { prisma } from "@/lib/prisma";
 import { generateMuxSignedPlaybackToken } from "@/lib/mux/mux-client";
 import { apiError, apiSuccess } from "@/lib/api-response";
+
+export const dynamic = "force-dynamic";
 
 export async function GET(
   req: NextRequest,
@@ -10,18 +12,22 @@ export async function GET(
 ) {
   try {
     const session = await getSession();
-    const courseId = params.id;
+    const courseIdOrSlug = params.id;
     const lessonId = params.lessonId;
 
-    if (!courseId || !lessonId) {
+    if (!courseIdOrSlug || !lessonId) {
       return apiError("courseId and lessonId required.", 400);
     }
 
-    // 1. Fetch lesson & course details
+    // 1. Fetch lesson & course details (supports course ID or slug)
     const lesson = await prisma.courseLesson.findFirst({
       where: {
         id: lessonId,
-        section: { courseId },
+        section: {
+          course: {
+            OR: [{ id: courseIdOrSlug }, { slug: courseIdOrSlug }],
+          },
+        },
       },
       include: {
         section: {
@@ -34,22 +40,37 @@ export async function GET(
     });
 
     if (!lesson) {
-      return apiError("Lesson not found.", 404);
+      return apiError("Lesson not found under this course.", 404);
     }
 
     const course = lesson.section.course;
+    const currentUserId = session?.userId || session?.id;
 
     // 2. Authorization Check
     let isAuthorized = false;
 
     // Public preview check
     if (lesson.isPreview) {
-      isAuthorized = true;
-    } else if (session) {
+      // For unpublished courses, only teacher or admin can preview
+      if (course.status !== "PUBLISHED") {
+        if (session?.role === "ADMIN") {
+          isAuthorized = true;
+        } else if (session?.role === "TEACHER" && currentUserId) {
+          const teacherProfile = await prisma.teacherProfile.findUnique({
+            where: { userId: currentUserId },
+          });
+          if (teacherProfile && teacherProfile.id === course.teacherId) {
+            isAuthorized = true;
+          }
+        }
+      } else {
+        isAuthorized = true;
+      }
+    } else if (session && currentUserId) {
       // Teacher ownership check
       if (session.role === "TEACHER") {
         const teacherProfile = await prisma.teacherProfile.findUnique({
-          where: { userId: session.id },
+          where: { userId: currentUserId },
         });
         if (teacherProfile && teacherProfile.id === course.teacherId) {
           isAuthorized = true;
@@ -65,9 +86,9 @@ export async function GET(
       if (!isAuthorized && session.role === "STUDENT") {
         const enrollment = await prisma.enrollment.findFirst({
           where: {
-            studentId: session.id,
-            courseId,
-            status: "ACTIVE",
+            studentId: currentUserId,
+            courseId: course.id,
+            status: { in: ["ACTIVE", "COMPLETED"] },
           },
         });
         if (enrollment) {
@@ -86,20 +107,31 @@ export async function GET(
     });
 
     if (!videoAsset || !videoAsset.playbackId) {
-      // Fallback: If local video URL exists or asset id is mapped
+      // Fallback: If direct video URL exists on lesson
       if (lesson.videoUrl) {
         return apiSuccess({
           playbackId: null,
           playbackUrl: lesson.videoUrl,
           signedToken: null,
           isMux: false,
+          status: "READY",
         });
       }
-      return apiError("Video asset is processing or unavailable.", 404);
+      if (videoAsset?.status === "UPLOADING" || videoAsset?.status === "PROCESSING" || lesson.status === "PROCESSING" || lesson.status === "UPLOADING") {
+        return apiError("Video is still processing. Please try again shortly.", 400);
+      }
+      if (videoAsset?.status === "FAILED" || lesson.status === "FAILED") {
+        return apiError("Video processing failed. Please re-upload the video.", 400);
+      }
+      return apiError("This preview video is currently unavailable.", 404);
     }
 
-    if (videoAsset.status !== "READY" && videoAsset.status !== "UPLOADING") {
+    if (videoAsset.status === "UPLOADING" || videoAsset.status === "PROCESSING") {
       return apiError("Video is still processing. Please try again shortly.", 400);
+    }
+
+    if (videoAsset.status === "FAILED") {
+      return apiError("Video processing failed. Please re-upload the video.", 400);
     }
 
     // 4. Generate short-lived Mux signed playback token
@@ -109,6 +141,7 @@ export async function GET(
       playbackId: videoAsset.playbackId,
       signedToken,
       isMux: true,
+      status: "READY",
       duration: videoAsset.duration || lesson.durationSeconds,
       aspectRatio: videoAsset.aspectRatio || "16:9",
     });

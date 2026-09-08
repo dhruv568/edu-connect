@@ -194,7 +194,7 @@ async function runModule4Tests() {
 
     console.log("✅ Test 7: Admin Suspension and Reactivation workflows executed successfully.");
 
-    // 9. Test Marketplace Visibility Rule (Section 36)
+    // 9. Test Platform Visibility Rule (Section 36)
     // Create an UNVERIFIED teacher
     const unverifiedUser = await prisma.user.create({
       data: {
@@ -221,10 +221,10 @@ async function runModule4Tests() {
 
     const isUnverifiedIncluded = publicVerifiedTeachers.some((t) => t.userId === unverifiedUser.id);
     if (isUnverifiedIncluded) {
-      throw new Error("CRITICAL SECURITY BUG: Unverified teacher appeared in public verified marketplace query!");
+      throw new Error("CRITICAL SECURITY BUG: Unverified teacher appeared in public verified platform query!");
     }
 
-    console.log("✅ Test 8: Marketplace visibility rule verified (Unverified/Pending teachers hidden from public search).");
+    console.log("✅ Test 8: Platform visibility rule verified (Unverified/Pending teachers hidden from public search).");
 
     // 10. Clean up test files & records
     await deleteDocumentFromStorage(storedDoc.storageKey);

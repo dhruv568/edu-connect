@@ -108,7 +108,7 @@ function FindTeachersContent() {
           {/* Header Banner */}
           <div className="text-center max-w-2xl mx-auto space-y-3">
             <span className="text-xs font-extrabold text-blue-600 uppercase tracking-widest">
-              Teacher Marketplace Discovery
+              Teacher Platform Discovery
             </span>
             <h1 className="text-4xl font-black text-slate-900 tracking-tight">
               Find Verified EduConnects Tutors

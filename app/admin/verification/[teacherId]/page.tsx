@@ -592,7 +592,7 @@ export default function AdminTeacherReviewPage() {
               <CheckCircle2 className="h-6 w-6" /> Approve Teacher Application?
             </h3>
             <p className="text-xs text-slate-600">
-              This action will transition the teacher status to <strong>VERIFIED</strong>. The profile will immediately become eligible for marketplace publication.
+              This action will transition the teacher status to <strong>VERIFIED</strong>. The profile will immediately become eligible for platform publication.
             </p>
             <div className="space-y-1.5">
               <label className="text-xs font-bold text-slate-700 uppercase">Optional Approval Note</label>
@@ -675,7 +675,7 @@ export default function AdminTeacherReviewPage() {
               <AlertOctagon className="h-6 w-6" /> Suspend Verified Teacher
             </h3>
             <p className="text-xs text-slate-600">
-              This will suspend the teacher's marketplace visibility and live class hosting privileges. Account data and history will be preserved.
+              This will suspend the teacher's platform visibility and live class hosting privileges. Account data and history will be preserved.
             </p>
             <div className="space-y-1.5">
               <label className="text-xs font-bold text-slate-700 uppercase">Suspension Reason *</label>

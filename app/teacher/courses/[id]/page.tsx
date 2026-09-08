@@ -94,7 +94,7 @@ export default function TeacherCourseDetailsPage() {
           </div>
 
           <div className="flex items-center gap-3">
-            <Link href={`/courses/${course?.slug || ""}`} target="_blank">
+            <Link href={`/courses/${course?.slug || courseId}/preview`} target="_blank">
               <Button variant="outline" size="sm" leftIcon={<Eye className="h-4 w-4" />}>
                 Preview Public Page
               </Button>

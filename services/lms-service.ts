@@ -339,6 +339,183 @@ export class LmsService {
   }
 
   /**
+   * Get course details formatted specifically for course preview with authorization rules.
+   */
+  static async getCoursePreview(slugOrId: string, session?: { id?: string; userId?: string; role?: string } | null) {
+    const course = await prisma.course.findFirst({
+      where: {
+        OR: [{ slug: slugOrId }, { id: slugOrId }],
+      },
+      include: {
+        teacher: {
+          include: {
+            user: {
+              include: { profile: true },
+            },
+          },
+        },
+        sections: {
+          orderBy: { order: "asc" },
+          include: {
+            lessons: {
+              orderBy: { order: "asc" },
+              include: {
+                videoAssets: true,
+              },
+            },
+          },
+        },
+        reviews: {
+          orderBy: { createdAt: "desc" },
+          take: 5,
+          include: {
+            student: {
+              include: { profile: true },
+            },
+          },
+        },
+      },
+    });
+
+    if (!course) {
+      throw new Error("NOT_FOUND: Course not found.");
+    }
+
+    const userId = session?.userId || session?.id;
+    const userRole = session?.role;
+
+    // Authorization rule check for unpublished courses
+    if (course.status !== "PUBLISHED") {
+      let canAccessDraft = false;
+      if (userRole === "ADMIN") {
+        canAccessDraft = true;
+      } else if (userRole === "TEACHER" && userId) {
+        const teacherProfile = await prisma.teacherProfile.findUnique({
+          where: { userId },
+        });
+        if (teacherProfile && teacherProfile.id === course.teacherId) {
+          canAccessDraft = true;
+        }
+      }
+
+      if (!canAccessDraft) {
+        throw new Error("UNAUTHORIZED: This course is not currently available for public preview.");
+      }
+    }
+
+    let isEnrolled = false;
+    let enrollmentStatus: string | null = null;
+
+    if (userId) {
+      const enrollment = await prisma.enrollment.findUnique({
+        where: {
+          studentId_courseId: {
+            studentId: userId,
+            courseId: course.id,
+          },
+        },
+      });
+
+      if (enrollment) {
+        isEnrolled = enrollment.status === "ACTIVE" || enrollment.status === "COMPLETED";
+        enrollmentStatus = enrollment.status;
+      }
+    }
+
+    let parsedOutcomes: string[] = [];
+    if (course.learningOutcomes) {
+      try {
+        parsedOutcomes = JSON.parse(course.learningOutcomes);
+      } catch {
+        parsedOutcomes = course.learningOutcomes.split("\n").filter((line) => line.trim().length > 0);
+      }
+    }
+
+    let parsedRequirements: string[] = [];
+    if (course.requirements) {
+      try {
+        parsedRequirements = JSON.parse(course.requirements);
+      } catch {
+        parsedRequirements = course.requirements.split("\n").filter((line) => line.trim().length > 0);
+      }
+    }
+
+    return {
+      id: course.id,
+      title: course.title,
+      slug: course.slug,
+      subtitle: course.subtitle,
+      description: course.description,
+      subject: course.subject,
+      category: course.category || "General",
+      level: course.level,
+      gradeLevel: course.gradeLevel,
+      language: course.language,
+      price: course.price,
+      rating: course.rating,
+      reviewCount: course.reviewCount,
+      lessonCount: course.lessonCount,
+      durationHours: course.durationHours,
+      enrollmentCount: course.enrollmentCount,
+      thumbnailUrl: course.thumbnailUrl || "/images/course-placeholder.jpg",
+      status: course.status,
+      learningOutcomes: parsedOutcomes,
+      requirements: parsedRequirements,
+      publishedAt: course.publishedAt,
+      isEnrolled,
+      enrollmentStatus,
+      teacher: {
+        id: course.teacher.id,
+        name: `${course.teacher.user.profile?.firstName || ""} ${course.teacher.user.profile?.lastName || ""}`.trim() || "EduConnects Instructor",
+        avatarUrl: course.teacher.user.profile?.avatarUrl,
+        headline: course.teacher.headline || "Passionate Educator",
+        bio: course.teacher.bio || "Experienced teacher dedicated to student growth.",
+        rating: course.teacher.rating,
+        experienceYears: course.teacher.experienceYears,
+        subjects: course.teacher.subjects,
+        isVerified: course.teacher.verificationStatus === "VERIFIED",
+      },
+      sections: course.sections.map((s) => ({
+        id: s.id,
+        title: s.title,
+        description: s.description,
+        order: s.order,
+        lessons: s.lessons.map((l) => {
+          const mainVideoAsset = l.videoAssets?.[0];
+          return {
+            id: l.id,
+            title: l.title,
+            description: l.description,
+            type: l.type,
+            durationSeconds: l.durationSeconds,
+            order: l.order,
+            isPreview: l.isPreview,
+            status: l.status,
+            videoProvider: l.videoProvider,
+            videoAsset: mainVideoAsset
+              ? {
+                  id: mainVideoAsset.id,
+                  playbackId: mainVideoAsset.playbackId,
+                  status: mainVideoAsset.status,
+                  duration: mainVideoAsset.duration,
+                  aspectRatio: mainVideoAsset.aspectRatio,
+                }
+              : null,
+          };
+        }),
+      })),
+      reviews: course.reviews.map((r) => ({
+        id: r.id,
+        rating: r.rating,
+        review: r.review,
+        createdAt: r.createdAt,
+        studentName: `${r.student.profile?.firstName || "Student"} ${r.student.profile?.lastName || ""}`.trim(),
+        studentAvatar: r.student.profile?.avatarUrl,
+      })),
+    };
+  }
+
+  /**
    * Get teacher's own courses dashboard list
    */
   static async getTeacherCourses(teacherUserId: string) {

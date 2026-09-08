@@ -163,10 +163,10 @@ Four roles are supported: `ADMIN`, `TEACHER`, `STUDENT`, `PARENT`.
 ## 🚀 Module 02 - 10 Extension Points
 
 This foundation is ready for future modules without requiring architectural refactoring:
-- **Module 02**: Public Marketplace & Teacher Search
+- **Module 02**: Public Platform & Teacher Search
 - **Module 03**: Expanded Auth & User Profiles
 - **Module 04**: Teacher Verification Workflows & Admin Panel
-- **Module 05**: Marketplace, Demo Booking & Live Slots
+- **Module 05**: Platform, Demo Booking & Live Slots
 - **Module 06**: Live Classroom Integration
 - **Module 07**: Pre-recorded LMS Courses & Lessons
 - **Module 08**: Payments, Subscriptions & Wallet
