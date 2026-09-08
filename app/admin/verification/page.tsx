@@ -6,7 +6,8 @@ import { DashboardLayout } from "@/components/layout/dashboard-layout";
 import { Card } from "@/components/ui/card";
 import { GlassButton } from "@/components/glass/glass-button";
 import { StatusBadge } from "@/components/ui/status-badge";
-import { ShieldCheck, Clock, FileText, ArrowRight, Loader2, CheckCircle2, RefreshCw } from "lucide-react";
+import { ShieldCheck, ArrowRight, Loader2, RefreshCw, FileText, CheckCircle2, Clock } from "lucide-react";
+import { BackButton } from "@/components/ui/back-button";
 
 export default function AdminVerificationQueuePage() {
   const [queue, setQueue] = useState<any[]>([]);
@@ -45,6 +46,12 @@ export default function AdminVerificationQueuePage() {
       <div className="space-y-6 pb-16 max-w-6xl mx-auto">
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
           <div>
+            <BackButton
+              fallbackUrl="/admin"
+              label="Back to Dashboard"
+              variant="default"
+              className="mb-3"
+            />
             <div className="flex items-center gap-3">
               <h1 className="text-2xl lg:text-3xl font-black text-slate-900 tracking-tight">
                 Teacher Verification Workspace
