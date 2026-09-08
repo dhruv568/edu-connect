@@ -344,42 +344,52 @@ export default function AdminStaffPage() {
               {staff.map((member) => (
                 <Card
                   key={member.id}
-                  className="p-5 border border-slate-200 dark:border-slate-800 flex flex-col justify-between space-y-4 hover:border-slate-300 transition"
+                  className="p-5 border border-slate-200 dark:border-slate-800 flex flex-col justify-between space-y-4 hover:border-slate-300 transition overflow-hidden"
                 >
-                  <div className="space-y-3">
-                    <div className="flex items-start justify-between gap-3">
-                      <div className="flex items-center gap-3">
+                  <div className="space-y-3 min-w-0">
+                    <div className="flex items-start justify-between gap-3 min-w-0">
+                      <div className="flex items-center gap-3 min-w-0 flex-1">
                         <div className="w-10 h-10 rounded-full bg-gradient-to-tr from-blue-600 to-indigo-600 text-white font-bold flex items-center justify-center text-sm shadow-xs shrink-0">
                           {member.name.charAt(0).toUpperCase()}
                         </div>
-                        <div>
-                          <h4 className="text-sm font-extrabold text-slate-900 dark:text-slate-100">
+                        <div className="min-w-0 flex-1">
+                          <h4 
+                            className="text-sm font-extrabold text-slate-900 dark:text-slate-100 truncate"
+                            title={member.name}
+                          >
                             {member.name}
                           </h4>
-                          <p className="text-xs text-slate-500">{member.email}</p>
+                          <p 
+                            className="text-xs text-slate-500 truncate"
+                            title={member.email}
+                          >
+                            {member.email}
+                          </p>
                         </div>
                       </div>
 
-                      <StatusBadge status={member.status} size="sm" />
+                      <div className="shrink-0">
+                        <StatusBadge status={member.status} size="sm" />
+                      </div>
                     </div>
 
-                    <div className="p-3 rounded-xl bg-slate-50 dark:bg-slate-800/60 border border-slate-100 dark:border-slate-800 flex items-center justify-between">
-                      <div>
+                    <div className="p-3 rounded-xl bg-slate-50 dark:bg-slate-800/60 border border-slate-100 dark:border-slate-800 flex items-center justify-between gap-2 min-w-0">
+                      <div className="min-w-0 flex-1">
                         <div className="text-[10px] text-slate-400 font-bold uppercase">Assigned Role</div>
-                        <div className="text-xs font-black text-slate-800 dark:text-slate-200 mt-0.5 flex items-center gap-1.5">
-                          <Shield className="h-3.5 w-3.5 text-blue-600" />
-                          <span>{member.roleName}</span>
+                        <div className="text-xs font-black text-slate-800 dark:text-slate-200 mt-0.5 flex items-center gap-1.5 min-w-0">
+                          <Shield className="h-3.5 w-3.5 text-blue-600 shrink-0" />
+                          <span className="truncate" title={member.roleName}>{member.roleName}</span>
                         </div>
                       </div>
 
-                      <span className="text-[11px] text-slate-400">
+                      <span className="text-[11px] text-slate-400 shrink-0">
                         Joined {new Date(member.createdAt).toLocaleDateString()}
                       </span>
                     </div>
                   </div>
 
                   {/* Actions */}
-                  <div className="pt-3 border-t border-slate-100 dark:border-slate-800 flex items-center justify-between gap-2">
+                  <div className="pt-3 border-t border-slate-100 dark:border-slate-800 flex items-center justify-between gap-2 min-w-0">
                     {member.role !== "ADMIN" ? (
                       <>
                         <Button
@@ -392,7 +402,7 @@ export default function AdminStaffPage() {
 
                         <button
                           onClick={() => handleToggleStaffStatus(member)}
-                          className={`text-xs font-semibold px-3 py-1.5 rounded-lg border transition ${
+                          className={`text-xs font-semibold px-3 py-1.5 rounded-lg border transition shrink-0 ${
                             member.status === "ACTIVE"
                               ? "text-rose-600 border-rose-200 hover:bg-rose-50"
                               : "text-emerald-600 border-emerald-200 hover:bg-emerald-50"
@@ -402,7 +412,7 @@ export default function AdminStaffPage() {
                         </button>
                       </>
                     ) : (
-                      <span className="text-xs font-bold text-slate-400 italic">
+                      <span className="text-xs font-bold text-slate-400 italic truncate" title="Super Administrator">
                         Super Administrator
                       </span>
                     )}
@@ -444,11 +454,11 @@ export default function AdminStaffPage() {
                 <tbody className="divide-y divide-slate-100 dark:divide-slate-800">
                   {invitations.map((inv) => (
                     <tr key={inv.id} className="hover:bg-slate-50/70 transition">
-                      <td className="p-3.5">
-                        <div className="font-bold text-slate-900 dark:text-slate-100">
+                      <td className="p-3.5 max-w-[240px]">
+                        <div className="font-bold text-slate-900 dark:text-slate-100 truncate" title={inv.fullName || "Staff Candidate"}>
                           {inv.fullName || "Staff Candidate"}
                         </div>
-                        <div className="text-[11px] text-slate-500 font-mono">{inv.email}</div>
+                        <div className="text-[11px] text-slate-500 font-mono truncate" title={inv.email}>{inv.email}</div>
                       </td>
 
                       <td className="p-3.5">
