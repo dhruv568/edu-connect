@@ -9,7 +9,7 @@ function PaymentPendingContent() {
   const router = useRouter();
   const transactionId = searchParams.get("transactionId");
 
-  const [status] = useState("We're confirming your payment status with Razorpay...");
+  const [status] = useState("We're confirming your payment status with Cashfree...");
 
   useEffect(() => {
     if (!transactionId) return;

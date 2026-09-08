@@ -405,12 +405,10 @@ async function runDynamicRBACTests() {
     console.log("   ✅ User deactivation and role deactivation guards properly block access.\n");
 
     // -----------------------------------------------------------------
-    // TEST 6: Staff Invitation Lifecycle
+    // TEST 6: Staff Invitation Lifecycle (Email-Based Registration)
     // -----------------------------------------------------------------
-    console.log("📋 Test 6: Testing Staff Invitation Lifecycle (Generation, Expiry, Acceptance)...");
+    console.log("📋 Test 6: Testing Staff Invitation Lifecycle (Email Invitation & Registration)...");
 
-    const rawInviteToken = crypto.randomBytes(32).toString("hex");
-    const tokenHash = crypto.createHash("sha256").update(rawInviteToken).digest("hex");
     const inviteEmail = `invitee.${timestamp}@educonnects.com`;
 
     testInvitation = await prisma.staffInvitation.create({
@@ -419,15 +417,14 @@ async function runDynamicRBACTests() {
         fullName: "Invited Staff Candidate",
         roleId: courseManagerRole.id,
         invitedById: testAdminUser.id,
-        tokenHash,
         status: "PENDING",
         expiresAt: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000),
       },
     });
 
-    // Lookup invitation by token hash
-    const foundInvite = await prisma.staffInvitation.findUnique({
-      where: { tokenHash },
+    // Lookup invitation by email
+    const foundInvite = await prisma.staffInvitation.findFirst({
+      where: { email: inviteEmail, status: "PENDING" },
       include: { role: true },
     });
     if (!foundInvite || foundInvite.status !== "PENDING") {
@@ -435,25 +432,23 @@ async function runDynamicRBACTests() {
     }
 
     // Test Expiry check
-    const expiredTokenHash = crypto.createHash("sha256").update("expired_token_sample").digest("hex");
     const expiredInvitation = await prisma.staffInvitation.create({
       data: {
         email: `expired.${timestamp}@educonnects.com`,
         fullName: "Expired Candidate",
         roleId: courseManagerRole.id,
         invitedById: testAdminUser.id,
-        tokenHash: expiredTokenHash,
         status: "PENDING",
         expiresAt: new Date(Date.now() - 1000), // In the past
       },
     });
 
-    const isExpired = new Date() > expiredInvitation.expiresAt;
+    const isExpired = expiredInvitation.expiresAt ? new Date() > expiredInvitation.expiresAt : false;
     if (!isExpired) {
       throw new Error("Expected past expiration date to evaluate to true");
     }
 
-    // Simulate Invitation Acceptance
+    // Simulate Invitation Acceptance via OTP registration
     const acceptedStaff = await prisma.$transaction(async (tx) => {
       const u = await tx.user.create({
         data: {
@@ -496,7 +491,7 @@ async function runDynamicRBACTests() {
     // Cleanup expired invitation record and accepted staff
     await prisma.staffInvitation.delete({ where: { id: expiredInvitation.id } });
     await prisma.user.delete({ where: { id: acceptedStaff.id } });
-    console.log("   ✅ Staff invitation generation, validation, expiry check, and acceptance verified.\n");
+    console.log("   ✅ Staff invitation creation, email validation, expiry check, and acceptance verified.\n");
 
     console.log("=======================================================");
     console.log("🎉 ALL DYNAMIC RBAC & STAFF DASHBOARD TESTS PASSED!");

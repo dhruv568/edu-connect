@@ -40,14 +40,12 @@ export function getAppUrl(): string {
 }
 
 /**
- * Generates the complete, public staff invitation URL for a given token.
- * 
- * @param token - Raw cryptographically secure invitation token
- * @returns Complete public invitation URL (e.g. "https://yourdomain.com/staff/invite/156052d209b703")
+ * Generates the public staff registration URL.
+ * Note: No tokens or unique URLs are generated for staff invitations; staff registers via email and OTP.
  */
-export function getStaffInviteUrl(token: string): string {
+export function getStaffRegisterUrl(): string {
   const baseUrl = getPublicAppUrl();
-  return `${baseUrl}/staff/invite/${encodeURIComponent(token)}`;
+  return `${baseUrl}/staff/register`;
 }
 
 /**

@@ -1,10 +1,9 @@
 import { NextRequest } from "next/server";
-import crypto from "crypto";
 import { requirePermission } from "@/lib/permissions/permission-engine";
 import { apiBadRequest, apiError, apiNotFound, apiSuccess } from "@/lib/api-response";
 import { prisma } from "@/lib/prisma";
 import { logAuditEvent } from "@/lib/audit-logger";
-import { getStaffInviteUrl } from "@/lib/app-url";
+import { EmailService } from "@/lib/email/email-service";
 
 export const dynamic = "force-dynamic";
 
@@ -13,7 +12,7 @@ export async function POST(req: NextRequest) {
     const { userId } = await requirePermission("staff.invite_resend");
 
     const body = await req.json();
-    const { invitationId, expiresInDays = 7 } = body;
+    const { invitationId } = body;
 
     if (!invitationId) {
       return apiBadRequest("Invitation ID is required.");
@@ -32,39 +31,41 @@ export async function POST(req: NextRequest) {
       return apiBadRequest("This invitation has already been accepted.");
     }
 
-    // Generate fresh secure token
-    const rawToken = crypto.randomBytes(32).toString("hex");
-    const tokenHash = crypto.createHash("sha256").update(rawToken).digest("hex");
-
-    const days = Math.max(1, Math.min(30, Number(expiresInDays) || 7));
-    const expiresAt = new Date(Date.now() + days * 24 * 60 * 60 * 1000);
+    const expiresAt = new Date(Date.now() + 7 * 24 * 60 * 60 * 1000);
 
     const updated = await prisma.staffInvitation.update({
       where: { id: invitation.id },
       data: {
-        tokenHash,
         status: "PENDING",
         expiresAt,
       },
     });
 
-    const inviteUrl = getStaffInviteUrl(rawToken);
+    // Resend invitation instructions email
+    await EmailService.sendStaffInvitationEmail({
+      email: updated.email,
+      recipientName: updated.fullName || undefined,
+      roleName: invitation.role.name,
+    });
 
     await logAuditEvent(userId, "STAFF_INVITE_RESENT", {
       invitationId: updated.id,
       email: updated.email,
-      expiresAt,
     });
 
-    return apiSuccess({
-      invitation: {
-        id: updated.id,
-        email: updated.email,
-        expiresAt: updated.expiresAt,
-        inviteUrl,
+    return apiSuccess(
+      {
+        invitation: {
+          id: updated.id,
+          email: updated.email,
+          fullName: updated.fullName,
+          roleName: invitation.role.name,
+          status: updated.status,
+          expiresAt: updated.expiresAt,
+        },
       },
-      invitationUrl: inviteUrl,
-    }, "Invitation regenerated successfully.");
+      `Invitation email resent successfully to ${updated.email}.`
+    );
   } catch (error: any) {
     if (error.message?.startsWith("UNAUTHORIZED")) return apiError(error.message, 401);
     if (error.message?.startsWith("FORBIDDEN")) return apiError(error.message, 403);

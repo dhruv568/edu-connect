@@ -175,13 +175,13 @@ export default function StudentPaymentReceiptPage() {
             </div>
             {receipt.providerOrderId && (
               <div className="flex justify-between">
-                <span className="text-slate-500 print:text-gray-500">Razorpay Order ID</span>
+                <span className="text-slate-500 print:text-gray-500">Gateway Order ID</span>
                 <span className="font-mono text-slate-300 print:text-black">{receipt.providerOrderId}</span>
               </div>
             )}
             {receipt.providerPaymentId && (
               <div className="flex justify-between">
-                <span className="text-slate-500 print:text-gray-500">Razorpay Payment ID</span>
+                <span className="text-slate-500 print:text-gray-500">Gateway Payment ID</span>
                 <span className="font-mono text-slate-300 print:text-black">{receipt.providerPaymentId}</span>
               </div>
             )}
@@ -190,7 +190,7 @@ export default function StudentPaymentReceiptPage() {
           {/* Footer Security */}
           <div className="pt-2 text-center text-[11px] text-slate-500 print:text-gray-500 flex items-center justify-center gap-1.5">
             <ShieldCheck className="w-4 h-4 text-emerald-400 print:text-emerald-600" />
-            Processed securely via Razorpay Checkout. Standard receipt document.
+            Processed securely via Cashfree Payments. Standard receipt document.
           </div>
         </div>
 

@@ -41,7 +41,7 @@ export default function TeacherPayoutSetupPage() {
       if (!res.ok) throw new Error(json.error || "Onboarding failed.");
 
       setAccount(json.data.payoutAccount);
-      setMsg("Razorpay Route Linked Account activated successfully!");
+      setMsg("Cashfree Split Payout Account activated successfully!");
     } catch (err: any) {
       setMsg(err.message || "Onboarding error.");
     } finally {
@@ -66,7 +66,7 @@ export default function TeacherPayoutSetupPage() {
             </div>
             <h1 className="text-2xl font-bold text-white tracking-tight">Set Up Teacher Payouts</h1>
             <p className="text-xs text-slate-400">
-              Onboard your Razorpay Route Linked Account to receive direct settlements.
+              Onboard your Cashfree Split Account to receive direct settlements.
             </p>
           </div>
 
@@ -74,8 +74,8 @@ export default function TeacherPayoutSetupPage() {
           <div className="space-y-3">
             {[
               { step: 1, title: "Account Information", desc: "EduConnects educator verification complete" },
-              { step: 2, title: "Razorpay Route Onboarding", desc: "Linked account metadata registration" },
-              { step: 3, title: "KYC Verification", desc: "Secure Razorpay partner check" },
+              { step: 2, title: "Cashfree Split Onboarding", desc: "Payout vendor metadata registration" },
+              { step: 3, title: "KYC Verification", desc: "Secure Cashfree partner check" },
               { step: 4, title: "Active Settlements", desc: "Automatic payout transfers enabled" },
             ].map((s) => (
               <div
@@ -109,7 +109,7 @@ export default function TeacherPayoutSetupPage() {
           {account?.status === "ACTIVE" ? (
             <div className="p-4 rounded-2xl bg-emerald-500/10 border border-emerald-500/20 text-center space-y-2">
               <div className="flex items-center justify-center gap-1.5 text-xs font-bold text-emerald-400">
-                <CheckCircle2 className="w-4 h-4" /> Razorpay Linked Account Active
+                <CheckCircle2 className="w-4 h-4" /> Cashfree Split Account Active
               </div>
               <p className="text-[11px] text-slate-400 font-mono">Account ID: {account.providerAccountId}</p>
             </div>
@@ -119,7 +119,7 @@ export default function TeacherPayoutSetupPage() {
               disabled={onboarding}
               className="w-full py-4 bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-500 text-white font-bold rounded-2xl shadow-lg shadow-purple-500/25 flex items-center justify-center gap-2 text-sm transition-all disabled:opacity-50"
             >
-              {onboarding ? "Connecting Razorpay Route..." : "Activate Razorpay Route Payout Account"}
+              {onboarding ? "Connecting Cashfree Split..." : "Activate Cashfree Split Payout Account"}
             </button>
           )}
         </div>

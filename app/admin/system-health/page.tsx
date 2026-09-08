@@ -35,7 +35,7 @@ export default function AdminSystemHealthPage() {
               System Operational Health
             </h1>
             <p className="text-xs sm:text-sm text-slate-500 mt-1">
-              Live service statuses for Database, Razorpay Payment Gateway, Email Provider, LiveKit, and Mux Video.
+              Live service statuses for Database, Cashfree Payment Gateway, Email Provider, LiveKit, and Mux Video.
             </p>
           </div>
 
@@ -87,13 +87,13 @@ export default function AdminSystemHealthPage() {
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-2">
                 <CreditCard className="h-5 w-5 text-emerald-600" />
-                <h4 className="text-sm font-extrabold text-slate-900 dark:text-slate-100">Razorpay Payment Gateway</h4>
+                <h4 className="text-sm font-extrabold text-slate-900 dark:text-slate-100">Cashfree Payment Gateway</h4>
               </div>
               <span className="px-2 py-0.5 rounded text-[10px] font-bold bg-emerald-100 text-emerald-800">
                 {health?.services?.paymentGateway?.status || "ACTIVE"}
               </span>
             </div>
-            <p className="text-xs text-slate-500 font-medium">Provider: Razorpay Standard & Route</p>
+            <p className="text-xs text-slate-500 font-medium">Provider: Cashfree PG & Split Settlements</p>
           </Card>
 
           <Card className="p-5 space-y-3">

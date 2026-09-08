@@ -2,7 +2,7 @@ import { prisma } from "../lib/prisma";
 import { requireRole, requireVerifiedEmail } from "../lib/auth/guards";
 import { hashPassword } from "../lib/auth/password";
 import { generateOTP, hashToken } from "../lib/auth/tokens";
-import { verifyRazorpaySignature, verifyWebhookSignature } from "../lib/razorpay";
+import { verifyCashfreeWebhookSignature } from "../lib/cashfree";
 import { generateLiveKitRoomToken } from "../lib/classroom/livekit-server";
 
 async function runModule11SecurityQATests() {
@@ -119,27 +119,33 @@ async function runModule11SecurityQATests() {
     }
     console.log("✅ Passed: 6-Digit OTP generation, SHA-256 hashing & secrecy.");
 
-    // Test 4: Razorpay Payment & Webhook Signature Verification
-    console.log("\nTest 4: Testing Payment & Webhook Signature Verification...");
+    // Test 4: Cashfree Payment & Webhook Signature Verification
+    console.log("\nTest 4: Testing Cashfree Webhook Signature Verification & Idempotency...");
 
-    const fakeOrderId = "order_9A33XCD1234567";
-    const fakePaymentId = "pay_29AB8977112345";
-    const secret = process.env.RAZORPAY_KEY_SECRET || "test_secret_key_123456789";
+    const fakePayload = JSON.stringify({
+      data: {
+        order: { order_id: "CF_9A33XCD1234567", order_amount: 799.0 },
+        payment: { cf_payment_id: 123456, payment_status: "SUCCESS" },
+      },
+      type: "PAYMENT_SUCCESS_WEBHOOK",
+    });
+    const fakeTimestamp = `${Date.now()}`;
+    const secret = process.env.CASHFREE_SECRET_KEY || "mock_cashfree_secret_key_123456";
 
     // Invalid signature must be rejected
-    const isValidSig = verifyRazorpaySignature(fakeOrderId, fakePaymentId, "invalid_signature_hash", secret);
+    const isValidSig = verifyCashfreeWebhookSignature(fakePayload, fakeTimestamp, "invalid_base64_sig==", secret);
     if (isValidSig !== false) {
-      throw new Error("Invalid Razorpay payment signature was incorrectly accepted!");
+      throw new Error("Invalid Cashfree webhook signature was incorrectly accepted!");
     }
 
     // Webhook event duplicate prevention test
-    const eventId = `evt_test_${Date.now()}`;
+    const eventId = `cf_evt_test_${Date.now()}`;
     const firstWebhook = await prisma.paymentWebhookEvent.create({
       data: {
-        provider: "RAZORPAY",
-        eventId,
-        eventType: "payment.captured",
-        payload: JSON.stringify({ event: "payment.captured" }),
+        provider: "CASHFREE",
+        providerEventId: eventId,
+        eventType: "PAYMENT_SUCCESS_WEBHOOK",
+        payload: fakePayload,
         processed: true,
       },
     });
@@ -148,10 +154,10 @@ async function runModule11SecurityQATests() {
     try {
       await prisma.paymentWebhookEvent.create({
         data: {
-          provider: "RAZORPAY",
-          eventId,
-          eventType: "payment.captured",
-          payload: JSON.stringify({ event: "payment.captured" }),
+          provider: "CASHFREE",
+          providerEventId: eventId,
+          eventType: "PAYMENT_SUCCESS_WEBHOOK",
+          payload: fakePayload,
           processed: true,
         },
       });
@@ -163,7 +169,7 @@ async function runModule11SecurityQATests() {
       }
     }
     await prisma.paymentWebhookEvent.delete({ where: { id: firstWebhook.id } });
-    console.log("✅ Passed: Razorpay signature verification & webhook idempotency protection.");
+    console.log("✅ Passed: Cashfree signature verification & webhook idempotency protection.");
 
     // Test 5: LiveKit Access Token Verification
     console.log("\nTest 5: Testing LiveKit Classroom Token Generation Security...");

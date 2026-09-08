@@ -1,10 +1,9 @@
 import { NextRequest } from "next/server";
-import crypto from "crypto";
 import { requirePermission } from "@/lib/permissions/permission-engine";
 import { apiBadRequest, apiError, apiSuccess } from "@/lib/api-response";
 import { prisma } from "@/lib/prisma";
 import { logAuditEvent } from "@/lib/audit-logger";
-import { getStaffInviteUrl } from "@/lib/app-url";
+import { EmailService } from "@/lib/email/email-service";
 
 export const dynamic = "force-dynamic";
 
@@ -13,7 +12,7 @@ export async function POST(req: NextRequest) {
     const { userId } = await requirePermission("staff.create");
 
     const body = await req.json();
-    const { email, fullName, roleId, expiresInDays = 7 } = body;
+    const { email, fullName, roleId } = body;
 
     if (!email || typeof email !== "string" || !email.includes("@")) {
       return apiBadRequest("A valid email address is required.");
@@ -58,12 +57,7 @@ export async function POST(req: NextRequest) {
       },
     });
 
-    // Generate cryptographically secure one-time invitation token
-    const rawToken = crypto.randomBytes(32).toString("hex");
-    const tokenHash = crypto.createHash("sha256").update(rawToken).digest("hex");
-
-    const days = Math.max(1, Math.min(30, Number(expiresInDays) || 7));
-    const expiresAt = new Date(Date.now() + days * 24 * 60 * 60 * 1000);
+    const expiresAt = new Date(Date.now() + 7 * 24 * 60 * 60 * 1000);
 
     const invitation = await prisma.staffInvitation.create({
       data: {
@@ -71,7 +65,6 @@ export async function POST(req: NextRequest) {
         fullName: fullName?.trim() || null,
         roleId: role.id,
         invitedById: userId,
-        tokenHash,
         status: "PENDING",
         expiresAt,
       },
@@ -80,14 +73,18 @@ export async function POST(req: NextRequest) {
       },
     });
 
-    const inviteUrl = getStaffInviteUrl(rawToken);
+    // Dispatch invitation email with clear instructions (no invitation link/token)
+    await EmailService.sendStaffInvitationEmail({
+      email: normalizedEmail,
+      recipientName: fullName?.trim() || undefined,
+      roleName: role.name,
+    });
 
     await logAuditEvent(userId, "STAFF_INVITED", {
       invitationId: invitation.id,
       email: normalizedEmail,
       roleId: role.id,
       roleName: role.name,
-      expiresAt,
     });
 
     return apiSuccess(
@@ -97,12 +94,11 @@ export async function POST(req: NextRequest) {
           email: invitation.email,
           fullName: invitation.fullName,
           roleName: role.name,
+          status: invitation.status,
           expiresAt: invitation.expiresAt,
-          inviteUrl,
         },
-        invitationUrl: inviteUrl,
       },
-      "Staff invitation generated successfully.",
+      `Invitation email sent successfully to ${normalizedEmail}.`,
       201
     );
   } catch (error: any) {

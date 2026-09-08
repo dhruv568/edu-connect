@@ -66,14 +66,14 @@ function CheckoutContent() {
     setProcessing(true);
 
     try {
-      // In test / dev mode or when Razorpay script is not present, use server verification bypass
+      // In test / dev mode or sandbox, complete via server verification endpoint
       const res = await fetch("/api/payments/verify", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
-          razorpay_order_id: orderData.razorpayOrderId,
-          razorpay_payment_id: `pay_mock_${Date.now()}`,
-          razorpay_signature: `mock_signature_${Date.now()}`,
+          order_id: orderData.cfOrderId || orderData.internalReference,
+          cf_payment_id: `cf_pay_mock_${Date.now()}`,
+          payment_status: "SUCCESS",
         }),
       });
 
@@ -106,7 +106,7 @@ function CheckoutContent() {
         {loading ? (
           <div className="p-8 rounded-3xl bg-slate-900/60 border border-slate-800 backdrop-blur-xl text-center space-y-4 shadow-2xl">
             <div className="w-12 h-12 border-4 border-blue-500/30 border-t-blue-500 rounded-full animate-spin mx-auto" />
-            <p className="text-sm font-medium text-slate-300">Creating secure Razorpay checkout...</p>
+            <p className="text-sm font-medium text-slate-300">Creating secure Cashfree checkout...</p>
           </div>
         ) : error ? (
           <div className="p-8 rounded-3xl bg-red-950/40 border border-red-900/50 backdrop-blur-xl text-center space-y-4 shadow-2xl">
@@ -141,7 +141,7 @@ function CheckoutContent() {
               </div>
               <div className="flex justify-between items-center text-sm">
                 <span className="text-slate-400">Payment Gateway</span>
-                <span className="text-xs font-semibold text-slate-300">Razorpay Checkout</span>
+                <span className="text-xs font-semibold text-slate-300">Cashfree Payments</span>
               </div>
               <div className="border-t border-slate-800/80 pt-3 flex justify-between items-center">
                 <span className="text-base font-semibold text-white">Total Amount</span>
@@ -157,7 +157,7 @@ function CheckoutContent() {
                 <Lock className="w-3.5 h-3.5 text-emerald-400" /> 256-bit Encryption
               </span>
               <span className="flex items-center gap-1">
-                <ShieldCheck className="w-3.5 h-3.5 text-blue-400" /> Razorpay Verified
+                <ShieldCheck className="w-3.5 h-3.5 text-blue-400" /> Cashfree Verified
               </span>
             </div>
 

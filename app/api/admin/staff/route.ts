@@ -60,7 +60,7 @@ export async function GET(req: NextRequest) {
 
     const formattedInvitations = invitations.map((inv) => {
       let resolvedStatus = inv.status;
-      if (inv.status === "PENDING" && now > inv.expiresAt) {
+      if (inv.status === "PENDING" && inv.expiresAt && now > inv.expiresAt) {
         resolvedStatus = "EXPIRED";
       }
 

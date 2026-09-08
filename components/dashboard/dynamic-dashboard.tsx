@@ -600,7 +600,7 @@ export function DynamicDashboard() {
               <Card className="p-5 hover:border-emerald-500 transition cursor-pointer space-y-2 group">
                 <Server className="h-6 w-6 text-emerald-600 group-hover:scale-110 transition-transform" />
                 <h4 className="text-sm font-extrabold text-slate-900 dark:text-slate-100">System Health</h4>
-                <p className="text-xs text-slate-500">Inspect DB, Razorpay, LiveKit, and Mux status.</p>
+                <p className="text-xs text-slate-500">Inspect DB, Cashfree, LiveKit, and Mux status.</p>
               </Card>
             </Link>
           )}

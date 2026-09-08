@@ -659,7 +659,7 @@ model PaymentOrder {
   referenceId     String   // courseId or liveClassSlotId
   courseId        String?
   liveClassSlotId String?
-  provider        String   @default("RAZORPAY")
+  provider        String   @default("CASHFREE")
   providerOrderId String   @unique
   amountPaise     Int
   currency        String   @default("INR")
@@ -687,7 +687,7 @@ model PaymentTransaction {
   status             String    @default("CREATED") // CREATED | PENDING | AUTHORIZED | CAPTURED | FAILED | REFUNDED | PARTIALLY_REFUNDED | CANCELLED | DISPUTED
   amountPaise        Int
   currency           String    @default("INR")
-  provider           String    @default("RAZORPAY")
+  provider           String    @default("CASHFREE")
   providerOrderId    String
   providerPaymentId  String?   @unique
   providerSignature  String?
@@ -721,7 +721,7 @@ model PaymentTransaction {
 
 model PaymentWebhookEvent {
   id           String    @id @default(uuid())
-  provider     String    @default("RAZORPAY")
+  provider     String    @default("CASHFREE")
   eventId      String
   eventType    String
   payloadHash  String?
@@ -760,8 +760,8 @@ model FinancialLedgerEntry {
 model TeacherPayoutAccount {
   id                String    @id @default(uuid())
   teacherId         String    @unique
-  provider          String    @default("RAZORPAY_ROUTE")
-  providerAccountId String?   // Razorpay Account ID (acc_xxx)
+  provider          String    @default("CASHFREE_SPLIT")
+  providerAccountId String?   // Cashfree Vendor ID / Beneficiary ID
   accountName       String?
   accountType       String?   @default("STANDARD")
   status            String    @default("NOT_STARTED") // NOT_STARTED | PENDING | UNDER_REVIEW | ACTIVE | REJECTED
@@ -781,7 +781,7 @@ model TeacherPayout {
   teacherId          String
   ledgerEntryId      String?
   transactionId      String?
-  providerTransferId String?   @unique // Razorpay Transfer ID (trf_xxx)
+  providerTransferId String?   @unique // Cashfree Transfer ID / Split ID
   amountPaise        Int
   currency           String    @default("INR")
   status             String    @default("PENDING") // PENDING | ELIGIBLE | PROCESSING | PAID | FAILED | ON_HOLD
@@ -991,9 +991,9 @@ model StaffInvitation {
   fullName    String?
   roleId      String
   invitedById String
-  tokenHash   String    @unique
+  tokenHash   String?
   status      String    @default("PENDING") // PENDING | ACCEPTED | EXPIRED | REVOKED
-  expiresAt   DateTime
+  expiresAt   DateTime?
   acceptedAt  DateTime?
   createdAt   DateTime  @default(now())
   updatedAt   DateTime  @updatedAt

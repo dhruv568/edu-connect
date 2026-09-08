@@ -8,10 +8,27 @@ export async function POST(request: NextRequest) {
     const session = await requireRole(["STUDENT"]);
     const body = await request.json();
 
-    const { razorpay_order_id, razorpay_payment_id, razorpay_signature } = body;
+    const {
+      order_id,
+      orderId,
+      cf_payment_id,
+      cfPaymentId,
+      payment_status,
+      paymentStatus,
+      razorpay_order_id,
+      razorpay_payment_id,
+      razorpay_signature,
+    } = body;
+
+    const targetOrderId = order_id || orderId || razorpay_order_id;
+    const targetPaymentId = cf_payment_id || cfPaymentId || razorpay_payment_id;
+    const targetStatus = payment_status || paymentStatus;
 
     const result = await PaymentService.verifyAndCompletePayment({
       userId: session.userId,
+      orderId: targetOrderId,
+      cfPaymentId: targetPaymentId,
+      paymentStatus: targetStatus,
       razorpayOrderId: razorpay_order_id,
       razorpayPaymentId: razorpay_payment_id,
       razorpaySignature: razorpay_signature,

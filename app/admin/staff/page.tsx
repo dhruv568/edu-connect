@@ -73,10 +73,7 @@ export default function AdminStaffPage() {
   const [inviteEmail, setInviteEmail] = useState("");
   const [inviteFullName, setInviteFullName] = useState("");
   const [inviteRoleId, setInviteRoleId] = useState("");
-  const [inviteDays, setInviteDays] = useState(7);
   const [inviting, setInviting] = useState(false);
-  const [generatedInviteUrl, setGeneratedInviteUrl] = useState<string | null>(null);
-  const [copied, setCopied] = useState(false);
 
   // Change Role Modal
   const [changeRoleModalOpen, setChangeRoleModalOpen] = useState(false);
@@ -133,30 +130,24 @@ export default function AdminStaffPage() {
           email: inviteEmail.trim(),
           fullName: inviteFullName.trim() || undefined,
           roleId: inviteRoleId,
-          expiresInDays: inviteDays,
         }),
       });
 
       const json = await res.json();
       if (!res.ok) {
-        throw new Error(json.error || "Failed to generate staff invitation.");
+        throw new Error(json.error || "Failed to send staff invitation.");
       }
 
-      setGeneratedInviteUrl(json.data.invitation.inviteUrl);
-      showToast("Invite Created", "Staff invitation link generated.", "success");
+      showToast("Invitation Sent", `Invitation email sent successfully to ${inviteEmail.trim()}.`, "success");
+      setInviteModalOpen(false);
+      setInviteEmail("");
+      setInviteFullName("");
       fetchStaffData();
     } catch (err: any) {
       showToast("Invitation Failed", err.message, "error");
     } finally {
       setInviting(false);
     }
-  };
-
-  const handleCopyLink = (url: string) => {
-    navigator.clipboard.writeText(url);
-    setCopied(true);
-    showToast("Link Copied", "Invitation link copied to clipboard!", "success");
-    setTimeout(() => setCopied(false), 2500);
   };
 
   const handleResendInvite = async (invitationId: string) => {
@@ -169,8 +160,7 @@ export default function AdminStaffPage() {
       const json = await res.json();
       if (!res.ok) throw new Error(json.error || "Failed to resend invitation.");
 
-      showToast("Invite Refreshed", "New invite link generated.", "success");
-      handleCopyLink(json.data.invitation.inviteUrl);
+      showToast("Invitation Resent", "Staff invitation email has been dispatched again.", "success");
       fetchStaffData();
     } catch (err: any) {
       showToast("Error", err.message, "error");
@@ -274,7 +264,6 @@ export default function AdminStaffPage() {
               size="sm"
               leftIcon={<UserPlus className="h-4 w-4" />}
               onClick={() => {
-                setGeneratedInviteUrl(null);
                 setInviteEmail("");
                 setInviteFullName("");
                 setInviteModalOpen(true);
@@ -466,9 +455,9 @@ export default function AdminStaffPage() {
                             <button
                               onClick={() => handleResendInvite(inv.id)}
                               className="px-2.5 py-1 text-[11px] font-semibold rounded-md border border-slate-200 text-slate-700 hover:bg-slate-100 transition"
-                              title="Resend / Refresh token"
+                              title="Resend invitation email"
                             >
-                              Refresh
+                              Resend Invitation
                             </button>
                             <button
                               onClick={() => handleRevokeInvite(inv.id)}
@@ -503,7 +492,7 @@ export default function AdminStaffPage() {
                     Invite New Staff Member
                   </h3>
                   <p className="text-xs text-slate-500 mt-0.5">
-                    Generate a secure invitation link for candidate onboarding.
+                    Dispatch an email invitation with instructions for candidate onboarding.
                   </p>
                 </div>
                 <button
@@ -514,113 +503,57 @@ export default function AdminStaffPage() {
                 </button>
               </div>
 
-              {generatedInviteUrl ? (
-                <div className="p-6 space-y-4">
-                  <div className="p-4 rounded-xl bg-emerald-50 border border-emerald-200 text-emerald-900 text-xs space-y-2">
-                    <div className="font-bold flex items-center gap-2">
-                      <CheckCircle2 className="h-4 w-4 text-emerald-600" />
-                      Invitation Link Created Successfully!
-                    </div>
-                    <p className="text-emerald-700">
-                      Share this one-time link with the candidate. It will allow them to set their password and verify their account.
-                    </p>
-                  </div>
+              <form onSubmit={handleSendInvite} className="p-6 space-y-4">
+                <Input
+                  label="Candidate Email Address *"
+                  type="email"
+                  value={inviteEmail}
+                  onChange={(e) => setInviteEmail(e.target.value)}
+                  placeholder="colleague@company.com"
+                  leftIcon={<Mail className="h-4 w-4" />}
+                  required
+                />
 
-                  <div className="space-y-1.5">
-                    <label className="text-xs font-bold text-slate-600 uppercase">Invitation Link</label>
-                    <div className="flex items-center gap-2">
-                      <input
-                        readOnly
-                        value={generatedInviteUrl}
-                        className="w-full h-11 px-3.5 text-xs font-mono bg-slate-50 border border-slate-200 rounded-xl"
-                      />
-                      <Button
-                        variant="primary"
-                        size="md"
-                        leftIcon={copied ? <Check className="h-4 w-4" /> : <Copy className="h-4 w-4" />}
-                        onClick={() => handleCopyLink(generatedInviteUrl)}
-                      >
-                        {copied ? "Copied" : "Copy"}
-                      </Button>
-                    </div>
-                  </div>
+                <Input
+                  label="Full Name (Optional)"
+                  value={inviteFullName}
+                  onChange={(e) => setInviteFullName(e.target.value)}
+                  placeholder="e.g. Jane Doe"
+                />
 
-                  <div className="pt-3 border-t flex justify-end">
-                    <Button variant="outline" size="sm" onClick={() => setInviteModalOpen(false)}>
-                      Done
-                    </Button>
-                  </div>
-                </div>
-              ) : (
-                <form onSubmit={handleSendInvite} className="p-6 space-y-4">
-                  <Input
-                    label="Candidate Email Address *"
-                    type="email"
-                    value={inviteEmail}
-                    onChange={(e) => setInviteEmail(e.target.value)}
-                    placeholder="colleague@company.com"
-                    leftIcon={<Mail className="h-4 w-4" />}
+                <div className="space-y-1.5">
+                  <label className="block text-xs font-semibold text-slate-700 uppercase tracking-wider">
+                    Assign Custom Role *
+                  </label>
+                  <select
+                    value={inviteRoleId}
+                    onChange={(e) => setInviteRoleId(e.target.value)}
+                    className="w-full h-11 px-4 text-sm rounded-xl border border-slate-200 bg-white text-slate-900 focus:outline-none focus:ring-2 focus:ring-blue-500"
                     required
-                  />
+                  >
+                    {roles.map((r) => (
+                      <option key={r.id} value={r.id}>
+                        {r.name}
+                      </option>
+                    ))}
+                  </select>
+                </div>
 
-                  <Input
-                    label="Full Name (Optional)"
-                    value={inviteFullName}
-                    onChange={(e) => setInviteFullName(e.target.value)}
-                    placeholder="e.g. Jane Doe"
-                  />
-
-                  <div className="space-y-1.5">
-                    <label className="block text-xs font-semibold text-slate-700 uppercase tracking-wider">
-                      Assign Custom Role *
-                    </label>
-                    <select
-                      value={inviteRoleId}
-                      onChange={(e) => setInviteRoleId(e.target.value)}
-                      className="w-full h-11 px-4 text-sm rounded-xl border border-slate-200 bg-white text-slate-900 focus:outline-none focus:ring-2 focus:ring-blue-500"
-                      required
-                    >
-                      {roles.map((r) => (
-                        <option key={r.id} value={r.id}>
-                          {r.name}
-                        </option>
-                      ))}
-                    </select>
-                  </div>
-
-                  <div className="space-y-1.5">
-                    <label className="block text-xs font-semibold text-slate-700 uppercase tracking-wider">
-                      Link Expiry (Days)
-                    </label>
-                    <select
-                      value={inviteDays}
-                      onChange={(e) => setInviteDays(Number(e.target.value))}
-                      className="w-full h-11 px-4 text-sm rounded-xl border border-slate-200 bg-white text-slate-900 focus:outline-none focus:ring-2 focus:ring-blue-500"
-                    >
-                      <option value={1}>1 Day</option>
-                      <option value={3}>3 Days</option>
-                      <option value={7}>7 Days (Recommended)</option>
-                      <option value={14}>14 Days</option>
-                      <option value={30}>30 Days</option>
-                    </select>
-                  </div>
-
-                  <div className="pt-4 border-t flex items-center justify-between">
-                    <Button variant="ghost" size="sm" type="button" onClick={() => setInviteModalOpen(false)}>
-                      Cancel
-                    </Button>
-                    <Button
-                      variant="primary"
-                      size="sm"
-                      type="submit"
-                      isLoading={inviting}
-                      leftIcon={<Send className="h-4 w-4" />}
-                    >
-                      Generate Invite Link
-                    </Button>
-                  </div>
-                </form>
-              )}
+                <div className="pt-4 border-t flex items-center justify-between">
+                  <Button variant="ghost" size="sm" type="button" onClick={() => setInviteModalOpen(false)}>
+                    Cancel
+                  </Button>
+                  <Button
+                    variant="primary"
+                    size="sm"
+                    type="submit"
+                    isLoading={inviting}
+                    leftIcon={<Send className="h-4 w-4" />}
+                  >
+                    Send Invitation
+                  </Button>
+                </div>
+              </form>
             </div>
           </div>
         )}

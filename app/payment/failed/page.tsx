@@ -17,7 +17,7 @@ export default function PaymentFailedPage() {
         <div className="space-y-2">
           <h1 className="text-3xl font-extrabold text-white tracking-tight">Payment Unsuccessful</h1>
           <p className="text-sm text-slate-400 leading-relaxed">
-            Your payment could not be completed at this time. If any amount was deducted, Razorpay will automatically reverse it.
+            Your payment could not be completed at this time. If any amount was deducted, Cashfree will automatically reverse it.
           </p>
         </div>
 

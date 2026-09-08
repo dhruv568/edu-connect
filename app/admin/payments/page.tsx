@@ -104,7 +104,7 @@ export default function AdminPaymentsPage() {
             <IndianRupee className="w-8 h-8 text-blue-500" /> Admin Financial System & Reconciliation
           </h1>
           <p className="text-sm text-slate-400 mt-1">
-            System-wide platform revenue, teacher payouts, commission settings, and Razorpay transaction reconciliation.
+            System-wide platform revenue, teacher payouts, commission settings, and Cashfree transaction reconciliation.
           </p>
         </div>
 
@@ -123,7 +123,7 @@ export default function AdminPaymentsPage() {
           <div className="flex items-center gap-2">
             <CheckCircle2 className="w-4 h-4 text-emerald-400" />
             <span>
-              Reconciliation complete: <strong>{reconcileResult.matchedCount} / {reconcileResult.reconciledCount}</strong> transactions matched perfectly with Razorpay state.
+              Reconciliation complete: <strong>{reconcileResult.matchedCount} / {reconcileResult.reconciledCount}</strong> transactions matched perfectly with payment gateway state.
             </span>
           </div>
           <button onClick={() => setReconcileResult(null)} className="text-xs underline text-emerald-400">

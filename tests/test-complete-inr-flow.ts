@@ -93,7 +93,7 @@ async function runEndToEndINRTest() {
     console.log("   ✅ Course price display properly verified as ₹599.\n");
 
     // Step 3: Checkout - Backend Order Creation
-    console.log("3️⃣  Verifying Checkout & Razorpay Order Creation (in Paise):");
+    console.log("3️⃣  Verifying Checkout & Cashfree Order Creation (in Paise):");
     const orderResult = await PaymentService.createPaymentOrder({
       userId: studentUser.id,
       type: "COURSE_ENROLLMENT",
@@ -103,7 +103,7 @@ async function runEndToEndINRTest() {
     console.log(`   Is Free: ${orderResult.isFree}`);
     console.log(`   Amount in Paise: ${orderResult.amountPaise} (Expected: 59900)`);
     console.log(`   Currency passed: ${orderResult.currency} (Expected: INR)`);
-    console.log(`   Razorpay Order ID: ${orderResult.razorpayOrderId}`);
+    console.log(`   Cashfree Order ID: ${orderResult.cfOrderId || orderResult.orderId}`);
     console.log(`   Internal Reference: ${orderResult.internalReference}`);
 
     if (orderResult.amountPaise !== 59900) {
@@ -122,15 +122,13 @@ async function runEndToEndINRTest() {
     }
     console.log("   ✅ Database PaymentOrder correctly saved with currency: INR and amountPaise: 59900.\n");
 
-    // Step 4: Razorpay Payment Verification & Capture
-    const fakePaymentId = `pay_mock_e2e_${Date.now()}`;
-    const mockSignature = `mock_signature_e2e_${Date.now()}`;
+    // Step 4: Cashfree Payment Verification & Capture
+    const fakeCfPaymentId = `cf_pay_mock_e2e_${Date.now()}`;
 
     const captureResult = await PaymentService.verifyAndCompletePayment({
       userId: studentUser.id,
-      razorpayOrderId: orderResult.razorpayOrderId!,
-      razorpayPaymentId: fakePaymentId,
-      razorpaySignature: mockSignature,
+      orderId: orderResult.orderId,
+      cfPaymentId: fakeCfPaymentId,
     });
 
     console.log(`   Capture Success: ${captureResult.success}`);

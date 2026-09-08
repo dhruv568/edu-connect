@@ -756,7 +756,7 @@ export class AnalyticsService {
     }
 
     const emailProvider = process.env.RESEND_API_KEY ? "RESEND" : process.env.SMTP_HOST ? "SMTP" : "CONSOLE";
-    const paymentGateway = process.env.RAZORPAY_KEY_ID ? "RAZORPAY_CONFIGURED" : "DEMO_MODE";
+    const paymentGateway = process.env.CASHFREE_APP_ID || process.env.RAZORPAY_KEY_ID ? "CASHFREE_CONFIGURED" : "DEMO_MODE";
     const livekitStatus = process.env.LIVEKIT_API_KEY ? "LIVEKIT_ACTIVE" : "CONFIG_PENDING";
     const muxStatus = process.env.MUX_TOKEN_ID ? "MUX_ACTIVE" : "CONFIG_PENDING";
 
@@ -764,7 +764,7 @@ export class AnalyticsService {
       status: dbStatus === "HEALTHY" ? "OPERATIONAL" : "ISSUES_DETECTED",
       services: {
         database: { status: dbStatus, type: "PostgreSQL (Neon)" },
-        paymentGateway: { status: paymentGateway, provider: "Razorpay" },
+        paymentGateway: { status: paymentGateway, provider: "Cashfree" },
         emailService: { status: "HEALTHY", provider: emailProvider },
         liveClassroom: { status: livekitStatus, provider: "LiveKit Cloud" },
         videoProcessing: { status: muxStatus, provider: "Mux Video" },

@@ -119,12 +119,12 @@ export default function TeacherEarningsPage() {
         <div className="space-y-1">
           <div className="flex items-center gap-2">
             <ShieldCheck className="w-5 h-5 text-purple-400" />
-            <h3 className="text-base font-bold text-white">Razorpay Route Marketplace Payouts</h3>
+            <h3 className="text-base font-bold text-white">Cashfree Split Marketplace Payouts</h3>
           </div>
           <p className="text-xs text-slate-300">
             {payoutAccount.status === "ACTIVE"
-              ? "Your Linked Account is active. Direct settlements to your bank account are enabled."
-              : "Set up your Razorpay Linked Account to automatically receive student payments."}
+              ? "Your Split Account is active. Direct settlements to your bank account are enabled."
+              : "Set up your Cashfree Split Account to automatically receive student payments."}
           </p>
         </div>
 

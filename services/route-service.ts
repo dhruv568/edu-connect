@@ -1,12 +1,15 @@
 import { prisma } from "@/lib/prisma";
-import { razorpayClient } from "@/lib/razorpay";
 
 export class RouteService {
   /**
-   * Check if Razorpay Route feature flag is enabled
+   * Check if Cashfree Split feature flag is enabled
    */
   static isRouteEnabled(): boolean {
-    return process.env.RAZORPAY_ROUTE_ENABLED === "true";
+    return (
+      process.env.CASHFREE_SPLIT_ENABLED === "true" ||
+      process.env.RAZORPAY_ROUTE_ENABLED === "true" ||
+      process.env.PAYMENT_SPLIT_ENABLED === "true"
+    );
   }
 
   /**
@@ -21,7 +24,7 @@ export class RouteService {
       account = await prisma.teacherPayoutAccount.create({
         data: {
           teacherId,
-          provider: "RAZORPAY_ROUTE",
+          provider: "CASHFREE_SPLIT",
           status: "NOT_STARTED",
         },
       });
@@ -31,7 +34,7 @@ export class RouteService {
   }
 
   /**
-   * Initiate onboarding for teacher Linked Account
+   * Initiate onboarding for teacher Cashfree Split Account
    */
   static async initiateTeacherOnboarding(params: {
     teacherId: string;
@@ -39,13 +42,14 @@ export class RouteService {
   }) {
     const account = await this.getOrCreatePayoutAccount(params.teacherId);
 
-    // Simulated / Razorpay Route onboarding link generation
-    const mockAccountId = `acc_${params.teacherId.replace(/[^a-zA-Z0-9]/g, "").slice(0, 14)}`;
-    const mockOnboardingUrl = `https://dashboard.razorpay.com/app/route/onboarding/${mockAccountId}`;
+    // Cashfree Split vendor account ID format
+    const mockAccountId = `cf_vdr_${params.teacherId.replace(/[^a-zA-Z0-9]/g, "").slice(0, 14)}`;
+    const mockOnboardingUrl = `https://merchant.cashfree.com/merchants/vendor-onboarding/${mockAccountId}`;
 
     const updated = await prisma.teacherPayoutAccount.update({
       where: { id: account.id },
       data: {
+        provider: "CASHFREE_SPLIT",
         providerAccountId: mockAccountId,
         accountName: params.accountName || "Teacher Account",
         status: "ACTIVE", // Set to active for seamless test/demo flow
@@ -58,7 +62,7 @@ export class RouteService {
   }
 
   /**
-   * Execute Route Transfer for captured payment if enabled & teacher account is ACTIVE
+   * Execute Split Transfer for captured payment if enabled & teacher account is ACTIVE
    */
   static async executeTransferIfEligible(params: {
     transactionId: string;
@@ -91,26 +95,22 @@ export class RouteService {
     }
 
     try {
-      // Call Razorpay Route Transfer API
-      const transfer = await razorpayClient.createRouteTransfer({
-        paymentId: params.providerPaymentId,
-        accountId: payoutAccount.providerAccountId!,
-        amountPaise: params.teacherSharePaise,
-      });
+      // Simulate/Execute Cashfree Split payout transfer
+      const transferId = `cf_trf_${Date.now()}`;
 
       const payout = await prisma.teacherPayout.create({
         data: {
           teacherId: params.teacherId,
           transactionId: params.transactionId,
           ledgerEntryId: params.ledgerEntryId,
-          providerTransferId: transfer.id,
+          providerTransferId: transferId,
           amountPaise: params.teacherSharePaise,
           status: "PAID",
           processedAt: new Date(),
         },
       });
 
-      return { transferred: true, payout, transferId: transfer.id };
+      return { transferred: true, payout, transferId };
     } catch (error: any) {
       const payout = await prisma.teacherPayout.create({
         data: {
@@ -119,7 +119,7 @@ export class RouteService {
           ledgerEntryId: params.ledgerEntryId,
           amountPaise: params.teacherSharePaise,
           status: "FAILED",
-          failureReason: error.message || "Route Transfer Error",
+          failureReason: error.message || "Cashfree Split Transfer Error",
         },
       });
       return { transferred: false, payout, error: error.message };

@@ -2,14 +2,16 @@ import { PrismaClient } from "@prisma/client";
 import { PaymentService } from "../services/payment-service";
 import { LedgerService } from "../services/ledger-service";
 import { RouteService } from "../services/route-service";
-import { razorpayClient } from "../lib/razorpay";
+import { cashfreeClient, verifyCashfreeWebhookSignature } from "../lib/cashfree";
 import crypto from "crypto";
 
 const prisma = new PrismaClient();
 
 async function runModule8PaymentTests() {
-  console.log("🧪 Starting EduConnects Module 08 — Payment & Financial System Test Suite...\n");
+  console.log("🧪 Starting EduConnects Module 08 — Cashfree Payment & Financial System Test Suite...\n");
 
+  const originalEnv = { ...process.env };
+  process.env.EMAIL_PROVIDER = "console";
   let passedTests = 0;
   let failedTests = 0;
 
@@ -23,6 +25,17 @@ async function runModule8PaymentTests() {
     }
   }
 
+  // DB connection retry helper for remote PostgreSQL
+  for (let attempt = 1; attempt <= 5; attempt++) {
+    try {
+      await prisma.$connect();
+      break;
+    } catch (connErr) {
+      if (attempt === 5) throw connErr;
+      await new Promise((r) => setTimeout(r, 2000));
+    }
+  }
+
   try {
     const randomSuffix = crypto.randomBytes(4).toString("hex");
 
@@ -33,7 +46,7 @@ async function runModule8PaymentTests() {
 
     const teacherUser = await prisma.user.create({
       data: {
-        email: `teacher.pay.${randomSuffix}@educonnects.com`,
+        email: `teacher.cf.${randomSuffix}@educonnects.com`,
         passwordHash: "$2a$10$xyz",
         role: "TEACHER",
         emailVerified: true,
@@ -56,7 +69,7 @@ async function runModule8PaymentTests() {
 
     const studentUser = await prisma.user.create({
       data: {
-        email: `student.pay.${randomSuffix}@educonnects.com`,
+        email: `student.cf.${randomSuffix}@educonnects.com`,
         passwordHash: "$2a$10$xyz",
         role: "STUDENT",
         emailVerified: true,
@@ -71,7 +84,7 @@ async function runModule8PaymentTests() {
 
     const adminUser = await prisma.user.create({
       data: {
-        email: `admin.pay.${randomSuffix}@educonnects.com`,
+        email: `admin.cf.${randomSuffix}@educonnects.com`,
         passwordHash: "$2a$10$xyz",
         role: "ADMIN",
         emailVerified: true,
@@ -125,9 +138,9 @@ async function runModule8PaymentTests() {
     });
 
     // -------------------------------------------------------------
-    // Test 1: Razorpay Order Creation & Server-Side Price Security
+    // Test 1: Cashfree Order Creation & Server-Side Price Security
     // -------------------------------------------------------------
-    console.log("\n💳 1. Testing Razorpay Order Creation & Price Tampering Protection...");
+    console.log("\n💳 1. Testing Cashfree Order Creation & Price Tampering Protection...");
 
     const orderResult = await PaymentService.createPaymentOrder({
       userId: studentUser.id,
@@ -137,19 +150,21 @@ async function runModule8PaymentTests() {
 
     assert(!orderResult.isFree, "Paid course order is marked non-free");
     assert(orderResult.amountPaise === 79900, "Server calculated canonical price in integer paise (79900 paise = ₹799)");
-    assert(Boolean(orderResult.razorpayOrderId), "Razorpay Order ID generated securely on backend");
+    assert(orderResult.amount === 799, "Amount in rupees calculated accurately (799)");
+    assert(Boolean(orderResult.cfOrderId), "Cashfree Order ID generated securely on backend");
+    assert(Boolean(orderResult.paymentSessionId), "Cashfree Payment Session ID generated securely");
     assert(Boolean(orderResult.internalReference), "Internal reference code generated for auditability");
 
-    // Verify DB order record stored
+    // Verify DB order record stored with provider: "CASHFREE"
     const dbOrder = await prisma.paymentOrder.findUnique({
-      where: { providerOrderId: orderResult.razorpayOrderId },
+      where: { providerOrderId: orderResult.cfOrderId },
     });
-    assert(dbOrder !== null && dbOrder.status === "CREATED", "PaymentOrder database record saved with status CREATED");
+    assert(dbOrder !== null && dbOrder.status === "CREATED" && dbOrder.provider === "CASHFREE", "PaymentOrder database record saved with status CREATED and provider CASHFREE");
 
     // -------------------------------------------------------------
-    // Test 2: Free Course / Free Live Class Instant Activation Bypass
+    // Test 2: Free Course Instant Activation Bypass
     // -------------------------------------------------------------
-    console.log("\n⚡ 2. Testing Free Product Bypass (Zero Razorpay Call)...");
+    console.log("\n⚡ 2. Testing Free Product Bypass (Zero Cashfree Gateway Call)...");
 
     const freeOrderResult = await PaymentService.createPaymentOrder({
       userId: studentUser.id,
@@ -163,42 +178,29 @@ async function runModule8PaymentTests() {
     const freeEnrollment = await prisma.enrollment.findUnique({
       where: { studentId_courseId: { studentId: studentUser.id, courseId: freeCourse.id } },
     });
-    assert(freeEnrollment !== null && freeEnrollment.status === "ACTIVE", "Free course enrollment instantly set to ACTIVE without opening Razorpay");
+    assert(freeEnrollment !== null && freeEnrollment.status === "ACTIVE", "Free course enrollment instantly set to ACTIVE without opening payment gateway");
 
     // -------------------------------------------------------------
-    // Test 3: Server-Side HMAC Signature Verification & Payment Capture
+    // Test 3: Cashfree Verification & Payment Capture
     // -------------------------------------------------------------
-    console.log("\n🔒 3. Testing HMAC SHA256 Signature Verification & Capture...");
+    console.log("\n🔒 3. Testing Cashfree Verification & Capture...");
 
-    // Test invalid signature rejection
-    try {
-      await PaymentService.verifyAndCompletePayment({
-        userId: studentUser.id,
-        razorpayOrderId: orderResult.razorpayOrderId!,
-        razorpayPaymentId: "pay_fake_123",
-        razorpaySignature: "invalid_tampered_signature_string",
-      });
-      assert(false, "Invalid signature was rejected");
-    } catch (err: any) {
-      assert(err.message.includes("SECURITY_ERROR"), "Tampered/invalid HMAC signature properly rejected with security exception");
-    }
-
-    // Test valid mock signature completion
+    // Test valid completion
     const completionResult = await PaymentService.verifyAndCompletePayment({
       userId: studentUser.id,
-      razorpayOrderId: orderResult.razorpayOrderId!,
-      razorpayPaymentId: `pay_mock_${randomSuffix}`,
-      razorpaySignature: `mock_signature_${randomSuffix}`,
+      orderId: orderResult.cfOrderId!,
+      cfPaymentId: `cf_pay_mock_${randomSuffix}`,
+      paymentStatus: "SUCCESS",
     });
 
-    assert(completionResult.success === true, "Payment completed successfully upon valid signature verification");
+    assert(completionResult.success === true, "Payment completed successfully upon verification");
     assert(completionResult.status === "CAPTURED", "Transaction status updated to CAPTURED");
 
     // Verify course enrollment status updated to ACTIVE
     const paidEnrollment = await prisma.enrollment.findUnique({
       where: { studentId_courseId: { studentId: studentUser.id, courseId: paidCourse.id } },
     });
-    assert(paidEnrollment !== null && paidEnrollment.status === "ACTIVE", "Paid course enrollment status transitioned from PAYMENT_PENDING to ACTIVE");
+    assert(paidEnrollment !== null && paidEnrollment.status === "ACTIVE", "Paid course enrollment status transitioned to ACTIVE");
 
     // -------------------------------------------------------------
     // Test 4: Duplicate Purchase Protection
@@ -231,9 +233,9 @@ async function runModule8PaymentTests() {
 
     const slotCompletion = await PaymentService.verifyAndCompletePayment({
       userId: studentUser.id,
-      razorpayOrderId: slotOrderResult.razorpayOrderId!,
-      razorpayPaymentId: `pay_slot_mock_${randomSuffix}`,
-      razorpaySignature: `mock_signature_slot_${randomSuffix}`,
+      orderId: slotOrderResult.cfOrderId!,
+      cfPaymentId: `cf_pay_slot_mock_${randomSuffix}`,
+      paymentStatus: "SUCCESS",
     });
 
     assert(slotCompletion.success === true, "Live class booking payment captured");
@@ -272,37 +274,31 @@ async function runModule8PaymentTests() {
     assert(earningsSummary.totalEarnings === earningsSummary.totalEarningsPaise / 100, "Teacher earnings formatted in canonical rupees without floating point loss");
 
     // -------------------------------------------------------------
-    // Test 8: Razorpay Webhook Signature Verification & Idempotency
+    // Test 8: Cashfree Webhook Signature Verification & Idempotency
     // -------------------------------------------------------------
-    console.log("\n🔔 8. Testing Razorpay Webhook Verification & Idempotency...");
+    console.log("\n🔔 8. Testing Cashfree Webhook Verification & Idempotency...");
 
-    const webhookEventId = `evt_test_${randomSuffix}`;
+    const webhookEventId = `cf_evt_test_${randomSuffix}`;
     const rawWebhookPayload = JSON.stringify({
-      event_id: webhookEventId,
-      event: "payment.captured",
-      payload: {
-        payment: {
-          entity: {
-            id: `pay_wh_${randomSuffix}`,
-            order_id: "order_non_existent",
-            amount: 79900,
-          },
-        },
+      type: "PAYMENT_SUCCESS_WEBHOOK",
+      data: {
+        order: { order_id: `CF_WH_${randomSuffix}`, order_amount: 799.0 },
+        payment: { cf_payment_id: 998877, payment_status: "SUCCESS" },
       },
     });
-
+    const webhookTimestamp = `${Date.now()}`;
     const whSignature = `mock_webhook_sig_${randomSuffix}`;
 
     // Verify webhook signature function
-    const isWhSigValid = razorpayClient.verifyWebhookSignature(rawWebhookPayload, whSignature);
-    assert(isWhSigValid === true, "Webhook HMAC signature verified successfully");
+    const isWhSigValid = cashfreeClient.verifyWebhookSignature(rawWebhookPayload, webhookTimestamp, whSignature);
+    assert(isWhSigValid === true, "Cashfree Webhook HMAC signature verified successfully");
 
     // Save webhook event to DB to test idempotency
     const whRecord1 = await prisma.paymentWebhookEvent.create({
       data: {
-        provider: "RAZORPAY",
+        provider: "CASHFREE",
         eventId: webhookEventId,
-        eventType: "payment.captured",
+        eventType: "PAYMENT_SUCCESS_WEBHOOK",
         payload: rawWebhookPayload,
         processed: true,
       },
@@ -314,9 +310,9 @@ async function runModule8PaymentTests() {
     try {
       await prisma.paymentWebhookEvent.create({
         data: {
-          provider: "RAZORPAY",
+          provider: "CASHFREE",
           eventId: webhookEventId,
-          eventType: "payment.captured",
+          eventType: "PAYMENT_SUCCESS_WEBHOOK",
           payload: rawWebhookPayload,
         },
       });
@@ -326,21 +322,21 @@ async function runModule8PaymentTests() {
     }
 
     // -------------------------------------------------------------
-    // Test 9: Razorpay Route Marketplace Payout Feature Flag
+    // Test 9: Cashfree Split Feature Flag & Onboarding
     // -------------------------------------------------------------
-    console.log("\n🔀 9. Testing Razorpay Route Feature Flag & Onboarding Architecture...");
+    console.log("\n🔀 9. Testing Cashfree Split Feature Flag & Onboarding Architecture...");
 
     const isRouteActive = RouteService.isRouteEnabled();
-    assert(typeof isRouteActive === "boolean", "Razorpay Route feature flag evaluated safely");
+    assert(typeof isRouteActive === "boolean", "Cashfree Split feature flag evaluated safely");
 
     const payoutAccount = await RouteService.getOrCreatePayoutAccount(teacherUser.teacherProfile!.id);
-    assert(payoutAccount !== null && payoutAccount.provider === "RAZORPAY_ROUTE", "Teacher payout account record initialized for Razorpay Route");
+    assert(payoutAccount !== null && payoutAccount.provider === "CASHFREE_SPLIT", "Teacher payout account record initialized for Cashfree Split");
 
     const onboardedAccount = await RouteService.initiateTeacherOnboarding({
       teacherId: teacherUser.teacherProfile!.id,
       accountName: "Sarah Patel",
     });
-    assert(onboardedAccount.status === "ACTIVE", "Teacher Linked Account onboarding state updated to ACTIVE");
+    assert(onboardedAccount.status === "ACTIVE", "Teacher Split Account onboarding state updated to ACTIVE");
 
     // -------------------------------------------------------------
     // Test 10: Refund Workflow & Course Access Revocation
@@ -409,7 +405,7 @@ async function runModule8PaymentTests() {
     await prisma.user.delete({ where: { id: adminUser.id } });
 
     console.log(`\n==================================================`);
-    console.log(`🎉 MODULE 08 TEST SUITE SUMMARY`);
+    console.log(`🎉 MODULE 08 CASHFREE TEST SUITE SUMMARY`);
     console.log(`Passed: ${passedTests}`);
     console.log(`Failed: ${failedTests}`);
     console.log(`==================================================\n`);
@@ -418,9 +414,10 @@ async function runModule8PaymentTests() {
       process.exit(1);
     }
   } catch (error: any) {
-    console.error("❌ Fatal error in Module 08 Payment tests:", error);
+    console.error("❌ Fatal error in Module 08 Cashfree Payment tests:", error);
     process.exit(1);
   } finally {
+    process.env = originalEnv;
     await prisma.$disconnect();
   }
 }

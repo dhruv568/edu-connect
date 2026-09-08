@@ -24,7 +24,7 @@ export function middleware(request: NextRequest) {
     pathname === "/teacher/register" ||
     pathname === "/login" ||
     pathname === "/staff/login" ||
-    pathname.startsWith("/staff/invite") ||
+    pathname.startsWith("/staff/register") ||
     pathname.startsWith("/register") ||
     pathname.startsWith("/forgot-password") ||
     pathname.startsWith("/reset-password") ||
@@ -108,7 +108,7 @@ export function middleware(request: NextRequest) {
   }
 
   // Verified user role-protected route guards
-  if (pathname.startsWith("/staff") && pathname !== "/staff/login" && !pathname.startsWith("/staff/invite")) {
+  if (pathname.startsWith("/staff") && pathname !== "/staff/login" && pathname !== "/staff/register") {
     if (userSession.role !== "STAFF" && userSession.role !== "ADMIN") {
       return NextResponse.redirect(new URL("/staff/login", request.url));
     }

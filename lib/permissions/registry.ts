@@ -132,7 +132,7 @@ export const PROJECT_FEATURES: FeatureDefinition[] = [
   {
     key: "system_health",
     name: "System Health",
-    description: "Monitor database, LiveKit Cloud, Mux Video, and Razorpay gateway health statuses.",
+    description: "Monitor database, LiveKit Cloud, Mux Video, and Cashfree gateway health statuses.",
     moduleGroup: "Operations",
     route: "/admin/system-health",
     icon: "Server",
@@ -626,7 +626,7 @@ export const PROJECT_PERMISSIONS: PermissionDefinition[] = [
   {
     key: "system_health.view",
     name: "View System Health",
-    description: "Inspect operational status of database, Mux, Razorpay, and LiveKit",
+    description: "Inspect operational status of database, Mux, Cashfree, and LiveKit",
     moduleGroup: "System Health",
     action: "view",
     featureKey: "system_health",
@@ -720,7 +720,7 @@ export const PROJECT_PERMISSIONS: PermissionDefinition[] = [
   {
     key: "staff.create",
     name: "Invite Staff",
-    description: "Create staff members and generate secure one-time invitations",
+    description: "Create pending staff invitation and email registration instructions",
     moduleGroup: "Staff",
     action: "create",
     featureKey: "staff",
@@ -756,7 +756,7 @@ export const PROJECT_PERMISSIONS: PermissionDefinition[] = [
   {
     key: "staff.invite_resend",
     name: "Resend Invitation",
-    description: "Regenerate and resend staff invitation links",
+    description: "Resend staff invitation email instructions",
     moduleGroup: "Staff",
     action: "invite_resend",
     featureKey: "staff",

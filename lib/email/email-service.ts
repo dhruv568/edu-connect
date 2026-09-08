@@ -322,20 +322,19 @@ export class EmailService {
     email: string;
     recipientName?: string;
     roleName: string;
-    inviteUrl: string;
-    expiresInDays?: number;
   }): Promise<boolean> {
     const provider = getEmailProvider();
+    const name = params.recipientName || "Colleague";
     return provider.sendNotificationEmail({
       email: params.email,
-      recipientName: params.recipientName || "Staff Member",
-      subject: "You've been invited to join EduConnects Staff 🎓",
-      headline: "Welcome to the EduConnects Team!",
-      statusBadgeText: `ROLE: ${params.roleName.toUpperCase()}`,
+      recipientName: name,
+      subject: "You've been invited to join EduConnects 🎓",
+      headline: "You're Invited to Join EduConnects Staff!",
+      statusBadgeText: `ASSIGNED ROLE: ${params.roleName.toUpperCase()}`,
       statusBadgeVariant: "success",
-      bodyText: `You have been invited to join EduConnects as a ${params.roleName}. Click the button below to accept your invitation, verify your email, and set up your staff password. This link is valid for ${params.expiresInDays || 7} days.`,
-      actionUrl: params.inviteUrl,
-      actionText: "Accept Staff Invitation",
+      bodyText: `Hello ${name},\n\nYou have been invited to join the EduConnects administration team.\n\nAssigned Role: ${params.roleName}\n\nTo activate your staff account:\n1. Open EduConnects.\n2. Go to Staff Registration (/staff/register).\n3. Enter this email address: ${params.email}\n4. Verify the OTP sent to your email.\n5. Complete your account setup.\n\nYour staff access and permissions will be automatically configured after email verification.`,
+      actionUrl: `${getPublicAppUrl()}/staff/register`,
+      actionText: "Go to Staff Registration",
     });
   }
 }

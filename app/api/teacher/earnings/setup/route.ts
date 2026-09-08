@@ -26,7 +26,7 @@ export async function POST(request: NextRequest) {
     });
 
     return apiSuccess({
-      message: "Teacher Razorpay Route Linked Account onboarding updated.",
+      message: "Teacher Cashfree Split Account onboarding updated.",
       payoutAccount: {
         id: payoutAccount.id,
         providerAccountId: payoutAccount.providerAccountId,

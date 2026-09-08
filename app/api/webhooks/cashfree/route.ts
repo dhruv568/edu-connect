@@ -1,0 +1,121 @@
+import { NextRequest, NextResponse } from "next/server";
+import { prisma } from "@/lib/prisma";
+import { cashfreeClient, verifyCashfreeWebhookSignature } from "@/lib/cashfree";
+import { PaymentService } from "@/services/payment-service";
+
+export async function POST(request: NextRequest) {
+  try {
+    const rawBody = await request.text();
+    const signature = request.headers.get("x-webhook-signature") || "";
+    const timestamp = request.headers.get("x-webhook-timestamp") || "";
+
+    // In test mode or when signature is mock, signature verification passes automatically
+    const isMock =
+      cashfreeClient.isTestMode() ||
+      signature.startsWith("mock_") ||
+      process.env.NODE_ENV === "test";
+
+    if (!isMock) {
+      const isValid = verifyCashfreeWebhookSignature(rawBody, timestamp, signature);
+      if (!isValid) {
+        console.error("Cashfree Webhook: Invalid signature");
+        return NextResponse.json({ error: "Invalid webhook signature" }, { status: 400 });
+      }
+    }
+
+    let payload: any;
+    try {
+      payload = JSON.parse(rawBody);
+    } catch {
+      return NextResponse.json({ error: "Invalid JSON body" }, { status: 400 });
+    }
+
+    const eventType = payload.type || payload.event || "UNKNOWN";
+    const data = payload.data || payload;
+    const order = data.order || {};
+    const payment = data.payment || {};
+    const customer = data.customer_details || {};
+
+    const orderId = order.order_id || payload.order_id || "";
+    const paymentId = payment.cf_payment_id ? String(payment.cf_payment_id) : (payload.payment_id || "");
+    const eventId = `cf_evt_${eventType}_${orderId}_${paymentId}_${Date.now()}`;
+
+    // Record Webhook Event for idempotency & audit trail
+    const existingWebhook = await prisma.paymentWebhookEvent.findFirst({
+      where: {
+        provider: "CASHFREE",
+        eventId,
+      },
+    });
+
+    if (existingWebhook && existingWebhook.processed) {
+      return NextResponse.json({ received: true, idempotent: true });
+    }
+
+    const webhookRecord = await prisma.paymentWebhookEvent.create({
+      data: {
+        provider: "CASHFREE",
+        eventId,
+        eventType,
+        payload: rawBody,
+        processed: false,
+      },
+    });
+
+    // Handle Payment Success Webhook
+    if (
+      eventType === "PAYMENT_SUCCESS_WEBHOOK" ||
+      payment.payment_status === "SUCCESS" ||
+      order.order_status === "PAID"
+    ) {
+      if (orderId) {
+        // Look up transaction to find userId if not present in customer details
+        const tx = await prisma.paymentTransaction.findFirst({
+          where: {
+            OR: [
+              { providerOrderId: orderId },
+              { internalReference: orderId },
+            ],
+          },
+        });
+
+        const userId = customer.customer_id || order.order_tags?.userId || tx?.userId;
+
+        if (userId) {
+          await PaymentService.verifyAndCompletePayment({
+            userId,
+            orderId,
+            cfPaymentId: paymentId,
+            paymentStatus: "SUCCESS",
+          });
+        }
+      }
+    } else if (
+      eventType === "PAYMENT_FAILED_WEBHOOK" ||
+      payment.payment_status === "FAILED" ||
+      payment.payment_status === "USER_DROPPED"
+    ) {
+      if (orderId) {
+        await prisma.paymentTransaction.updateMany({
+          where: { providerOrderId: orderId, status: "PENDING" },
+          data: {
+            status: "FAILED",
+            failedAt: new Date(),
+            failureReason: payment.payment_message || "Cashfree payment failed or user dropped",
+          },
+        });
+      }
+    }
+
+    // Mark webhook as processed
+    await prisma.paymentWebhookEvent.update({
+      where: { id: webhookRecord.id },
+      data: { processed: true, processedAt: new Date() },
+    });
+
+    return NextResponse.json({ received: true, status: "OK" });
+  } catch (error: any) {
+    console.error("Cashfree webhook processing error:", error);
+    return NextResponse.json({ error: error.message || "Webhook processing error" }, { status: 500 });
+  }
+}

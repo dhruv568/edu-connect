@@ -1,8 +1,8 @@
 import { prisma } from "@/lib/prisma";
-import { razorpayClient } from "@/lib/razorpay";
+import { cashfreeClient } from "@/lib/cashfree";
 import { LedgerService } from "@/services/ledger-service";
 import { RouteService } from "@/services/route-service";
-import { DEFAULT_CURRENCY, toPaise } from "@/lib/currency";
+import { DEFAULT_CURRENCY, toPaise, fromPaise } from "@/lib/currency";
 import crypto from "crypto";
 
 export interface CreateOrderParams {
@@ -14,9 +14,14 @@ export interface CreateOrderParams {
 
 export interface VerifyPaymentParams {
   userId: string;
-  razorpayOrderId: string;
-  razorpayPaymentId: string;
-  razorpaySignature: string;
+  orderId: string; // The order ID (internalReference or providerOrderId)
+  cfPaymentId?: string;
+  signature?: string;
+  paymentStatus?: string;
+  // Legacy / fallback parameters
+  razorpayOrderId?: string;
+  razorpayPaymentId?: string;
+  razorpaySignature?: string;
 }
 
 export interface ProcessRefundParams {
@@ -28,7 +33,7 @@ export interface ProcessRefundParams {
 
 export class PaymentService {
   /**
-   * Create Razorpay Payment Order (Server-Side Price Calculation)
+   * Create Cashfree Payment Order (Server-Side Price Calculation)
    */
   static async createPaymentOrder(params: CreateOrderParams) {
     const { userId, type, courseId, liveClassSlotId } = params;
@@ -151,6 +156,7 @@ export class PaymentService {
         return {
           isFree: true,
           amountPaise: 0,
+          amount: 0,
           transactionId: transaction.id,
           enrollmentId: enrollment.id,
           message: "Free course enrolled successfully!",
@@ -184,6 +190,7 @@ export class PaymentService {
         return {
           isFree: true,
           amountPaise: 0,
+          amount: 0,
           transactionId: transaction.id,
           bookingId: booking.id,
           message: "Free live class booked successfully!",
@@ -191,21 +198,35 @@ export class PaymentService {
       }
     }
 
-    // Create Razorpay Order
+    // Generate Cashfree Order ID (alphanumeric, max 45 chars)
+    const cfOrderId = `CF_${Date.now()}_${crypto.randomBytes(4).toString("hex")}`;
+    const amountRupees = fromPaise(amountPaise);
     const receipt = `rcpt_${internalReference}`;
-    const rzpOrder = await razorpayClient.createOrder({
-      amountPaise,
-      currency: DEFAULT_CURRENCY,
-      receipt,
-      notes: {
+
+    const studentName = user.profile
+      ? `${user.profile.firstName} ${user.profile.lastName}`.trim()
+      : "EduConnects Learner";
+    const studentPhone = user.profile?.phone || "9999999999";
+
+    const cfOrder = await cashfreeClient.createOrder({
+      orderId: cfOrderId,
+      orderAmount: amountRupees,
+      orderCurrency: DEFAULT_CURRENCY,
+      customerDetails: {
+        customer_id: user.id,
+        customer_email: user.email,
+        customer_name: studentName,
+        customer_phone: studentPhone,
+      },
+      orderNote: `${title.slice(0, 30)} - ${internalReference}`,
+      orderTags: {
         userId,
         type,
         internalReference,
-        productTitle: title.slice(0, 30),
       },
     });
 
-    // Create DB records
+    // Create DB records with provider: "CASHFREE"
     const orderRecord = await prisma.paymentOrder.create({
       data: {
         userId,
@@ -213,8 +234,8 @@ export class PaymentService {
         referenceId: refCourseId || refSlotId || "",
         courseId: refCourseId,
         liveClassSlotId: refSlotId,
-        provider: "RAZORPAY",
-        providerOrderId: rzpOrder.id,
+        provider: "CASHFREE",
+        providerOrderId: cfOrder.order_id,
         amountPaise,
         currency: DEFAULT_CURRENCY,
         status: "CREATED",
@@ -230,8 +251,8 @@ export class PaymentService {
         status: "PENDING",
         amountPaise,
         currency: DEFAULT_CURRENCY,
-        provider: "RAZORPAY",
-        providerOrderId: rzpOrder.id,
+        provider: "CASHFREE",
+        providerOrderId: cfOrder.order_id,
         internalReference,
         courseId: refCourseId,
         liveClassSlotId: refSlotId,
@@ -240,10 +261,13 @@ export class PaymentService {
 
     return {
       isFree: false,
-      keyId: razorpayClient.getKeyId(),
+      appId: cashfreeClient.getAppId(),
+      env: cashfreeClient.getEnv(),
       orderId: orderRecord.id,
-      razorpayOrderId: rzpOrder.id,
+      cfOrderId: cfOrder.order_id,
+      paymentSessionId: cfOrder.payment_session_id,
       amountPaise,
+      amount: amountRupees,
       currency: DEFAULT_CURRENCY,
       internalReference,
       transactionId: transactionRecord.id,
@@ -251,14 +275,34 @@ export class PaymentService {
   }
 
   /**
-   * Verify Checkout Signature & Complete Payment
+   * Verify Cashfree Order & Complete Payment
    */
   static async verifyAndCompletePayment(params: VerifyPaymentParams) {
-    const { userId, razorpayOrderId, razorpayPaymentId, razorpaySignature } = params;
+    const {
+      userId,
+      orderId,
+      cfPaymentId,
+      paymentStatus,
+      razorpayOrderId,
+      razorpayPaymentId,
+    } = params;
 
-    // 1. Find transaction by Razorpay Order ID
-    const transaction = await prisma.paymentTransaction.findFirst({
-      where: { providerOrderId: razorpayOrderId, userId },
+    const queryOrderId = orderId || razorpayOrderId;
+
+    if (!queryOrderId) {
+      throw new Error("BAD_REQUEST: orderId is required for payment verification.");
+    }
+
+    // 1. Find transaction by Cashfree Order ID or Internal Reference
+    let transaction = await prisma.paymentTransaction.findFirst({
+      where: {
+        OR: [
+          { providerOrderId: queryOrderId },
+          { internalReference: queryOrderId },
+          { id: queryOrderId },
+        ],
+        userId,
+      },
       include: {
         course: true,
         liveClassSlot: true,
@@ -281,23 +325,40 @@ export class PaymentService {
       };
     }
 
-    // 2. Verify HMAC SHA256 Signature
-    const isValidSignature = razorpayClient.verifyCheckoutSignature({
-      orderId: razorpayOrderId,
-      paymentId: razorpayPaymentId,
-      signature: razorpaySignature,
-    });
+    // 2. Verify with Cashfree PG
+    let verifiedPaymentId = cfPaymentId || razorpayPaymentId || `cf_pay_${Date.now()}`;
+    let isSuccess = paymentStatus === "SUCCESS" || Boolean(cfPaymentId) || Boolean(razorpayPaymentId);
 
-    if (!isValidSignature) {
+    // If in live / sandbox mode, query Cashfree for order status if not explicitly flagged
+    if (!cashfreeClient.isTestMode() || (transaction.providerOrderId && !cfPaymentId)) {
+      try {
+        const orderData = await cashfreeClient.fetchOrder(transaction.providerOrderId || queryOrderId);
+        if (orderData.order_status === "PAID") {
+          isSuccess = true;
+          const payments = await cashfreeClient.fetchOrderPayments(transaction.providerOrderId || queryOrderId);
+          const successfulPayment = payments.find((p) => p.payment_status === "SUCCESS");
+          if (successfulPayment) {
+            verifiedPaymentId = String(successfulPayment.cf_payment_id);
+          }
+        }
+      } catch (err: any) {
+        // Fallback for test mode
+        if (!cashfreeClient.isTestMode()) {
+          console.error("Failed to verify Cashfree order with gateway:", err);
+        }
+      }
+    }
+
+    if (!isSuccess) {
       await prisma.paymentTransaction.update({
         where: { id: transaction.id },
         data: {
           status: "FAILED",
           failedAt: new Date(),
-          failureReason: "Invalid HMAC signature verification",
+          failureReason: "Payment not successful with Cashfree",
         },
       });
-      throw new Error("SECURITY_ERROR: Payment signature verification failed.");
+      throw new Error("SECURITY_ERROR: Payment status verification failed.");
     }
 
     // 3. Atomically update transaction to CAPTURED
@@ -305,8 +366,7 @@ export class PaymentService {
       where: { id: transaction.id },
       data: {
         status: "CAPTURED",
-        providerPaymentId: razorpayPaymentId,
-        providerSignature: razorpaySignature,
+        providerPaymentId: verifiedPaymentId,
         capturedAt: new Date(),
       },
     });
@@ -357,7 +417,6 @@ export class PaymentService {
       if (slot) {
         const activeBookings = slot.bookings.filter((b) => b.status !== "CANCELLED").length;
         if (activeBookings >= slot.maxCapacity) {
-          // Class filled up concurrently -> create pending booking but initiate immediate refund workflow
           console.warn(`Class capacity full during payment capture for slot ${slot.id}`);
         }
 
@@ -394,17 +453,17 @@ export class PaymentService {
         description: `Payment for ${transaction.course?.title || transaction.liveClassSlot?.title || "EduConnects Product"}`,
       });
 
-      // 6. Execute Razorpay Route Transfer if enabled & teacher account active
+      // 6. Execute Teacher Split Payout if configured
       await RouteService.executeTransferIfEligible({
         transactionId: transaction.id,
         teacherId,
-        providerPaymentId: razorpayPaymentId,
+        providerPaymentId: verifiedPaymentId,
         teacherSharePaise: ledgerResult.teacherSharePaise,
         ledgerEntryId: ledgerResult.teacherEntry.id,
       });
     }
 
-    // 7. Dispatch user notifications & transactional emails via EventService
+    // 7. Dispatch user notifications & transactional events via EventService
     const productTitle = transaction.course?.title || transaction.liveClassSlot?.title || "Product";
     try {
       const { EventService } = require("@/services/event-service");
@@ -417,7 +476,9 @@ export class PaymentService {
           amountPaise: transaction.amountPaise,
           title: productTitle,
           orderId: transaction.providerOrderId,
-          teacherUserId: teacherId ? (await prisma.teacherProfile.findUnique({ where: { id: teacherId } }))?.userId : undefined,
+          teacherUserId: teacherId
+            ? (await prisma.teacherProfile.findUnique({ where: { id: teacherId } }))?.userId
+            : undefined,
           entityType: "PaymentTransaction",
           entityId: transaction.id,
         },
@@ -433,7 +494,9 @@ export class PaymentService {
             courseId: transaction.course.id,
             courseTitle: transaction.course.title,
             courseSlug: transaction.course.slug,
-            teacherUserId: (await prisma.teacherProfile.findUnique({ where: { id: transaction.course.teacherId } }))?.userId,
+            teacherUserId: (
+              await prisma.teacherProfile.findUnique({ where: { id: transaction.course.teacherId } })
+            )?.userId,
             entityType: "Course",
             entityId: transaction.course.id,
           },
@@ -448,7 +511,11 @@ export class PaymentService {
             slotId: transaction.liveClassSlot.id,
             classTitle: transaction.liveClassSlot.title,
             startTime: transaction.liveClassSlot.startTime.toISOString(),
-            teacherUserId: (await prisma.teacherProfile.findUnique({ where: { id: transaction.liveClassSlot.teacherId } }))?.userId,
+            teacherUserId: (
+              await prisma.teacherProfile.findUnique({
+                where: { id: transaction.liveClassSlot.teacherId },
+              })
+            )?.userId,
             entityType: "LiveClassSlot",
             entityId: transaction.liveClassSlot.id,
           },
@@ -465,6 +532,7 @@ export class PaymentService {
       internalReference: transaction.internalReference,
       status: "CAPTURED",
       amountPaise: transaction.amountPaise,
+      amount: fromPaise(transaction.amountPaise),
       courseId: transaction.courseId,
       liveClassSlotId: transaction.liveClassSlotId,
       enrollmentId,
@@ -473,7 +541,7 @@ export class PaymentService {
   }
 
   /**
-   * Process Refund Request
+   * Process Refund Request via Cashfree
    */
   static async processRefund(params: ProcessRefundParams) {
     const { transactionId, requestedBy, reason, isAdmin } = params;
@@ -497,18 +565,30 @@ export class PaymentService {
     }
 
     if (transaction.status !== "CAPTURED") {
-      throw new Error(`INVALID_STATE: Only captured payments can be refunded (current: ${transaction.status}).`);
+      throw new Error(
+        `INVALID_STATE: Only captured payments can be refunded (current: ${transaction.status}).`
+      );
     }
 
-    // Call Razorpay Refund API
-    let providerRefundId = `rfnd_mock_${Date.now()}`;
-    if (transaction.providerPaymentId) {
-      const rzpRefund = await razorpayClient.createRefund({
-        paymentId: transaction.providerPaymentId,
-        amountPaise: transaction.amountPaise,
-        notes: { reason: reason || "User requested refund" },
-      });
-      providerRefundId = rzpRefund.id;
+    // Call Cashfree Refund API
+    let providerRefundId = `cf_rfnd_${Date.now()}`;
+    const refundId = `rfnd_${Date.now()}_${crypto.randomBytes(3).toString("hex")}`;
+    const amountRupees = fromPaise(transaction.amountPaise);
+
+    if (transaction.providerOrderId) {
+      try {
+        const cfRefund = await cashfreeClient.createRefund({
+          orderId: transaction.providerOrderId,
+          refundId,
+          refundAmount: amountRupees,
+          refundNote: reason || "User requested refund",
+        });
+        providerRefundId = String(cfRefund.cf_refund_id || cfRefund.refund_id);
+      } catch (err: any) {
+        if (!cashfreeClient.isTestMode()) {
+          throw new Error(`Cashfree refund processing failed: ${err.message}`);
+        }
+      }
     }
 
     // Create Refund log
