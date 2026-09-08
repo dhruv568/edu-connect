@@ -4,6 +4,7 @@ import React, { useState, useEffect } from "react";
 import Link from "next/link";
 import { ArrowLeft, ListFilter, CheckCircle2, IndianRupee, Search } from "lucide-react";
 import { formatCurrency } from "@/lib/currency";
+import { BackButton } from "@/components/ui/back-button";
 
 export default function TeacherTransactionsPage() {
   const [transactions, setTransactions] = useState<any[]>([]);
@@ -41,12 +42,12 @@ export default function TeacherTransactionsPage() {
     <div className="min-h-screen bg-slate-950 text-slate-100 p-6 md:p-10 space-y-8">
       <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 border-b border-slate-800/80 pb-6">
         <div>
-          <Link
-            href="/teacher/earnings"
-            className="inline-flex items-center text-xs font-semibold text-slate-400 hover:text-white transition-colors mb-2"
-          >
-            <ArrowLeft className="w-4 h-4 mr-1.5" /> Back to Overview
-          </Link>
+          <BackButton
+            fallbackUrl="/teacher/earnings"
+            label="Back to Earnings"
+            variant="dark"
+            className="mb-2"
+          />
           <h1 className="text-3xl font-extrabold text-white tracking-tight flex items-center gap-3">
             <ListFilter className="w-8 h-8 text-purple-400" /> Educator Sales Ledger
           </h1>

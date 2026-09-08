@@ -5,6 +5,7 @@ import { useSearchParams } from "next/navigation";
 import Link from "next/link";
 import { CheckCircle2, ArrowRight, Download } from "lucide-react";
 import { formatCurrency } from "@/lib/currency";
+import { BackButton } from "@/components/ui/back-button";
 
 function PaymentSuccessContent() {
   const searchParams = useSearchParams();
@@ -40,6 +41,14 @@ function PaymentSuccessContent() {
       <div className="absolute top-1/3 left-1/2 -translate-x-1/2 w-[500px] h-[500px] bg-emerald-500/10 blur-[130px] rounded-full pointer-events-none" />
 
       <div className="w-full max-w-md relative z-10 text-center space-y-6">
+        <div className="flex justify-start">
+          <BackButton
+            fallbackUrl="/student/dashboard"
+            label="Back to Dashboard"
+            variant="dark"
+          />
+        </div>
+
         <div className="w-20 h-20 rounded-full bg-emerald-500/20 text-emerald-400 border border-emerald-500/40 flex items-center justify-center mx-auto shadow-2xl shadow-emerald-500/20 animate-bounce">
           <CheckCircle2 className="w-10 h-10" />
         </div>

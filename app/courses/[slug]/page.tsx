@@ -25,6 +25,7 @@ import {
 import { Navbar } from "@/components/layout/navbar";
 import { formatCurrency } from "@/lib/currency";
 import { Footer } from "@/components/layout/footer";
+import { BackButton } from "@/components/ui/back-button";
 
 export default function CourseDetailPage() {
   const params = useParams();
@@ -139,13 +140,21 @@ export default function CourseDetailPage() {
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-12 items-start">
             {/* Left Header Info */}
             <div className="lg:col-span-2 space-y-6">
-              <div className="flex flex-wrap items-center gap-2">
-                <span className="px-3 py-1 text-xs font-semibold rounded-full bg-blue-500/20 text-blue-400 border border-blue-500/30 uppercase tracking-wider">
-                  {course.subject}
-                </span>
-                <span className="px-3 py-1 text-xs font-semibold rounded-full bg-slate-800 text-slate-300 border border-slate-700 uppercase tracking-wider">
-                  {course.level}
-                </span>
+              <div>
+                <BackButton
+                  fallbackUrl="/courses"
+                  label="Back to Courses"
+                  variant="dark"
+                  className="mb-4"
+                />
+                <div className="flex flex-wrap items-center gap-2">
+                  <span className="px-3 py-1 text-xs font-semibold rounded-full bg-blue-500/20 text-blue-400 border border-blue-500/30 uppercase tracking-wider">
+                    {course.subject}
+                  </span>
+                  <span className="px-3 py-1 text-xs font-semibold rounded-full bg-slate-800 text-slate-300 border border-slate-700 uppercase tracking-wider">
+                    {course.level}
+                  </span>
+                </div>
               </div>
 
               <h1 className="text-3xl sm:text-4xl lg:text-5xl font-black text-slate-50 tracking-tight leading-tight">

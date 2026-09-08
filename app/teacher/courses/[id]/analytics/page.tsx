@@ -8,6 +8,7 @@ import { Button } from "@/components/ui/button";
 import { MetricCard } from "@/components/analytics/metric-card";
 import { BookOpen, Users, CheckCircle2, Star, ArrowLeft, Loader2 } from "lucide-react";
 import { formatCurrency } from "@/lib/currency";
+import { BackButton } from "@/components/ui/back-button";
 
 export default function SingleCourseAnalyticsPage({ params }: { params: { id: string } }) {
   const [loading, setLoading] = useState(true);
@@ -38,9 +39,7 @@ export default function SingleCourseAnalyticsPage({ params }: { params: { id: st
       <DashboardLayout role="TEACHER" userName="Course Analytics">
         <div className="p-12 text-center space-y-3">
           <p className="text-sm font-bold text-slate-700">Course analytics not found.</p>
-          <Link href="/teacher/courses">
-            <Button variant="outline" size="sm">Back to Courses</Button>
-          </Link>
+          <BackButton fallbackUrl={`/teacher/courses/${params.id}`} label="Back to Course" variant="default" />
         </div>
       </DashboardLayout>
     );
@@ -50,11 +49,11 @@ export default function SingleCourseAnalyticsPage({ params }: { params: { id: st
     <DashboardLayout role="TEACHER" userName={data.course.title}>
       <div className="max-w-5xl mx-auto space-y-6 pb-16">
         <div className="flex items-center gap-3">
-          <Link href="/teacher/analytics">
-            <Button variant="outline" size="sm" leftIcon={<ArrowLeft className="h-4 w-4" />}>
-              Back to Analytics
-            </Button>
-          </Link>
+          <BackButton
+            fallbackUrl={`/teacher/courses/${params.id}`}
+            label="Back to Course"
+            variant="default"
+          />
           <h1 className="text-2xl font-black text-slate-900 dark:text-slate-100 truncate">
             {data.course.title}
           </h1>

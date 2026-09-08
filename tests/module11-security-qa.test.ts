@@ -143,7 +143,7 @@ async function runModule11SecurityQATests() {
     const firstWebhook = await prisma.paymentWebhookEvent.create({
       data: {
         provider: "CASHFREE",
-        providerEventId: eventId,
+        eventId: eventId,
         eventType: "PAYMENT_SUCCESS_WEBHOOK",
         payload: fakePayload,
         processed: true,
@@ -155,7 +155,7 @@ async function runModule11SecurityQATests() {
       await prisma.paymentWebhookEvent.create({
         data: {
           provider: "CASHFREE",
-          providerEventId: eventId,
+          eventId: eventId,
           eventType: "PAYMENT_SUCCESS_WEBHOOK",
           payload: fakePayload,
           processed: true,

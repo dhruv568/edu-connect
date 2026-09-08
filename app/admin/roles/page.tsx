@@ -7,6 +7,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { StatusBadge } from "@/components/ui/status-badge";
 import { useToast } from "@/components/ui/toast";
+import { BackButton } from "@/components/ui/back-button";
 import {
   ShieldAlert,
   Plus,
@@ -323,6 +324,12 @@ export default function AdminRolesPage() {
         {/* Page Header */}
         <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
           <div>
+            <BackButton
+              fallbackUrl="/admin"
+              label="Back to Dashboard"
+              variant="default"
+              className="mb-3"
+            />
             <div className="flex items-center gap-2">
               <h1 className="text-2xl lg:text-3xl font-black text-slate-900 dark:text-slate-100 tracking-tight">
                 Role Governance & Permissions

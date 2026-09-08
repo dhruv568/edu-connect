@@ -11,6 +11,7 @@ import { GlassButton } from "@/components/glass/glass-button";
 import { Input } from "@/components/ui/input";
 import { useToast } from "@/components/ui/toast";
 import { BookOpen, CheckCircle2, ArrowRight } from "lucide-react";
+import { BackButton } from "@/components/ui/back-button";
 
 export default function StudentRegistrationPage() {
   const [firstName, setFirstName] = useState("");
@@ -62,10 +63,12 @@ export default function StudentRegistrationPage() {
       });
 
       const data = await res.json();
-      if (!res.ok) throw new Error(data.error || "Student registration failed.");
+      if (!res.ok) throw new Error(data.error?.message || "Registration failed");
 
-      showToast("Account Created!", "6-digit verification code sent to your email.", "success", true);
-      router.push(`/verify-email?email=${encodeURIComponent(email)}`);
+      showToast("Account Created!", "Redirecting to your student dashboard...", "success");
+      setTimeout(() => {
+        router.push("/student/dashboard");
+      }, 1000);
     } catch (err: any) {
       showToast("Registration Error", err.message, "error");
     } finally {
@@ -77,7 +80,13 @@ export default function StudentRegistrationPage() {
     <div className="min-h-screen flex flex-col bg-slate-50">
       <FloatingNavbar />
 
-      <main className="flex-1 pt-32 pb-20 max-w-xl mx-auto px-4 w-full space-y-8">
+      <main className="flex-1 pt-32 pb-20 max-w-xl mx-auto px-4 w-full space-y-6">
+        <BackButton
+          fallbackUrl="/register"
+          label="Back to Role Selection"
+          variant="default"
+        />
+
         <div className="text-center space-y-2">
           <GlassBadge variant="emerald">STUDENT REGISTRATION</GlassBadge>
           <h1 className="text-3xl font-black text-slate-900">Create Student Account</h1>

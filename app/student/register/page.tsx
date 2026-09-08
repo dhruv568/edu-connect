@@ -11,6 +11,7 @@ import { GlassButton } from "@/components/glass/glass-button";
 import { Input } from "@/components/ui/input";
 import { useToast } from "@/components/ui/toast";
 import { BookOpen, CheckCircle2, ArrowRight, Video, Sparkles, Award } from "lucide-react";
+import { BackButton } from "@/components/ui/back-button";
 
 export default function StudentRegisterPage() {
   const [firstName, setFirstName] = useState("");
@@ -121,7 +122,13 @@ export default function StudentRegisterPage() {
           </div>
 
           {/* Right Column: Registration Form */}
-          <div className="lg:col-span-7 max-w-xl mx-auto w-full space-y-6">
+          <div className="lg:col-span-7 max-w-xl mx-auto w-full space-y-4">
+            <BackButton
+              fallbackUrl="/student/login"
+              label="Back to Sign In"
+              variant="default"
+            />
+
             <div className="text-center lg:text-left space-y-1">
               <GlassBadge variant="emerald">STUDENT ONBOARDING</GlassBadge>
               <h2 className="text-2xl sm:text-3xl font-black text-slate-900">

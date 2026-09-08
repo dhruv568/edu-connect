@@ -74,11 +74,15 @@ export async function POST(req: NextRequest) {
     });
 
     // Dispatch invitation email with clear instructions (no invitation link/token)
-    await EmailService.sendStaffInvitationEmail({
+    const emailSent = await EmailService.sendStaffInvitationEmail({
       email: normalizedEmail,
       recipientName: fullName?.trim() || undefined,
       roleName: role.name,
     });
+
+    if (!emailSent) {
+      return apiError("Unable to send invitation email. Please try again.", 500);
+    }
 
     await logAuditEvent(userId, "STAFF_INVITED", {
       invitationId: invitation.id,

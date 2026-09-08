@@ -991,7 +991,6 @@ model StaffInvitation {
   fullName    String?
   roleId      String
   invitedById String
-  tokenHash   String?
   status      String    @default("PENDING") // PENDING | ACCEPTED | EXPIRED | REVOKED
   expiresAt   DateTime?
   acceptedAt  DateTime?

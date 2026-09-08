@@ -10,6 +10,7 @@ import { GlassButton } from "@/components/glass/glass-button";
 import { Input } from "@/components/ui/input";
 import { useToast } from "@/components/ui/toast";
 import { Lock, CheckCircle2, ShieldCheck } from "lucide-react";
+import { BackButton } from "@/components/ui/back-button";
 
 function ResetPasswordForm() {
   const searchParams = useSearchParams();
@@ -55,7 +56,13 @@ function ResetPasswordForm() {
     <div className="min-h-screen flex flex-col bg-slate-50">
       <FloatingNavbar />
 
-      <main className="flex-1 pt-32 pb-20 max-w-md mx-auto px-4 w-full space-y-8">
+      <main className="flex-1 pt-32 pb-20 max-w-md mx-auto px-4 w-full space-y-6">
+        <BackButton
+          fallbackUrl="/login"
+          label="Back to Sign In"
+          variant="default"
+        />
+
         <div className="text-center space-y-2">
           <GlassBadge variant="emerald">SECURE PASSWORD RESET</GlassBadge>
           <h1 className="text-3xl font-black text-slate-900">Set New Password</h1>

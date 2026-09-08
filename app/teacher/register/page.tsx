@@ -19,6 +19,7 @@ import {
   ShieldCheck,
   CheckCircle2,
 } from "lucide-react";
+import { BackButton } from "@/components/ui/back-button";
 
 export default function TeacherRegisterPage() {
   const [step, setStep] = useState<1 | 2>(1);
@@ -130,7 +131,13 @@ export default function TeacherRegisterPage() {
           </div>
 
           {/* Right Column: Registration Form */}
-          <div className="lg:col-span-7 max-w-xl mx-auto w-full space-y-6">
+          <div className="lg:col-span-7 max-w-xl mx-auto w-full space-y-4">
+            <BackButton
+              fallbackUrl="/teacher/login"
+              label="Back to Sign In"
+              variant="default"
+            />
+
             <div className="text-center lg:text-left space-y-1">
               <div className="flex items-center justify-between">
                 <GlassBadge variant="indigo">STEP {step} OF 2 • EDUCATOR PORTAL</GlassBadge>

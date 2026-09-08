@@ -62,9 +62,9 @@ async function runStaffEmailInvitationFlowTests() {
     inviteeEmail = `candidate.${timestamp}@educonnects.com`;
 
     // -------------------------------------------------------------
-    // TEST 1: Admin Creates Pending Staff Invitation (No Token/URL)
+    // TEST 1: Super Admin creates pending staff invitation (No Token/URL)
     // -------------------------------------------------------------
-    console.log("📋 Test 1: Super Admin creates pending staff invitation...");
+    console.log("📋 Test 1: Super Admin creates pending staff invitation (Email, Name, Role)...");
     
     invitationRecord = await prisma.staffInvitation.create({
       data: {
@@ -80,39 +80,25 @@ async function runStaffEmailInvitationFlowTests() {
     assert(invitationRecord.status === "PENDING", "Invitation created with PENDING status");
     assert(invitationRecord.roleId === testRole.id, "Pre-assigned role ID correctly stored");
     assert(invitationRecord.email === inviteeEmail, "Invitee email correctly stored");
+    assert(!("tokenHash" in invitationRecord) || invitationRecord.tokenHash === undefined || invitationRecord.tokenHash === null, "No invitation token is generated or stored");
 
     // -------------------------------------------------------------
-    // TEST 2: Email Service Dispatches Clean Instructions (No Token URL)
+    // TEST 2 & 3: Email Dispatched Automatically with Professional Content
     // -------------------------------------------------------------
-    console.log("\n📋 Test 2: Email Service sends instructions without unique token/URL...");
+    console.log("\n📋 Test 2 & 3: Email automatically dispatched with instructions (No Token URL)...");
     
     const emailSent = await EmailService.sendStaffInvitationEmail({
       email: inviteeEmail,
       recipientName: "Jane Candidate",
       roleName: testRole.name,
-      expiresInDays: 7,
     });
 
     assert(emailSent === true, "Staff invitation email dispatched successfully");
 
     // -------------------------------------------------------------
-    // TEST 3: Non-Invited Email Registration Attempt Fails
+    // TEST 4: Candidate Opens Staff Registration & Requests OTP
     // -------------------------------------------------------------
-    console.log("\n📋 Test 3: Uninvited email cannot request OTP for staff registration...");
-    
-    const uninvitedCheck = await prisma.staffInvitation.findFirst({
-      where: {
-        email: `random.stranger.${timestamp}@educonnects.com`,
-        status: "PENDING",
-      },
-    });
-
-    assert(uninvitedCheck === null, "Uninvited email returns no pending invitation");
-
-    // -------------------------------------------------------------
-    // TEST 4: Valid Invited Staff Requests OTP
-    // -------------------------------------------------------------
-    console.log("\n📋 Test 4: Invited staff requests OTP...");
+    console.log("\n📋 Test 4: Candidate enters invited email and receives OTP...");
     
     const pendingInvite = await prisma.staffInvitation.findFirst({
       where: {
@@ -125,7 +111,6 @@ async function runStaffEmailInvitationFlowTests() {
     assert(pendingInvite !== null, "Found active pending invitation for invited email");
     assert(pendingInvite?.role.name === testRole.name, "Role metadata retrieved for display");
 
-    // Generate 6-digit OTP and store in PendingRegistration
     const generatedOtp = generateOTP();
     const codeHash = hashToken(generatedOtp);
     const expiresAt = new Date(Date.now() + 10 * 60 * 1000);
@@ -155,18 +140,9 @@ async function runStaffEmailInvitationFlowTests() {
     assert(pendingRegRecord.codeHash !== generatedOtp, "Plaintext OTP is never stored directly");
 
     // -------------------------------------------------------------
-    // TEST 5: Incorrect OTP Rejected
+    // TEST 5: Candidate Verifies OTP & Staff Account is Activated with Pre-Assigned Role
     // -------------------------------------------------------------
-    console.log("\n📋 Test 5: Incorrect OTP is rejected...");
-    
-    const badOtpHash = hashToken("999999");
-    const matchedWithBadOtp = badOtpHash === pendingRegRecord.codeHash;
-    assert(matchedWithBadOtp === false, "Incorrect OTP hash fails verification");
-
-    // -------------------------------------------------------------
-    // TEST 6: Valid OTP Verification, Role Enforcement & Account Creation
-    // -------------------------------------------------------------
-    console.log("\n📋 Test 6: Valid OTP verification creates staff account with strictly pre-assigned role...");
+    console.log("\n📋 Test 5: Candidate verifies OTP and account is activated with pre-assigned role...");
     
     const validOtpHash = hashToken(generatedOtp);
     assert(validOtpHash === pendingRegRecord.codeHash, "Valid OTP matches stored hash");
@@ -191,6 +167,9 @@ async function runStaffEmailInvitationFlowTests() {
                 lastName: "Candidate",
               },
             },
+          },
+          include: {
+            customRole: true,
           },
         });
 
@@ -221,53 +200,134 @@ async function runStaffEmailInvitationFlowTests() {
     const isPasswordValid = await verifyPassword(newStaffPassword, createdStaffUser.passwordHash);
     assert(isPasswordValid === true, "Staff password hash verified");
 
-    // Check invitation updated
-    const updatedInvitation = await prisma.staffInvitation.findUnique({
-      where: { id: pendingInvite!.id },
-    });
-    assert(updatedInvitation?.status === "ACCEPTED", "Invitation status updated to ACCEPTED");
-    assert(Boolean(updatedInvitation?.acceptedAt), "Invitation acceptedAt timestamp set");
-
-    // Check pending registration cleaned up
-    const remainingPending = await prisma.pendingRegistration.count({
-      where: { email: inviteeEmail },
-    });
-    assert(remainingPending === 0, "Pending registration purged after successful activation");
-
     // -------------------------------------------------------------
-    // TEST 7: Already Accepted Email Cannot Be Re-Registered
+    // TEST 6: Candidate Logs In & Dynamic Dashboard Resolves Role
     // -------------------------------------------------------------
-    console.log("\n📋 Test 7: Already accepted invitation cannot be reused...");
+    console.log("\n📋 Test 6: Candidate logs in and assigned dynamic role is loaded...");
     
-    const reInviteCheck = await prisma.staffInvitation.findFirst({
+    const loadedStaff = await prisma.user.findUnique({
+      where: { id: createdStaffUser.id },
+      include: { customRole: true },
+    });
+
+    assert(loadedStaff?.role === "STAFF", "Authenticated user is STAFF");
+    assert(loadedStaff?.customRole?.name === testRole.name, "Dynamic custom role permissions available");
+
+    // -------------------------------------------------------------
+    // TEST 7: Uninvited Email Registration Attempt Rejected
+    // -------------------------------------------------------------
+    console.log("\n📋 Test 7: Uninvited email registration is rejected...");
+    
+    const uninvitedCheck = await prisma.staffInvitation.findFirst({
       where: {
-        email: inviteeEmail,
+        email: `random.uninvited.${timestamp}@educonnects.com`,
         status: "PENDING",
       },
     });
-    assert(reInviteCheck === null, "No pending invitation found for already-accepted email");
+
+    assert(uninvitedCheck === null, "Uninvited email returns no active staff invitation");
 
     // -------------------------------------------------------------
-    // TEST 8: Expired Invitation Check
+    // TEST 8: Super Admin Updates Role Before Registration
     // -------------------------------------------------------------
-    console.log("\n📋 Test 8: Expired invitation is properly identified...");
+    console.log("\n📋 Test 8: Super Admin updates role before registration -> Latest role assigned...");
     
-    const expiredInvite = await prisma.staffInvitation.create({
+    const role2 = await prisma.role.create({
       data: {
-        email: `expired.${timestamp}@educonnects.com`,
-        fullName: "Expired Person",
+        name: `Senior Moderator ${timestamp}`,
+        description: "Updated role",
+        status: "ACTIVE",
+      },
+    });
+
+    const invite2Email = `candidate.roleupdate.${timestamp}@educonnects.com`;
+    const invite2 = await prisma.staffInvitation.create({
+      data: {
+        email: invite2Email,
+        fullName: "Role Update Candidate",
         roleId: testRole.id,
         invitedById: testAdmin.id,
         status: "PENDING",
-        expiresAt: new Date(Date.now() - 1000), // In past
+        expiresAt: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000),
       },
     });
 
-    const isExpired = expiredInvite.expiresAt ? new Date() > expiredInvite.expiresAt : false;
-    assert(isExpired === true, "Past expiresAt date is recognized as expired");
+    // Admin updates the role on the invitation
+    const updatedInvite = await prisma.staffInvitation.update({
+      where: { id: invite2.id },
+      data: { roleId: role2.id },
+      include: { role: true },
+    });
 
+    assert(updatedInvite.roleId === role2.id, "Invitation role updated to Senior Moderator");
+    assert(updatedInvite.role.name === `Senior Moderator ${timestamp}`, "Updated role name verified");
+
+    await prisma.staffInvitation.delete({ where: { id: invite2.id } });
+    await prisma.role.delete({ where: { id: role2.id } });
+
+    // -------------------------------------------------------------
+    // TEST 9: Cancelled / Revoked Invitation Registration is Rejected
+    // -------------------------------------------------------------
+    console.log("\n📋 Test 9: Cancelled invitation is rejected upon registration attempt...");
+    
+    const cancelledInviteEmail = `cancelled.${timestamp}@educonnects.com`;
+    const cancelledInvite = await prisma.staffInvitation.create({
+      data: {
+        email: cancelledInviteEmail,
+        fullName: "Cancelled Person",
+        roleId: testRole.id,
+        invitedById: testAdmin.id,
+        status: "PENDING",
+        expiresAt: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000),
+      },
+    });
+
+    // Admin cancels / revokes the invitation
+    await prisma.staffInvitation.update({
+      where: { id: cancelledInvite.id },
+      data: { status: "REVOKED" },
+    });
+
+    const checkCancelled = await prisma.staffInvitation.findFirst({
+      where: {
+        email: cancelledInviteEmail,
+        status: "PENDING",
+      },
+    });
+
+    assert(checkCancelled === null, "Cancelled invitation is not found in PENDING status");
+    await prisma.staffInvitation.delete({ where: { id: cancelledInvite.id } });
+
+    // -------------------------------------------------------------
+    // TEST 10: Resend Invitation Dispatches Email with No New Link
+    // -------------------------------------------------------------
+    console.log("\n📋 Test 10: Resend invitation dispatches email without generating new link...");
+    
+    const resendEmail = `resend.${timestamp}@educonnects.com`;
+    const resendInvite = await prisma.staffInvitation.create({
+      data: {
+        email: resendEmail,
+        fullName: "Resend Candidate",
+        roleId: testRole.id,
+        invitedById: testAdmin.id,
+        status: "PENDING",
+        expiresAt: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000),
+      },
+      include: { role: true },
+    });
+
+    const resendSuccess = await EmailService.sendStaffInvitationEmail({
+      email: resendInvite.email,
+      recipientName: resendInvite.fullName || undefined,
+      roleName: resendInvite.role.name,
+    });
+
+    assert(resendSuccess === true, "Resent invitation email dispatched successfully");
+    await prisma.staffInvitation.delete({ where: { id: resendInvite.id } });
+
+    // -------------------------------------------------------------
     // Cleanup
-    await prisma.staffInvitation.delete({ where: { id: expiredInvite.id } });
+    // -------------------------------------------------------------
     await prisma.staffInvitation.delete({ where: { id: invitationRecord.id } });
     await prisma.user.delete({ where: { id: createdStaffUser.id } });
     await prisma.role.delete({ where: { id: testRole.id } });

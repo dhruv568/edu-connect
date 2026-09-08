@@ -7,6 +7,7 @@ import { DashboardLayout } from "@/components/layout/dashboard-layout";
 import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
+import { BackButton } from "@/components/ui/back-button";
 import {
   GraduationCap,
   Search,
@@ -164,7 +165,13 @@ export default function StudentFindTeachersPage() {
 
   return (
     <DashboardLayout role="STUDENT">
-      <div className="space-y-8 pb-16">
+      <div className="space-y-6 pb-16">
+        <BackButton
+          fallbackUrl="/student/dashboard"
+          label="Back to Dashboard"
+          variant="default"
+        />
+
         {/* Header Banner */}
         <div className="bg-gradient-to-r from-blue-700 via-indigo-700 to-purple-800 text-white rounded-3xl p-6 lg:p-8 shadow-xl flex flex-col md:flex-row items-start md:items-center justify-between gap-6">
           <div className="space-y-1 max-w-xl">

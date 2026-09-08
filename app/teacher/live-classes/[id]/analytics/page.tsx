@@ -7,6 +7,7 @@ import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { MetricCard } from "@/components/analytics/metric-card";
 import { Video, Users, CheckCircle2, Clock, ArrowLeft, Loader2 } from "lucide-react";
+import { BackButton } from "@/components/ui/back-button";
 
 export default function SingleLiveClassAnalyticsPage({ params }: { params: { id: string } }) {
   const [loading, setLoading] = useState(true);
@@ -37,9 +38,7 @@ export default function SingleLiveClassAnalyticsPage({ params }: { params: { id:
       <DashboardLayout role="TEACHER" userName="Live Class Analytics">
         <div className="p-12 text-center space-y-3">
           <p className="text-sm font-bold text-slate-700">Live class analytics not found.</p>
-          <Link href="/teacher/live-classes">
-            <Button variant="outline" size="sm">Back to Live Classes</Button>
-          </Link>
+          <BackButton fallbackUrl={`/teacher/live-classes/${params.id}`} label="Back to Class Details" variant="default" />
         </div>
       </DashboardLayout>
     );
@@ -49,11 +48,11 @@ export default function SingleLiveClassAnalyticsPage({ params }: { params: { id:
     <DashboardLayout role="TEACHER" userName={data.slot.title}>
       <div className="max-w-5xl mx-auto space-y-6 pb-16">
         <div className="flex items-center gap-3">
-          <Link href="/teacher/analytics">
-            <Button variant="outline" size="sm" leftIcon={<ArrowLeft className="h-4 w-4" />}>
-              Back to Analytics
-            </Button>
-          </Link>
+          <BackButton
+            fallbackUrl={`/teacher/live-classes/${params.id}`}
+            label="Back to Class Details"
+            variant="default"
+          />
           <h1 className="text-2xl font-black text-slate-900 dark:text-slate-100 truncate">
             {data.slot.title}
           </h1>

@@ -42,11 +42,15 @@ export async function POST(req: NextRequest) {
     });
 
     // Resend invitation instructions email
-    await EmailService.sendStaffInvitationEmail({
+    const emailSent = await EmailService.sendStaffInvitationEmail({
       email: updated.email,
       recipientName: updated.fullName || undefined,
       roleName: invitation.role.name,
     });
+
+    if (!emailSent) {
+      return apiError("Unable to send invitation email. Please try again.", 500);
+    }
 
     await logAuditEvent(userId, "STAFF_INVITE_RESENT", {
       invitationId: updated.id,

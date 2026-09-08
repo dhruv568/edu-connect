@@ -5,6 +5,7 @@ import { useSearchParams, useRouter } from "next/navigation";
 import Link from "next/link";
 import { Lock, ShieldCheck, CheckCircle2, AlertCircle, ArrowLeft, CreditCard, Sparkles } from "lucide-react";
 import { formatPaise } from "@/lib/currency";
+import { BackButton } from "@/components/ui/back-button";
 
 function CheckoutContent() {
   const searchParams = useSearchParams();
@@ -96,12 +97,12 @@ function CheckoutContent() {
       <div className="absolute bottom-10 right-10 w-[400px] h-[400px] bg-purple-600/10 blur-[120px] rounded-full pointer-events-none" />
 
       <div className="w-full max-w-md relative z-10">
-        <Link
-          href="/courses"
-          className="inline-flex items-center text-xs font-semibold text-slate-400 hover:text-slate-200 transition-colors mb-6"
-        >
-          <ArrowLeft className="w-4 h-4 mr-1.5" /> Back to Catalog
-        </Link>
+        <BackButton
+          fallbackUrl="/courses"
+          label="Back to Catalog"
+          variant="dark"
+          className="mb-6"
+        />
 
         {loading ? (
           <div className="p-8 rounded-3xl bg-slate-900/60 border border-slate-800 backdrop-blur-xl text-center space-y-4 shadow-2xl">

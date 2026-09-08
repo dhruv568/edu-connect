@@ -5,6 +5,7 @@ import { DashboardLayout } from "@/components/layout/dashboard-layout";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Activity, Search, Shield, ChevronLeft, ChevronRight, Loader2 } from "lucide-react";
+import { BackButton } from "@/components/ui/back-button";
 
 export default function AdminActivityPage() {
   const [loading, setLoading] = useState(true);
@@ -37,6 +38,12 @@ export default function AdminActivityPage() {
     <DashboardLayout role="ADMIN">
       <div className="max-w-5xl mx-auto space-y-6 pb-16">
         <div>
+          <BackButton
+            fallbackUrl="/admin"
+            label="Back to Dashboard"
+            variant="default"
+            className="mb-3"
+          />
           <h1 className="text-2xl lg:text-3xl font-black text-slate-900 dark:text-slate-100 tracking-tight">
             Platform Audit & Activity Logs
           </h1>

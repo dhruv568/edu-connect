@@ -8,6 +8,7 @@ import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { useToast } from "@/components/ui/toast";
 import { formatCurrency } from "@/lib/currency";
+import { BackButton } from "@/components/ui/back-button";
 import {
   Plus,
   BookOpen,
@@ -153,6 +154,12 @@ export default function TeacherCoursesDashboardPage() {
         {/* Top Header */}
         <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 pb-4 border-b border-slate-200">
           <div>
+            <BackButton
+              fallbackUrl="/teacher/dashboard"
+              label="Back to Dashboard"
+              variant="default"
+              className="mb-3"
+            />
             <h1 className="text-2xl sm:text-3xl font-black text-slate-900 flex items-center gap-2">
               <BookOpen className="h-7 w-7 text-blue-600" /> Courses & Content
             </h1>

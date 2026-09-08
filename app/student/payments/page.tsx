@@ -4,6 +4,7 @@ import React, { useState, useEffect } from "react";
 import Link from "next/link";
 import { CreditCard, CheckCircle2, AlertCircle, RefreshCw, Receipt, Search, ArrowRight, ExternalLink } from "lucide-react";
 import { formatCurrency } from "@/lib/currency";
+import { BackButton } from "@/components/ui/back-button";
 
 export default function StudentPaymentsPage() {
   const [payments, setPayments] = useState<any[]>([]);
@@ -48,6 +49,12 @@ export default function StudentPaymentsPage() {
       {/* Header */}
       <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 border-b border-slate-800/80 pb-6">
         <div>
+          <BackButton
+            fallbackUrl="/student/dashboard"
+            label="Back to Dashboard"
+            variant="dark"
+            className="mb-3"
+          />
           <h1 className="text-3xl font-extrabold text-white tracking-tight flex items-center gap-3">
             <CreditCard className="w-8 h-8 text-blue-400" /> Payment & Purchase History
           </h1>

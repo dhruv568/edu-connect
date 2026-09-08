@@ -4,6 +4,7 @@ import React, { useState, useEffect } from "react";
 import Link from "next/link";
 import { IndianRupee, TrendingUp, Clock, CheckCircle2, ShieldCheck, ArrowRight, ListFilter, CreditCard } from "lucide-react";
 import { formatCurrency } from "@/lib/currency";
+import { BackButton } from "@/components/ui/back-button";
 
 export default function TeacherEarningsPage() {
   const [data, setData] = useState<any>(null);
@@ -49,6 +50,12 @@ export default function TeacherEarningsPage() {
       {/* Header */}
       <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 border-b border-slate-800/80 pb-6">
         <div>
+          <BackButton
+            fallbackUrl="/teacher/dashboard"
+            label="Back to Dashboard"
+            variant="dark"
+            className="mb-3"
+          />
           <h1 className="text-3xl font-extrabold text-white tracking-tight flex items-center gap-3">
             <IndianRupee className="w-8 h-8 text-emerald-400" /> Educator Earnings & Revenue
           </h1>

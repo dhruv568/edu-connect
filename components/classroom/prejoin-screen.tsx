@@ -6,6 +6,7 @@ import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Camera, CameraOff, Mic, MicOff, Volume2, Settings, ShieldCheck, Clock } from "lucide-react";
 import { DeviceSelection, LiveSessionDetails } from "@/types/classroom";
+import { BackButton } from "@/components/ui/back-button";
 
 interface PreJoinScreenProps {
   sessionDetails: LiveSessionDetails;
@@ -151,6 +152,14 @@ export function PreJoinScreen({
   return (
     <div className="min-h-screen bg-slate-950 text-slate-100 flex items-center justify-center p-4 md:p-8">
       <div className="max-w-4xl w-full space-y-6">
+        <div className="flex justify-start">
+          <BackButton
+            fallbackUrl={isTeacher ? "/teacher/live-classes" : "/student/live-classes"}
+            label={isTeacher ? "Back to Live Classes" : "Back to Schedule"}
+            variant="dark"
+          />
+        </div>
+
         {/* Header */}
         <div className="text-center space-y-2">
           <div className="inline-flex items-center gap-2 bg-blue-500/10 border border-blue-500/30 px-3 py-1 rounded-full text-xs font-semibold text-blue-400">

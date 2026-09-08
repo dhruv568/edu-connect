@@ -6,6 +6,7 @@ import Link from "next/link";
 import { Mail, Lock, ShieldCheck, ArrowRight, CheckCircle2, AlertCircle, RefreshCw, KeyRound, User } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { BackButton } from "@/components/ui/back-button";
 
 export default function StaffRegisterPage() {
   const router = useRouter();
@@ -131,6 +132,12 @@ export default function StaffRegisterPage() {
       <div className="absolute bottom-10 right-10 w-[400px] h-[400px] bg-indigo-600/10 blur-[120px] rounded-full pointer-events-none" />
 
       <div className="w-full max-w-md relative z-10 space-y-6">
+        <BackButton
+          fallbackUrl="/staff/login"
+          label="Back to Staff Login"
+          variant="dark"
+        />
+
         {/* Brand Header */}
         <div className="text-center space-y-2">
           <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-blue-500/10 text-blue-400 text-xs font-semibold border border-blue-500/20">

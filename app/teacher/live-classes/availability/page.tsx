@@ -6,6 +6,7 @@ import { DashboardLayout } from "@/components/layout/dashboard-layout";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { useToast } from "@/components/ui/toast";
+import { BackButton } from "@/components/ui/back-button";
 import { ArrowLeft, Clock, Save, Plus, Trash2, Calendar, ShieldCheck } from "lucide-react";
 
 const DAYS = ["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"];
@@ -111,11 +112,11 @@ export default function TeacherAvailabilityPage() {
         {/* Header */}
         <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 pb-4 border-b border-slate-200">
           <div className="flex items-center gap-3">
-            <Link href="/teacher/live-classes">
-              <button className="p-2 rounded-xl bg-white border border-slate-200 hover:bg-slate-50 text-slate-600">
-                <ArrowLeft className="h-5 w-5" />
-              </button>
-            </Link>
+            <BackButton
+              fallbackUrl="/teacher/live-classes"
+              label="Back to Live Classes"
+              variant="default"
+            />
             <div>
               <h1 className="text-2xl font-black text-slate-900 flex items-center gap-2">
                 <Clock className="h-6 w-6 text-blue-600" /> Availability & Buffer Settings

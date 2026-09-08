@@ -11,6 +11,7 @@ import { GlassButton } from "@/components/glass/glass-button";
 import { Input } from "@/components/ui/input";
 import { useToast } from "@/components/ui/toast";
 import { GraduationCap, ArrowRight, ArrowLeft, Mail, Lock, User, CheckCircle2 } from "lucide-react";
+import { BackButton } from "@/components/ui/back-button";
 
 export default function TeacherRegistrationPage() {
   const [step, setStep] = useState<1 | 2>(1);
@@ -78,7 +79,13 @@ export default function TeacherRegistrationPage() {
     <div className="min-h-screen flex flex-col bg-slate-50">
       <FloatingNavbar />
 
-      <main className="flex-1 pt-32 pb-20 max-w-2xl mx-auto px-4 w-full space-y-8">
+      <main className="flex-1 pt-32 pb-20 max-w-2xl mx-auto px-4 w-full space-y-6">
+        <BackButton
+          fallbackUrl="/register"
+          label="Back to Role Selection"
+          variant="default"
+        />
+
         <div className="text-center space-y-2">
           <GlassBadge variant="indigo">STEP {step} OF 2 • TEACHER PORTAL</GlassBadge>
           <h1 className="text-3xl font-black text-slate-900">Create Educator Account</h1>

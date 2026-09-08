@@ -3,6 +3,7 @@
 import React from "react";
 import Link from "next/link";
 import { AlertTriangle, ArrowLeft, RefreshCw } from "lucide-react";
+import { BackButton } from "@/components/ui/back-button";
 
 export default function PaymentFailedPage() {
   return (
@@ -29,12 +30,12 @@ export default function PaymentFailedPage() {
             <RefreshCw className="w-5 h-5" /> Try Payment Again
           </Link>
 
-          <Link
-            href="/courses"
-            className="w-full py-3 bg-slate-900 hover:bg-slate-800 text-slate-400 font-semibold rounded-xl text-sm border border-slate-800 flex items-center justify-center gap-2 transition-all"
-          >
-            <ArrowLeft className="w-4 h-4" /> Back to Courses
-          </Link>
+          <BackButton
+            fallbackUrl="/courses"
+            label="Back to Courses"
+            variant="dark"
+            className="w-full py-3 rounded-xl border border-slate-800"
+          />
         </div>
       </div>
     </div>

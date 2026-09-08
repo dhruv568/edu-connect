@@ -7,6 +7,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { StatusBadge } from "@/components/ui/status-badge";
 import { useToast } from "@/components/ui/toast";
+import { BackButton } from "@/components/ui/back-button";
 import {
   UserCheck,
   UserPlus,
@@ -74,6 +75,7 @@ export default function AdminStaffPage() {
   const [inviteFullName, setInviteFullName] = useState("");
   const [inviteRoleId, setInviteRoleId] = useState("");
   const [inviting, setInviting] = useState(false);
+  const [inviteSuccessInfo, setInviteSuccessInfo] = useState<{ email: string; roleName: string } | null>(null);
 
   // Change Role Modal
   const [changeRoleModalOpen, setChangeRoleModalOpen] = useState(false);
@@ -135,19 +137,29 @@ export default function AdminStaffPage() {
 
       const json = await res.json();
       if (!res.ok) {
-        throw new Error(json.error || "Failed to send staff invitation.");
+        throw new Error(json.error || "Unable to send invitation email. Please try again.");
       }
 
+      const assignedRole = roles.find((r) => r.id === inviteRoleId)?.name || "Staff Member";
+      setInviteSuccessInfo({
+        email: inviteEmail.trim(),
+        roleName: assignedRole,
+      });
+
       showToast("Invitation Sent", `Invitation email sent successfully to ${inviteEmail.trim()}.`, "success");
-      setInviteModalOpen(false);
-      setInviteEmail("");
-      setInviteFullName("");
       fetchStaffData();
     } catch (err: any) {
-      showToast("Invitation Failed", err.message, "error");
+      showToast("Invitation Failed", err.message || "Unable to send invitation email. Please try again.", "error");
     } finally {
       setInviting(false);
     }
+  };
+
+  const handleCloseInviteModal = () => {
+    setInviteModalOpen(false);
+    setInviteSuccessInfo(null);
+    setInviteEmail("");
+    setInviteFullName("");
   };
 
   const handleResendInvite = async (invitationId: string) => {
@@ -158,17 +170,17 @@ export default function AdminStaffPage() {
         body: JSON.stringify({ invitationId }),
       });
       const json = await res.json();
-      if (!res.ok) throw new Error(json.error || "Failed to resend invitation.");
+      if (!res.ok) throw new Error(json.error || "Unable to send invitation email. Please try again.");
 
       showToast("Invitation Resent", "Staff invitation email has been dispatched again.", "success");
       fetchStaffData();
     } catch (err: any) {
-      showToast("Error", err.message, "error");
+      showToast("Error", err.message || "Unable to send invitation email. Please try again.", "error");
     }
   };
 
   const handleRevokeInvite = async (invitationId: string) => {
-    if (!confirm("Are you sure you want to revoke this invitation?")) return;
+    if (!confirm("Are you sure you want to cancel this staff invitation?")) return;
 
     try {
       const res = await fetch("/api/admin/staff/invite/revoke", {
@@ -177,9 +189,9 @@ export default function AdminStaffPage() {
         body: JSON.stringify({ invitationId }),
       });
       const json = await res.json();
-      if (!res.ok) throw new Error(json.error || "Failed to revoke invitation.");
+      if (!res.ok) throw new Error(json.error || "Failed to cancel invitation.");
 
-      showToast("Invite Revoked", "The invitation has been invalidated.", "info");
+      showToast("Invitation Cancelled", "The invitation has been cancelled.", "info");
       fetchStaffData();
     } catch (err: any) {
       showToast("Error", err.message, "error");
@@ -245,6 +257,12 @@ export default function AdminStaffPage() {
         {/* Page Header */}
         <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
           <div>
+            <BackButton
+              fallbackUrl="/admin"
+              label="Back to Dashboard"
+              variant="default"
+              className="mb-3"
+            />
             <div className="flex items-center gap-2">
               <h1 className="text-2xl lg:text-3xl font-black text-slate-900 dark:text-slate-100 tracking-tight">
                 Staff Operations & Roster
@@ -454,17 +472,17 @@ export default function AdminStaffPage() {
                           <>
                             <button
                               onClick={() => handleResendInvite(inv.id)}
-                              className="px-2.5 py-1 text-[11px] font-semibold rounded-md border border-slate-200 text-slate-700 hover:bg-slate-100 transition"
+                              className="px-2.5 py-1 text-[11px] font-semibold rounded-md border border-slate-200 dark:border-slate-700 text-slate-700 dark:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-800 transition"
                               title="Resend invitation email"
                             >
-                              Resend Invitation
+                              Resend Email
                             </button>
                             <button
                               onClick={() => handleRevokeInvite(inv.id)}
-                              className="px-2.5 py-1 text-[11px] font-semibold rounded-md border border-rose-200 text-rose-600 hover:bg-rose-50 transition"
-                              title="Revoke invitation"
+                              className="px-2.5 py-1 text-[11px] font-semibold rounded-md border border-rose-200 dark:border-rose-800 text-rose-600 dark:text-rose-400 hover:bg-rose-50 dark:hover:bg-rose-950/40 transition"
+                              title="Cancel staff invitation"
                             >
-                              Revoke
+                              Cancel Invitation
                             </button>
                           </>
                         )}
@@ -492,68 +510,111 @@ export default function AdminStaffPage() {
                     Invite New Staff Member
                   </h3>
                   <p className="text-xs text-slate-500 mt-0.5">
-                    Dispatch an email invitation with instructions for candidate onboarding.
+                    Send an email invitation to onboard a new staff member.
                   </p>
                 </div>
                 <button
-                  onClick={() => setInviteModalOpen(false)}
+                  onClick={handleCloseInviteModal}
                   className="p-2 text-slate-400 hover:text-slate-600 rounded-lg"
                 >
                   <X className="h-5 w-5" />
                 </button>
               </div>
 
-              <form onSubmit={handleSendInvite} className="p-6 space-y-4">
-                <Input
-                  label="Candidate Email Address *"
-                  type="email"
-                  value={inviteEmail}
-                  onChange={(e) => setInviteEmail(e.target.value)}
-                  placeholder="colleague@company.com"
-                  leftIcon={<Mail className="h-4 w-4" />}
-                  required
-                />
+              {inviteSuccessInfo ? (
+                /* Success View */
+                <div className="p-6 space-y-5">
+                  <div className="flex items-center gap-3 p-4 rounded-2xl bg-emerald-50 dark:bg-emerald-950/30 border border-emerald-200 dark:border-emerald-800">
+                    <CheckCircle2 className="h-6 w-6 text-emerald-600 dark:text-emerald-400 shrink-0" />
+                    <div>
+                      <h4 className="text-sm font-bold text-emerald-900 dark:text-emerald-200">
+                        ✓ Invitation Sent Successfully!
+                      </h4>
+                      <p className="text-xs text-emerald-700 dark:text-emerald-300 mt-0.5">
+                        Invitation email has been sent to:
+                      </p>
+                      <p className="text-xs font-bold text-slate-900 dark:text-slate-100 font-mono mt-0.5">
+                        {inviteSuccessInfo.email}
+                      </p>
+                    </div>
+                  </div>
 
-                <Input
-                  label="Full Name (Optional)"
-                  value={inviteFullName}
-                  onChange={(e) => setInviteFullName(e.target.value)}
-                  placeholder="e.g. Jane Doe"
-                />
+                  <div className="p-4 rounded-2xl bg-slate-50 dark:bg-slate-800/50 border border-slate-200 dark:border-slate-700 space-y-2">
+                    <div className="text-xs text-slate-500 font-medium">Assigned Role:</div>
+                    <div className="inline-block px-3 py-1 rounded-lg bg-blue-50 text-blue-700 font-bold text-xs border border-blue-200">
+                      {inviteSuccessInfo.roleName}
+                    </div>
+                    <p className="text-xs text-slate-500 pt-2 border-t border-slate-200 dark:border-slate-700">
+                      The staff member can complete their account setup using the instructions in the email.
+                    </p>
+                  </div>
 
-                <div className="space-y-1.5">
-                  <label className="block text-xs font-semibold text-slate-700 uppercase tracking-wider">
-                    Assign Custom Role *
-                  </label>
-                  <select
-                    value={inviteRoleId}
-                    onChange={(e) => setInviteRoleId(e.target.value)}
-                    className="w-full h-11 px-4 text-sm rounded-xl border border-slate-200 bg-white text-slate-900 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  <div className="pt-2">
+                    <Button
+                      variant="primary"
+                      size="sm"
+                      onClick={handleCloseInviteModal}
+                      className="w-full"
+                    >
+                      Done
+                    </Button>
+                  </div>
+                </div>
+              ) : (
+                /* Form View */
+                <form onSubmit={handleSendInvite} className="p-6 space-y-4">
+                  <Input
+                    label="Candidate Email Address *"
+                    type="email"
+                    value={inviteEmail}
+                    onChange={(e) => setInviteEmail(e.target.value)}
+                    placeholder="colleague@company.com"
+                    leftIcon={<Mail className="h-4 w-4" />}
                     required
-                  >
-                    {roles.map((r) => (
-                      <option key={r.id} value={r.id}>
-                        {r.name}
-                      </option>
-                    ))}
-                  </select>
-                </div>
+                  />
 
-                <div className="pt-4 border-t flex items-center justify-between">
-                  <Button variant="ghost" size="sm" type="button" onClick={() => setInviteModalOpen(false)}>
-                    Cancel
-                  </Button>
-                  <Button
-                    variant="primary"
-                    size="sm"
-                    type="submit"
-                    isLoading={inviting}
-                    leftIcon={<Send className="h-4 w-4" />}
-                  >
-                    Send Invitation
-                  </Button>
-                </div>
-              </form>
+                  <Input
+                    label="Full Name (Optional)"
+                    value={inviteFullName}
+                    onChange={(e) => setInviteFullName(e.target.value)}
+                    placeholder="e.g. Jane Doe"
+                  />
+
+                  <div className="space-y-1.5">
+                    <label className="block text-xs font-semibold text-slate-700 dark:text-slate-300 uppercase tracking-wider">
+                      Assign Custom Role *
+                    </label>
+                    <select
+                      value={inviteRoleId}
+                      onChange={(e) => setInviteRoleId(e.target.value)}
+                      className="w-full h-11 px-4 text-sm rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-900 dark:text-slate-100 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                      required
+                    >
+                      <option value="">Select Role</option>
+                      {roles.map((r) => (
+                        <option key={r.id} value={r.id}>
+                          {r.name}
+                        </option>
+                      ))}
+                    </select>
+                  </div>
+
+                  <div className="pt-4 border-t border-slate-200 dark:border-slate-800 flex items-center justify-between">
+                    <Button variant="ghost" size="sm" type="button" onClick={handleCloseInviteModal}>
+                      Cancel
+                    </Button>
+                    <Button
+                      variant="primary"
+                      size="sm"
+                      type="submit"
+                      isLoading={inviting}
+                      leftIcon={<Send className="h-4 w-4" />}
+                    >
+                      Send Invitation
+                    </Button>
+                  </div>
+                </form>
+              )}
             </div>
           </div>
         )}

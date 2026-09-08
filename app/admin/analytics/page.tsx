@@ -19,6 +19,7 @@ import {
   CheckCircle2,
 } from "lucide-react";
 import { formatCurrency } from "@/lib/currency";
+import { BackButton } from "@/components/ui/back-button";
 
 export default function AdminAnalyticsPage() {
   const [range, setRange] = useState("30d");
@@ -54,6 +55,12 @@ export default function AdminAnalyticsPage() {
       <div className="space-y-8 pb-16">
         <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
           <div>
+            <BackButton
+              fallbackUrl="/admin"
+              label="Back to Dashboard"
+              variant="default"
+              className="mb-3"
+            />
             <h1 className="text-2xl lg:text-3xl font-black text-slate-900 dark:text-slate-100 tracking-tight">
               Platform Analytics & Financial Reports
             </h1>

@@ -25,6 +25,7 @@ import {
   X,
   MessageSquare,
 } from "lucide-react";
+import { BackButton } from "@/components/ui/back-button";
 
 export default function LmsClassroomPlayerPage() {
   const params = useParams();
@@ -250,12 +251,12 @@ export default function LmsClassroomPlayerPage() {
       {/* Top LMS Header */}
       <header className="h-16 px-4 sm:px-6 bg-slate-900 border-b border-slate-800 flex items-center justify-between z-30 shrink-0">
         <div className="flex items-center gap-4">
-          <Link
-            href="/student/courses"
-            className="flex items-center gap-1.5 text-xs font-semibold text-slate-400 hover:text-slate-200"
-          >
-            <ChevronLeft className="w-4 h-4" /> Dashboard
-          </Link>
+          <BackButton
+            fallbackUrl="/student/courses"
+            label="My Courses"
+            variant="dark"
+            size="sm"
+          />
           <span className="text-slate-700">|</span>
           <h1 className="text-sm font-bold text-slate-100 truncate max-w-xs sm:max-w-md">
             {courseData.title}

@@ -4,6 +4,7 @@ import React, { useState, useEffect } from "react";
 import { DashboardLayout } from "@/components/layout/dashboard-layout";
 import { Card } from "@/components/ui/card";
 import { Server, CheckCircle2, AlertTriangle, RefreshCw, Database, CreditCard, Mail, Video } from "lucide-react";
+import { BackButton } from "@/components/ui/back-button";
 
 export default function AdminSystemHealthPage() {
   const [loading, setLoading] = useState(true);
@@ -31,6 +32,12 @@ export default function AdminSystemHealthPage() {
       <div className="max-w-4xl mx-auto space-y-6 pb-16">
         <div className="flex items-center justify-between">
           <div>
+            <BackButton
+              fallbackUrl="/admin"
+              label="Back to Dashboard"
+              variant="default"
+              className="mb-3"
+            />
             <h1 className="text-2xl lg:text-3xl font-black text-slate-900 dark:text-slate-100 tracking-tight">
               System Operational Health
             </h1>

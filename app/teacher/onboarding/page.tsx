@@ -9,6 +9,7 @@ import { StatusBadge } from "@/components/ui/status-badge";
 import { Input } from "@/components/ui/input";
 import { useToast } from "@/components/ui/toast";
 import { DocumentViewerModal } from "@/components/shared/document-viewer-modal";
+import { BackButton } from "@/components/ui/back-button";
 import { QualificationItem, CertificateItem, DocumentItem, VerificationStatus } from "@/types/auth";
 import { formatCurrency } from "@/lib/currency";
 import {
@@ -406,6 +407,12 @@ export default function TeacherOnboardingPage() {
         {/* Header */}
         <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
           <div>
+            <BackButton
+              fallbackUrl="/teacher/dashboard"
+              label="Back to Dashboard"
+              variant="default"
+              className="mb-3"
+            />
             <div className="flex items-center gap-3">
               <h1 className="text-2xl lg:text-3xl font-black text-slate-900 tracking-tight">
                 Teacher Verification & Profile Setup

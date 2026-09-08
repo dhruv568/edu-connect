@@ -3,6 +3,7 @@
 import React, { useState, useEffect, Suspense } from "react";
 import { useSearchParams, useRouter } from "next/navigation";
 import { ShieldCheck } from "lucide-react";
+import { BackButton } from "@/components/ui/back-button";
 
 function PaymentPendingContent() {
   const searchParams = useSearchParams();
@@ -49,6 +50,13 @@ function PaymentPendingContent() {
         <div className="p-4 rounded-2xl bg-slate-900/60 border border-slate-800 text-xs text-slate-400 flex items-center justify-center gap-2">
           <ShieldCheck className="w-4 h-4 text-blue-400" /> Safe transaction verification in progress
         </div>
+
+        <BackButton
+          fallbackUrl="/student/dashboard"
+          label="Back to Dashboard"
+          variant="dark"
+          className="w-full py-3 rounded-xl border border-slate-800"
+        />
       </div>
     </div>
   );

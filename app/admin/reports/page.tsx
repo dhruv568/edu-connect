@@ -6,6 +6,8 @@ import { Card } from "@/components/ui/card";
 import { StatusBadge } from "@/components/ui/status-badge";
 import { GlassButton } from "@/components/glass/glass-button";
 import { Search, Filter, ChevronLeft, ChevronRight, Loader2, Flag, CheckCircle2, XCircle, Eye, X } from "lucide-react";
+import { useToast } from "@/components/ui/toast";
+import { BackButton } from "@/components/ui/back-button";
 
 export default function AdminReportsPage() {
   const [reports, setReports] = useState<any[]>([]);
@@ -78,6 +80,12 @@ export default function AdminReportsPage() {
     <DashboardLayout role="ADMIN" userName="System Administrator" userEmail="admin@educonnects.com">
       <div className="space-y-6 pb-16">
         <div>
+          <BackButton
+            fallbackUrl="/admin"
+            label="Back to Dashboard"
+            variant="default"
+            className="mb-3"
+          />
           <h1 className="text-2xl lg:text-3xl font-black text-slate-900 dark:text-slate-100 tracking-tight">
             Content & User Report Moderation
           </h1>

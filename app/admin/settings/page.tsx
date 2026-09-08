@@ -5,6 +5,7 @@ import { DashboardLayout } from "@/components/layout/dashboard-layout";
 import { Card } from "@/components/ui/card";
 import { GlassButton } from "@/components/glass/glass-button";
 import { Settings, Percent, Layers, Shield, Save, Loader2, Plus, Check } from "lucide-react";
+import { BackButton } from "@/components/ui/back-button";
 
 export default function AdminSettingsPage() {
   const [activeTab, setActiveTab] = useState<"general" | "commission" | "categories">("general");
@@ -144,6 +145,12 @@ export default function AdminSettingsPage() {
     <DashboardLayout role="ADMIN" userName="System Administrator" userEmail="admin@educonnects.com">
       <div className="space-y-6 pb-16">
         <div>
+          <BackButton
+            fallbackUrl="/admin"
+            label="Back to Dashboard"
+            variant="default"
+            className="mb-3"
+          />
           <h1 className="text-2xl lg:text-3xl font-black text-slate-900 dark:text-slate-100 tracking-tight">
             Platform Settings & Configuration
           </h1>

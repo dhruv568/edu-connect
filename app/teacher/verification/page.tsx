@@ -6,6 +6,7 @@ import { DashboardLayout } from "@/components/layout/dashboard-layout";
 import { GlassCard } from "@/components/glass/glass-card";
 import { GlassButton } from "@/components/glass/glass-button";
 import { StatusBadge } from "@/components/ui/status-badge";
+import { BackButton } from "@/components/ui/back-button";
 import { useToast } from "@/components/ui/toast";
 import { VerificationStatus, VerificationHistoryItem } from "@/types/auth";
 import {
@@ -85,6 +86,12 @@ export default function TeacherVerificationStatusPage() {
         {/* Header */}
         <div className="flex items-center justify-between">
           <div>
+            <BackButton
+              fallbackUrl="/teacher/dashboard"
+              label="Back to Dashboard"
+              variant="default"
+              className="mb-3"
+            />
             <h1 className="text-2xl lg:text-3xl font-black text-slate-900 tracking-tight">
               Teacher Verification Dashboard
             </h1>

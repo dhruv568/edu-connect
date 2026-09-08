@@ -23,6 +23,7 @@ import {
   Layers,
 } from "lucide-react";
 import { DashboardLayout } from "@/components/layout/dashboard-layout";
+import { BackButton } from "@/components/ui/back-button";
 
 export default function TeacherCourseEditorPage() {
   const params = useParams();
@@ -339,11 +340,13 @@ export default function TeacherCourseEditorPage() {
         {/* Top Header & Quick Actions */}
         <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 pb-6 border-b border-slate-800">
           <div>
-            <div className="flex items-center gap-2">
-              <Link href="/teacher/courses" className="text-xs text-blue-400 font-semibold hover:underline">
-                ← Back to Courses
-              </Link>
-              <span className="text-slate-600">•</span>
+            <div className="flex items-center gap-3 mb-2">
+              <BackButton
+                fallbackUrl={`/teacher/courses/${courseId}`}
+                label="Back to Course"
+                variant="dark"
+                size="sm"
+              />
               <span
                 className={`px-2.5 py-0.5 text-[10px] font-bold uppercase rounded-full ${
                   course.status === "PUBLISHED"

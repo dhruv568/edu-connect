@@ -8,6 +8,7 @@ import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { useToast } from "@/components/ui/toast";
 import { Save, ArrowLeft } from "lucide-react";
+import { BackButton } from "@/components/ui/back-button";
 import Link from "next/link";
 
 export default function ProfileEditPage() {
@@ -97,9 +98,11 @@ export default function ProfileEditPage() {
     <DashboardLayout role={userRole as any} userName={firstName || "User"} userEmail="...">
       <div className="space-y-6 max-w-2xl mx-auto">
         <div className="flex items-center justify-between">
-          <Link href="/profile" className="text-xs font-bold text-slate-500 hover:text-slate-900 flex items-center gap-1">
-            <ArrowLeft className="h-4 w-4" /> Cancel & Return
-          </Link>
+          <BackButton
+            fallbackUrl="/profile"
+            label="Cancel & Return"
+            variant="default"
+          />
           <h1 className="text-xl font-bold text-slate-900">Edit Profile</h1>
         </div>
 

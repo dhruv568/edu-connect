@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import { DashboardLayout } from "@/components/layout/dashboard-layout";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
+import { BackButton } from "@/components/ui/back-button";
 import {
   Bell,
   CheckCircle2,
@@ -28,7 +29,7 @@ export default function NotificationCenterPage() {
   const [filter, setFilter] = useState<"ALL" | "UNREAD" | "CLASSES" | "COURSES" | "PAYMENTS" | "SYSTEM">("ALL");
   const [page, setPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
-  const [userRole, setUserRole] = useState<"STUDENT" | "TEACHER" | "ADMIN">("STUDENT");
+  const [userRole, setUserRole] = useState<"STUDENT" | "TEACHER" | "ADMIN" | "STAFF">("STUDENT");
   const [userName, setUserName] = useState("Notification Center");
   const [unreadCount, setUnreadCount] = useState(0);
 
@@ -117,6 +118,20 @@ export default function NotificationCenterPage() {
       <div className="max-w-4xl mx-auto space-y-6 pb-16">
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
           <div>
+            <BackButton
+              fallbackUrl={
+                userRole === "ADMIN"
+                  ? "/admin"
+                  : userRole === "TEACHER"
+                  ? "/teacher/dashboard"
+                  : userRole === "STAFF"
+                  ? "/staff/dashboard"
+                  : "/student/dashboard"
+              }
+              label="Back to Dashboard"
+              variant="default"
+              className="mb-3"
+            />
             <h1 className="text-2xl lg:text-3xl font-black text-slate-900 dark:text-slate-100 tracking-tight">
               Notification Center
             </h1>

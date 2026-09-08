@@ -7,6 +7,7 @@ import { Mail, CheckCircle2, AlertCircle, RefreshCw, ArrowLeft, ShieldCheck } fr
 import { Button } from "@/components/ui/button";
 import { useToast } from "@/components/ui/toast";
 import { maskEmail } from "@/lib/auth/tokens";
+import { BackButton } from "@/components/ui/back-button";
 
 function VerifyEmailForm() {
   const searchParams = useSearchParams();
@@ -259,22 +260,20 @@ function VerifyEmailForm() {
             )}
 
             <div className="pt-4 border-t border-slate-100 flex items-center justify-between text-xs">
-              <button
-                type="button"
-                onClick={() => router.push("/")}
-                className="text-slate-500 hover:text-slate-800 flex items-center gap-1 font-semibold"
-              >
-                <ArrowLeft className="h-3.5 w-3.5" /> Back Home
-              </button>
+              <BackButton
+                fallbackUrl="/"
+                label="Back Home"
+                variant="ghost"
+              />
 
               <button
                 type="button"
                 onClick={handleResend}
                 disabled={resendCooldown > 0 || loading}
-                className="text-blue-600 hover:text-blue-700 font-bold disabled:text-slate-400 flex items-center gap-1"
+                className="text-blue-600 hover:text-blue-700 font-bold disabled:text-slate-400 flex items-center gap-1 text-xs"
               >
                 <RefreshCw className={`h-3.5 w-3.5 ${resendCooldown > 0 ? "animate-spin" : ""}`} />
-                {resendCooldown > 0 ? `Resend code in ${resendCooldown}s` : "Resend Code"}
+                {resendCooldown > 0 ? `Resend in ${resendCooldown}s` : "Resend Code"}
               </button>
             </div>
           </>

@@ -20,6 +20,7 @@ import {
   CheckCircle2,
 } from "lucide-react";
 import { formatCurrency } from "@/lib/currency";
+import { BackButton } from "@/components/ui/back-button";
 
 export default function TeacherAnalyticsPage() {
   const [range, setRange] = useState("30d");
@@ -58,6 +59,12 @@ export default function TeacherAnalyticsPage() {
         {/* Header & Date Range Picker */}
         <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
           <div>
+            <BackButton
+              fallbackUrl="/teacher/dashboard"
+              label="Back to Dashboard"
+              variant="default"
+              className="mb-3"
+            />
             <h1 className="text-2xl lg:text-3xl font-black text-slate-900 dark:text-slate-100 tracking-tight">
               Teaching Analytics & Insights
             </h1>

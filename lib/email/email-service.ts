@@ -328,11 +328,11 @@ export class EmailService {
     return provider.sendNotificationEmail({
       email: params.email,
       recipientName: name,
-      subject: "You've been invited to join EduConnects 🎓",
-      headline: "You're Invited to Join EduConnects Staff!",
+      subject: "You've been invited to join EduConnects",
+      headline: "You've been invited to join EduConnects",
       statusBadgeText: `ASSIGNED ROLE: ${params.roleName.toUpperCase()}`,
       statusBadgeVariant: "success",
-      bodyText: `Hello ${name},\n\nYou have been invited to join the EduConnects administration team.\n\nAssigned Role: ${params.roleName}\n\nTo activate your staff account:\n1. Open EduConnects.\n2. Go to Staff Registration (/staff/register).\n3. Enter this email address: ${params.email}\n4. Verify the OTP sent to your email.\n5. Complete your account setup.\n\nYour staff access and permissions will be automatically configured after email verification.`,
+      bodyText: `Hello ${name},\n\nYou have been invited to join the EduConnects administration team.\n\nYou have been assigned the following role:\n${params.roleName}\n\nTo complete your staff account setup:\n1. Open EduConnects.\n2. Go to Staff Registration.\n3. Enter the email address where you received this invitation (${params.email}).\n4. Verify the OTP sent to your email.\n5. Complete your account setup.\n\nYour staff access and permissions will be automatically configured after verification.\n\nIf you were not expecting this invitation, please contact the EduConnects administrator.\n\nRegards,\nEduConnects Team`,
       actionUrl: `${getPublicAppUrl()}/staff/register`,
       actionText: "Go to Staff Registration",
     });

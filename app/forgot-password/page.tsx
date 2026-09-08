@@ -10,6 +10,7 @@ import { GlassButton } from "@/components/glass/glass-button";
 import { Input } from "@/components/ui/input";
 import { useToast } from "@/components/ui/toast";
 import { Mail, ArrowLeft, Send } from "lucide-react";
+import { BackButton } from "@/components/ui/back-button";
 
 export default function ForgotPasswordPage() {
   const [email, setEmail] = useState("");
@@ -45,7 +46,13 @@ export default function ForgotPasswordPage() {
     <div className="min-h-screen flex flex-col bg-slate-50">
       <FloatingNavbar />
 
-      <main className="flex-1 pt-32 pb-20 max-w-md mx-auto px-4 w-full space-y-8">
+      <main className="flex-1 pt-32 pb-20 max-w-md mx-auto px-4 w-full space-y-6">
+        <BackButton
+          fallbackUrl="/login"
+          label="Back to Sign In"
+          variant="default"
+        />
+
         <div className="text-center space-y-2">
           <GlassBadge variant="blue">PASSWORD RECOVERY</GlassBadge>
           <h1 className="text-3xl font-black text-slate-900">Forgot Password</h1>

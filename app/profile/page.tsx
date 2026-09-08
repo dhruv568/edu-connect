@@ -9,6 +9,7 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { User, Mail, ShieldCheck, Edit, CheckCircle2, Award } from "lucide-react";
 import { ProfileSkeleton } from "@/components/shared/loading-skeleton";
+import { BackButton } from "@/components/ui/back-button";
 
 export default function UserProfilePage() {
   const [userData, setUserData] = useState<any | null>(null);
@@ -36,6 +37,15 @@ export default function UserProfilePage() {
 
   if (!userData) return null;
 
+  const dashboardFallback =
+    userData.role === "ADMIN"
+      ? "/admin"
+      : userData.role === "TEACHER"
+      ? "/teacher/dashboard"
+      : userData.role === "STAFF"
+      ? "/staff/dashboard"
+      : "/student/dashboard";
+
   return (
     <DashboardLayout
       role={userData.role}
@@ -45,6 +55,12 @@ export default function UserProfilePage() {
       <div className="space-y-6 max-w-4xl mx-auto">
         <div className="flex items-center justify-between">
           <div>
+            <BackButton
+              fallbackUrl={dashboardFallback}
+              label="Back to Dashboard"
+              variant="default"
+              className="mb-3"
+            />
             <h1 className="text-2xl font-black text-slate-900">User Profile</h1>
             <p className="text-xs text-slate-500">Manage your EduConnects account settings and preferences</p>
           </div>

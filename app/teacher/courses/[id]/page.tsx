@@ -8,6 +8,7 @@ import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { useToast } from "@/components/ui/toast";
 import { formatCurrency } from "@/lib/currency";
+import { BackButton } from "@/components/ui/back-button";
 import {
   ArrowLeft,
   Edit,
@@ -74,11 +75,11 @@ export default function TeacherCourseDetailsPage() {
         {/* Top Header */}
         <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 pb-4 border-b border-slate-200">
           <div className="flex items-center gap-3">
-            <Link href="/teacher/courses">
-              <button className="p-2 rounded-xl bg-white border border-slate-200 hover:bg-slate-50 text-slate-600">
-                <ArrowLeft className="h-5 w-5" />
-              </button>
-            </Link>
+            <BackButton
+              fallbackUrl="/teacher/courses"
+              label="Back to Courses"
+              variant="default"
+            />
             <div>
               <div className="flex items-center gap-2">
                 <span className="px-2.5 py-0.5 text-[10px] font-bold uppercase rounded-md bg-blue-100 text-blue-700">

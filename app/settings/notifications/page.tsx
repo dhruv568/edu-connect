@@ -5,6 +5,7 @@ import { DashboardLayout } from "@/components/layout/dashboard-layout";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Bell, Mail, ShieldAlert, CheckCircle2, Loader2, Save } from "lucide-react";
+import { BackButton } from "@/components/ui/back-button";
 
 export default function NotificationSettingsPage() {
   const [loading, setLoading] = useState(true);
@@ -78,6 +79,12 @@ export default function NotificationSettingsPage() {
     <DashboardLayout role={userRole} userName={userName}>
       <div className="max-w-3xl mx-auto space-y-6 pb-16">
         <div>
+          <BackButton
+            fallbackUrl="/notifications"
+            label="Back to Notifications"
+            variant="default"
+            className="mb-3"
+          />
           <h1 className="text-2xl lg:text-3xl font-black text-slate-900 dark:text-slate-100 tracking-tight">
             Notification Preferences
           </h1>

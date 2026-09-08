@@ -11,6 +11,7 @@ import { AuthModal } from "@/components/shared/auth-modal";
 import { ShieldCheck, Star, ArrowLeft, Calendar, BookOpen, Clock } from "lucide-react";
 import { UserRole } from "@/types/auth";
 import { formatCurrency } from "@/lib/currency";
+import { BackButton } from "@/components/ui/back-button";
 
 export default function PublicTeacherProfilePage() {
   const { id } = useParams();
@@ -36,12 +37,11 @@ export default function PublicTeacherProfilePage() {
       <FloatingNavbar />
 
       <main className="flex-1 pt-32 pb-20 max-w-4xl mx-auto px-4 w-full space-y-6">
-        <button
-          onClick={() => router.back()}
-          className="text-xs font-bold text-slate-500 hover:text-slate-900 flex items-center gap-1.5"
-        >
-          <ArrowLeft className="h-4 w-4" /> Back to Teacher Discovery
-        </button>
+        <BackButton
+          fallbackUrl="/find-teachers"
+          label="Back to Teacher Discovery"
+          variant="default"
+        />
 
         {loading ? (
           <div className="h-96 bg-white rounded-3xl animate-pulse border border-slate-200" />
