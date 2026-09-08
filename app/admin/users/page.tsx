@@ -4,6 +4,7 @@ import React, { useState, useEffect } from "react";
 import { DashboardLayout } from "@/components/layout/dashboard-layout";
 import { Card } from "@/components/ui/card";
 import { StatusBadge } from "@/components/ui/status-badge";
+import { BackButton } from "@/components/ui/back-button";
 import { GlassButton } from "@/components/glass/glass-button";
 import { Search, Filter, ChevronLeft, ChevronRight, Loader2, UserCheck, UserX, ShieldAlert, Eye, X } from "lucide-react";
 
@@ -96,6 +97,12 @@ export default function AdminUsersPage() {
     <DashboardLayout role="ADMIN" userName="System Administrator" userEmail="admin@educonnects.com">
       <div className="space-y-6 pb-16">
         <div>
+          <BackButton
+            fallbackUrl="/admin"
+            label="Back to Dashboard"
+            variant="default"
+            className="mb-3"
+          />
           <h1 className="text-2xl lg:text-3xl font-black text-slate-900 dark:text-slate-100 tracking-tight">
             User Governance & Accounts
           </h1>

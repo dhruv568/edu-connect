@@ -3,6 +3,7 @@
 import React, { useState, useEffect } from "react";
 import { IndianRupee, TrendingUp, RefreshCw, ShieldCheck, Search, Filter, CheckCircle2, AlertCircle, Settings, ArrowUpRight } from "lucide-react";
 import { formatCurrency } from "@/lib/currency";
+import { BackButton } from "@/components/ui/back-button";
 
 export default function AdminPaymentsPage() {
   const [data, setData] = useState<any>(null);
@@ -100,6 +101,12 @@ export default function AdminPaymentsPage() {
       {/* Header */}
       <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 border-b border-slate-800/80 pb-6">
         <div>
+          <BackButton
+            fallbackUrl="/admin"
+            label="Back to Dashboard"
+            variant="dark"
+            className="mb-3"
+          />
           <h1 className="text-3xl font-extrabold text-white tracking-tight flex items-center gap-3">
             <IndianRupee className="w-8 h-8 text-blue-500" /> Admin Financial System & Reconciliation
           </h1>

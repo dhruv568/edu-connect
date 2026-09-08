@@ -8,6 +8,7 @@ import { GlassButton } from "@/components/glass/glass-button";
 import { StatusBadge } from "@/components/ui/status-badge";
 import { Search, Filter, ChevronLeft, ChevronRight, Loader2, ArrowRight, ShieldCheck } from "lucide-react";
 import { formatCurrency } from "@/lib/currency";
+import { BackButton } from "@/components/ui/back-button";
 
 export default function AdminTeachersPage() {
   const [teachers, setTeachers] = useState<any[]>([]);
@@ -52,6 +53,12 @@ export default function AdminTeachersPage() {
       <div className="space-y-6 pb-16">
         <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
           <div>
+            <BackButton
+              fallbackUrl="/admin"
+              label="Back to Dashboard"
+              variant="default"
+              className="mb-3"
+            />
             <h1 className="text-2xl lg:text-3xl font-black text-slate-900 tracking-tight">Teacher Governance & Directory</h1>
             <p className="text-xs lg:text-sm text-slate-500 mt-1">
               Review, approve, reject, or suspend teacher accounts across EduConnects.

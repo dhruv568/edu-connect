@@ -16,6 +16,7 @@ import { Navbar } from "@/components/layout/navbar";
 import { Footer } from "@/components/layout/footer";
 import { formatCurrency } from "@/lib/currency";
 import { PermissionProvider, PermissionGuard } from "@/components/shared/permission-guard";
+import { BackButton } from "@/components/ui/back-button";
 
 export default function AdminCoursesModerationPage() {
   const [courses, setCourses] = useState<any[]>([]);
@@ -89,6 +90,12 @@ export default function AdminCoursesModerationPage() {
       <main className="flex-1 max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 pt-28 pb-16 space-y-8">
         <div className="pb-6 border-b border-slate-800 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
           <div>
+            <BackButton
+              fallbackUrl="/admin"
+              label="Back to Dashboard"
+              variant="dark"
+              className="mb-3"
+            />
             <h1 className="text-2xl sm:text-3xl font-black text-slate-50 flex items-center gap-2">
               <Shield className="w-7 h-7 text-blue-500" /> Admin Course Moderation
             </h1>
