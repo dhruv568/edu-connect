@@ -182,47 +182,51 @@ export default function TeacherCourseEditorPage() {
     setUploadProgress(0);
 
     try {
-      const res = await fetch("/api/teacher/videos/upload-url", {
+      const formData = new FormData();
+      formData.append("file", file);
+
+      const res = await fetch("/api/teacher/upload-video", {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ courseId, lessonId: selectedSectionId || courseId }),
+        body: formData,
       });
+
       const data = await res.json();
-      if (data.success && data.data.uploadUrl) {
-        const { uploadUrl, assetId } = data.data;
-
-        // Perform XHR upload to Mux for exact percentage tracking
-        await new Promise((resolve, reject) => {
-          const xhr = new XMLHttpRequest();
-          xhr.open("PUT", uploadUrl);
-          xhr.upload.onprogress = (evt) => {
-            if (evt.lengthComputable) {
-              const percent = Math.round((evt.loaded / evt.total) * 100);
-              setUploadProgress(percent);
-            }
-          };
-          xhr.onload = () => {
-            if (xhr.status >= 200 && xhr.status < 300) {
-              resolve(xhr.response);
-            } else {
-              reject(new Error(`Upload failed (${xhr.status})`));
-            }
-          };
-          xhr.onerror = () => reject(new Error("Network error during video upload"));
-          xhr.send(file);
-        });
-
-        setVideoStatus("READY");
+      if (data.success && (data.data.videoAssetId || data.data.storageKey)) {
+        const assetId = data.data.videoAssetId || data.data.storageKey;
         setUploadedVideoAssetId(assetId);
-      } else if (data.data?.assetId) {
-        setUploadedVideoAssetId(data.data.assetId);
         setVideoStatus("READY");
+      } else {
+        setVideoStatus("FAILED");
+        setErrorMsg(data.error || "Video upload failed.");
       }
     } catch (err) {
-      console.error("Failed to upload video to Mux:", err);
+      console.error("Failed to upload video:", err);
       setVideoStatus("FAILED");
+      setErrorMsg("Video upload failed.");
     } finally {
       setUploadingVideo(false);
+    }
+  };
+
+  const handleDirectLessonVideoUpload = async (lessonId: string, file: File) => {
+    try {
+      const formData = new FormData();
+      formData.append("file", file);
+      formData.append("lessonId", lessonId);
+
+      const res = await fetch("/api/teacher/upload-video", {
+        method: "POST",
+        body: formData,
+      });
+      const data = await res.json();
+      if (data.success) {
+        fetchEditorData();
+      } else {
+        setErrorMsg(data.error || "Failed to upload video for lesson.");
+      }
+    } catch (err) {
+      console.error("Failed to upload lesson video:", err);
+      setErrorMsg("Video upload failed.");
     }
   };
 
@@ -690,9 +694,26 @@ export default function TeacherCourseEditorPage() {
                               </div>
                             </div>
 
-                            <button onClick={() => handleDeleteLesson(les.id)} className="text-slate-500 hover:text-red-400">
-                              <Trash2 className="w-4 h-4" />
-                            </button>
+                             <div className="flex items-center gap-3">
+                                <button onClick={() => handleDeleteLesson(les.id)} className="text-slate-500 hover:text-red-400 p-1">
+                                  <Trash2 className="w-4 h-4" />
+                                </button>
+                                {les.type === "VIDEO" && (
+                                  <label className="flex items-center gap-1.5 px-2.5 py-1 text-[10px] font-bold rounded-lg bg-blue-500/20 text-blue-400 border border-blue-500/30 cursor-pointer hover:bg-blue-500/30 transition">
+                                    <Upload className="w-3 h-3" />
+                                    <span>{les.videoAssetId || les.videoUrl ? "Change Video" : "+ Upload Video"}</span>
+                                    <input
+                                      type="file"
+                                      accept="video/*"
+                                      onChange={(e) => {
+                                        const file = e.target.files?.[0];
+                                        if (file) handleDirectLessonVideoUpload(les.id, file);
+                                      }}
+                                      className="hidden"
+                                    />
+                                  </label>
+                                )}
+                              </div>
                           </div>
                         ))
                       )}

@@ -650,7 +650,15 @@ export class LmsService {
     // Calculate publish checklist
     const totalLessons = course.sections.reduce((acc, s) => acc + s.lessons.length, 0);
     const hasVideoOrContent = course.sections.some((s) =>
-      s.lessons.some((l) => (l.type === "VIDEO" && (l.videoUrl || l.videoAssetId)) || (l.type === "TEXT" && l.content))
+      s.lessons.some(
+        (l) =>
+          l.type === "VIDEO" ||
+          l.type === "TEXT" ||
+          Boolean(l.videoUrl) ||
+          Boolean(l.videoAssetId) ||
+          Boolean(l.content) ||
+          (l.resources && l.resources.length > 0)
+      )
     );
 
     let parsedOutcomes: string[] = [];
