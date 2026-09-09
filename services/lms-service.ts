@@ -492,6 +492,8 @@ export class LmsService {
             isPreview: l.isPreview,
             status: l.status,
             videoProvider: l.videoProvider,
+            videoUrl: l.videoUrl || (l.videoAssetId ? `/api/videos/${l.videoAssetId}/stream` : null),
+            videoAssetId: l.videoAssetId,
             videoAsset: mainVideoAsset
               ? {
                   id: mainVideoAsset.id,

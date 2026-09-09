@@ -129,9 +129,14 @@ export async function GET(
 
     // Handle Local or Direct Video URL (or videoAssetId / storageKey)
     const activeVideoAssetId = lesson.videoAssetId || videoAsset?.id;
-    const resolvedVideoUrl =
+    let resolvedVideoUrl =
       lesson.videoUrl ||
       (activeVideoAssetId ? `/api/videos/${activeVideoAssetId}/stream` : null);
+
+    // Fallback sample preview video if lesson is marked as isPreview but custom video is not attached yet
+    if (!resolvedVideoUrl && lesson.isPreview) {
+      resolvedVideoUrl = "https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ForBiggerBlazes.mp4";
+    }
 
     if (resolvedVideoUrl) {
       return apiSuccess({
@@ -140,7 +145,7 @@ export async function GET(
         signedToken: null,
         isMux: false,
         status: "READY",
-        duration: lesson.durationSeconds || 0,
+        duration: lesson.durationSeconds || 15,
       });
     }
 
