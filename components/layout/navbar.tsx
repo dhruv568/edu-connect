@@ -94,14 +94,14 @@ export function Navbar() {
             <Link href="/" className="hover:text-blue-600 transition-colors">
               Home
             </Link>
+            <Link href="/services" className="hover:text-blue-600 transition-colors">
+              Services
+            </Link>
             <Link href="/courses" className="hover:text-blue-600 transition-colors">
               Courses
             </Link>
-            <Link href="/find-teachers" className="hover:text-blue-600 transition-colors">
-              Find Teachers
-            </Link>
-            <Link href="/about" className="hover:text-blue-600 transition-colors">
-              About
+            <Link href="/pricing" className="hover:text-blue-600 transition-colors">
+              Pricing
             </Link>
             <Link href="/contact" className="hover:text-blue-600 transition-colors">
               Contact

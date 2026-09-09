@@ -214,89 +214,20 @@ export function FloatingNavbar({ variant }: FloatingNavbarProps = {}) {
               <Link href="/" className="hover:text-blue-600 transition-colors">
                 Home
               </Link>
-              <Link href="/student" className="hover:text-blue-600 text-blue-700 font-extrabold transition-colors">
-                Students
-              </Link>
-              <Link href="/teacher" className="hover:text-indigo-600 text-indigo-700 font-extrabold transition-colors">
-                Teachers
-              </Link>
-              <Link href="/find-teachers" className="hover:text-blue-600 transition-colors">
-                Find Tutors
+              <Link href="/services" className="hover:text-blue-600 transition-colors">
+                Services
               </Link>
               <Link href="/courses" className="hover:text-blue-600 transition-colors">
                 Courses
               </Link>
-
-              {/* Learning Models Dropdown */}
-              <div
-                className="relative"
-                onMouseEnter={() => setMegaMenuOpen(true)}
-                onMouseLeave={() => setMegaMenuOpen(false)}
-              >
-                <button className="flex items-center gap-1 hover:text-blue-600 transition-colors py-1">
-                  <span>Models</span>
-                  <ChevronDown className="h-3.5 w-3.5" />
-                </button>
-
-                <AnimatePresence>
-                  {megaMenuOpen && (
-                    <motion.div
-                      initial={{ opacity: 0, y: 8 }}
-                      animate={{ opacity: 1, y: 0 }}
-                      exit={{ opacity: 0, y: 8 }}
-                      className="absolute top-full -left-8 w-72 p-3 glass-dropdown-menu space-y-2 pointer-events-auto text-left normal-case shadow-2xl"
-                    >
-                      <Link
-                        href="/#models"
-                        onClick={() => setMegaMenuOpen(false)}
-                        className="p-2.5 rounded-xl hover:bg-blue-50/80 transition-colors flex items-start gap-3 group"
-                      >
-                        <div className="p-2 bg-blue-100 text-blue-600 rounded-lg shrink-0">
-                          <Target className="h-4 w-4" />
-                        </div>
-                        <div>
-                          <h4 className="text-xs font-bold text-slate-900 group-hover:text-blue-600">Demo Sessions</h4>
-                          <p className="text-[10px] text-slate-500">1-on-1 trial session</p>
-                        </div>
-                      </Link>
-
-                      <Link
-                        href="/#models"
-                        onClick={() => setMegaMenuOpen(false)}
-                        className="p-2.5 rounded-xl hover:bg-indigo-50/80 transition-colors flex items-start gap-3 group"
-                      >
-                        <div className="p-2 bg-indigo-100 text-indigo-600 rounded-lg shrink-0">
-                          <Video className="h-4 w-4" />
-                        </div>
-                        <div>
-                          <h4 className="text-xs font-bold text-slate-900 group-hover:text-indigo-600">Live Class Slots</h4>
-                          <p className="text-[10px] text-slate-500">Scheduled live slots</p>
-                        </div>
-                      </Link>
-
-                      <Link
-                        href="/courses"
-                        onClick={() => setMegaMenuOpen(false)}
-                        className="p-2.5 rounded-xl hover:bg-emerald-50/80 transition-colors flex items-start gap-3 group"
-                      >
-                        <div className="p-2 bg-emerald-100 text-emerald-600 rounded-lg shrink-0">
-                          <Play className="h-4 w-4" />
-                        </div>
-                        <div>
-                          <h4 className="text-xs font-bold text-slate-900 group-hover:text-emerald-600">Recorded Courses</h4>
-                          <p className="text-[10px] text-slate-500">Self-paced LMS modules</p>
-                        </div>
-                      </Link>
-                    </motion.div>
-                  )}
-                </AnimatePresence>
-              </div>
-
+              <Link href="/find-teachers" className="hover:text-blue-600 transition-colors">
+                Find Tutors
+              </Link>
               <Link href="/pricing" className="hover:text-blue-600 transition-colors">
                 Pricing
               </Link>
-              <Link href="/about" className="hover:text-blue-600 transition-colors">
-                About
+              <Link href="/contact" className="hover:text-blue-600 transition-colors">
+                Contact
               </Link>
             </nav>
           )}
@@ -551,23 +482,20 @@ export function FloatingNavbar({ variant }: FloatingNavbarProps = {}) {
                 <Link href="/" onClick={() => setMobileOpen(false)} className="py-2 border-b border-slate-100 text-left px-2">
                   Home
                 </Link>
-                <Link href="/student" onClick={() => setMobileOpen(false)} className="py-2 border-b border-slate-100 text-left px-2 text-blue-600">
-                  Student Portal
-                </Link>
-                <Link href="/teacher" onClick={() => setMobileOpen(false)} className="py-2 border-b border-slate-100 text-left px-2 text-indigo-600">
-                  Teacher Portal
-                </Link>
-                <Link href="/find-teachers" onClick={() => setMobileOpen(false)} className="py-2 border-b border-slate-100 text-left px-2">
-                  Find Teachers
+                <Link href="/services" onClick={() => setMobileOpen(false)} className="py-2 border-b border-slate-100 text-left px-2 text-blue-600">
+                  Products & Services
                 </Link>
                 <Link href="/courses" onClick={() => setMobileOpen(false)} className="py-2 border-b border-slate-100 text-left px-2">
                   Courses
                 </Link>
+                <Link href="/find-teachers" onClick={() => setMobileOpen(false)} className="py-2 border-b border-slate-100 text-left px-2">
+                  Find Tutors
+                </Link>
                 <Link href="/pricing" onClick={() => setMobileOpen(false)} className="py-2 border-b border-slate-100 text-left px-2">
                   Pricing
                 </Link>
-                <Link href="/about" onClick={() => setMobileOpen(false)} className="py-2 border-b border-slate-100 text-left px-2">
-                  About
+                <Link href="/contact" onClick={() => setMobileOpen(false)} className="py-2 border-b border-slate-100 text-left px-2">
+                  Contact Us
                 </Link>
               </nav>
             )}

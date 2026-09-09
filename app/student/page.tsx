@@ -178,7 +178,7 @@ export default function StudentLandingPage() {
     {
       question: "How do I enroll in a course on EduConnects?",
       answer:
-        "You can explore our course catalog, filter by subject or difficulty level, view the curriculum overview and preview lessons, and click 'Enroll Now'. Payments are securely handled via Razorpay UPI, Netbanking, or Debit/Credit Cards.",
+        "You can explore our course catalog, filter by subject or difficulty level, view the curriculum overview and preview lessons, and click 'Enroll Now'. Payments are securely handled via Cashfree UPI, Netbanking, or Debit/Credit Cards.",
     },
     {
       question: "How do live interactive classes work?",

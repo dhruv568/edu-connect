@@ -9,7 +9,7 @@ const inter = Inter({ subsets: ["latin"] });
 
 export const metadata: Metadata = {
   title: "EduConnects — Learn Better. Teach Smarter.",
-  description: "Next-generation education platform connecting teachers, students, and parents with flexible learning models.",
+  description: "Next-generation education platform connecting teachers and students with flexible learning models.",
 };
 
 export default function RootLayout({

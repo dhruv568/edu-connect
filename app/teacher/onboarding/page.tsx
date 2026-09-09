@@ -825,7 +825,7 @@ export default function TeacherOnboardingPage() {
                   <Award className="h-12 w-12 text-slate-300 mx-auto" />
                   <div className="text-sm font-bold text-slate-700">No Certificates Added</div>
                   <p className="text-xs text-slate-500 max-w-sm mx-auto">
-                    Certificates build high trust with parents & students. Add any relevant teaching credentials or click Next to proceed.
+                    Certificates build high trust with students & learners. Add any relevant teaching credentials or click Next to proceed.
                   </p>
                 </div>
               ) : (

@@ -241,7 +241,7 @@ export default function HowItWorksPage() {
                     : "text-slate-600 hover:text-slate-900"
                 }`}
               >
-                For Students & Parents
+                For Students & Learners
               </button>
               <button
                 onClick={() => setActiveTab("TEACHER")}

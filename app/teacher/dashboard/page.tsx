@@ -302,7 +302,7 @@ export default function TeacherDashboardPage() {
             <Card className="p-5 hover:border-amber-500 transition cursor-pointer space-y-2">
               <IndianRupee className="h-6 w-6 text-amber-500" />
               <h4 className="text-sm font-extrabold text-slate-900 dark:text-slate-100">View Earnings</h4>
-              <p className="text-xs text-slate-500">Financial ledger entries & Razorpay payouts.</p>
+              <p className="text-xs text-slate-500">Financial ledger entries & Cashfree payouts.</p>
             </Card>
           </Link>
         </div>

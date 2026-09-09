@@ -133,7 +133,7 @@ export default function TeacherLandingPage() {
     {
       step: "05",
       title: "Automated Bank Payouts",
-      desc: "Track every completed session in your financial ledger and receive automatic direct deposits via Razorpay.",
+      desc: "Track every completed session in your financial ledger and receive automatic direct deposits via Cashfree.",
       icon: IndianRupee,
     },
   ];
@@ -157,7 +157,7 @@ export default function TeacherLandingPage() {
     {
       question: "How and when do I receive payouts?",
       answer:
-        "All earnings from enrolled courses and completed live sessions are logged in your Teacher Ledger. Payouts are transferred automatically to your verified bank account via Razorpay Route without manual invoicing.",
+        "All earnings from enrolled courses and completed live sessions are logged in your Teacher Ledger. Payouts are transferred automatically to your verified bank account via Cashfree Payouts without manual invoicing.",
     },
     {
       question: "Can I offer both 1-on-1 trial demos and group classes?",
@@ -253,7 +253,7 @@ export default function TeacherLandingPage() {
                   </div>
                   <div>
                     <div className="text-2xl lg:text-3xl font-black text-slate-900">Direct</div>
-                    <div className="text-xs text-slate-500 font-medium">Razorpay Payouts</div>
+                    <div className="text-xs text-slate-500 font-medium">Cashfree Payouts</div>
                   </div>
                   <div>
                     <div className="text-2xl lg:text-3xl font-black text-emerald-600">100%</div>
@@ -825,7 +825,7 @@ export default function TeacherLandingPage() {
               <span>•</span>
               <span>✓ Verified Educator Badge</span>
               <span>•</span>
-              <span>✓ Automated Razorpay bank transfers</span>
+              <span>✓ Automated Cashfree bank transfers</span>
             </div>
           </div>
         </section>

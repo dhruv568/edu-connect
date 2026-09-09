@@ -4,11 +4,12 @@ import React, { useState, useEffect } from "react";
 import { DashboardLayout } from "@/components/layout/dashboard-layout";
 import { Card } from "@/components/ui/card";
 import { GlassButton } from "@/components/glass/glass-button";
-import { Settings, Percent, Layers, Shield, Save, Loader2, Plus, Check } from "lucide-react";
+import { Settings, Percent, Layers, Shield, Save, Loader2, Plus, Check, Building2, Phone, FileText } from "lucide-react";
 import { BackButton } from "@/components/ui/back-button";
+import { OFFICIAL_COMPANY_INFO } from "@/lib/company";
 
 export default function AdminSettingsPage() {
-  const [activeTab, setActiveTab] = useState<"general" | "commission" | "categories">("general");
+  const [activeTab, setActiveTab] = useState<"general" | "company" | "commission" | "categories">("general");
 
   // General Settings State
   const [generalSettings, setGeneralSettings] = useState({
@@ -20,6 +21,24 @@ export default function AdminSettingsPage() {
   });
   const [loadingSettings, setLoadingSettings] = useState(true);
   const [savingSettings, setSavingSettings] = useState(false);
+
+  // Company Profile Settings State
+  const [companySettings, setCompanySettings] = useState({
+    brandName: OFFICIAL_COMPANY_INFO.brandName,
+    legalName: OFFICIAL_COMPANY_INFO.legalName,
+    cin: OFFICIAL_COMPANY_INFO.cin,
+    pan: OFFICIAL_COMPANY_INFO.pan,
+    founder: OFFICIAL_COMPANY_INFO.founder,
+    authorizedSignatory: OFFICIAL_COMPANY_INFO.authorizedSignatory,
+    registeredAddress: OFFICIAL_COMPANY_INFO.registeredAddress,
+    website: OFFICIAL_COMPANY_INFO.website,
+    tagline: OFFICIAL_COMPANY_INFO.tagline,
+    governingLaw: OFFICIAL_COMPANY_INFO.governingLaw,
+    whatsappNumber: OFFICIAL_COMPANY_INFO.whatsappNumber,
+    refundPeriod: OFFICIAL_COMPANY_INFO.refundPeriod,
+    pricingRange: OFFICIAL_COMPANY_INFO.pricingRange,
+  });
+  const [savingCompany, setSavingCompany] = useState(false);
 
   // Commission Settings State
   const [commissionRate, setCommissionRate] = useState(15.0);
@@ -42,7 +61,31 @@ export default function AdminSettingsPage() {
     try {
       const res = await fetch("/api/admin/settings");
       const json = await res.json();
-      if (json.data) setGeneralSettings(json.data);
+      if (json.data) {
+        setGeneralSettings({
+          siteName: json.data.siteName || "EduConnects",
+          supportEmail: json.data.supportEmail || "support@educonnects.com",
+          allowRegistration: json.data.allowRegistration ?? true,
+          requireTeacherApproval: json.data.requireTeacherApproval ?? true,
+          maintenanceMode: json.data.maintenanceMode ?? false,
+        });
+
+        setCompanySettings({
+          brandName: json.data.brandName || OFFICIAL_COMPANY_INFO.brandName,
+          legalName: json.data.legalName || OFFICIAL_COMPANY_INFO.legalName,
+          cin: json.data.cin || OFFICIAL_COMPANY_INFO.cin,
+          pan: json.data.pan || OFFICIAL_COMPANY_INFO.pan,
+          founder: json.data.founder || OFFICIAL_COMPANY_INFO.founder,
+          authorizedSignatory: json.data.authorizedSignatory || OFFICIAL_COMPANY_INFO.authorizedSignatory,
+          registeredAddress: json.data.registeredAddress || OFFICIAL_COMPANY_INFO.registeredAddress,
+          website: json.data.website || OFFICIAL_COMPANY_INFO.website,
+          tagline: json.data.tagline || OFFICIAL_COMPANY_INFO.tagline,
+          governingLaw: json.data.governingLaw || OFFICIAL_COMPANY_INFO.governingLaw,
+          whatsappNumber: json.data.whatsappNumber || OFFICIAL_COMPANY_INFO.whatsappNumber,
+          refundPeriod: json.data.refundPeriod || OFFICIAL_COMPANY_INFO.refundPeriod,
+          pricingRange: json.data.pricingRange || OFFICIAL_COMPANY_INFO.pricingRange,
+        });
+      }
     } catch (err) {
       console.error("Failed to load settings:", err);
     } finally {
@@ -76,14 +119,49 @@ export default function AdminSettingsPage() {
       const res = await fetch("/api/admin/settings", {
         method: "PUT",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(generalSettings),
+        body: JSON.stringify({
+          site_name: generalSettings.siteName,
+          support_email: generalSettings.supportEmail,
+          allow_registration: generalSettings.allowRegistration,
+          require_teacher_approval: generalSettings.requireTeacherApproval,
+          maintenance_mode: generalSettings.maintenanceMode,
+        }),
       });
-      const json = await res.json();
       if (res.ok) alert("General settings saved successfully!");
     } catch (err) {
       console.error("Failed to save settings:", err);
     } finally {
       setSavingSettings(false);
+    }
+  };
+
+  const saveCompanySettings = async () => {
+    setSavingCompany(true);
+    try {
+      const res = await fetch("/api/admin/settings", {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          company_brand_name: companySettings.brandName,
+          company_legal_name: companySettings.legalName,
+          company_cin: companySettings.cin,
+          company_pan: companySettings.pan,
+          company_founder: companySettings.founder,
+          company_authorized_signatory: companySettings.authorizedSignatory,
+          company_registered_address: companySettings.registeredAddress,
+          company_website: companySettings.website,
+          company_tagline: companySettings.tagline,
+          company_governing_law: companySettings.governingLaw,
+          company_whatsapp_number: companySettings.whatsappNumber,
+          company_refund_period: companySettings.refundPeriod,
+          company_pricing_range: companySettings.pricingRange,
+        }),
+      });
+      if (res.ok) alert("Official company information updated successfully!");
+    } catch (err) {
+      console.error("Failed to save company settings:", err);
+    } finally {
+      setSavingCompany(false);
     }
   };
 
@@ -95,7 +173,6 @@ export default function AdminSettingsPage() {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ percentage: commissionRate }),
       });
-      const json = await res.json();
       if (res.ok) alert("Platform commission updated successfully!");
     } catch (err) {
       console.error("Failed to save commission:", err);
@@ -143,7 +220,7 @@ export default function AdminSettingsPage() {
 
   return (
     <DashboardLayout role="ADMIN" userName="System Administrator" userEmail="admin@educonnects.com">
-      <div className="space-y-6 pb-16">
+      <div className="space-y-6 pb-16 font-sans">
         <div>
           <BackButton
             fallbackUrl="/admin"
@@ -152,15 +229,15 @@ export default function AdminSettingsPage() {
             className="mb-3"
           />
           <h1 className="text-2xl lg:text-3xl font-black text-slate-900 dark:text-slate-100 tracking-tight">
-            Platform Settings & Configuration
+            Platform Settings & Company Profile
           </h1>
           <p className="text-xs lg:text-sm text-slate-500 mt-1">
-            Centralized platform parameters, revenue commission rates, and course categories.
+            Centralized company identity, platform parameters, revenue commission rates, and course categories.
           </p>
         </div>
 
         {/* Navigation Tabs */}
-        <div className="flex items-center gap-2 border-b border-slate-200 dark:border-slate-800 pb-3">
+        <div className="flex items-center gap-2 border-b border-slate-200 dark:border-slate-800 pb-3 flex-wrap">
           <button
             onClick={() => setActiveTab("general")}
             className={`flex items-center gap-2 px-4 py-2 rounded-2xl text-xs font-black transition-all ${
@@ -171,6 +248,18 @@ export default function AdminSettingsPage() {
           >
             <Settings className="h-4 w-4" />
             General Settings
+          </button>
+
+          <button
+            onClick={() => setActiveTab("company")}
+            className={`flex items-center gap-2 px-4 py-2 rounded-2xl text-xs font-black transition-all ${
+              activeTab === "company"
+                ? "bg-blue-600 text-white shadow-md shadow-blue-500/20"
+                : "text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800"
+            }`}
+          >
+            <Building2 className="h-4 w-4" />
+            Company Profile
           </button>
 
           <button
@@ -273,7 +362,153 @@ export default function AdminSettingsPage() {
           </Card>
         )}
 
-        {/* Tab 2: Commission Settings */}
+        {/* Tab 2: Company Profile Settings */}
+        {activeTab === "company" && (
+          <Card className="p-6 border-slate-200 dark:border-slate-800 space-y-6 max-w-3xl">
+            <div className="border-b border-slate-100 dark:border-slate-800 pb-3">
+              <h3 className="text-lg font-black text-slate-900 dark:text-slate-100">Official Company Profile Parameters</h3>
+              <p className="text-xs text-slate-500">
+                Manage business details displayed across footers, contact forms, pricing pages, and legal policies.
+              </p>
+            </div>
+
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 text-xs">
+              <div>
+                <label className="font-bold text-slate-700 dark:text-slate-300 block mb-1">Brand Name</label>
+                <input
+                  type="text"
+                  value={companySettings.brandName}
+                  onChange={(e) => setCompanySettings({ ...companySettings, brandName: e.target.value })}
+                  className="w-full h-10 px-3 bg-slate-100 dark:bg-slate-800 border-none rounded-xl font-semibold outline-none focus:ring-2 focus:ring-blue-500"
+                />
+              </div>
+
+              <div>
+                <label className="font-bold text-slate-700 dark:text-slate-300 block mb-1">Legal Company Name</label>
+                <input
+                  type="text"
+                  value={companySettings.legalName}
+                  onChange={(e) => setCompanySettings({ ...companySettings, legalName: e.target.value })}
+                  className="w-full h-10 px-3 bg-slate-100 dark:bg-slate-800 border-none rounded-xl font-semibold outline-none focus:ring-2 focus:ring-blue-500"
+                />
+              </div>
+
+              <div>
+                <label className="font-bold text-slate-700 dark:text-slate-300 block mb-1">CIN (Corporate Identification No.)</label>
+                <input
+                  type="text"
+                  value={companySettings.cin}
+                  onChange={(e) => setCompanySettings({ ...companySettings, cin: e.target.value })}
+                  className="w-full h-10 px-3 bg-slate-100 dark:bg-slate-800 border-none rounded-xl font-mono font-semibold outline-none focus:ring-2 focus:ring-blue-500"
+                />
+              </div>
+
+              <div>
+                <label className="font-bold text-slate-700 dark:text-slate-300 block mb-1">PAN</label>
+                <input
+                  type="text"
+                  value={companySettings.pan}
+                  onChange={(e) => setCompanySettings({ ...companySettings, pan: e.target.value })}
+                  className="w-full h-10 px-3 bg-slate-100 dark:bg-slate-800 border-none rounded-xl font-mono font-semibold outline-none focus:ring-2 focus:ring-blue-500"
+                />
+              </div>
+
+              <div>
+                <label className="font-bold text-slate-700 dark:text-slate-300 block mb-1">Founder</label>
+                <input
+                  type="text"
+                  value={companySettings.founder}
+                  onChange={(e) => setCompanySettings({ ...companySettings, founder: e.target.value })}
+                  className="w-full h-10 px-3 bg-slate-100 dark:bg-slate-800 border-none rounded-xl font-semibold outline-none focus:ring-2 focus:ring-blue-500"
+                />
+              </div>
+
+              <div>
+                <label className="font-bold text-slate-700 dark:text-slate-300 block mb-1">Authorized Signatory</label>
+                <input
+                  type="text"
+                  value={companySettings.authorizedSignatory}
+                  onChange={(e) => setCompanySettings({ ...companySettings, authorizedSignatory: e.target.value })}
+                  className="w-full h-10 px-3 bg-slate-100 dark:bg-slate-800 border-none rounded-xl font-semibold outline-none focus:ring-2 focus:ring-blue-500"
+                />
+              </div>
+
+              <div>
+                <label className="font-bold text-slate-700 dark:text-slate-300 block mb-1">Official WhatsApp Number</label>
+                <input
+                  type="text"
+                  value={companySettings.whatsappNumber}
+                  onChange={(e) => setCompanySettings({ ...companySettings, whatsappNumber: e.target.value })}
+                  className="w-full h-10 px-3 bg-slate-100 dark:bg-slate-800 border-none rounded-xl font-semibold outline-none focus:ring-2 focus:ring-blue-500"
+                />
+              </div>
+
+              <div>
+                <label className="font-bold text-slate-700 dark:text-slate-300 block mb-1">Official Website URL</label>
+                <input
+                  type="text"
+                  value={companySettings.website}
+                  onChange={(e) => setCompanySettings({ ...companySettings, website: e.target.value })}
+                  className="w-full h-10 px-3 bg-slate-100 dark:bg-slate-800 border-none rounded-xl font-semibold outline-none focus:ring-2 focus:ring-blue-500"
+                />
+              </div>
+
+              <div>
+                <label className="font-bold text-slate-700 dark:text-slate-300 block mb-1">Tagline</label>
+                <input
+                  type="text"
+                  value={companySettings.tagline}
+                  onChange={(e) => setCompanySettings({ ...companySettings, tagline: e.target.value })}
+                  className="w-full h-10 px-3 bg-slate-100 dark:bg-slate-800 border-none rounded-xl font-semibold outline-none focus:ring-2 focus:ring-blue-500"
+                />
+              </div>
+
+              <div>
+                <label className="font-bold text-slate-700 dark:text-slate-300 block mb-1">Pricing Range Display</label>
+                <input
+                  type="text"
+                  value={companySettings.pricingRange}
+                  onChange={(e) => setCompanySettings({ ...companySettings, pricingRange: e.target.value })}
+                  className="w-full h-10 px-3 bg-slate-100 dark:bg-slate-800 border-none rounded-xl font-semibold outline-none focus:ring-2 focus:ring-blue-500"
+                />
+              </div>
+
+              <div className="sm:col-span-2">
+                <label className="font-bold text-slate-700 dark:text-slate-300 block mb-1">Registered Address</label>
+                <input
+                  type="text"
+                  value={companySettings.registeredAddress}
+                  onChange={(e) => setCompanySettings({ ...companySettings, registeredAddress: e.target.value })}
+                  className="w-full h-10 px-3 bg-slate-100 dark:bg-slate-800 border-none rounded-xl font-semibold outline-none focus:ring-2 focus:ring-blue-500"
+                />
+              </div>
+
+              <div className="sm:col-span-2">
+                <label className="font-bold text-slate-700 dark:text-slate-300 block mb-1">Refund Policy Period Note</label>
+                <input
+                  type="text"
+                  value={companySettings.refundPeriod}
+                  onChange={(e) => setCompanySettings({ ...companySettings, refundPeriod: e.target.value })}
+                  className="w-full h-10 px-3 bg-slate-100 dark:bg-slate-800 border-none rounded-xl font-semibold outline-none focus:ring-2 focus:ring-blue-500"
+                />
+              </div>
+            </div>
+
+            <div className="pt-4 border-t border-slate-100 dark:border-slate-800">
+              <GlassButton
+                variant="primary"
+                size="sm"
+                disabled={savingCompany}
+                onClick={saveCompanySettings}
+                leftIcon={<Save className="h-4 w-4" />}
+              >
+                Save Company Profile
+              </GlassButton>
+            </div>
+          </Card>
+        )}
+
+        {/* Tab 3: Commission Settings */}
         {activeTab === "commission" && (
           <Card className="p-6 border-slate-200 dark:border-slate-800 space-y-6 max-w-2xl">
             <div className="space-y-1 border-b border-slate-100 dark:border-slate-800 pb-3">
@@ -324,7 +559,7 @@ export default function AdminSettingsPage() {
           </Card>
         )}
 
-        {/* Tab 3: Course Categories */}
+        {/* Tab 4: Course Categories */}
         {activeTab === "categories" && (
           <div className="space-y-6 max-w-4xl">
             {/* Create Category Card */}

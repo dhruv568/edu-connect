@@ -929,6 +929,21 @@ export class AdminService {
       allowRegistration: settings.allow_registration !== "false",
       requireTeacherApproval: settings.require_teacher_approval !== "false",
       maintenanceMode: settings.maintenance_mode === "true",
+      brandName: settings.company_brand_name || "MyProFunnels Ventures",
+      legalName: settings.company_legal_name || "SHRIVASTAVA PROFUNNELS VENTURES PRIVATE LIMITED",
+      cin: settings.company_cin || "U85499UP2024PTC212061",
+      pan: settings.company_pan || "ABOCS6783J",
+      founder: settings.company_founder || "Neeraj Shrivastava",
+      authorizedSignatory: settings.company_authorized_signatory || "Neeraj Shrivastava",
+      natureOfBusiness: settings.company_nature_of_business || "Digital business solutions, digital marketing, automation, online education, training, and technology-enabled business services.",
+      registeredAddress: settings.company_registered_address || "Bard No. 8, Basundhara Colony, Chandmari, Lalitpur (UP), 284403",
+      website: settings.company_website || "https://myprofunnels.com",
+      tagline: settings.company_tagline || "Automate • Engage • Grow",
+      governingLaw: settings.company_governing_law || "India",
+      whatsappNumber: settings.company_whatsapp_number || "+91 8062181499",
+      refundPeriod: settings.company_refund_period || "Within 24 Hours, subject to applicable terms and conditions.",
+      pricingRange: settings.company_pricing_range || "₹99 to ₹2.99 Lakh",
+      currency: settings.company_currency || "INR",
     };
   }
 

@@ -454,7 +454,7 @@ export default function StudentDashboardPage() {
               <CreditCard className="h-4 w-4 text-amber-500" />
             </div>
             <h3 className="text-base font-bold text-slate-900">Payment Invoices</h3>
-            <p className="text-xs text-slate-500">Review purchases, receipts, and Razorpay transactions.</p>
+            <p className="text-xs text-slate-500">Review purchases, receipts, and Cashfree transactions.</p>
             <Link href="/student/payments" className="block pt-1">
               <Button variant="outline" size="sm" className="w-full">
                 Billing Receipts
