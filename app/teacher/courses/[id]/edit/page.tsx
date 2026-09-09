@@ -173,60 +173,52 @@ export default function TeacherCourseEditorPage() {
 
   const [uploadProgress, setUploadProgress] = useState(0);
   const [videoStatus, setVideoStatus] = useState<"IDLE" | "UPLOADING" | "UPLOADED" | "PROCESSING" | "READY" | "FAILED">("IDLE");
+  const [pendingVideoFile, setPendingVideoFile] = useState<File | null>(null);
 
   const handleVideoUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (!file) return;
-    setUploadingVideo(true);
-    setVideoStatus("UPLOADING");
-    setUploadProgress(0);
-
-    try {
-      const formData = new FormData();
-      formData.append("file", file);
-
-      const res = await fetch("/api/teacher/upload-video", {
-        method: "POST",
-        body: formData,
-      });
-
-      const data = await res.json();
-      if (data.success && (data.data.videoAssetId || data.data.storageKey)) {
-        const assetId = data.data.videoAssetId || data.data.storageKey;
-        setUploadedVideoAssetId(assetId);
-        setVideoStatus("READY");
-      } else {
-        setVideoStatus("FAILED");
-        setErrorMsg(data.error || "Video upload failed.");
-      }
-    } catch (err) {
-      console.error("Failed to upload video:", err);
-      setVideoStatus("FAILED");
-      setErrorMsg("Video upload failed.");
-    } finally {
-      setUploadingVideo(false);
-    }
+    setPendingVideoFile(file);
+    setVideoStatus("UPLOADED");
   };
 
   const handleDirectLessonVideoUpload = async (lessonId: string, file: File) => {
     try {
-      const formData = new FormData();
-      formData.append("file", file);
-      formData.append("lessonId", lessonId);
+      setUploadingVideo(true);
+      setVideoStatus("UPLOADING");
+      setErrorMsg("");
 
-      const res = await fetch("/api/teacher/upload-video", {
+      const urlRes = await fetch("/api/teacher/videos/upload-url", {
         method: "POST",
-        body: formData,
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ courseId, lessonId }),
       });
-      const data = await res.json();
-      if (data.success) {
-        fetchEditorData();
-      } else {
-        setErrorMsg(data.error || "Failed to upload video for lesson.");
+
+      const urlData = await urlRes.json();
+      if (!urlData.success || !urlData.data?.uploadUrl) {
+        throw new Error(urlData.error || "Failed to create Mux upload URL.");
       }
-    } catch (err) {
+
+      const uploadRes = await fetch(urlData.data.uploadUrl, {
+        method: "PUT",
+        body: file,
+        headers: {
+          "Content-Type": file.type || "video/mp4",
+        },
+      });
+
+      if (!uploadRes.ok) {
+        throw new Error("Direct video file upload to Mux failed.");
+      }
+
+      setVideoStatus("PROCESSING");
+      fetchEditorData();
+    } catch (err: any) {
       console.error("Failed to upload lesson video:", err);
-      setErrorMsg("Video upload failed.");
+      setVideoStatus("FAILED");
+      setErrorMsg(err.message || "Video upload failed.");
+    } finally {
+      setUploadingVideo(false);
     }
   };
 
@@ -275,12 +267,20 @@ export default function TeacherCourseEditorPage() {
           content: lessonContent || undefined,
         }),
       });
-      if (res.ok) {
+      const data = await res.json();
+      if (res.ok && data.success) {
+        const createdLessonId = data.data?.lesson?.id || data.data?.id;
         setLessonTitle("");
         setUploadedVideoAssetId("");
         setLessonContent("");
         setShowLessonModal(false);
         fetchEditorData();
+
+        if (createdLessonId && pendingVideoFile) {
+          const fileToUpload = pendingVideoFile;
+          setPendingVideoFile(null);
+          await handleDirectLessonVideoUpload(createdLessonId, fileToUpload);
+        }
       }
     } catch (err) {
       console.error("Failed to add lesson:", err);

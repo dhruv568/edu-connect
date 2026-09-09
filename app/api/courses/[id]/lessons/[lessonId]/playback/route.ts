@@ -127,16 +127,19 @@ export async function GET(
       });
     }
 
-    // Handle Local or Direct Video URL (or videoAssetId / storageKey)
+    if (videoAsset?.status === "UPLOADING" || videoAsset?.status === "PROCESSING" || lesson.status === "PROCESSING" || lesson.status === "UPLOADING") {
+      return apiError("Video is still processing. Please try again shortly.", 400);
+    }
+
+    if (videoAsset?.status === "FAILED" || lesson.status === "FAILED") {
+      return apiError("Video processing failed. Please re-upload the video.", 400);
+    }
+
+    // Handle Local or Direct Video URL if custom uploaded video exists
     const activeVideoAssetId = lesson.videoAssetId || videoAsset?.id;
-    let resolvedVideoUrl =
+    const resolvedVideoUrl =
       lesson.videoUrl ||
       (activeVideoAssetId ? `/api/videos/${activeVideoAssetId}/stream` : null);
-
-    // Fallback sample preview video if lesson is marked as isPreview but custom video is not attached yet
-    if (!resolvedVideoUrl && lesson.isPreview) {
-      resolvedVideoUrl = "https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ForBiggerBlazes.mp4";
-    }
 
     if (resolvedVideoUrl) {
       return apiSuccess({
@@ -149,15 +152,7 @@ export async function GET(
       });
     }
 
-    if (videoAsset?.status === "UPLOADING" || videoAsset?.status === "PROCESSING" || lesson.status === "PROCESSING" || lesson.status === "UPLOADING") {
-      return apiError("Video is still processing. Please try again shortly.", 400);
-    }
-
-    if (videoAsset?.status === "FAILED" || lesson.status === "FAILED") {
-      return apiError("Video processing failed. Please re-upload the video.", 400);
-    }
-
-    return apiError("This preview video is currently unavailable.", 404);
+    return apiError("No video has been uploaded for this lesson.", 404);
   } catch (error: any) {
     console.error("[Mux Playback Token Error]:", error);
     return apiError("Failed to issue playback token.", 500);
