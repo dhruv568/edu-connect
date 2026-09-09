@@ -3,8 +3,12 @@ import type { NextRequest } from "next/server";
 
 export function middleware(request: NextRequest) {
   const { pathname } = request.nextUrl;
-  const host = request.headers.get("host") || request.nextUrl.host || "";
-  const cleanHost = host.split(":")[0].toLowerCase();
+  const rawHost =
+    request.headers.get("x-forwarded-host") ||
+    request.headers.get("host") ||
+    request.nextUrl.host ||
+    "";
+  const cleanHost = rawHost.split(",")[0].split(":")[0].trim().toLowerCase();
 
   // Static assets & internal Next.js paths
   if (
