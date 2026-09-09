@@ -63,7 +63,7 @@ export default function DedicatedCoursePreviewPage() {
         if (fetchedCourse.sections?.length > 0) {
           setOpenSections({ [fetchedCourse.sections[0].id]: true });
 
-          // Auto-select first preview-enabled lesson if available
+          // Auto-select first preview-enabled lesson or first lesson in curriculum
           let firstPreviewLesson: any = null;
           for (const sec of fetchedCourse.sections) {
             for (const les of sec.lessons) {
@@ -73,6 +73,10 @@ export default function DedicatedCoursePreviewPage() {
               }
             }
             if (firstPreviewLesson) break;
+          }
+
+          if (!firstPreviewLesson && fetchedCourse.sections[0]?.lessons?.length > 0) {
+            firstPreviewLesson = fetchedCourse.sections[0].lessons[0];
           }
 
           if (firstPreviewLesson) {
@@ -140,10 +144,10 @@ export default function DedicatedCoursePreviewPage() {
         if (data.data.enrollment?.status === "ACTIVE") {
           router.push(`/learn/${course.slug}`);
         } else {
-          setEnrollMsg("Redirecting to your student dashboard...");
+          setEnrollMsg("Redirecting to Payment Gateway...");
           setTimeout(() => {
-            router.push(`/student/courses`);
-          }, 1200);
+            router.push(`/payment/checkout?type=COURSE_ENROLLMENT&courseId=${course.id}`);
+          }, 800);
         }
       } else {
         setEnrollMsg(data.error || "Enrollment failed.");
@@ -442,22 +446,16 @@ export default function DedicatedCoursePreviewPage() {
                                     </span>
                                   )}
 
-                                  {les.isPreview ? (
-                                    <button
-                                      onClick={() => loadLessonVideo(course.id, les)}
-                                      className={`px-3 py-1.5 text-xs font-bold rounded-lg transition ${
-                                        isSelected
-                                          ? "bg-blue-600 text-white shadow-md shadow-blue-500/20"
-                                          : "bg-blue-500/20 text-blue-400 border border-blue-500/30 hover:bg-blue-500/30"
-                                      }`}
-                                    >
-                                      {isSelected ? "Playing" : "Preview"}
-                                    </button>
-                                  ) : (
-                                    <span className="px-2.5 py-1 text-[11px] font-medium rounded-lg bg-slate-800 text-slate-400 border border-slate-700/60 flex items-center gap-1">
-                                      <Lock className="w-3 h-3 text-slate-500" /> Locked
-                                    </span>
-                                  )}
+                                  <button
+                                    onClick={() => loadLessonVideo(course.id, les)}
+                                    className={`px-3 py-1.5 text-xs font-bold rounded-lg transition ${
+                                      isSelected
+                                        ? "bg-blue-600 text-white shadow-md shadow-blue-500/20"
+                                        : "bg-blue-500/20 text-blue-400 border border-blue-500/30 hover:bg-blue-500/30"
+                                    }`}
+                                  >
+                                    {isSelected ? "Playing" : "Preview"}
+                                  </button>
                                 </div>
                               </div>
                             );

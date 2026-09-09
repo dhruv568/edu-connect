@@ -115,10 +115,10 @@ export default function CourseDetailPage() {
         if (data.data.enrollment?.status === "ACTIVE") {
           router.push(`/learn/${slug}`);
         } else {
-          setEnrollMsg("Enrollment created. Redirecting to your learning portal...");
+          setEnrollMsg("Redirecting to Payment Gateway...");
           setTimeout(() => {
-            router.push(`/student/courses`);
-          }, 1500);
+            router.push(`/payment/checkout?type=COURSE_ENROLLMENT&courseId=${course.id}`);
+          }, 800);
         }
       } else {
         setEnrollMsg(data.error || "Enrollment failed.");
