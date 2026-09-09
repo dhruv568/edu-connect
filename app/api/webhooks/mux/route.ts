@@ -11,7 +11,7 @@ export async function POST(req: NextRequest) {
     });
 
     // 1. Verify Webhook Signature
-    const isValid = verifyMuxWebhookHeader(rawBody, headersList);
+    const isValid = await verifyMuxWebhookHeader(rawBody, headersList);
     if (!isValid) {
       return NextResponse.json({ error: "Invalid webhook signature" }, { status: 401 });
     }

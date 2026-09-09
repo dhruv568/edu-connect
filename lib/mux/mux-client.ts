@@ -9,6 +9,32 @@ export const muxClient = new Mux({
 });
 
 /**
+ * Formats/sanitizes MUX_SIGNING_PRIVATE_KEY from environment variables.
+ * Handles unescaping literal \n, strip quotes, and base64 PEM decoding.
+ */
+function formatPrivateKey(key: string): string {
+  if (!key) return "";
+  let formatted = key.trim();
+  if ((formatted.startsWith('"') && formatted.endsWith('"')) || (formatted.startsWith("'") && formatted.endsWith("'"))) {
+    formatted = formatted.slice(1, -1);
+  }
+  if (formatted.includes("\\n")) {
+    formatted = formatted.replace(/\\n/g, "\n");
+  }
+  if (!formatted.includes("BEGIN") && !formatted.includes("\n")) {
+    try {
+      const decoded = Buffer.from(formatted, "base64").toString("utf-8");
+      if (decoded.includes("BEGIN")) {
+        formatted = decoded;
+      }
+    } catch {
+      // Keep original formatted if decoding fails
+    }
+  }
+  return formatted;
+}
+
+/**
  * Creates a Mux Direct Upload URL for browser uploading.
  */
 export async function createMuxDirectUpload(corsOrigin: string = "*") {
@@ -24,19 +50,21 @@ export async function createMuxDirectUpload(corsOrigin: string = "*") {
 /**
  * Generates a short-lived Mux signed playback token for secure video streaming.
  */
-export function generateMuxSignedPlaybackToken(playbackId: string): string {
+export async function generateMuxSignedPlaybackToken(playbackId: string): Promise<string> {
   const signingKeyId = process.env.MUX_SIGNING_KEY_ID || "demo_key_id";
-  const signingPrivateKey = process.env.MUX_SIGNING_PRIVATE_KEY || "demo_private_key";
+  const rawPrivateKey = process.env.MUX_SIGNING_PRIVATE_KEY || "demo_private_key";
+  const signingPrivateKey = formatPrivateKey(rawPrivateKey);
 
   try {
-    const jwt = (muxClient as any).jwt || (Mux as any).jwt || (Mux as any).JWT;
+    const jwt = muxClient.jwt || (Mux as any).jwt || (Mux as any).JWT;
     if (jwt && typeof jwt.signPlaybackId === "function") {
-      return jwt.signPlaybackId(playbackId, {
+      const token = await jwt.signPlaybackId(playbackId, {
         keyId: signingKeyId,
         keySecret: signingPrivateKey,
         type: "video",
         expiration: "4h",
       });
+      return token;
     }
     return `token_${playbackId}_${Date.now()}`;
   } catch (e) {
@@ -48,14 +76,15 @@ export function generateMuxSignedPlaybackToken(playbackId: string): string {
 /**
  * Verifies authenticity of incoming Mux Webhooks.
  */
-export function verifyMuxWebhookHeader(rawBody: string, headers: Record<string, string>): boolean {
+export async function verifyMuxWebhookHeader(rawBody: string, headers: Record<string, string>): Promise<boolean> {
   const secret = process.env.MUX_WEBHOOK_SECRET;
   if (!secret) return true; // If secret not configured in local dev, allow
   try {
-    muxClient.webhooks.verifySignature(rawBody, headers, secret);
+    await muxClient.webhooks.verifySignature(rawBody, headers, secret);
     return true;
   } catch (err) {
     console.error("Mux webhook signature verification failed:", err);
     return false;
   }
 }
+

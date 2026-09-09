@@ -115,7 +115,7 @@ export async function GET(
         return apiError("Video processing failed. Please re-upload the video.", 400);
       }
 
-      const signedToken = generateMuxSignedPlaybackToken(videoAsset.playbackId);
+      const signedToken = await generateMuxSignedPlaybackToken(videoAsset.playbackId);
       return apiSuccess({
         playbackId: videoAsset.playbackId,
         playbackUrl: null,
