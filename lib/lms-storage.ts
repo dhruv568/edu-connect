@@ -116,8 +116,10 @@ export async function saveThumbnailFile(
   originalName: string,
   mimeType: string
 ): Promise<string> {
-  if (!ALLOWED_THUMBNAIL_TYPES.includes(mimeType.toLowerCase())) {
-    throw new Error("Invalid thumbnail image format. Use JPG, PNG, or WebP.");
+  const cleanMime = (mimeType || "").split(";")[0].trim().toLowerCase();
+  const allowed = ["image/jpeg", "image/jpg", "image/png", "image/webp", "image/gif", "image/svg+xml"];
+  if (cleanMime && !allowed.includes(cleanMime)) {
+    throw new Error("Invalid thumbnail image format. Use JPG, PNG, WebP, GIF, or SVG.");
   }
   if (buffer.length > MAX_THUMBNAIL_SIZE_BYTES) {
     throw new Error("Thumbnail size must be under 5MB.");

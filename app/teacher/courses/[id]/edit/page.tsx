@@ -105,8 +105,9 @@ export default function TeacherCourseEditorPage() {
     if (courseId) fetchEditorData();
   }, [courseId]);
 
-  const handleSaveBasicInfo = async () => {
+  const handleSaveBasicInfo = async (overrideThumbnailUrl?: string | React.MouseEvent) => {
     setSavingStatus("SAVING");
+    const activeThumbnailUrl = typeof overrideThumbnailUrl === "string" ? overrideThumbnailUrl : thumbnailUrl;
     try {
       const res = await fetch(`/api/teacher/courses/${courseId}`, {
         method: "PATCH",
@@ -119,7 +120,7 @@ export default function TeacherCourseEditorPage() {
           category,
           level,
           price: Number(price) || 0,
-          thumbnailUrl,
+          thumbnailUrl: activeThumbnailUrl,
           learningOutcomes: outcomes,
           requirements: reqs,
         }),
@@ -140,6 +141,7 @@ export default function TeacherCourseEditorPage() {
     const file = e.target.files?.[0];
     if (!file) return;
     setUploadingThumb(true);
+    setErrorMsg("");
     try {
       const formData = new FormData();
       formData.append("file", file);
@@ -149,11 +151,15 @@ export default function TeacherCourseEditorPage() {
       });
       const data = await res.json();
       if (data.success && data.data.thumbnailUrl) {
-        setThumbnailUrl(data.data.thumbnailUrl);
-        handleSaveBasicInfo();
+        const newThumb = data.data.thumbnailUrl;
+        setThumbnailUrl(newThumb);
+        await handleSaveBasicInfo(newThumb);
+      } else {
+        setErrorMsg(data.error || "Failed to upload thumbnail.");
       }
     } catch (err) {
       console.error("Failed to upload thumbnail:", err);
+      setErrorMsg("Thumbnail upload failed.");
     } finally {
       setUploadingThumb(false);
     }
@@ -357,7 +363,7 @@ export default function TeacherCourseEditorPage() {
                 {course.status}
               </span>
             </div>
-            <h1 className="text-2xl sm:text-3xl font-black text-slate-50 mt-1">{course.title}</h1>
+            <h1 className="text-2xl sm:text-3xl font-black text-slate-900 mt-1">{course.title}</h1>
           </div>
 
           <div className="flex items-center gap-3">
@@ -710,7 +716,7 @@ export default function TeacherCourseEditorPage() {
             <div className="p-6 rounded-2xl bg-slate-900 border border-slate-800 space-y-4">
               <h3 className="text-base font-bold text-slate-100">Publish Requirement Checklist</h3>
 
-              <div className="space-y-3 text-xs">
+              <div className="space-y-3 text-xs text-slate-300">
                 <div className="flex items-center justify-between">
                   <span>Course Title</span>
                   {course.checklist?.hasTitle ? <CheckCircle2 className="w-4 h-4 text-emerald-400" /> : <AlertCircle className="w-4 h-4 text-amber-400" />}

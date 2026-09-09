@@ -15,7 +15,16 @@ export async function GET(request: NextRequest, { params }: { params: { key: str
 
     const buffer = await fs.promises.readFile(filePath);
     const ext = path.extname(key).toLowerCase();
-    const contentType = ext === ".png" ? "image/png" : ext === ".webp" ? "image/webp" : "image/jpeg";
+    const contentType =
+      ext === ".png"
+        ? "image/png"
+        : ext === ".webp"
+        ? "image/webp"
+        : ext === ".svg"
+        ? "image/svg+xml"
+        : ext === ".gif"
+        ? "image/gif"
+        : "image/jpeg";
 
     return new NextResponse(buffer, {
       headers: {
