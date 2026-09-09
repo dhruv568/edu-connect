@@ -62,12 +62,49 @@ function CheckoutContent() {
     }
   }, [type, courseId, slotId, router]);
 
+  const loadCashfreeSdk = (): Promise<any> => {
+    return new Promise((resolve, reject) => {
+      if ((window as any).Cashfree) {
+        resolve((window as any).Cashfree);
+        return;
+      }
+      const script = document.createElement("script");
+      script.src = "https://sdk.cashfree.com/js/v3/cashfree.js";
+      script.async = true;
+      script.onload = () => {
+        if ((window as any).Cashfree) {
+          resolve((window as any).Cashfree);
+        } else {
+          reject(new Error("Cashfree SDK failed to initialize."));
+        }
+      };
+      script.onerror = () => reject(new Error("Failed to load Cashfree SDK script."));
+      document.body.appendChild(script);
+    });
+  };
+
   const handlePay = async () => {
     if (!orderData) return;
     setProcessing(true);
 
     try {
-      // In test / dev mode or sandbox, complete via server verification endpoint
+      const isProd = orderData.env === "PRODUCTION";
+      const isMockSession = orderData.paymentSessionId?.startsWith("session_");
+
+      // In production or when real Cashfree session exists, launch Cashfree Hosted Checkout SDK
+      if (orderData.paymentSessionId && (isProd || !isMockSession)) {
+        const Cashfree = await loadCashfreeSdk();
+        const cashfree = Cashfree({ mode: isProd ? "production" : "sandbox" });
+        const returnUrl = `${window.location.origin}/payment/success?order_id=${encodeURIComponent(orderData.cfOrderId || orderData.internalReference)}`;
+
+        await cashfree.checkout({
+          paymentSessionId: orderData.paymentSessionId,
+          returnUrl,
+        });
+        return;
+      }
+
+      // Fallback for offline local dev/test mode without live gateway keys
       const res = await fetch("/api/payments/verify", {
         method: "POST",
         headers: { "Content-Type": "application/json" },

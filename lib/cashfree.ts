@@ -84,7 +84,11 @@ export function verifyCashfreeWebhookSignature(
   }
 
   try {
-    const key = secretKey || process.env.CASHFREE_SECRET_KEY || "mock_cashfree_secret_key_123456";
+    const key =
+      secretKey ||
+      process.env.CASHFREE_CLIENT_SECRET ||
+      process.env.CASHFREE_SECRET_KEY ||
+      "mock_cashfree_secret_key_123456";
     const signaturePayload = `${timestamp || ""}${rawBody}`;
     const expectedSignature = crypto
       .createHmac("sha256", key)
@@ -112,9 +116,16 @@ export class CashfreeClient {
   private baseUrl: string;
 
   constructor() {
-    this.appId = process.env.CASHFREE_APP_ID || "TEST_MOCK_APP_ID_123456";
-    this.secretKey = process.env.CASHFREE_SECRET_KEY || "mock_cashfree_secret_key_123456";
-    this.env = process.env.CASHFREE_ENV?.toUpperCase() === "PRODUCTION" ? "PRODUCTION" : "SANDBOX";
+    this.appId =
+      process.env.CASHFREE_CLIENT_ID ||
+      process.env.CASHFREE_APP_ID ||
+      "TEST_MOCK_APP_ID_123456";
+    this.secretKey =
+      process.env.CASHFREE_CLIENT_SECRET ||
+      process.env.CASHFREE_SECRET_KEY ||
+      "mock_cashfree_secret_key_123456";
+    const envVar = process.env.CASHFREE_ENVIRONMENT || process.env.CASHFREE_ENV;
+    this.env = envVar?.toUpperCase() === "PRODUCTION" ? "PRODUCTION" : "SANDBOX";
     this.apiVersion = process.env.CASHFREE_API_VERSION || "2023-08-01";
     this.baseUrl =
       this.env === "PRODUCTION"

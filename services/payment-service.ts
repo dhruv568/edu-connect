@@ -293,13 +293,14 @@ export class PaymentService {
       throw new Error("BAD_REQUEST: orderId is required for payment verification.");
     }
 
-    // 1. Find transaction by Cashfree Order ID or Internal Reference
+    // 1. Find transaction by Cashfree Order ID, Internal Reference, Transaction ID or PaymentOrder ID
     let transaction = await prisma.paymentTransaction.findFirst({
       where: {
         OR: [
           { providerOrderId: queryOrderId },
           { internalReference: queryOrderId },
           { id: queryOrderId },
+          { orderId: queryOrderId },
         ],
         userId,
       },

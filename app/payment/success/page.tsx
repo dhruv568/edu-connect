@@ -10,31 +10,50 @@ import { BackButton } from "@/components/ui/back-button";
 function PaymentSuccessContent() {
   const searchParams = useSearchParams();
   const transactionId = searchParams.get("transactionId");
+  const orderIdParam = searchParams.get("order_id") || searchParams.get("orderId") || searchParams.get("cf_order_id");
   const isFree = searchParams.get("free") === "true";
 
   const [payment, setPayment] = useState<any>(null);
   const [loading, setLoading] = useState(true);
+  const [verifyError, setVerifyError] = useState<string | null>(null);
 
   useEffect(() => {
     async function fetchStatus() {
-      if (!transactionId) {
-        setLoading(false);
-        return;
-      }
+      setLoading(true);
       try {
-        const res = await fetch(`/api/payments/${transactionId}`);
-        const data = await res.json();
-        if (res.ok) {
-          setPayment(data.data.transaction);
+        let targetTxId = transactionId;
+
+        // If returned from Cashfree redirect with order_id, verify payment server-side
+        if (orderIdParam) {
+          const verifyRes = await fetch("/api/payments/verify", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ order_id: orderIdParam }),
+          });
+
+          const verifyData = await verifyRes.json();
+          if (!verifyRes.ok) {
+            throw new Error(verifyData.error || "Server-side payment verification failed.");
+          }
+
+          targetTxId = verifyData.data?.transactionId || targetTxId;
         }
-      } catch {
-        // Fallback preview
+
+        if (targetTxId) {
+          const res = await fetch(`/api/payments/${targetTxId}`);
+          const data = await res.json();
+          if (res.ok) {
+            setPayment(data.data.transaction);
+          }
+        }
+      } catch (err: any) {
+        setVerifyError(err.message || "Failed to verify payment status.");
       } finally {
         setLoading(false);
       }
     }
     fetchStatus();
-  }, [transactionId]);
+  }, [transactionId, orderIdParam]);
 
   return (
     <div className="min-h-screen bg-slate-950 text-slate-100 flex flex-col justify-center items-center p-4 relative overflow-hidden">
@@ -66,7 +85,12 @@ function PaymentSuccessContent() {
 
         {loading ? (
           <div className="p-6 rounded-2xl bg-slate-900/60 border border-slate-800 backdrop-blur-xl">
-            <p className="text-xs text-slate-400">Loading receipt details...</p>
+            <p className="text-xs text-slate-400">Verifying payment with Cashfree...</p>
+          </div>
+        ) : verifyError ? (
+          <div className="p-6 rounded-2xl bg-red-950/40 border border-red-900/50 backdrop-blur-xl text-left space-y-2">
+            <p className="text-sm font-bold text-red-300">Verification Pending or Unsuccessful</p>
+            <p className="text-xs text-red-300/80">{verifyError}</p>
           </div>
         ) : payment ? (
           <div className="p-6 rounded-3xl bg-slate-900/70 border border-slate-800/80 backdrop-blur-xl text-left space-y-3 shadow-xl">
