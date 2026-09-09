@@ -106,45 +106,53 @@ export async function GET(
       where: { lessonId: lesson.id },
     });
 
-    if (!videoAsset || !videoAsset.playbackId) {
-      // Fallback: If direct video URL exists on lesson
-      if (lesson.videoUrl) {
-        return apiSuccess({
-          playbackId: null,
-          playbackUrl: lesson.videoUrl,
-          signedToken: null,
-          isMux: false,
-          status: "READY",
-        });
-      }
-      if (videoAsset?.status === "UPLOADING" || videoAsset?.status === "PROCESSING" || lesson.status === "PROCESSING" || lesson.status === "UPLOADING") {
+    // Handle Mux Cloud Video if playbackId exists
+    if (videoAsset && videoAsset.playbackId && videoAsset.provider === "MUX") {
+      if (videoAsset.status === "UPLOADING" || videoAsset.status === "PROCESSING") {
         return apiError("Video is still processing. Please try again shortly.", 400);
       }
-      if (videoAsset?.status === "FAILED" || lesson.status === "FAILED") {
+      if (videoAsset.status === "FAILED") {
         return apiError("Video processing failed. Please re-upload the video.", 400);
       }
-      return apiError("This preview video is currently unavailable.", 404);
+
+      const signedToken = generateMuxSignedPlaybackToken(videoAsset.playbackId);
+      return apiSuccess({
+        playbackId: videoAsset.playbackId,
+        playbackUrl: null,
+        signedToken,
+        isMux: true,
+        status: "READY",
+        duration: videoAsset.duration || lesson.durationSeconds,
+        aspectRatio: videoAsset.aspectRatio || "16:9",
+      });
     }
 
-    if (videoAsset.status === "UPLOADING" || videoAsset.status === "PROCESSING") {
+    // Handle Local or Direct Video URL (or videoAssetId / storageKey)
+    const activeVideoAssetId = lesson.videoAssetId || videoAsset?.id;
+    const resolvedVideoUrl =
+      lesson.videoUrl ||
+      (activeVideoAssetId ? `/api/videos/${activeVideoAssetId}/stream` : null);
+
+    if (resolvedVideoUrl) {
+      return apiSuccess({
+        playbackId: null,
+        playbackUrl: resolvedVideoUrl,
+        signedToken: null,
+        isMux: false,
+        status: "READY",
+        duration: lesson.durationSeconds || 0,
+      });
+    }
+
+    if (videoAsset?.status === "UPLOADING" || videoAsset?.status === "PROCESSING" || lesson.status === "PROCESSING" || lesson.status === "UPLOADING") {
       return apiError("Video is still processing. Please try again shortly.", 400);
     }
 
-    if (videoAsset.status === "FAILED") {
+    if (videoAsset?.status === "FAILED" || lesson.status === "FAILED") {
       return apiError("Video processing failed. Please re-upload the video.", 400);
     }
 
-    // 4. Generate short-lived Mux signed playback token
-    const signedToken = generateMuxSignedPlaybackToken(videoAsset.playbackId);
-
-    return apiSuccess({
-      playbackId: videoAsset.playbackId,
-      signedToken,
-      isMux: true,
-      status: "READY",
-      duration: videoAsset.duration || lesson.durationSeconds,
-      aspectRatio: videoAsset.aspectRatio || "16:9",
-    });
+    return apiError("This preview video is currently unavailable.", 404);
   } catch (error: any) {
     console.error("[Mux Playback Token Error]:", error);
     return apiError("Failed to issue playback token.", 500);
