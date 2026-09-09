@@ -40,6 +40,30 @@ export function getAppUrl(): string {
 }
 
 /**
+ * Resolves the main website domain (e.g. https://educonnects.co.in).
+ */
+export function getMainDomain(): string {
+  const envUrl = process.env.NEXT_PUBLIC_MAIN_DOMAIN || process.env.NEXT_PUBLIC_APP_URL || "https://educonnects.co.in";
+  return envUrl.trim().replace(/\/+$/, "");
+}
+
+/**
+ * Resolves the Student subdomain URL (e.g. https://students.educonnects.co.in).
+ */
+export function getStudentDomain(): string {
+  const envUrl = process.env.NEXT_PUBLIC_STUDENT_DOMAIN || "https://students.educonnects.co.in";
+  return envUrl.trim().replace(/\/+$/, "");
+}
+
+/**
+ * Resolves the Educator/Teacher subdomain URL (e.g. https://educators.educonnects.co.in).
+ */
+export function getEducatorDomain(): string {
+  const envUrl = process.env.NEXT_PUBLIC_EDUCATOR_DOMAIN || "https://educators.educonnects.co.in";
+  return envUrl.trim().replace(/\/+$/, "");
+}
+
+/**
  * Generates the public staff registration URL.
  * Note: No tokens or unique URLs are generated for staff invitations; staff registers via email and OTP.
  */

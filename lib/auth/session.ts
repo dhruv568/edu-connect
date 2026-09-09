@@ -28,19 +28,31 @@ export function decodeSession(token: string): UserSession | null {
   }
 }
 
+function getCookieDomain(): string | undefined {
+  if (process.env.NODE_ENV === "production") {
+    return ".educonnects.co.in";
+  }
+  return undefined;
+}
+
 /**
  * Sets session cookie in Response headers or current cookie context.
  */
 export async function setSessionCookie(session: UserSession) {
   const cookieStore = await cookies();
   const encoded = encodeSession(session);
-  cookieStore.set(SESSION_COOKIE_NAME, encoded, {
+  const cookieOptions: any = {
     httpOnly: true,
     secure: process.env.NODE_ENV === "production",
     sameSite: "lax",
     path: "/",
     maxAge: SESSION_DURATION_DAYS * 24 * 60 * 60,
-  });
+  };
+  const domain = getCookieDomain();
+  if (domain) {
+    cookieOptions.domain = domain;
+  }
+  cookieStore.set(SESSION_COOKIE_NAME, encoded, cookieOptions);
 }
 
 /**
@@ -58,5 +70,9 @@ export async function getSession(): Promise<UserSession | null> {
  */
 export async function clearSessionCookie() {
   const cookieStore = await cookies();
+  const domain = getCookieDomain();
+  if (domain) {
+    cookieStore.delete({ name: SESSION_COOKIE_NAME, path: "/", domain });
+  }
   cookieStore.delete(SESSION_COOKIE_NAME);
 }

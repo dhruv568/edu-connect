@@ -15,8 +15,12 @@ import {
   Sparkles,
   Award,
 } from "lucide-react";
+import { getStudentDomain, getEducatorDomain } from "@/lib/app-url";
 
 export function RoleGatewaySection() {
+  const studentUrl = getStudentDomain() + "/";
+  const educatorUrl = getEducatorDomain() + "/";
+
   return (
     <section className="py-16 sm:py-24 bg-gradient-to-b from-transparent via-blue-50/50 to-transparent relative z-10">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -94,7 +98,7 @@ export function RoleGatewaySection() {
               </div>
 
               <div className="pt-8 mt-6 border-t border-slate-100 flex flex-col sm:flex-row items-center gap-3 relative z-10">
-                <Link href="/student" className="w-full sm:w-auto flex-1">
+                <Link href={studentUrl} className="w-full sm:w-auto flex-1">
                   <GlassButton
                     variant="primary"
                     size="lg"
@@ -174,7 +178,7 @@ export function RoleGatewaySection() {
               </div>
 
               <div className="pt-8 mt-6 border-t border-slate-100 flex flex-col sm:flex-row items-center gap-3 relative z-10">
-                <Link href="/teacher" className="w-full sm:w-auto flex-1">
+                <Link href={educatorUrl} className="w-full sm:w-auto flex-1">
                   <GlassButton
                     variant="primary"
                     size="lg"

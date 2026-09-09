@@ -29,6 +29,7 @@ import { GlassButton } from "@/components/glass/glass-button";
 import { AuthModal } from "@/components/shared/auth-modal";
 import { GlobalSearchModal } from "@/components/discovery/global-search-modal";
 import { UserRole, UserSession } from "@/types/auth";
+import { getMainDomain, getStudentDomain, getEducatorDomain } from "@/lib/app-url";
 
 export interface FloatingNavbarProps {
   variant?: "default" | "student" | "teacher";
@@ -122,7 +123,7 @@ export function FloatingNavbar({ variant }: FloatingNavbarProps = {}) {
           className="pointer-events-auto shrink-0"
         >
           <Link
-            href={effectiveVariant === "student" ? "/student" : effectiveVariant === "teacher" ? "/teacher" : "/"}
+            href={effectiveVariant === "student" ? getStudentDomain() + "/" : effectiveVariant === "teacher" ? getEducatorDomain() + "/" : getMainDomain() + "/"}
             className="flex items-center gap-2 sm:gap-3 px-2.5 sm:px-4 py-1.5 sm:py-2.5 rounded-2xl glass-surface border border-white/80 shadow-lg group transition-transform hover:scale-105"
           >
             <div
@@ -170,41 +171,41 @@ export function FloatingNavbar({ variant }: FloatingNavbarProps = {}) {
               <Link href="/find-teachers" className="hover:text-blue-600 transition-colors">
                 Teachers
               </Link>
-              <Link href="/student#live-classes" className="hover:text-blue-600 transition-colors">
+              <Link href="/#live-classes" className="hover:text-blue-600 transition-colors">
                 Live Classes
               </Link>
-              <Link href="/student#benefits" className="hover:text-blue-600 transition-colors">
+              <Link href="/#benefits" className="hover:text-blue-600 transition-colors">
                 Benefits
               </Link>
-              <Link href="/student#faq" className="hover:text-blue-600 transition-colors">
+              <Link href="/#faq" className="hover:text-blue-600 transition-colors">
                 FAQ
               </Link>
-              <Link href="/teacher" className="text-slate-400 hover:text-indigo-600 text-[11px] font-semibold transition-colors pl-2 border-l border-slate-200">
+              <Link href={getEducatorDomain() + "/"} className="text-slate-400 hover:text-indigo-600 text-[11px] font-semibold transition-colors pl-2 border-l border-slate-200">
                 Teach on EduConnects →
               </Link>
             </nav>
           ) : effectiveVariant === "teacher" ? (
             /* Teacher-Specific Navigation Links */
             <nav className="flex items-center gap-6 text-xs font-bold text-slate-700 uppercase tracking-wider whitespace-nowrap">
-              <Link href="/teacher#how-it-works" className="hover:text-indigo-600 transition-colors">
+              <Link href="/#how-it-works" className="hover:text-indigo-600 transition-colors">
                 How It Works
               </Link>
-              <Link href="/teacher#courses" className="hover:text-indigo-600 transition-colors">
+              <Link href="/#courses" className="hover:text-indigo-600 transition-colors">
                 Create Courses
               </Link>
-              <Link href="/teacher#live-classes" className="hover:text-indigo-600 transition-colors">
+              <Link href="/#live-classes" className="hover:text-indigo-600 transition-colors">
                 Live Classes
               </Link>
-              <Link href="/teacher#earnings" className="hover:text-indigo-600 transition-colors">
+              <Link href="/#earnings" className="hover:text-indigo-600 transition-colors">
                 Earnings
               </Link>
-              <Link href="/teacher#benefits" className="hover:text-indigo-600 transition-colors">
+              <Link href="/#benefits" className="hover:text-indigo-600 transition-colors">
                 Benefits
               </Link>
-              <Link href="/teacher#faq" className="hover:text-indigo-600 transition-colors">
+              <Link href="/#faq" className="hover:text-indigo-600 transition-colors">
                 FAQ
               </Link>
-              <Link href="/student" className="text-slate-400 hover:text-blue-600 text-[11px] font-semibold transition-colors pl-2 border-l border-slate-200">
+              <Link href={getStudentDomain() + "/"} className="text-slate-400 hover:text-blue-600 text-[11px] font-semibold transition-colors pl-2 border-l border-slate-200">
                 Student Portal →
               </Link>
             </nav>
@@ -449,31 +450,31 @@ export function FloatingNavbar({ variant }: FloatingNavbarProps = {}) {
                 <Link href="/student#faq" onClick={() => setMobileOpen(false)} className="py-2 border-b border-slate-100 text-left px-2">
                   Student FAQ
                 </Link>
-                <Link href="/teacher" onClick={() => setMobileOpen(false)} className="py-2 text-left px-2 text-indigo-600 font-bold text-xs">
+                <Link href={getEducatorDomain() + "/"} onClick={() => setMobileOpen(false)} className="py-2 text-left px-2 text-indigo-600 font-bold text-xs">
                   Switch to Teacher Portal →
                 </Link>
               </nav>
             ) : effectiveVariant === "teacher" ? (
               <nav className="flex flex-col gap-2.5 font-bold text-slate-800 text-sm pt-1">
-                <Link href="/teacher#how-it-works" onClick={() => setMobileOpen(false)} className="py-2 border-b border-slate-100 text-left px-2">
+                <Link href="/#how-it-works" onClick={() => setMobileOpen(false)} className="py-2 border-b border-slate-100 text-left px-2">
                   How Teaching Works
                 </Link>
-                <Link href="/teacher#courses" onClick={() => setMobileOpen(false)} className="py-2 border-b border-slate-100 text-left px-2">
+                <Link href="/#courses" onClick={() => setMobileOpen(false)} className="py-2 border-b border-slate-100 text-left px-2">
                   Create & Upload Courses
                 </Link>
-                <Link href="/teacher#live-classes" onClick={() => setMobileOpen(false)} className="py-2 border-b border-slate-100 text-left px-2">
+                <Link href="/#live-classes" onClick={() => setMobileOpen(false)} className="py-2 border-b border-slate-100 text-left px-2">
                   Schedule Live Classes
                 </Link>
-                <Link href="/teacher#earnings" onClick={() => setMobileOpen(false)} className="py-2 border-b border-slate-100 text-left px-2">
+                <Link href="/#earnings" onClick={() => setMobileOpen(false)} className="py-2 border-b border-slate-100 text-left px-2">
                   Earnings & Payouts
                 </Link>
-                <Link href="/teacher#benefits" onClick={() => setMobileOpen(false)} className="py-2 border-b border-slate-100 text-left px-2">
+                <Link href="/#benefits" onClick={() => setMobileOpen(false)} className="py-2 border-b border-slate-100 text-left px-2">
                   Educator Benefits
                 </Link>
-                <Link href="/teacher#faq" onClick={() => setMobileOpen(false)} className="py-2 border-b border-slate-100 text-left px-2">
+                <Link href="/#faq" onClick={() => setMobileOpen(false)} className="py-2 border-b border-slate-100 text-left px-2">
                   Teacher FAQ
                 </Link>
-                <Link href="/student" onClick={() => setMobileOpen(false)} className="py-2 text-left px-2 text-blue-600 font-bold text-xs">
+                <Link href={getStudentDomain() + "/"} onClick={() => setMobileOpen(false)} className="py-2 text-left px-2 text-blue-600 font-bold text-xs">
                   Switch to Student Portal →
                 </Link>
               </nav>

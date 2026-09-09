@@ -3,6 +3,8 @@ import type { NextRequest } from "next/server";
 
 export function middleware(request: NextRequest) {
   const { pathname } = request.nextUrl;
+  const host = request.headers.get("host") || request.nextUrl.host || "";
+  const cleanHost = host.split(":")[0].toLowerCase();
 
   // Static assets & internal Next.js paths
   if (
@@ -12,6 +14,43 @@ export function middleware(request: NextRequest) {
   ) {
     return NextResponse.next();
   }
+
+  // Hostname-based domain detection
+  const isStudentSubdomain =
+    cleanHost.startsWith("students.") || cleanHost === "students.educonnects.co.in";
+  const isEducatorSubdomain =
+    cleanHost.startsWith("educators.") ||
+    cleanHost.startsWith("teacher.") ||
+    cleanHost === "educators.educonnects.co.in";
+
+  const studentDomainUrl =
+    process.env.NEXT_PUBLIC_STUDENT_DOMAIN || "https://students.educonnects.co.in";
+  const educatorDomainUrl =
+    process.env.NEXT_PUBLIC_EDUCATOR_DOMAIN || "https://educators.educonnects.co.in";
+
+  // Prevent domain crosstalk / accidental page display
+  if (isStudentSubdomain && pathname.startsWith("/teacher")) {
+    const targetUrl = new URL(pathname, educatorDomainUrl);
+    return NextResponse.redirect(targetUrl);
+  }
+
+  if (isEducatorSubdomain && pathname.startsWith("/student")) {
+    const targetUrl = new URL(pathname, studentDomainUrl);
+    return NextResponse.redirect(targetUrl);
+  }
+
+  // Helper for subdomain rewrites on root path '/'
+  const getSubdomainRewrite = (): NextResponse | null => {
+    if (pathname === "/") {
+      if (isStudentSubdomain) {
+        return NextResponse.rewrite(new URL("/student", request.url));
+      }
+      if (isEducatorSubdomain) {
+        return NextResponse.rewrite(new URL("/teacher", request.url));
+      }
+    }
+    return null;
+  };
 
   // Public paths accessible without authentication and accessible to unverified/verified users
   const isPublicPath =
@@ -46,7 +85,8 @@ export function middleware(request: NextRequest) {
   // If no session cookie present
   if (!cookie?.value) {
     if (isPublicPath) {
-      return NextResponse.next();
+      const rewrite = getSubdomainRewrite();
+      return rewrite || NextResponse.next();
     }
     // Unauthenticated user attempting to access protected route
     if (pathname.startsWith("/staff")) {
@@ -81,7 +121,8 @@ export function middleware(request: NextRequest) {
 
   if (!userSession) {
     if (isPublicPath) {
-      return NextResponse.next();
+      const rewrite = getSubdomainRewrite();
+      return rewrite || NextResponse.next();
     }
     if (pathname.startsWith("/staff")) {
       return NextResponse.redirect(new URL("/staff/login", request.url));
@@ -94,11 +135,10 @@ export function middleware(request: NextRequest) {
 
   // Unverified user handling
   if (!userSession.emailVerified) {
-    // Unverified users CAN access public routes (like /, /courses, /verify-email, etc.)
     if (isPublicPath) {
-      return NextResponse.next();
+      const rewrite = getSubdomainRewrite();
+      return rewrite || NextResponse.next();
     }
-    // Unverified users attempting to access protected routes must be redirected to /verify-email
     const verifyUrl = new URL("/verify-email", request.url);
     if (userSession.email) {
       verifyUrl.searchParams.set("email", userSession.email);
@@ -148,7 +188,8 @@ export function middleware(request: NextRequest) {
     return NextResponse.redirect(new URL("/", request.url));
   }
 
-  return NextResponse.next();
+  const rewrite = getSubdomainRewrite();
+  return rewrite || NextResponse.next();
 }
 
 export const config = {
