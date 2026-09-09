@@ -5,7 +5,9 @@ export function middleware(request: NextRequest) {
   const { pathname } = request.nextUrl;
   const rawHost =
     request.headers.get("x-forwarded-host") ||
+    request.headers.get("x-original-host") ||
     request.headers.get("host") ||
+    request.nextUrl.hostname ||
     request.nextUrl.host ||
     "";
   const cleanHost = rawHost.split(",")[0].split(":")[0].trim().toLowerCase();
