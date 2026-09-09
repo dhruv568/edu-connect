@@ -40,7 +40,9 @@ export default function TeacherCourseEditorPage() {
   const [title, setTitle] = useState("");
   const [subtitle, setSubtitle] = useState("");
   const [description, setDescription] = useState("");
+  const PRESET_SUBJECTS = ["Mathematics", "Science", "Physics", "Chemistry", "Biology", "Computer Science", "English"];
   const [subject, setSubject] = useState("");
+  const [isCustomSubject, setIsCustomSubject] = useState(false);
   const [category, setCategory] = useState("General");
   const [level, setLevel] = useState("BEGINNER");
   const [price, setPrice] = useState("0");
@@ -86,7 +88,11 @@ export default function TeacherCourseEditorPage() {
         setTitle(c.title || "");
         setSubtitle(c.subtitle || "");
         setDescription(c.description || "");
-        setSubject(c.subject || "Mathematics");
+        const fetchedSub = c.subject || "Mathematics";
+        setSubject(fetchedSub);
+        if (fetchedSub && !PRESET_SUBJECTS.includes(fetchedSub)) {
+          setIsCustomSubject(true);
+        }
         setCategory(c.category || "General");
         setLevel(c.level || "BEGINNER");
         setPrice(c.price !== undefined ? c.price.toString() : "0");
@@ -454,16 +460,50 @@ export default function TeacherCourseEditorPage() {
 
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                   <div>
-                    <label className="text-xs font-bold text-slate-300 block mb-1">Subject *</label>
-                    <select
-                      value={subject}
-                      onChange={(e) => setSubject(e.target.value)}
-                      className="w-full px-4 py-2.5 text-xs bg-slate-950 border border-slate-800 rounded-xl text-slate-100 outline-none"
-                    >
-                      {["Mathematics", "Science", "Physics", "Chemistry", "Biology", "Computer Science", "English"].map((s) => (
-                        <option key={s} value={s}>{s}</option>
-                      ))}
-                    </select>
+                    <div className="flex items-center justify-between mb-1">
+                      <label className="text-xs font-bold text-slate-300">Subject *</label>
+                      <button
+                        type="button"
+                        onClick={() => {
+                          const nextState = !isCustomSubject;
+                          setIsCustomSubject(nextState);
+                          if (!nextState && !PRESET_SUBJECTS.includes(subject)) {
+                            setSubject("Mathematics");
+                          }
+                        }}
+                        className="text-[10px] text-blue-400 hover:underline font-semibold"
+                      >
+                        {isCustomSubject ? "← Choose from list" : "+ Custom Subject"}
+                      </button>
+                    </div>
+
+                    {isCustomSubject ? (
+                      <input
+                        type="text"
+                        placeholder="e.g. Instagram Growth, Marketing..."
+                        value={subject}
+                        onChange={(e) => setSubject(e.target.value)}
+                        className="w-full px-4 py-2.5 text-xs bg-slate-950 border border-slate-800 rounded-xl text-slate-100 outline-none focus:border-blue-500"
+                      />
+                    ) : (
+                      <select
+                        value={PRESET_SUBJECTS.includes(subject) ? subject : "OTHER"}
+                        onChange={(e) => {
+                          if (e.target.value === "OTHER") {
+                            setIsCustomSubject(true);
+                            setSubject("");
+                          } else {
+                            setSubject(e.target.value);
+                          }
+                        }}
+                        className="w-full px-4 py-2.5 text-xs bg-slate-950 border border-slate-800 rounded-xl text-slate-100 outline-none focus:border-blue-500"
+                      >
+                        {PRESET_SUBJECTS.map((s) => (
+                          <option key={s} value={s}>{s}</option>
+                        ))}
+                        <option value="OTHER">+ Add Custom Subject / Other...</option>
+                      </select>
+                    )}
                   </div>
 
                   <div>
