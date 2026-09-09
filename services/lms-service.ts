@@ -747,7 +747,16 @@ export class LmsService {
     const editorData = await LmsService.getTeacherCourseEditorDetails(teacherUserId, courseId);
 
     if (!editorData.checklist.isPublishable) {
-      throw new Error("VALIDATION_FAILED: Course does not meet publish requirements. Check title, thumbnail, curriculum, and lessons.");
+      const pending: string[] = [];
+      if (!editorData.checklist.hasTitle) pending.push("Course Title (min 4 chars)");
+      if (!editorData.checklist.hasDescription) pending.push("Course Description (min 11 chars)");
+      if (!editorData.checklist.hasThumbnail) pending.push("Course Thumbnail Image");
+      if (!editorData.checklist.hasSubject) pending.push("Subject Category");
+      if (!editorData.checklist.hasSections) pending.push("At least 1 Section");
+      if (!editorData.checklist.hasLessons) pending.push("At least 1 Lesson");
+      if (!editorData.checklist.hasLessonContent) pending.push("Lesson Video or Text Content");
+
+      throw new Error(`VALIDATION_FAILED: Cannot publish course. Missing requirements: ${pending.join(", ")}.`);
     }
 
     // Recalculate duration and lesson count

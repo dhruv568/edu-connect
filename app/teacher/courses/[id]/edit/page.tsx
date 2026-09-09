@@ -753,34 +753,75 @@ export default function TeacherCourseEditorPage() {
             </div>
 
             {/* Checklist Drawer */}
-            <div className="p-6 rounded-2xl bg-slate-900 border border-slate-800 space-y-4">
-              <h3 className="text-base font-bold text-slate-100">Publish Requirement Checklist</h3>
+            <div className="p-6 rounded-2xl bg-slate-900 border border-slate-800 space-y-5">
+              <div className="flex items-center justify-between">
+                <h3 className="text-base font-bold text-slate-100">Publish Requirement Checklist</h3>
+                <span className={`px-2 py-0.5 text-[10px] font-bold uppercase rounded-full ${
+                  course.checklist?.isPublishable
+                    ? "bg-emerald-500/20 text-emerald-400 border border-emerald-500/30"
+                    : "bg-amber-500/20 text-amber-400 border border-amber-500/30"
+                }`}>
+                  {course.checklist?.isPublishable ? "Ready to Publish" : "Incomplete"}
+                </span>
+              </div>
 
-              <div className="space-y-3 text-xs text-slate-300">
-                <div className="flex items-center justify-between">
-                  <span>Course Title</span>
-                  {course.checklist?.hasTitle ? <CheckCircle2 className="w-4 h-4 text-emerald-400" /> : <AlertCircle className="w-4 h-4 text-amber-400" />}
+              {/* Status Banner */}
+              {course.checklist && !course.checklist.isPublishable ? (
+                <div className="p-3.5 rounded-xl bg-amber-500/10 border border-amber-500/30 text-amber-300 text-xs space-y-2">
+                  <div className="font-bold flex items-center gap-1.5 text-amber-400">
+                    <AlertCircle className="w-4 h-4 shrink-0" /> Pending Items to Resolve:
+                  </div>
+                  <ul className="list-disc list-inside text-[11px] text-amber-200/90 space-y-1 pl-1">
+                    {!course.checklist.hasTitle && <li>Course Title (at least 4 characters)</li>}
+                    {!course.checklist.hasDescription && <li>Course Description (at least 11 characters)</li>}
+                    {!course.checklist.hasThumbnail && <li>Upload Course Thumbnail image</li>}
+                    {!course.checklist.hasSubject && <li>Select or enter Subject Category</li>}
+                    {!course.checklist.hasSections && <li>Add at least 1 Curriculum Section</li>}
+                    {!course.checklist.hasLessons && <li>Add at least 1 Lesson</li>}
+                    {!course.checklist.hasLessonContent && <li>Add Video or Text Content to lessons</li>}
+                  </ul>
                 </div>
-                <div className="flex items-center justify-between">
-                  <span>Course Description</span>
-                  {course.checklist?.hasDescription ? <CheckCircle2 className="w-4 h-4 text-emerald-400" /> : <AlertCircle className="w-4 h-4 text-amber-400" />}
+              ) : (
+                <div className="p-3.5 rounded-xl bg-emerald-500/10 border border-emerald-500/30 text-emerald-300 text-xs font-semibold flex items-center gap-2">
+                  <CheckCircle2 className="w-4 h-4 text-emerald-400 shrink-0" />
+                  <span>All publish requirements satisfied! Click "Publish Course Now" to launch.</span>
                 </div>
-                <div className="flex items-center justify-between">
-                  <span>Course Thumbnail</span>
-                  {course.checklist?.hasThumbnail ? <CheckCircle2 className="w-4 h-4 text-emerald-400" /> : <AlertCircle className="w-4 h-4 text-amber-400" />}
-                </div>
-                <div className="flex items-center justify-between">
-                  <span>Subject Category</span>
-                  {course.checklist?.hasSubject ? <CheckCircle2 className="w-4 h-4 text-emerald-400" /> : <AlertCircle className="w-4 h-4 text-amber-400" />}
-                </div>
-                <div className="flex items-center justify-between">
-                  <span>Curriculum Sections</span>
-                  {course.checklist?.hasSections ? <CheckCircle2 className="w-4 h-4 text-emerald-400" /> : <AlertCircle className="w-4 h-4 text-amber-400" />}
-                </div>
-                <div className="flex items-center justify-between">
-                  <span>Course Lessons</span>
-                  {course.checklist?.hasLessons ? <CheckCircle2 className="w-4 h-4 text-emerald-400" /> : <AlertCircle className="w-4 h-4 text-amber-400" />}
-                </div>
+              )}
+
+              <div className="space-y-3 text-xs text-slate-300 pt-1 border-t border-slate-800">
+                {[
+                  { key: "hasTitle", label: "Course Title", req: "At least 4 chars" },
+                  { key: "hasDescription", label: "Course Description", req: "At least 11 chars" },
+                  { key: "hasThumbnail", label: "Course Thumbnail", req: "Cover image uploaded" },
+                  { key: "hasSubject", label: "Subject Category", req: "Valid subject set" },
+                  { key: "hasSections", label: "Curriculum Sections", req: "At least 1 section" },
+                  { key: "hasLessons", label: "Course Lessons", req: "At least 1 lesson" },
+                  { key: "hasLessonContent", label: "Lesson Content", req: "Video or text added" },
+                ].map((item) => {
+                  const isDone = Boolean(course.checklist?.[item.key]);
+                  return (
+                    <div key={item.key} className="flex items-center justify-between p-2 rounded-lg bg-slate-950/60 border border-slate-800/80">
+                      <div>
+                        <div className="font-semibold text-slate-200">{item.label}</div>
+                        <div className="text-[10px] text-slate-400">{item.req}</div>
+                      </div>
+                      <div className="flex items-center gap-2">
+                        <span className={`px-2 py-0.5 text-[9px] font-bold uppercase rounded ${
+                          isDone
+                            ? "bg-emerald-500/20 text-emerald-400"
+                            : "bg-amber-500/20 text-amber-400 animate-pulse"
+                        }`}>
+                          {isDone ? "Complete" : "Pending"}
+                        </span>
+                        {isDone ? (
+                          <CheckCircle2 className="w-4.5 h-4.5 text-emerald-400 shrink-0" />
+                        ) : (
+                          <AlertCircle className="w-4.5 h-4.5 text-amber-400 shrink-0" />
+                        )}
+                      </div>
+                    </div>
+                  );
+                })}
               </div>
             </div>
           </div>
