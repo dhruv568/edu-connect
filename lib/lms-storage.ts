@@ -30,8 +30,23 @@ function ensureDirsExist() {
 }
 
 export function validateVideoFile(mimeType: string, sizeInBytes: number): { valid: boolean; error?: string } {
-  if (!ALLOWED_VIDEO_TYPES.includes(mimeType.toLowerCase())) {
-    return { valid: false, error: `Unsupported video format '${mimeType}'. Supported: MP4, WebM, MOV.` };
+  const cleanMime = (mimeType || "").split(";")[0].trim().toLowerCase();
+  const allowed = [
+    "video/mp4",
+    "video/webm",
+    "video/ogg",
+    "video/quicktime",
+    "video/x-msvideo",
+    "video/avi",
+    "video/msvideo",
+    "video/x-matroska",
+    "video/mkv",
+    "video/3gpp",
+    "video/flv",
+    "video/x-flv",
+  ];
+  if (cleanMime && !allowed.includes(cleanMime)) {
+    return { valid: false, error: `Unsupported video format '${cleanMime}'. Supported: MP4, WebM, MOV, AVI, MKV.` };
   }
   if (sizeInBytes > MAX_VIDEO_SIZE_BYTES) {
     return { valid: false, error: `Video size exceeds limit of 500MB.` };

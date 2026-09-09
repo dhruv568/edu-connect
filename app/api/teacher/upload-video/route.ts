@@ -35,6 +35,21 @@ export async function POST(request: NextRequest) {
             status: "READY",
           },
         });
+
+        await prisma.videoAsset.upsert({
+          where: { uploadId: saved.storageKey },
+          create: {
+            id: saved.storageKey,
+            lessonId,
+            uploadId: saved.storageKey,
+            provider: "LOCAL",
+            status: "READY",
+          },
+          update: {
+            lessonId,
+            status: "READY",
+          },
+        });
       }
     }
 
