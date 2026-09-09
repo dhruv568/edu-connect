@@ -21,6 +21,7 @@ import {
   Check,
   X,
   Layers,
+  Loader2,
 } from "lucide-react";
 import { DashboardLayout } from "@/components/layout/dashboard-layout";
 import { BackButton } from "@/components/ui/back-button";
@@ -69,6 +70,19 @@ export default function TeacherCourseEditorPage() {
   const [videoDurationSeconds, setVideoDurationSeconds] = useState(300);
   const [userName, setUserName] = useState("Educator");
   const [userEmail, setUserEmail] = useState("");
+  const [lessonProgresses, setLessonProgresses] = useState<{ [key: string]: number }>({});
+
+  const fetchEditorDataSilent = async () => {
+    try {
+      const res = await fetch(`/api/teacher/courses/${courseId}`);
+      const data = await res.json();
+      if (data.success && data.data.course) {
+        setCourse(data.data.course);
+      }
+    } catch (err) {
+      console.error("Silent editor poll failed:", err);
+    }
+  };
 
   const fetchEditorData = async () => {
     setLoading(true);
@@ -110,6 +124,23 @@ export default function TeacherCourseEditorPage() {
   useEffect(() => {
     if (courseId) fetchEditorData();
   }, [courseId]);
+
+  useEffect(() => {
+    let interval: any = null;
+    const hasProcessing = course?.sections?.some((s: any) =>
+      s.lessons?.some((l: any) => l.status === "UPLOADING" || l.status === "PROCESSING")
+    );
+
+    if (hasProcessing && courseId) {
+      interval = setInterval(() => {
+        fetchEditorDataSilent();
+      }, 3000);
+    }
+
+    return () => {
+      if (interval) clearInterval(interval);
+    };
+  }, [course, courseId]);
 
   const handleSaveBasicInfo = async (overrideThumbnailUrl?: string | React.MouseEvent) => {
     setSavingStatus("SAVING");
@@ -199,19 +230,40 @@ export default function TeacherCourseEditorPage() {
         throw new Error(urlData.error || "Failed to create Mux upload URL.");
       }
 
-      const uploadRes = await fetch(urlData.data.uploadUrl, {
-        method: "PUT",
-        body: file,
-        headers: {
-          "Content-Type": file.type || "video/mp4",
-        },
+      // 2. Perform direct upload to Mux with real-time percentage progress tracking
+      await new Promise<void>((resolve, reject) => {
+        const xhr = new XMLHttpRequest();
+        xhr.open("PUT", urlData.data.uploadUrl);
+        xhr.setRequestHeader("Content-Type", file.type || "video/mp4");
+
+        xhr.upload.onprogress = (evt) => {
+          if (evt.lengthComputable) {
+            const percent = Math.round((evt.loaded / evt.total) * 100);
+            setUploadProgress(percent);
+            setLessonProgresses((prev) => ({
+              ...prev,
+              [lessonId]: percent,
+            }));
+          }
+        };
+
+        xhr.onload = () => {
+          if (xhr.status >= 200 && xhr.status < 300) {
+            resolve();
+          } else {
+            reject(new Error(`Direct video file upload to Mux failed (${xhr.status}).`));
+          }
+        };
+
+        xhr.onerror = () => reject(new Error("Network error during video upload to Mux."));
+        xhr.send(file);
       });
 
-      if (!uploadRes.ok) {
-        throw new Error("Direct video file upload to Mux failed.");
-      }
-
       setVideoStatus("PROCESSING");
+      setLessonProgresses((prev) => ({
+        ...prev,
+        [lessonId]: 95,
+      }));
       fetchEditorData();
     } catch (err: any) {
       console.error("Failed to upload lesson video:", err);
@@ -300,11 +352,13 @@ export default function TeacherCourseEditorPage() {
     setErrorMsg("");
 
     // Verify video processing status across sections
-    const isProcessing = course?.sections?.some((s: any) =>
-      s.lessons?.some((l: any) => l.status === "PROCESSING" || l.status === "UPLOADING")
+    const processingLesson = course?.sections?.flatMap((s: any) => s.lessons || []).find(
+      (l: any) => l.status === "PROCESSING" || l.status === "UPLOADING"
     );
-    if (isProcessing) {
-      setErrorMsg("Your video is still processing. Please wait until video processing is completed.");
+
+    if (processingLesson) {
+      const prog = lessonProgresses[processingLesson.id] || (processingLesson.status === "PROCESSING" ? 95 : 50);
+      setErrorMsg(`Video "${processingLesson.title}" is currently processing (${prog}%). Please wait until processing completes.`);
       return;
     }
 
@@ -688,9 +742,26 @@ export default function TeacherCourseEditorPage() {
                                     </span>
                                   )}
                                 </div>
-                                {les.videoAssetId && (
-                                  <div className="text-[10px] text-emerald-400 font-mono">Video Uploaded ✓</div>
-                                )}
+                                 {les.status === "UPLOADING" || les.status === "PROCESSING" ? (
+                                   <div className="space-y-1 mt-1">
+                                     <div className="flex items-center gap-2 text-[10px] font-bold text-blue-400">
+                                       <Loader2 className="w-3 h-3 animate-spin shrink-0" />
+                                       <span>
+                                         {lessonProgresses[les.id] && lessonProgresses[les.id] < 100
+                                           ? `Uploading... ${lessonProgresses[les.id]}%`
+                                           : `Processing on Mux... ${lessonProgresses[les.id] || 95}%`}
+                                       </span>
+                                     </div>
+                                     <div className="w-36 h-1.5 bg-slate-800 rounded-full overflow-hidden">
+                                       <div
+                                         className="h-full bg-gradient-to-r from-blue-500 to-indigo-500 transition-all duration-300 animate-pulse"
+                                         style={{ width: `${lessonProgresses[les.id] || (les.status === "PROCESSING" ? 95 : 50)}%` }}
+                                       />
+                                     </div>
+                                   </div>
+                                 ) : les.videoAssetId ? (
+                                   <div className="text-[10px] text-emerald-400 font-mono">Video Uploaded ✓</div>
+                                 ) : null}
                               </div>
                             </div>
 
