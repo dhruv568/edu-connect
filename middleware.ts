@@ -17,10 +17,14 @@ export function middleware(request: NextRequest) {
 
   // Hostname-based domain detection
   const isStudentSubdomain =
-    cleanHost.startsWith("students.") || cleanHost === "students.educonnects.co.in";
+    cleanHost.startsWith("students.") ||
+    cleanHost.startsWith("student.") ||
+    cleanHost === "students.educonnects.co.in";
   const isEducatorSubdomain =
     cleanHost.startsWith("educators.") ||
+    cleanHost.startsWith("educator.") ||
     cleanHost.startsWith("teacher.") ||
+    cleanHost.startsWith("teachers.") ||
     cleanHost === "educators.educonnects.co.in";
 
   const studentDomainUrl =
