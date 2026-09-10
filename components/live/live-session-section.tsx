@@ -49,14 +49,14 @@ export function LiveSessionSection({
   }, [eventStatus]);
 
   return (
-    <section id="live-session" className="py-16 sm:py-24 bg-slate-900 text-white font-sans relative overflow-hidden">
+    <section id="live-session" className="py-16 sm:py-24 bg-[#280303] text-white font-sans relative overflow-hidden">
       {/* Background Lighting */}
-      <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[40rem] h-[40rem] bg-red-900/20 rounded-full blur-[150px] pointer-events-none" />
+      <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[40rem] h-[40rem] bg-red-900/30 rounded-full blur-[150px] pointer-events-none" />
 
       <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10 space-y-8 text-center">
         {/* Section Header */}
         <div className="space-y-3">
-          <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-red-600/20 border border-red-500/40 text-red-400 text-xs font-black uppercase tracking-widest">
+          <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-red-600/20 border border-red-500/40 text-amber-300 text-xs font-black uppercase tracking-widest">
             <Radio className="h-4 w-4 animate-pulse text-red-500" />
             <span>EduConnects Broadcast</span>
           </div>
@@ -64,13 +64,13 @@ export function LiveSessionSection({
           <h2 className="text-3xl sm:text-4xl lg:text-5xl font-black text-white tracking-tight">
             🔴 Join the Live Session
           </h2>
-          <p className="text-slate-400 max-w-xl mx-auto text-sm sm:text-base">
+          <p className="text-amber-100/80 max-w-xl mx-auto text-sm sm:text-base">
             Experience real-time interactive classrooms with EduConnects educators.
           </p>
         </div>
 
         {/* CONTAINER DISPLAY BASED ON STATUS */}
-        <div className="w-full max-w-4xl mx-auto rounded-3xl border-2 border-amber-400/40 bg-slate-950 shadow-2xl p-6 sm:p-10 overflow-hidden relative min-h-[360px] flex flex-col items-center justify-center">
+        <div className="w-full max-w-4xl mx-auto rounded-3xl border-2 border-[#FFD700]/40 bg-[#170101] shadow-2xl p-6 sm:p-10 overflow-hidden relative min-h-[360px] flex flex-col items-center justify-center">
           
           {/* STATE 1: BEFORE EVENT */}
           {eventStatus === "BEFORE_EVENT" && (

@@ -129,15 +129,15 @@ export function WhatsAppRegistrationModal({
           animate={{ opacity: 1, scale: 1, y: 0 }}
           exit={{ opacity: 0, scale: 0.9, y: 20 }}
           transition={{ type: "spring", damping: 25, stiffness: 300 }}
-          className="relative w-full max-w-md bg-white rounded-3xl border-2 border-[#DCE5E4] shadow-2xl p-6 sm:p-8 overflow-hidden z-10 font-sans"
+          className="relative w-full max-w-md bg-white rounded-3xl border-2 border-[#F3E2D0] shadow-2xl p-6 sm:p-8 overflow-hidden z-10 font-sans"
         >
           {/* Top Decorative Gold Accent Line */}
-          <div className="absolute top-0 left-0 right-0 h-2 bg-gradient-to-r from-[#0B4F4B] via-[#F2C14E] to-[#073F3C]" />
+          <div className="absolute top-0 left-0 right-0 h-2 bg-gradient-to-r from-[#7A0000] via-[#FFD700] to-[#9E1B1B]" />
 
           {/* Close Button */}
           <button
             onClick={onClose}
-            className="absolute top-4 right-4 p-2 rounded-full bg-[#F5F7F8] text-[#102A2A] hover:bg-[#DCE5E4] transition-colors"
+            className="absolute top-4 right-4 p-2 rounded-full bg-[#FFF9F2] text-[#3B0202] hover:bg-[#F3E2D0] transition-colors"
             aria-label="Close registration popup"
           >
             <X className="h-5 w-5" />
@@ -148,21 +148,21 @@ export function WhatsAppRegistrationModal({
             <div className="space-y-5">
               {/* Header Icon & Title */}
               <div className="text-center space-y-2 pt-2">
-                <div className="mx-auto w-14 h-14 rounded-2xl bg-gradient-to-tr from-[#0B4F4B] to-[#1B6863] p-0.5 shadow-md flex items-center justify-center">
-                  <div className="w-full h-full rounded-[0.9rem] bg-[#FBF7EE] flex items-center justify-center">
-                    <Gift className="h-7 w-7 text-[#0B4F4B] animate-bounce" />
+                <div className="mx-auto w-14 h-14 rounded-2xl bg-gradient-to-tr from-[#7A0000] to-[#9E1B1B] p-0.5 shadow-md flex items-center justify-center">
+                  <div className="w-full h-full rounded-[0.9rem] bg-[#FFF5E8] flex items-center justify-center">
+                    <Gift className="h-7 w-7 text-[#7A0000] animate-bounce" />
                   </div>
                 </div>
 
-                <h3 className="text-xl sm:text-2xl font-black text-[#102A2A] tracking-tight flex items-center justify-center gap-1.5">
+                <h3 className="text-xl sm:text-2xl font-black text-[#3B0202] tracking-tight flex items-center justify-center gap-1.5">
                   <span>Welcome to EduConnects</span>
                 </h3>
 
                 <div className="space-y-1">
-                  <p className="text-xs sm:text-sm font-bold text-[#0B4F4B]">
+                  <p className="text-xs sm:text-sm font-bold text-[#7A0000]">
                     Hum Aapka Tahe Dil Se Swagat Karte Hain
                   </p>
-                  <p className="text-xs font-semibold text-[#5D7373]">
+                  <p className="text-xs font-semibold text-[#6E4F42]">
                     Kripya Hamein Apna Vivaran Dein
                   </p>
                 </div>
@@ -178,11 +178,11 @@ export function WhatsAppRegistrationModal({
               <form onSubmit={handleSubmit} className="space-y-4 pt-1">
                 {/* Aapka Naam */}
                 <div className="space-y-1">
-                  <label className="block text-xs font-bold text-[#102A2A] uppercase tracking-wider">
+                  <label className="block text-xs font-bold text-[#3B0202] uppercase tracking-wider">
                     Aapka Naam <span className="text-red-600">*</span>
                   </label>
                   <div className="relative">
-                    <div className="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-[#5D7373]">
+                    <div className="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-[#6E4F42]">
                       <User className="h-4 w-4" />
                     </div>
                     <input
@@ -190,10 +190,10 @@ export function WhatsAppRegistrationModal({
                       value={name}
                       onChange={(e) => setName(e.target.value)}
                       placeholder="Apna naam likhiye"
-                      className={`w-full pl-10 pr-4 py-3 rounded-xl border bg-white text-[#102A2A] text-sm font-semibold placeholder:text-[#5D7373] focus:outline-none transition-all ${
+                      className={`w-full pl-10 pr-4 py-3 rounded-xl border bg-white text-[#3B0202] text-sm font-semibold placeholder:text-[#6E4F42] focus:outline-none transition-all ${
                         nameError
                           ? "border-red-500 focus:ring-2 focus:ring-red-200"
-                          : "border-[#DCE5E4] focus:border-[#0B4F4B] focus:ring-2 focus:ring-[#0B4F4B]/20"
+                          : "border-[#F3E2D0] focus:border-[#7A0000] focus:ring-2 focus:ring-[#7A0000]/20"
                       }`}
                     />
                   </div>
@@ -204,11 +204,11 @@ export function WhatsAppRegistrationModal({
 
                 {/* Aapka WhatsApp No. */}
                 <div className="space-y-1">
-                  <label className="block text-xs font-bold text-[#102A2A] uppercase tracking-wider">
+                  <label className="block text-xs font-bold text-[#3B0202] uppercase tracking-wider">
                     Aapka WhatsApp No. <span className="text-red-600">*</span>
                   </label>
                   <div className="relative">
-                    <div className="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-[#5D7373] font-bold text-xs">
+                    <div className="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-[#6E4F42] font-bold text-xs">
                       +91
                     </div>
                     <input
@@ -217,10 +217,10 @@ export function WhatsAppRegistrationModal({
                       onChange={(e) => setWhatsappNumber(e.target.value)}
                       placeholder="WhatsApp number"
                       maxLength={14}
-                      className={`w-full pl-12 pr-4 py-3 rounded-xl border bg-white text-[#102A2A] text-sm font-semibold placeholder:text-[#5D7373] focus:outline-none transition-all ${
+                      className={`w-full pl-12 pr-4 py-3 rounded-xl border bg-white text-[#3B0202] text-sm font-semibold placeholder:text-[#6E4F42] focus:outline-none transition-all ${
                         whatsappError
                           ? "border-red-500 focus:ring-2 focus:ring-red-200"
-                          : "border-[#DCE5E4] focus:border-[#0B4F4B] focus:ring-2 focus:ring-[#0B4F4B]/20"
+                          : "border-[#F3E2D0] focus:border-[#7A0000] focus:ring-2 focus:ring-[#7A0000]/20"
                       }`}
                     />
                   </div>
@@ -233,7 +233,7 @@ export function WhatsAppRegistrationModal({
                 <button
                   type="submit"
                   disabled={isSubmitting}
-                  className="w-full py-3.5 px-6 rounded-full bg-[#0B4F4B] text-white font-extrabold text-sm uppercase tracking-wider shadow-lg hover:bg-[#073F3C] active:scale-95 transition-all duration-200 flex items-center justify-center gap-2 group disabled:opacity-60"
+                  className="w-full py-3.5 px-6 rounded-full bg-gradient-to-r from-[#7A0000] to-[#9E1B1B] text-white font-extrabold text-sm uppercase tracking-wider shadow-lg hover:from-[#590404] hover:to-[#7A0000] active:scale-95 transition-all duration-200 flex items-center justify-center gap-2 group disabled:opacity-60 border border-[#FFD700]/30"
                 >
                   {isSubmitting ? (
                     <span className="flex items-center gap-2">
@@ -243,7 +243,7 @@ export function WhatsAppRegistrationModal({
                   ) : (
                     <>
                       <span>Submit & Join Us</span>
-                      <ArrowRight className="h-4 w-4 text-[#F2C14E] group-hover:translate-x-1 transition-transform" />
+                      <ArrowRight className="h-4 w-4 text-[#FFD700] group-hover:translate-x-1 transition-transform" />
                     </>
                   )}
                 </button>
@@ -251,14 +251,14 @@ export function WhatsAppRegistrationModal({
 
               {/* Shagun note */}
               <div className="text-center pt-1">
-                <p className="text-xs font-bold text-[#0B4F4B] italic">
+                <p className="text-xs font-bold text-[#7A0000] italic">
                   Taki Shagun Ki Mithai Hum Aapko Bhijwa Saken. 🎁
                 </p>
               </div>
 
               {/* Footer */}
-              <div className="pt-3 border-t border-[#DCE5E4] text-center">
-                <p className="text-xs font-extrabold text-[#102A2A]">
+              <div className="pt-3 border-t border-[#F3E2D0] text-center">
+                <p className="text-xs font-extrabold text-[#3B0202]">
                   Thank You! • EduConnects Family ❤️
                 </p>
               </div>
@@ -271,32 +271,32 @@ export function WhatsAppRegistrationModal({
               </div>
 
               <div className="space-y-2">
-                <h3 className="text-2xl font-black text-[#102A2A]">🎉 You&apos;re Registered!</h3>
-                <p className="text-sm font-semibold text-[#5D7373]">
+                <h3 className="text-2xl font-black text-[#3B0202]">🎉 You&apos;re Registered!</h3>
+                <p className="text-sm font-semibold text-[#6E4F42]">
                   Welcome to the EduConnects family.
                 </p>
               </div>
 
               {/* Event Time Summary Card */}
-              <div className="p-4 rounded-2xl bg-[#FBF7EE] border border-[#DCE5E4] text-left space-y-2">
-                <div className="flex items-center gap-2 text-xs font-bold text-[#102A2A]">
-                  <Calendar className="h-4 w-4 text-[#0B4F4B]" />
+              <div className="p-4 rounded-2xl bg-[#FFF5E8] border border-[#F3E2D0] text-left space-y-2">
+                <div className="flex items-center gap-2 text-xs font-bold text-[#3B0202]">
+                  <Calendar className="h-4 w-4 text-[#7A0000]" />
                   <span>{liveEventConfig.displayDate}</span>
                 </div>
-                <div className="flex items-center gap-2 text-xs font-bold text-[#102A2A]">
-                  <Clock className="h-4 w-4 text-[#0B4F4B]" />
+                <div className="flex items-center gap-2 text-xs font-bold text-[#3B0202]">
+                  <Clock className="h-4 w-4 text-[#7A0000]" />
                   <span>{liveEventConfig.displayTime}</span>
                 </div>
               </div>
 
-              <p className="text-xs font-extrabold text-[#0B4F4B]">
+              <p className="text-xs font-extrabold text-[#7A0000]">
                 We&apos;ll see you at the Live Event! ❤️
               </p>
 
               <button
                 type="button"
                 onClick={onClose}
-                className="w-full py-3 px-6 rounded-full bg-[#0B4F4B] text-white font-extrabold text-xs uppercase tracking-wider hover:bg-[#073F3C] transition-colors"
+                className="w-full py-3 px-6 rounded-full bg-[#7A0000] text-white font-extrabold text-xs uppercase tracking-wider hover:bg-[#590404] transition-colors"
               >
                 Back to Event
               </button>

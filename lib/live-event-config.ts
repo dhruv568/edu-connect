@@ -31,21 +31,21 @@ export interface LiveEventConfig {
 
 export const liveEventConfig: LiveEventConfig = {
   slug: "educonnects-grand-opening",
-  title: "EduConnects Grand Opening & Live Learning Launch",
-  subtitle: "Learn. Connect. Grow. Live.",
+  title: "EduConnects Grand Opening on Ganesh Chaturthi",
+  subtitle: "New Beginnings with Bappa's Blessings • Learn. Connect. Grow.",
   description:
-    "Join live educational sessions, connect with passionate educators, ask questions in real time, and learn together with the EduConnects community.",
+    "Education Removes Every Obstacle. Join the live grand opening of EduConnects on the auspicious occasion of Ganesh Chaturthi with Founder Neeraj Shrivastava.",
   startDateTime: "2026-09-14T10:10:00+05:30",
   endDateTime: "2026-09-14T12:00:00+05:30",
   displayDate: "Monday, 14th September 2026",
   displayTime: "10:10 AM IST",
   timezone: "Asia/Kolkata",
-  heroBadge: "🎓 LIVE EVENT • EDUCONNECTS",
-  heroHeadline: "Learn. Connect. Grow. Live.",
-  heroHeadlineHighlight: "Grow. Live.",
-  heroSubheadline: "Experience the Future of Learning with EduConnects Live",
+  heroBadge: "🚩 GANESH CHATURTHI GRAND OPENING • EDUCONNECTS LIVE",
+  heroHeadline: "New Beginnings with Bappa's Blessings",
+  heroHeadlineHighlight: "Bappa's Blessings",
+  heroSubheadline: "Education Removes Every Obstacle — Let's Build Brighter Futures Together",
   heroDescription:
-    "Join live educational sessions, connect with educators, ask questions in real time, and learn together with the EduConnects community.",
+    "Join Founder Neeraj Shrivastava & top educators live as we inaugurate EduConnects. Experience live interactive classrooms, instant Q&A, and empower learners across India.",
   liveUrl: null, // Will use internal LiveKit server session when available
   recordingUrl: null,
   registrationEnabled: true,
@@ -53,9 +53,9 @@ export const liveEventConfig: LiveEventConfig = {
   schedule: [
     {
       time: "10:10 AM IST",
-      title: "Grand Opening & Festive Welcome",
-      description: "Opening address by founding educators, ribbon cutting, and platform walkthrough.",
-      speaker: "EduConnects Team",
+      title: "Festive Welcome & Bappa's Blessings",
+      description: "Opening address by Founder Neeraj Shrivastava, Ganesh Chaturthi inauguration, and platform reveal.",
+      speaker: "Neeraj Shrivastava (Founder)",
       isHighlight: true,
     },
     {
@@ -72,20 +72,20 @@ export const liveEventConfig: LiveEventConfig = {
     },
     {
       time: "10:55 AM IST",
-      title: "Live Learning & Educator Experience",
+      title: "Live Learning & Educator Showcase",
       description: "Live interactive class demo showcasing instant Q&A, digital whiteboard, and instant feedback.",
       isHighlight: true,
     },
     {
       time: "11:15 AM IST",
-      title: "Community, Growth & Skill Opportunities",
-      description: "Explore upcoming courses, educator mentorship programs, and career roadmaps.",
+      title: "Quality Education & Growth Roadmaps",
+      description: "Empowering educators and creating new opportunities for a stronger learning community.",
     },
     {
       time: "11:35 AM IST",
       title: "Open Q&A & Interactive Discussion",
-      description: "Direct interaction with educators, answering student queries live on stage.",
-      speaker: "All Educators & Audience",
+      description: "Direct interaction with Founder Neeraj Shrivastava and mentors, answering student queries live.",
+      speaker: "Neeraj Shrivastava & Mentors",
     },
   ],
 };

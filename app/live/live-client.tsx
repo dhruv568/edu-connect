@@ -37,7 +37,7 @@ export function LivePageClient() {
   };
 
   return (
-    <div className="min-h-screen flex flex-col bg-[#F5F7F8] text-[#102A2A] overflow-x-hidden selection:bg-[#F2C14E]/30 selection:text-[#0B4F4B] font-sans">
+    <div className="min-h-screen flex flex-col bg-[#FFF9F2] text-[#3B0202] overflow-x-hidden selection:bg-[#FFD700]/40 selection:text-[#590404] font-sans">
       {/* 1. White Header with Live Event Pill Button */}
       <LiveHeader onRegisterClick={handleOpenRegisterModal} />
 
