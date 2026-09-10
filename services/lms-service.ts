@@ -1,4 +1,5 @@
 import { prisma } from "@/lib/prisma";
+import { syncMuxAssetStatus } from "@/lib/mux/mux-client";
 
 export interface CourseFilterParams {
   search?: string;
@@ -637,7 +638,7 @@ export class LmsService {
           include: {
             lessons: {
               orderBy: { order: "asc" },
-              include: { resources: true },
+              include: { resources: true, videoAssets: true },
             },
           },
         },
@@ -647,6 +648,47 @@ export class LmsService {
     if (!course) throw new Error("NOT_FOUND: Course not found.");
     if (course.teacherId !== teacher.id) {
       throw new Error("FORBIDDEN: You can only edit your own courses.");
+    }
+
+    // Active sync for any pending Mux video uploads
+    for (const section of course.sections) {
+      for (const lesson of section.lessons) {
+        if (lesson.status === "UPLOADING" || lesson.status === "PROCESSING") {
+          const videoAsset = (lesson as any).videoAssets?.[0] || await prisma.videoAsset.findFirst({
+            where: { lessonId: lesson.id },
+          });
+
+          if (videoAsset && videoAsset.provider === "MUX") {
+            const syncResult = await syncMuxAssetStatus(videoAsset.uploadId, videoAsset.providerAssetId || undefined);
+            if (syncResult) {
+              const { status, assetId, playbackId, duration, aspectRatio } = syncResult;
+              if (status !== lesson.status) {
+                await prisma.videoAsset.update({
+                  where: { id: videoAsset.id },
+                  data: {
+                    ...(assetId ? { providerAssetId: assetId } : {}),
+                    ...(playbackId ? { playbackId } : {}),
+                    ...(duration ? { duration } : {}),
+                    ...(aspectRatio ? { aspectRatio } : {}),
+                    status: status as any,
+                  },
+                });
+
+                await prisma.courseLesson.update({
+                  where: { id: lesson.id },
+                  data: {
+                    status: status as any,
+                    ...(duration ? { durationSeconds: Math.round(duration) } : {}),
+                  },
+                });
+
+                lesson.status = status as any;
+                if (duration) lesson.durationSeconds = Math.round(duration);
+              }
+            }
+          }
+        }
+      }
     }
 
     // Calculate publish checklist

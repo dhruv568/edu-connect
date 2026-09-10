@@ -31,6 +31,19 @@ export async function POST(req: NextRequest) {
           where: { uploadId },
           data: { providerAssetId: assetId, status: "PROCESSING" },
         });
+
+        const assets = await prisma.videoAsset.findMany({
+          where: { uploadId },
+          select: { lessonId: true },
+        });
+        for (const a of assets) {
+          if (a.lessonId) {
+            await prisma.courseLesson.update({
+              where: { id: a.lessonId },
+              data: { status: "PROCESSING" },
+            });
+          }
+        }
       }
     } else if (type === "video.asset.ready") {
       const assetId = data.id;

@@ -230,41 +230,67 @@ export default function TeacherCourseEditorPage() {
         throw new Error(urlData.error || "Failed to create Mux upload URL.");
       }
 
-      // 2. Perform direct upload to Mux with real-time percentage progress tracking
-      await new Promise<void>((resolve, reject) => {
-        const xhr = new XMLHttpRequest();
-        xhr.open("PUT", urlData.data.uploadUrl);
-        xhr.setRequestHeader("Content-Type", file.type || "video/mp4");
+      if (urlData.data.uploadUrl.startsWith("/api/teacher/upload-video")) {
+        const formData = new FormData();
+        formData.append("file", file);
+        formData.append("lessonId", lessonId);
+        const localRes = await fetch("/api/teacher/upload-video", {
+          method: "POST",
+          body: formData,
+        });
+        const localData = await localRes.json();
+        if (!localRes.ok || !localData.success) {
+          throw new Error(localData.error || "Local video upload failed.");
+        }
+      } else {
+        // Perform direct upload to Mux with real-time percentage progress tracking
+        await new Promise<void>((resolve, reject) => {
+          const xhr = new XMLHttpRequest();
+          xhr.open("PUT", urlData.data.uploadUrl);
+          xhr.setRequestHeader("Content-Type", file.type || "video/mp4");
 
-        xhr.upload.onprogress = (evt) => {
-          if (evt.lengthComputable) {
-            const percent = Math.round((evt.loaded / evt.total) * 100);
-            setUploadProgress(percent);
-            setLessonProgresses((prev) => ({
-              ...prev,
-              [lessonId]: percent,
-            }));
-          }
-        };
+          xhr.upload.onprogress = (evt) => {
+            if (evt.lengthComputable) {
+              const percent = Math.round((evt.loaded / evt.total) * 100);
+              setUploadProgress(percent);
+              setLessonProgresses((prev) => ({
+                ...prev,
+                [lessonId]: percent,
+              }));
+            }
+          };
 
-        xhr.onload = () => {
-          if (xhr.status >= 200 && xhr.status < 300) {
-            resolve();
-          } else {
-            reject(new Error(`Direct video file upload to Mux failed (${xhr.status}).`));
-          }
-        };
+          xhr.onload = () => {
+            if (xhr.status >= 200 && xhr.status < 300) {
+              resolve();
+            } else {
+              reject(new Error(`Direct video file upload failed (${xhr.status}).`));
+            }
+          };
 
-        xhr.onerror = () => reject(new Error("Network error during video upload to Mux."));
-        xhr.send(file);
-      });
+          xhr.onerror = () => reject(new Error("Network error during video upload."));
+          xhr.send(file);
+        });
+      }
 
       setVideoStatus("PROCESSING");
       setLessonProgresses((prev) => ({
         ...prev,
         [lessonId]: 95,
       }));
-      fetchEditorData();
+
+      // Immediately trigger active status sync with Mux
+      try {
+        await fetch("/api/teacher/videos/sync-status", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ lessonId, uploadId: urlData.data.uploadId }),
+        });
+      } catch (syncErr) {
+        console.warn("Manual Mux sync check failed:", syncErr);
+      }
+
+      await fetchEditorData();
     } catch (err: any) {
       console.error("Failed to upload lesson video:", err);
       setVideoStatus("FAILED");
