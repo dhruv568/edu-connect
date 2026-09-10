@@ -64,6 +64,22 @@ export function getEducatorDomain(): string {
 }
 
 /**
+ * Resolves the Live Event subdomain URL (e.g. https://live.educonnects.co.in).
+ */
+export function getLiveDomain(): string {
+  const envUrl =
+    process.env.NEXT_PUBLIC_LIVE_DOMAIN ||
+    process.env.NEXT_PUBLIC_LIVE_URL ||
+    "https://live.educonnects.co.in";
+  return envUrl.trim().replace(/\/+$/, "");
+}
+
+/**
+ * Centralized Live Event URL constant/helper.
+ */
+export const LIVE_EVENT_URL = "https://live.educonnects.co.in";
+
+/**
  * Generates the public staff registration URL.
  * Note: No tokens or unique URLs are generated for staff invitations; staff registers via email and OTP.
  */

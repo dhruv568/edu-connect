@@ -5,6 +5,7 @@ import Link from "next/link";
 import { GraduationCap, Menu, X, LogIn, UserPlus, LogOut, User, LayoutDashboard } from "lucide-react";
 import { GlassButton } from "@/components/glass/glass-button";
 import { UserSession } from "@/types/auth";
+import { getLiveDomain } from "@/lib/app-url";
 
 export function Navbar() {
   const [isScrolled, setIsScrolled] = useState(false);
@@ -89,10 +90,10 @@ export function Navbar() {
             <a href="/#how-it-works" className="hover:text-[#0B4F4B] transition-colors">
               How It Works
             </a>
-            <Link href="/live" className="hover:text-[#0B4F4B] transition-colors flex items-center gap-1 text-red-600 font-bold">
+            <a href={getLiveDomain()} className="hover:text-[#0B4F4B] transition-colors flex items-center gap-1.5 text-red-600 font-bold">
               <span className="h-2 w-2 rounded-full bg-red-500 animate-pulse" />
-              Live
-            </Link>
+              🔴 Live
+            </a>
             <Link href="/teacher" className="hover:text-[#0B4F4B] transition-colors text-[#1B6863] font-bold">
               Become an Educator
             </Link>

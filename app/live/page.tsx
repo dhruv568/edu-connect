@@ -1,5 +1,8 @@
 import { Metadata } from "next";
 import { LivePageClient } from "./live-client";
+import { getLiveDomain } from "@/lib/app-url";
+
+const liveDomain = getLiveDomain();
 
 export const metadata: Metadata = {
   title: "EduConnects Live | Learn • Connect • Grow",
@@ -14,21 +17,21 @@ export const metadata: Metadata = {
     "EduConnects Event",
   ],
   authors: [{ name: "EduConnects" }],
-  metadataBase: new URL("https://educonnects.co.in"),
+  metadataBase: new URL(liveDomain),
   alternates: {
-    canonical: "https://educonnects.co.in/live",
+    canonical: liveDomain,
   },
   openGraph: {
     title: "EduConnects Live | Learn • Connect • Grow",
     description:
       "Join EduConnects Live for interactive learning, live sessions, educator connections and a stronger learning community.",
-    url: "https://educonnects.co.in/live",
+    url: liveDomain,
     siteName: "EduConnects",
     locale: "en_IN",
     type: "website",
     images: [
       {
-        url: "https://educonnects.co.in/icon.svg",
+        url: `${liveDomain}/icon.svg`,
         width: 1200,
         height: 630,
         alt: "EduConnects Live Event",
@@ -40,7 +43,7 @@ export const metadata: Metadata = {
     title: "EduConnects Live | Learn • Connect • Grow",
     description:
       "Join EduConnects Live for interactive learning, live sessions, educator connections and a stronger learning community.",
-    images: ["https://educonnects.co.in/icon.svg"],
+    images: [`${liveDomain}/icon.svg`],
   },
 };
 

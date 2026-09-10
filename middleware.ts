@@ -22,6 +22,9 @@ export function middleware(request: NextRequest) {
   }
 
   // Hostname-based domain detection
+  const isLiveSubdomain =
+    cleanHost.startsWith("live.") ||
+    cleanHost === "live.educonnects.co.in";
   const isStudentSubdomain =
     cleanHost.startsWith("students.") ||
     cleanHost.startsWith("student.") ||
@@ -52,6 +55,9 @@ export function middleware(request: NextRequest) {
   // Helper for subdomain rewrites on root path '/'
   const getSubdomainRewrite = (): NextResponse | null => {
     if (pathname === "/") {
+      if (isLiveSubdomain) {
+        return NextResponse.rewrite(new URL("/live", request.url));
+      }
       if (isStudentSubdomain) {
         return NextResponse.rewrite(new URL("/student", request.url));
       }
@@ -65,6 +71,8 @@ export function middleware(request: NextRequest) {
   // Public paths accessible without authentication and accessible to unverified/verified users
   const isPublicPath =
     pathname === "/" ||
+    pathname === "/live" ||
+    pathname.startsWith("/live/") ||
     pathname === "/student" ||
     pathname === "/teacher" ||
     pathname === "/student/login" ||

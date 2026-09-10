@@ -4,6 +4,7 @@ import React, { useState, useEffect } from "react";
 import Link from "next/link";
 import { GraduationCap, Menu, X, Bell } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
+import { getMainDomain, getLiveDomain } from "@/lib/app-url";
 
 export interface LiveHeaderProps {
   onRegisterClick?: () => void;
@@ -32,14 +33,14 @@ export function LiveHeader({ onRegisterClick }: LiveHeaderProps) {
       >
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex items-center justify-between">
           {/* Logo */}
-          <Link href="/" className="flex items-center gap-2.5 group">
+          <a href={getMainDomain() + "/"} className="flex items-center gap-2.5 group">
             <div className="p-2.5 rounded-2xl bg-[#7A0000] text-white shadow-md group-hover:scale-105 transition-transform border border-[#FFD700]/30">
               <GraduationCap className="h-6 w-6" />
             </div>
             <span className="text-xl font-extrabold text-[#3B0202] tracking-tight">
               EDU<span className="text-[#7A0000]">CONNECTS</span>
             </span>
-          </Link>
+          </a>
 
           {/* Desktop Right Nav & Button */}
           <div className="hidden md:flex items-center gap-8">
@@ -57,7 +58,7 @@ export function LiveHeader({ onRegisterClick }: LiveHeaderProps) {
             </a>
 
             {/* Prominent Live Event Pill Button */}
-            <Link href="/live">
+            <a href={getLiveDomain()}>
               <button
                 type="button"
                 onClick={onRegisterClick}
@@ -72,7 +73,7 @@ export function LiveHeader({ onRegisterClick }: LiveHeaderProps) {
                 <Bell className="h-4 w-4 text-[#FFD700] group-hover:rotate-12 transition-transform" />
                 <span className="relative">🔔 Live Event</span>
               </button>
-            </Link>
+            </a>
           </div>
 
           {/* Mobile Hamburger Button */}
@@ -119,7 +120,7 @@ export function LiveHeader({ onRegisterClick }: LiveHeaderProps) {
               </a>
 
               <div className="pt-2">
-                <Link href="/live" onClick={() => setMobileMenuOpen(false)}>
+                <a href={getLiveDomain()} onClick={() => setMobileMenuOpen(false)}>
                   <button
                     type="button"
                     onClick={() => {
@@ -131,7 +132,7 @@ export function LiveHeader({ onRegisterClick }: LiveHeaderProps) {
                     <Bell className="h-4 w-4 text-[#FFD700]" />
                     <span>🔔 Live Event</span>
                   </button>
-                </Link>
+                </a>
               </div>
             </div>
           </motion.div>

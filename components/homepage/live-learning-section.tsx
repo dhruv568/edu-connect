@@ -4,6 +4,7 @@ import React, { useState, useEffect } from "react";
 import Link from "next/link";
 import { ArrowRight, Video, Users, Calendar, MessageSquare } from "lucide-react";
 import { GlassButton } from "@/components/glass/glass-button";
+import { getLiveDomain } from "@/lib/app-url";
 
 export function LiveLearningSection() {
   const [hasLiveNow, setHasLiveNow] = useState(false);
@@ -59,7 +60,7 @@ export function LiveLearningSection() {
             )}
 
             <div className="pt-2 flex flex-col sm:flex-row items-center justify-center lg:justify-start gap-4">
-              <Link href="/live">
+              <a href={getLiveDomain()}>
                 <GlassButton
                   variant="secondary"
                   size="lg"
@@ -68,7 +69,7 @@ export function LiveLearningSection() {
                 >
                   Explore Live Events →
                 </GlassButton>
-              </Link>
+              </a>
             </div>
           </div>
 

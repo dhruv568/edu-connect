@@ -20,7 +20,7 @@ import {
 } from "lucide-react";
 import { GlassButton } from "@/components/glass/glass-button";
 import { UserSession } from "@/types/auth";
-import { getMainDomain } from "@/lib/app-url";
+import { getMainDomain, getLiveDomain } from "@/lib/app-url";
 
 export interface FloatingNavbarProps {
   variant?: "default" | "student" | "teacher";
@@ -249,16 +249,16 @@ export function FloatingNavbar({ variant }: FloatingNavbarProps = {}) {
             </a>
 
             {/* Live Link */}
-            <Link
-              href="/live"
+            <a
+              href={getLiveDomain()}
               className="flex items-center gap-1.5 hover:text-[#0B4F4B] transition-colors py-2 group"
             >
               <span className="relative flex h-2 w-2">
                 <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-red-400 opacity-75"></span>
                 <span className="relative inline-flex rounded-full h-2 w-2 bg-red-500"></span>
               </span>
-              <span className="font-bold text-red-600 group-hover:text-red-700">Live</span>
-            </Link>
+              <span className="font-bold text-red-600 group-hover:text-red-700">🔴 Live</span>
+            </a>
 
             {/* Become an Educator Link */}
             <Link
@@ -399,8 +399,8 @@ export function FloatingNavbar({ variant }: FloatingNavbarProps = {}) {
                   How It Works
                 </a>
 
-                <Link
-                  href="/live"
+                <a
+                  href={getLiveDomain()}
                   onClick={() => setMobileOpen(false)}
                   className="py-2 px-2 hover:bg-[#F5F7F8] rounded-xl border-b border-[#DCE5E4] flex items-center justify-between"
                 >
@@ -409,7 +409,7 @@ export function FloatingNavbar({ variant }: FloatingNavbarProps = {}) {
                     <span className="h-1.5 w-1.5 rounded-full bg-red-500 animate-pulse" />
                     🔴 Live
                   </span>
-                </Link>
+                </a>
 
                 <Link
                   href="/teacher"

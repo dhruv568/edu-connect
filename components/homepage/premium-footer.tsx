@@ -4,6 +4,7 @@ import React from "react";
 import Link from "next/link";
 import { GraduationCap, Heart, Shield } from "lucide-react";
 import { OFFICIAL_COMPANY_INFO } from "@/lib/company";
+import { getLiveDomain } from "@/lib/app-url";
 
 export interface PremiumFooterProps {
   showCta?: boolean;
@@ -65,10 +66,10 @@ export function PremiumFooter({ showCta = false }: PremiumFooterProps = {}) {
                 </Link>
               </li>
               <li>
-                <Link href="/live" className="hover:text-[#F2C14E] transition-colors flex items-center gap-1.5">
+                <a href={getLiveDomain()} className="hover:text-[#F2C14E] transition-colors flex items-center gap-1.5">
                   <span className="h-2 w-2 rounded-full bg-red-500 animate-pulse" />
                   Live Events
-                </Link>
+                </a>
               </li>
             </ul>
           </div>
