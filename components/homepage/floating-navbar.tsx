@@ -1,35 +1,26 @@
 "use client";
 
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import Link from "next/link";
-import { usePathname } from "next/navigation";
+import { usePathname, useRouter } from "next/navigation";
 import { motion, AnimatePresence } from "framer-motion";
 import {
   GraduationCap,
-  LogIn,
-  UserPlus,
+  ChevronDown,
   Menu,
   X,
-  Search,
-  ChevronDown,
-  Target,
-  Video,
-  Play,
+  LogIn,
+  UserPlus,
   LogOut,
   User,
   LayoutDashboard,
-  MailCheck,
-  Sparkles,
+  Users,
   BookOpen,
-  DollarSign,
-  HelpCircle,
-  Award,
+  Grid,
 } from "lucide-react";
 import { GlassButton } from "@/components/glass/glass-button";
-import { AuthModal } from "@/components/shared/auth-modal";
-import { GlobalSearchModal } from "@/components/discovery/global-search-modal";
-import { UserRole, UserSession } from "@/types/auth";
-import { getMainDomain, getStudentDomain, getEducatorDomain } from "@/lib/app-url";
+import { UserSession } from "@/types/auth";
+import { getMainDomain } from "@/lib/app-url";
 
 export interface FloatingNavbarProps {
   variant?: "default" | "student" | "teacher";
@@ -37,26 +28,15 @@ export interface FloatingNavbarProps {
 
 export function FloatingNavbar({ variant }: FloatingNavbarProps = {}) {
   const pathname = usePathname();
+  const router = useRouter();
+
   const [scrolled, setScrolled] = useState(false);
   const [mobileOpen, setMobileOpen] = useState(false);
-  const [authModalOpen, setAuthModalOpen] = useState(false);
-  const [authMode, setAuthMode] = useState<"register" | "login">("register");
-  const [searchModalOpen, setSearchModalOpen] = useState(false);
-  const [megaMenuOpen, setMegaMenuOpen] = useState(false);
-  const [selectedRole, setSelectedRole] = useState<UserRole>("STUDENT");
-
+  const [exploreDropdownOpen, setExploreDropdownOpen] = useState(false);
   const [userSession, setUserSession] = useState<UserSession | null>(null);
 
-  // Determine effective variant
-  const effectiveVariant =
-    variant ||
-    (pathname === "/student" ||
-    (pathname.startsWith("/student/") && !pathname.startsWith("/student/dashboard"))
-      ? "student"
-      : pathname === "/teacher" ||
-        (pathname.startsWith("/teacher/") && !pathname.startsWith("/teacher/dashboard"))
-      ? "teacher"
-      : "default");
+  const dropdownRef = useRef<HTMLDivElement>(null);
+  const mobileMenuRef = useRef<HTMLDivElement>(null);
 
   const checkAuthStatus = async () => {
     try {
@@ -77,18 +57,37 @@ export function FloatingNavbar({ variant }: FloatingNavbarProps = {}) {
   useEffect(() => {
     checkAuthStatus();
     const handleScroll = () => {
-      setScrolled(window.scrollY > 40);
+      setScrolled(window.scrollY > 20);
     };
     window.addEventListener("scroll", handleScroll);
     return () => window.removeEventListener("scroll", handleScroll);
   }, []);
 
-  const openAuth = (mode: "register" | "login", role?: UserRole) => {
-    setAuthMode(mode);
-    if (role) setSelectedRole(role);
-    setAuthModalOpen(true);
-    setMobileOpen(false);
-  };
+  // Close dropdown & mobile menu when clicking outside or pressing Escape
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (dropdownRef.current && !dropdownRef.current.contains(event.target as Node)) {
+        setExploreDropdownOpen(false);
+      }
+      if (mobileMenuRef.current && !mobileMenuRef.current.contains(event.target as Node)) {
+        setMobileOpen(false);
+      }
+    };
+
+    const handleKeyDown = (event: KeyboardEvent) => {
+      if (event.key === "Escape") {
+        setExploreDropdownOpen(false);
+        setMobileOpen(false);
+      }
+    };
+
+    document.addEventListener("mousedown", handleClickOutside);
+    document.addEventListener("keydown", handleKeyDown);
+    return () => {
+      document.removeEventListener("mousedown", handleClickOutside);
+      document.removeEventListener("keydown", handleKeyDown);
+    };
+  }, []);
 
   const handleLogout = async () => {
     try {
@@ -100,6 +99,19 @@ export function FloatingNavbar({ variant }: FloatingNavbarProps = {}) {
     }
   };
 
+  const handleHowItWorksClick = (e: React.MouseEvent) => {
+    setMobileOpen(false);
+    if (pathname === "/") {
+      e.preventDefault();
+      const el = document.getElementById("how-it-works");
+      if (el) {
+        el.scrollIntoView({ behavior: "smooth" });
+      }
+    } else {
+      router.push("/#how-it-works");
+    }
+  };
+
   const getDashboardPath = (session: UserSession) => {
     if (session.role === "TEACHER") return "/teacher/dashboard";
     if (session.role === "ADMIN") return "/admin/dashboard";
@@ -107,250 +119,180 @@ export function FloatingNavbar({ variant }: FloatingNavbarProps = {}) {
   };
 
   const getDashboardLabel = (session: UserSession) => {
-    if (session.role === "TEACHER") return "Teacher Dashboard";
+    if (session.role === "TEACHER") return "Educator Portal";
     if (session.role === "ADMIN") return "Admin Dashboard";
     return "Student Dashboard";
   };
 
   return (
     <>
-      <header className="fixed top-3 sm:top-5 left-0 right-0 z-50 px-3 sm:px-6 lg:px-12 pointer-events-none flex items-center justify-between">
-        {/* SEPARATE LOGO IN TOP LEFT CORNER */}
-        <motion.div
-          initial={{ x: -30, opacity: 0 }}
-          animate={{ x: 0, opacity: 1 }}
-          transition={{ duration: 0.5 }}
-          className="pointer-events-auto shrink-0"
-        >
+      <header
+        className={`fixed top-0 left-0 right-0 z-50 transition-all duration-300 ${
+          scrolled
+            ? "bg-white/95 backdrop-blur-md border-b border-[#DCE5E4] shadow-sm py-3"
+            : "bg-transparent py-4 sm:py-5"
+        }`}
+      >
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex items-center justify-between">
+          {/* Logo */}
           <Link
-            href={effectiveVariant === "student" ? getStudentDomain() + "/" : effectiveVariant === "teacher" ? getEducatorDomain() + "/" : getMainDomain() + "/"}
-            className="flex items-center gap-2 sm:gap-3 px-2.5 sm:px-4 py-1.5 sm:py-2.5 rounded-2xl glass-surface border border-[#DCE5E4] shadow-md group transition-transform hover:scale-105"
+            href={getMainDomain() + "/"}
+            className="flex items-center gap-2.5 group shrink-0"
+            onClick={() => setMobileOpen(false)}
           >
-            <div className="p-1.5 sm:p-2 rounded-xl text-white shadow-md bg-[#0B4F4B]">
-              <GraduationCap className="h-4 w-4 sm:h-5 sm:w-5" />
+            <div className="p-2 sm:p-2.5 rounded-xl bg-[#0B4F4B] text-[#F2C14E] shadow-sm group-hover:scale-105 transition-transform">
+              <GraduationCap className="h-5 w-5 sm:h-6 sm:w-6" />
             </div>
             <div className="flex flex-col">
-              <span className="text-sm sm:text-base md:text-lg font-black text-[#102A2A] tracking-tight whitespace-nowrap leading-none">
+              <span className="text-lg sm:text-xl font-black text-[#102A2A] tracking-tight leading-none">
                 EDU<span className="text-[#0B4F4B]">CONNECTS</span>
               </span>
-              {effectiveVariant === "student" && (
-                <span className="text-[9px] font-extrabold text-[#1B6863] tracking-wider uppercase">
-                  For Students
-                </span>
-              )}
-              {effectiveVariant === "teacher" && (
-                <span className="text-[9px] font-extrabold text-[#0B4F4B] tracking-wider uppercase">
-                  For Educators
-                </span>
-              )}
-            </div>
-          </Link>
-        </motion.div>
-
-        {/* CENTER FLOATING GLASS NAVIGATION PILL (DESKTOP) */}
-        <motion.div
-          initial={{ y: -30, opacity: 0 }}
-          animate={{ y: 0, opacity: 1 }}
-          transition={{ duration: 0.5, delay: 0.1 }}
-          className="pointer-events-auto hidden lg:flex items-center gap-6 px-6 py-2.5 rounded-full glass-pill border border-[#DCE5E4] shadow-lg transition-all duration-300"
-        >
-          {effectiveVariant === "student" ? (
-            /* Student-Specific Navigation Links */
-            <nav className="flex items-center gap-6 text-xs font-bold text-[#102A2A] uppercase tracking-wider whitespace-nowrap">
-              <Link href="/courses" className="hover:text-[#0B4F4B] transition-colors">
-                Courses
-              </Link>
-              <Link href="/find-teachers" className="hover:text-[#0B4F4B] transition-colors">
-                Teachers
-              </Link>
-              <Link href="/#live-classes" className="hover:text-[#0B4F4B] transition-colors">
-                Live Classes
-              </Link>
-              <Link href="/#benefits" className="hover:text-[#0B4F4B] transition-colors">
-                Benefits
-              </Link>
-              <Link href="/#faq" className="hover:text-[#0B4F4B] transition-colors">
-                FAQ
-              </Link>
-              <Link href={getEducatorDomain() + "/"} className="text-[#5D7373] hover:text-[#0B4F4B] text-[11px] font-semibold transition-colors pl-2 border-l border-[#DCE5E4]">
-                Teach on EduConnects →
-              </Link>
-            </nav>
-          ) : effectiveVariant === "teacher" ? (
-            /* Teacher-Specific Navigation Links */
-            <nav className="flex items-center gap-6 text-xs font-bold text-[#102A2A] uppercase tracking-wider whitespace-nowrap">
-              <Link href="/#how-it-works" className="hover:text-[#0B4F4B] transition-colors">
-                How It Works
-              </Link>
-              <Link href="/#courses" className="hover:text-[#0B4F4B] transition-colors">
-                Create Courses
-              </Link>
-              <Link href="/#live-classes" className="hover:text-[#0B4F4B] transition-colors">
-                Live Classes
-              </Link>
-              <Link href="/#earnings" className="hover:text-[#0B4F4B] transition-colors">
-                Earnings
-              </Link>
-              <Link href="/#benefits" className="hover:text-[#0B4F4B] transition-colors">
-                Benefits
-              </Link>
-              <Link href="/#faq" className="hover:text-[#0B4F4B] transition-colors">
-                FAQ
-              </Link>
-              <Link href={getStudentDomain() + "/"} className="text-[#5D7373] hover:text-[#0B4F4B] text-[11px] font-semibold transition-colors pl-2 border-l border-[#DCE5E4]">
-                Student Portal →
-              </Link>
-            </nav>
-          ) : (
-            /* Default Global Homepage Navigation Links */
-            <nav className="flex items-center gap-6 text-xs font-bold text-[#102A2A] uppercase tracking-wider whitespace-nowrap">
-              <Link href="/" className="hover:text-[#0B4F4B] transition-colors">
-                Home
-              </Link>
-              <Link href="/services" className="hover:text-[#0B4F4B] transition-colors">
-                Services
-              </Link>
-              <Link href="/courses" className="hover:text-[#0B4F4B] transition-colors">
-                Courses
-              </Link>
-              <Link href="/find-teachers" className="hover:text-[#0B4F4B] transition-colors">
-                Find Tutors
-              </Link>
-              <Link href="/pricing" className="hover:text-[#0B4F4B] transition-colors">
-                Pricing
-              </Link>
-              <Link href="/contact" className="hover:text-[#0B4F4B] transition-colors">
-                Contact
-              </Link>
-            </nav>
-          )}
-        </motion.div>
-
-        {/* RIGHT ACTIONS */}
-        <motion.div
-          initial={{ x: 30, opacity: 0 }}
-          animate={{ x: 0, opacity: 1 }}
-          transition={{ duration: 0.5 }}
-          className="pointer-events-auto flex items-center gap-2 sm:gap-3 shrink-0"
-        >
-          {/* Mobile/Tablet: compact icon-only search button */}
-          <button
-            onClick={() => setSearchModalOpen(true)}
-            className="lg:hidden p-2 sm:p-2.5 rounded-2xl bg-white border border-[#DCE5E4] text-[#102A2A] hover:text-[#0B4F4B] hover:border-[#0B4F4B] transition-all shadow-sm flex items-center justify-center"
-            aria-label="Open Search"
-          >
-            <Search className="h-4 w-4" />
-          </button>
-
-          {/* Large Desktop: expanded search bar */}
-          <button
-            onClick={() => setSearchModalOpen(true)}
-            className="hidden lg:flex w-48 xl:w-60 px-3.5 py-2 rounded-2xl bg-white border border-[#DCE5E4] text-[#102A2A] hover:text-[#0B4F4B] hover:border-[#0B4F4B] hover:shadow-md transition-all text-xs font-semibold items-center justify-between shadow-sm group"
-          >
-            <div className="flex items-center gap-2.5 overflow-hidden">
-              <Search className="h-3.5 w-3.5 text-[#5D7373] group-hover:text-[#0B4F4B] shrink-0 transition-colors" />
-              <span className="text-[#5D7373] font-semibold group-hover:text-[#0B4F4B] transition-colors truncate">
-                {effectiveVariant === "teacher"
-                  ? "Search teaching guides..."
-                  : effectiveVariant === "student"
-                  ? "Search courses & tutors..."
-                  : "Search tutors, courses..."}
+              <span className="text-[10px] font-semibold text-[#5D7373] tracking-wide">
+                Learn • Grow • Belong
               </span>
             </div>
-            <kbd className="hidden xl:inline-block bg-[#F5F7F8] px-1.5 py-0.5 rounded text-[10px] text-[#5D7373] font-mono font-bold border border-[#DCE5E4] shrink-0">
-              ⌘K
-            </kbd>
-          </button>
+          </Link>
 
-          {/* Desktop Auth Buttons based on session state and variant */}
-          <div className="hidden lg:flex items-center gap-2">
+          {/* Desktop Navigation Links */}
+          <nav className="hidden lg:flex items-center gap-7 text-sm font-semibold text-[#102A2A]">
+            {/* Explore Dropdown */}
+            <div className="relative" ref={dropdownRef}>
+              <button
+                onClick={() => setExploreDropdownOpen(!exploreDropdownOpen)}
+                onMouseEnter={() => setExploreDropdownOpen(true)}
+                className="flex items-center gap-1.5 hover:text-[#0B4F4B] transition-colors py-2 focus:outline-none"
+                aria-expanded={exploreDropdownOpen}
+              >
+                <span>Explore</span>
+                <ChevronDown
+                  className={`h-4 w-4 text-[#5D7373] transition-transform duration-200 ${
+                    exploreDropdownOpen ? "rotate-180 text-[#0B4F4B]" : ""
+                  }`}
+                />
+              </button>
+
+              <AnimatePresence>
+                {exploreDropdownOpen && (
+                  <motion.div
+                    initial={{ opacity: 0, y: 8, scale: 0.98 }}
+                    animate={{ opacity: 1, y: 0, scale: 1 }}
+                    exit={{ opacity: 0, y: 6, scale: 0.98 }}
+                    transition={{ duration: 0.15 }}
+                    onMouseLeave={() => setExploreDropdownOpen(false)}
+                    className="absolute top-full left-0 mt-1 w-72 bg-white rounded-2xl border border-[#DCE5E4] shadow-xl p-3 space-y-1 z-50"
+                  >
+                    <Link
+                      href="/find-teachers"
+                      onClick={() => setExploreDropdownOpen(false)}
+                      className="flex items-start gap-3 p-3 rounded-xl hover:bg-[#F5F7F8] transition-colors group"
+                    >
+                      <div className="p-2 rounded-lg bg-[#E6F0EF] text-[#0B4F4B] group-hover:bg-[#0B4F4B] group-hover:text-white transition-colors shrink-0">
+                        <Users className="h-4 w-4" />
+                      </div>
+                      <div>
+                        <div className="text-xs font-bold text-[#102A2A] group-hover:text-[#0B4F4B] transition-colors">
+                          Find an Educator
+                        </div>
+                        <div className="text-[11px] text-[#5D7373] font-normal leading-tight mt-0.5">
+                          Find educators based on subject, level and learning mode.
+                        </div>
+                      </div>
+                    </Link>
+
+                    <Link
+                      href="/courses"
+                      onClick={() => setExploreDropdownOpen(false)}
+                      className="flex items-start gap-3 p-3 rounded-xl hover:bg-[#F5F7F8] transition-colors group"
+                    >
+                      <div className="p-2 rounded-lg bg-[#FBF7EE] text-[#B8860B] group-hover:bg-[#F2C14E] group-hover:text-[#102A2A] transition-colors shrink-0">
+                        <BookOpen className="h-4 w-4" />
+                      </div>
+                      <div>
+                        <div className="text-xs font-bold text-[#102A2A] group-hover:text-[#0B4F4B] transition-colors">
+                          Explore Courses
+                        </div>
+                        <div className="text-[11px] text-[#5D7373] font-normal leading-tight mt-0.5">
+                          Browse available courses.
+                        </div>
+                      </div>
+                    </Link>
+
+                    <Link
+                      href="/courses"
+                      onClick={() => setExploreDropdownOpen(false)}
+                      className="flex items-start gap-3 p-3 rounded-xl hover:bg-[#F5F7F8] transition-colors group"
+                    >
+                      <div className="p-2 rounded-lg bg-[#F5F7F8] text-[#5D7373] group-hover:bg-[#1B6863] group-hover:text-white transition-colors shrink-0">
+                        <Grid className="h-4 w-4" />
+                      </div>
+                      <div>
+                        <div className="text-xs font-bold text-[#102A2A] group-hover:text-[#0B4F4B] transition-colors">
+                          Browse Subjects
+                        </div>
+                        <div className="text-[11px] text-[#5D7373] font-normal leading-tight mt-0.5">
+                          Explore learning categories and subjects.
+                        </div>
+                      </div>
+                    </Link>
+                  </motion.div>
+                )}
+              </AnimatePresence>
+            </div>
+
+            {/* How It Works Link */}
+            <a
+              href="#how-it-works"
+              onClick={handleHowItWorksClick}
+              className="hover:text-[#0B4F4B] transition-colors py-2 cursor-pointer"
+            >
+              How It Works
+            </a>
+
+            {/* Live Link */}
+            <Link
+              href="/live"
+              className="flex items-center gap-1.5 hover:text-[#0B4F4B] transition-colors py-2 group"
+            >
+              <span className="relative flex h-2 w-2">
+                <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-red-400 opacity-75"></span>
+                <span className="relative inline-flex rounded-full h-2 w-2 bg-red-500"></span>
+              </span>
+              <span className="font-bold text-red-600 group-hover:text-red-700">Live</span>
+            </Link>
+
+            {/* Become an Educator Link */}
+            <Link
+              href="/teacher"
+              className="hover:text-[#0B4F4B] transition-colors py-2 text-[#1B6863] font-bold"
+            >
+              Become an Educator
+            </Link>
+          </nav>
+
+          {/* Desktop Right Actions */}
+          <div className="hidden lg:flex items-center gap-3">
             {!userSession ? (
-              effectiveVariant === "teacher" ? (
-                <>
-                  <Link href="/teacher/login">
-                    <GlassButton
-                      variant="ghost"
-                      size="sm"
-                      leftIcon={<LogIn className="h-3.5 w-3.5 text-[#5D7373]" />}
-                    >
-                      Teacher Login
-                    </GlassButton>
-                  </Link>
-                  <Link href="/teacher/register">
-                    <GlassButton
-                      variant="primary"
-                      size="sm"
-                      className="bg-[#0B4F4B] hover:bg-[#073F3C] text-white rounded-full px-5"
-                      leftIcon={<UserPlus className="h-3.5 w-3.5" />}
-                    >
-                      Start Teaching
-                    </GlassButton>
-                  </Link>
-                </>
-              ) : effectiveVariant === "student" ? (
-                <>
-                  <Link href="/student/login">
-                    <GlassButton
-                      variant="ghost"
-                      size="sm"
-                      leftIcon={<LogIn className="h-3.5 w-3.5 text-[#5D7373]" />}
-                    >
-                      Student Login
-                    </GlassButton>
-                  </Link>
-                  <Link href="/student/register">
-                    <GlassButton
-                      variant="primary"
-                      size="sm"
-                      className="bg-[#0B4F4B] hover:bg-[#073F3C] text-white rounded-full px-5"
-                      leftIcon={<UserPlus className="h-3.5 w-3.5" />}
-                    >
-                      Start Learning
-                    </GlassButton>
-                  </Link>
-                </>
-              ) : (
-                <>
-                  <Link href="/login">
-                    <GlassButton
-                      variant="ghost"
-                      size="sm"
-                      leftIcon={<LogIn className="h-3.5 w-3.5 text-[#5D7373]" />}
-                    >
-                      Login
-                    </GlassButton>
-                  </Link>
-                  <Link href="/register">
-                    <GlassButton
-                      variant="primary"
-                      size="sm"
-                      className="bg-[#0B4F4B] hover:bg-[#073F3C] text-white rounded-full px-5"
-                      leftIcon={<UserPlus className="h-3.5 w-3.5" />}
-                    >
-                      Get Started
-                    </GlassButton>
-                  </Link>
-                </>
-              )
-            ) : !userSession.emailVerified ? (
               <>
-                <Link href={`/verify-email?email=${encodeURIComponent(userSession.email)}`}>
+                <Link href="/login">
+                  <GlassButton
+                    variant="ghost"
+                    size="sm"
+                    className="text-[#102A2A] hover:text-[#0B4F4B]"
+                    leftIcon={<LogIn className="h-4 w-4 text-[#5D7373]" />}
+                  >
+                    Login
+                  </GlassButton>
+                </Link>
+                <Link href="/register">
                   <GlassButton
                     variant="primary"
                     size="sm"
-                    leftIcon={<MailCheck className="h-3.5 w-3.5" />}
+                    className="bg-[#0B4F4B] hover:bg-[#073F3C] text-white rounded-full px-5 font-bold shadow-md"
+                    leftIcon={<UserPlus className="h-4 w-4" />}
                   >
-                    Verify Email
+                    Get Started
                   </GlassButton>
                 </Link>
-                <GlassButton
-                  variant="ghost"
-                  size="sm"
-                  onClick={handleLogout}
-                  leftIcon={<LogOut className="h-3.5 w-3.5 text-slate-600" />}
-                >
-                  Logout
-                </GlassButton>
               </>
             ) : (
               <>
@@ -358,7 +300,8 @@ export function FloatingNavbar({ variant }: FloatingNavbarProps = {}) {
                   <GlassButton
                     variant="primary"
                     size="sm"
-                    leftIcon={<LayoutDashboard className="h-3.5 w-3.5" />}
+                    className="bg-[#0B4F4B] hover:bg-[#073F3C] text-white rounded-full px-4"
+                    leftIcon={<LayoutDashboard className="h-4 w-4" />}
                   >
                     {getDashboardLabel(userSession)}
                   </GlassButton>
@@ -367,7 +310,7 @@ export function FloatingNavbar({ variant }: FloatingNavbarProps = {}) {
                   <GlassButton
                     variant="secondary"
                     size="sm"
-                    leftIcon={<User className="h-3.5 w-3.5" />}
+                    leftIcon={<User className="h-4 w-4" />}
                   >
                     Profile
                   </GlassButton>
@@ -376,7 +319,7 @@ export function FloatingNavbar({ variant }: FloatingNavbarProps = {}) {
                   variant="ghost"
                   size="sm"
                   onClick={handleLogout}
-                  leftIcon={<LogOut className="h-3.5 w-3.5 text-slate-600" />}
+                  leftIcon={<LogOut className="h-4 w-4 text-[#5D7373]" />}
                 >
                   Logout
                 </GlassButton>
@@ -384,203 +327,143 @@ export function FloatingNavbar({ variant }: FloatingNavbarProps = {}) {
             )}
           </div>
 
-          {/* Mobile / Tablet Hamburger Menu Button */}
+          {/* Mobile Hamburger Menu Button */}
           <button
             onClick={() => setMobileOpen(!mobileOpen)}
-            className="lg:hidden p-2 sm:p-2.5 rounded-2xl glass-surface border border-white/80 text-slate-800 hover:bg-slate-100 shadow-sm flex items-center justify-center"
-            aria-label="Toggle Menu"
+            className="lg:hidden p-2 rounded-xl bg-[#F5F7F8] border border-[#DCE5E4] text-[#102A2A] hover:bg-[#DCE5E4] transition-colors"
+            aria-label="Toggle mobile menu"
           >
-            {mobileOpen ? <X className="h-4.5 w-4.5" /> : <Menu className="h-4.5 w-4.5" />}
+            {mobileOpen ? <X className="h-5 w-5" /> : <Menu className="h-5 w-5" />}
           </button>
-        </motion.div>
+        </div>
       </header>
 
-      {/* Mobile Navigation Drawer */}
+      {/* Mobile Menu Drawer */}
       <AnimatePresence>
         {mobileOpen && (
-          <motion.div
-            initial={{ opacity: 0, scale: 0.95, y: -10 }}
-            animate={{ opacity: 1, scale: 1, y: 0 }}
-            exit={{ opacity: 0, scale: 0.95, y: -10 }}
-            className="fixed top-16 sm:top-20 left-3 right-3 sm:left-6 sm:right-6 z-40 p-5 sm:p-6 glass-surface rounded-3xl shadow-2xl lg:hidden space-y-4 text-center pointer-events-auto border border-white/90 max-h-[calc(100vh-5.5rem)] overflow-y-auto"
-          >
-            {/* Quick Search Tap Button inside Mobile Menu */}
-            <button
-              onClick={() => {
-                setMobileOpen(false);
-                setSearchModalOpen(true);
-              }}
-              className="w-full flex items-center justify-between px-4 py-2.5 rounded-2xl bg-white text-slate-700 text-xs font-semibold hover:bg-blue-50 hover:text-blue-600 transition-colors border border-slate-200 shadow-xs"
+          <div className="fixed inset-0 z-40 lg:hidden overflow-hidden" ref={mobileMenuRef}>
+            {/* Backdrop overlay */}
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              onClick={() => setMobileOpen(false)}
+              className="absolute inset-0 bg-black/40 backdrop-blur-xs"
+            />
+
+            {/* Menu Drawer */}
+            <motion.div
+              initial={{ opacity: 0, y: -20 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: -20 }}
+              transition={{ duration: 0.2 }}
+              className="relative top-16 mx-3 sm:mx-6 bg-white rounded-3xl border border-[#DCE5E4] shadow-2xl p-6 space-y-5 max-h-[calc(100vh-5rem)] overflow-y-auto"
             >
-              <div className="flex items-center gap-2">
-                <Search className="h-4 w-4 text-slate-500" />
-                <span className="text-slate-700 font-semibold truncate">
-                  {effectiveVariant === "teacher"
-                    ? "Search teaching resources..."
-                    : effectiveVariant === "student"
-                    ? "Search courses & tutors..."
-                    : "Search tutors, courses..."}
-                </span>
-              </div>
-              <span className="text-[10px] bg-blue-50 px-2 py-0.5 rounded-md text-blue-600 font-bold border border-blue-100 shrink-0">
-                Search
-              </span>
-            </button>
+              {/* Navigation Links */}
+              <nav className="flex flex-col space-y-3 font-semibold text-[#102A2A] text-sm">
+                <div className="pb-2 border-b border-[#DCE5E4] space-y-2">
+                  <div className="text-xs font-black uppercase text-[#5D7373] tracking-wider px-2">
+                    Explore
+                  </div>
+                  <Link
+                    href="/find-teachers"
+                    onClick={() => setMobileOpen(false)}
+                    className="flex items-center gap-2.5 p-2 rounded-xl hover:bg-[#F5F7F8] text-[#102A2A] font-bold"
+                  >
+                    <Users className="h-4 w-4 text-[#0B4F4B]" />
+                    Find an Educator
+                  </Link>
+                  <Link
+                    href="/courses"
+                    onClick={() => setMobileOpen(false)}
+                    className="flex items-center gap-2.5 p-2 rounded-xl hover:bg-[#F5F7F8] text-[#102A2A] font-bold"
+                  >
+                    <BookOpen className="h-4 w-4 text-[#B8860B]" />
+                    Explore Courses
+                  </Link>
+                  <Link
+                    href="/courses"
+                    onClick={() => setMobileOpen(false)}
+                    className="flex items-center gap-2.5 p-2 rounded-xl hover:bg-[#F5F7F8] text-[#102A2A] font-bold"
+                  >
+                    <Grid className="h-4 w-4 text-[#5D7373]" />
+                    Browse Subjects
+                  </Link>
+                </div>
 
-            {effectiveVariant === "student" ? (
-              <nav className="flex flex-col gap-2.5 font-bold text-slate-800 text-sm pt-1">
-                <Link href="/courses" onClick={() => setMobileOpen(false)} className="py-2 border-b border-slate-100 text-left px-2">
-                  Browse Courses
-                </Link>
-                <Link href="/find-teachers" onClick={() => setMobileOpen(false)} className="py-2 border-b border-slate-100 text-left px-2">
-                  Find Verified Teachers
-                </Link>
-                <Link href="/student#live-classes" onClick={() => setMobileOpen(false)} className="py-2 border-b border-slate-100 text-left px-2">
-                  Live Classroom Learning
-                </Link>
-                <Link href="/student#benefits" onClick={() => setMobileOpen(false)} className="py-2 border-b border-slate-100 text-left px-2">
-                  Student Benefits
-                </Link>
-                <Link href="/student#faq" onClick={() => setMobileOpen(false)} className="py-2 border-b border-slate-100 text-left px-2">
-                  Student FAQ
-                </Link>
-                <Link href={getEducatorDomain() + "/"} onClick={() => setMobileOpen(false)} className="py-2 text-left px-2 text-indigo-600 font-bold text-xs">
-                  Switch to Teacher Portal →
-                </Link>
-              </nav>
-            ) : effectiveVariant === "teacher" ? (
-              <nav className="flex flex-col gap-2.5 font-bold text-slate-800 text-sm pt-1">
-                <Link href="/#how-it-works" onClick={() => setMobileOpen(false)} className="py-2 border-b border-slate-100 text-left px-2">
-                  How Teaching Works
-                </Link>
-                <Link href="/#courses" onClick={() => setMobileOpen(false)} className="py-2 border-b border-slate-100 text-left px-2">
-                  Create & Upload Courses
-                </Link>
-                <Link href="/#live-classes" onClick={() => setMobileOpen(false)} className="py-2 border-b border-slate-100 text-left px-2">
-                  Schedule Live Classes
-                </Link>
-                <Link href="/#earnings" onClick={() => setMobileOpen(false)} className="py-2 border-b border-slate-100 text-left px-2">
-                  Earnings & Payouts
-                </Link>
-                <Link href="/#benefits" onClick={() => setMobileOpen(false)} className="py-2 border-b border-slate-100 text-left px-2">
-                  Educator Benefits
-                </Link>
-                <Link href="/#faq" onClick={() => setMobileOpen(false)} className="py-2 border-b border-slate-100 text-left px-2">
-                  Teacher FAQ
-                </Link>
-                <Link href={getStudentDomain() + "/"} onClick={() => setMobileOpen(false)} className="py-2 text-left px-2 text-blue-600 font-bold text-xs">
-                  Switch to Student Portal →
-                </Link>
-              </nav>
-            ) : (
-              <nav className="flex flex-col gap-2.5 font-bold text-slate-800 text-sm pt-1">
-                <Link href="/" onClick={() => setMobileOpen(false)} className="py-2 border-b border-slate-100 text-left px-2">
-                  Home
-                </Link>
-                <Link href="/services" onClick={() => setMobileOpen(false)} className="py-2 border-b border-slate-100 text-left px-2 text-blue-600">
-                  Products & Services
-                </Link>
-                <Link href="/courses" onClick={() => setMobileOpen(false)} className="py-2 border-b border-slate-100 text-left px-2">
-                  Courses
-                </Link>
-                <Link href="/find-teachers" onClick={() => setMobileOpen(false)} className="py-2 border-b border-slate-100 text-left px-2">
-                  Find Tutors
-                </Link>
-                <Link href="/pricing" onClick={() => setMobileOpen(false)} className="py-2 border-b border-slate-100 text-left px-2">
-                  Pricing
-                </Link>
-                <Link href="/contact" onClick={() => setMobileOpen(false)} className="py-2 border-b border-slate-100 text-left px-2">
-                  Contact Us
-                </Link>
-              </nav>
-            )}
+                <a
+                  href="#how-it-works"
+                  onClick={handleHowItWorksClick}
+                  className="py-2 px-2 hover:bg-[#F5F7F8] rounded-xl border-b border-[#DCE5E4]"
+                >
+                  How It Works
+                </a>
 
-            <div className="pt-2 flex flex-col gap-2">
-              {!userSession ? (
-                effectiveVariant === "teacher" ? (
+                <Link
+                  href="/live"
+                  onClick={() => setMobileOpen(false)}
+                  className="py-2 px-2 hover:bg-[#F5F7F8] rounded-xl border-b border-[#DCE5E4] flex items-center justify-between"
+                >
+                  <span>Live Events</span>
+                  <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-bold bg-red-100 text-red-600">
+                    <span className="h-1.5 w-1.5 rounded-full bg-red-500 animate-pulse" />
+                    🔴 Live
+                  </span>
+                </Link>
+
+                <Link
+                  href="/teacher"
+                  onClick={() => setMobileOpen(false)}
+                  className="py-2 px-2 hover:bg-[#F5F7F8] rounded-xl text-[#0B4F4B] font-bold"
+                >
+                  Become an Educator
+                </Link>
+              </nav>
+
+              {/* Mobile Auth CTAs */}
+              <div className="pt-2 border-t border-[#DCE5E4] flex flex-col gap-2.5">
+                {!userSession ? (
                   <>
-                    <Link href="/teacher/login" onClick={() => setMobileOpen(false)}>
-                      <GlassButton variant="secondary" className="w-full justify-center">
-                        Teacher Login
+                    <Link href="/login" onClick={() => setMobileOpen(false)}>
+                      <GlassButton variant="secondary" className="w-full justify-center text-sm font-bold">
+                        Login
                       </GlassButton>
                     </Link>
-                    <Link href="/teacher/register" onClick={() => setMobileOpen(false)}>
-                      <GlassButton variant="primary" className="w-full justify-center bg-indigo-600 hover:bg-indigo-700">
-                        Become a Teacher
-                      </GlassButton>
-                    </Link>
-                  </>
-                ) : effectiveVariant === "student" ? (
-                  <>
-                    <Link href="/student/login" onClick={() => setMobileOpen(false)}>
-                      <GlassButton variant="secondary" className="w-full justify-center">
-                        Student Login
-                      </GlassButton>
-                    </Link>
-                    <Link href="/student/register" onClick={() => setMobileOpen(false)}>
-                      <GlassButton variant="primary" className="w-full justify-center">
-                        Start Learning
+                    <Link href="/register" onClick={() => setMobileOpen(false)}>
+                      <GlassButton
+                        variant="primary"
+                        className="w-full justify-center bg-[#0B4F4B] hover:bg-[#073F3C] text-white text-sm font-bold"
+                      >
+                        Get Started
                       </GlassButton>
                     </Link>
                   </>
                 ) : (
                   <>
-                    <Link href="/login" onClick={() => setMobileOpen(false)}>
-                      <GlassButton variant="secondary" className="w-full justify-center">
-                        Login
+                    <Link href={getDashboardPath(userSession)} onClick={() => setMobileOpen(false)}>
+                      <GlassButton variant="primary" className="w-full justify-center bg-[#0B4F4B] text-white text-sm">
+                        {getDashboardLabel(userSession)}
                       </GlassButton>
                     </Link>
-                    <Link href="/register" onClick={() => setMobileOpen(false)}>
-                      <GlassButton variant="primary" className="w-full justify-center">
-                        Get Started
+                    <Link href="/profile" onClick={() => setMobileOpen(false)}>
+                      <GlassButton variant="secondary" className="w-full justify-center text-sm">
+                        Profile
                       </GlassButton>
                     </Link>
+                    <GlassButton
+                      variant="ghost"
+                      className="w-full justify-center text-sm text-[#5D7373]"
+                      onClick={handleLogout}
+                    >
+                      Logout
+                    </GlassButton>
                   </>
-                )
-              ) : !userSession.emailVerified ? (
-                <>
-                  <Link href={`/verify-email?email=${encodeURIComponent(userSession.email)}`} onClick={() => setMobileOpen(false)}>
-                    <GlassButton variant="primary" className="w-full justify-center">
-                      Verify Email
-                    </GlassButton>
-                  </Link>
-                  <GlassButton variant="secondary" className="w-full justify-center" onClick={handleLogout}>
-                    Logout
-                  </GlassButton>
-                </>
-              ) : (
-                <>
-                  <Link href={getDashboardPath(userSession)} onClick={() => setMobileOpen(false)}>
-                    <GlassButton variant="primary" className="w-full justify-center">
-                      {getDashboardLabel(userSession)}
-                    </GlassButton>
-                  </Link>
-                  <Link href="/profile" onClick={() => setMobileOpen(false)}>
-                    <GlassButton variant="secondary" className="w-full justify-center">
-                      Profile
-                    </GlassButton>
-                  </Link>
-                  <GlassButton variant="ghost" className="w-full justify-center" onClick={handleLogout}>
-                    Logout
-                  </GlassButton>
-                </>
-              )}
-            </div>
-          </motion.div>
+                )}
+              </div>
+            </motion.div>
+          </div>
         )}
       </AnimatePresence>
-
-      <GlobalSearchModal isOpen={searchModalOpen} onClose={() => setSearchModalOpen(false)} />
-
-      <AuthModal
-        isOpen={authModalOpen}
-        onClose={() => {
-          setAuthModalOpen(false);
-          checkAuthStatus();
-        }}
-        initialMode={authMode}
-        initialRole={selectedRole}
-      />
     </>
   );
 }

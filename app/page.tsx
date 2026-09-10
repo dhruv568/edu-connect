@@ -1,72 +1,59 @@
 "use client";
 
-import React, { useState } from "react";
+import React from "react";
 import { FloatingNavbar } from "@/components/homepage/floating-navbar";
-import { InteractiveHeroCanvas } from "@/components/homepage/interactive-hero-canvas";
-import { TrustChips } from "@/components/homepage/trust-chips";
-import { RoleGatewaySection } from "@/components/homepage/role-gateway-section";
-import { LiquidLearningModels } from "@/components/homepage/liquid-learning-models";
-import { TeacherCarousel } from "@/components/homepage/teacher-carousel";
-import { LiveClassroomPreview } from "@/components/homepage/live-classroom-preview";
-import { CourseExperienceSection } from "@/components/homepage/course-experience-section";
-import { SocialProofTestimonials } from "@/components/homepage/social-proof-testimonials";
-import { LearningJourneyPath } from "@/components/homepage/learning-journey-path";
+import { HeroSection } from "@/components/homepage/hero-section";
+import { WhoIsItForSection } from "@/components/homepage/who-is-it-for-section";
+import { WhatYouCanDoSection } from "@/components/homepage/what-you-can-do-section";
+import { HowItWorksSection } from "@/components/homepage/how-it-works-section";
+import { ExploreEducatorsSection } from "@/components/homepage/explore-educators-section";
+import { ExploreCoursesSection } from "@/components/homepage/explore-courses-section";
+import { LiveLearningSection } from "@/components/homepage/live-learning-section";
+import { WhyEduConnectsSection } from "@/components/homepage/why-educonnects-section";
+import { BecomeEducatorSection } from "@/components/homepage/become-educator-section";
+import { FinalCtaSection } from "@/components/homepage/final-cta-section";
 import { PremiumFooter } from "@/components/homepage/premium-footer";
-import { AuthModal } from "@/components/shared/auth-modal";
-import { UserRole } from "@/types/auth";
 
 export default function EduConnectsHomePage() {
-  const [authModalOpen, setAuthModalOpen] = useState(false);
-  const [selectedRole, setSelectedRole] = useState<UserRole>("STUDENT");
-
-  const handleOpenAuth = (role: UserRole) => {
-    setSelectedRole(role);
-    setAuthModalOpen(true);
-  };
-
   return (
-    <div className="min-h-screen flex flex-col relative bg-slate-50 overflow-hidden font-sans">
-      {/* 1. Floating Glass Navbar */}
+    <div className="min-h-screen flex flex-col relative bg-[#F5F7F8] overflow-x-hidden font-sans">
+      {/* 1. Simplified Modern Glass Navbar */}
       <FloatingNavbar />
 
       <main className="flex-1">
-        {/* 2. Interactive Living Learning Canvas Hero */}
-        <InteractiveHeroCanvas onOpenAuth={handleOpenAuth} />
+        {/* 2. Clear Hero Section */}
+        <HeroSection />
 
-        {/* 3. Floating Trust Chips */}
-        <TrustChips />
+        {/* 3. Who Is EduConnects For? (Learners & Educators) */}
+        <WhoIsItForSection />
 
-        {/* 3.5 Role Selection Gateway (Student / Teacher Paths) */}
-        <RoleGatewaySection />
+        {/* 4. What Can You Do On EduConnects? */}
+        <WhatYouCanDoSection />
 
-        {/* 4. Three Liquid Learning Models */}
-        <LiquidLearningModels onOpenAuth={handleOpenAuth} />
+        {/* 5. How EduConnects Works */}
+        <HowItWorksSection />
 
-        {/* 5. Teacher Discovery Carousel */}
-        <TeacherCarousel onOpenAuth={handleOpenAuth} />
+        {/* 6. Explore Educators */}
+        <ExploreEducatorsSection />
 
-        {/* 6. Built-in Live Virtual Classroom Preview */}
-        <LiveClassroomPreview onOpenAuth={handleOpenAuth} />
+        {/* 7. Explore Courses */}
+        <ExploreCoursesSection />
 
-        {/* 7. Structured Pre-Recorded LMS Courses */}
-        <CourseExperienceSection onOpenAuth={handleOpenAuth} />
+        {/* 8. Live Learning */}
+        <LiveLearningSection />
 
-        {/* 8. Social Proof & Verified Learning Outcomes */}
-        <SocialProofTestimonials onOpenAuth={handleOpenAuth} />
+        {/* 9. Why EduConnects? */}
+        <WhyEduConnectsSection />
 
-        {/* 9. Flowing Animated Learning Journey */}
-        <LearningJourneyPath />
+        {/* 10. Become An Educator */}
+        <BecomeEducatorSection />
+
+        {/* 11. Final CTA */}
+        <FinalCtaSection />
       </main>
 
-      {/* 9. Premium Glass Footer */}
+      {/* 12. Premium Structured Footer */}
       <PremiumFooter />
-
-      {/* Auth Modal Trigger */}
-      <AuthModal
-        isOpen={authModalOpen}
-        onClose={() => setAuthModalOpen(false)}
-        initialRole={selectedRole}
-      />
     </div>
   );
 }
