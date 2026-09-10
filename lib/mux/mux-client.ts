@@ -102,7 +102,7 @@ export async function syncMuxAssetStatus(
     let targetAssetId = assetId;
 
     if (!targetAssetId && uploadId) {
-      const upload = await muxClient.video.uploads.get(uploadId);
+      const upload = await muxClient.video.uploads.retrieve(uploadId);
       if (upload.asset_id) {
         targetAssetId = upload.asset_id;
       } else if (upload.status === "errored") {
@@ -113,7 +113,7 @@ export async function syncMuxAssetStatus(
     }
 
     if (targetAssetId) {
-      const asset = await muxClient.video.assets.get(targetAssetId);
+      const asset = await muxClient.video.assets.retrieve(targetAssetId);
       if (asset.status === "ready") {
         return {
           status: "READY",
