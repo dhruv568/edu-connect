@@ -35,20 +35,20 @@ export const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
     ref
   ) => {
     const baseStyles =
-      "inline-flex items-center justify-center font-semibold rounded-xl transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 disabled:pointer-events-none disabled:opacity-50 select-none cursor-pointer";
+      "inline-flex items-center justify-center font-bold rounded-xl transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#0B4F4B] disabled:pointer-events-none disabled:opacity-50 select-none cursor-pointer";
 
     const variants = {
-      primary: "bg-blue-600 text-white hover:bg-blue-700 active:bg-blue-800 shadow-md shadow-blue-500/20",
-      secondary: "bg-slate-100 text-slate-900 hover:bg-slate-200 active:bg-slate-300",
-      outline: "border-2 border-slate-200 bg-white text-slate-800 hover:bg-slate-50 hover:border-slate-300",
-      ghost: "text-slate-700 hover:bg-slate-100 active:bg-slate-200",
-      teacher: "bg-indigo-600 text-white hover:bg-indigo-700 shadow-md shadow-indigo-500/20",
-      student: "bg-emerald-600 text-white hover:bg-emerald-700 shadow-md shadow-emerald-500/20",
-      gradient: "bg-gradient-to-r from-blue-600 to-indigo-600 text-white hover:from-blue-700 hover:to-indigo-700 shadow-lg shadow-blue-500/25",
+      primary: "bg-[#0B4F4B] text-white hover:bg-[#073F3C] active:bg-[#052C2A] shadow-md shadow-[#0B4F4B]/15",
+      secondary: "bg-[#F2C14E] text-[#102A2A] hover:bg-[#E0B03C] active:bg-[#D4A22F] shadow-sm",
+      outline: "border-2 border-[#DCE5E4] bg-white text-[#102A2A] hover:bg-[#FBF7EE] hover:border-[#B8CBC9]",
+      ghost: "text-[#102A2A] hover:bg-[#F5F7F8] active:bg-[#EBF0F0]",
+      teacher: "bg-[#0B4F4B] text-white hover:bg-[#073F3C] shadow-md shadow-[#0B4F4B]/15",
+      student: "bg-[#1B6863] text-white hover:bg-[#0B4F4B] shadow-md shadow-[#1B6863]/15",
+      gradient: "bg-gradient-to-r from-[#0B4F4B] via-[#1B6863] to-[#073F3C] text-white hover:opacity-95 shadow-lg shadow-[#0B4F4B]/20",
     };
 
     const sizes = {
-      sm: "h-9 px-3.5 text-xs rounded-lg gap-1.5",
+      sm: "h-9 px-3.5 text-xs rounded-xl gap-1.5",
       md: "h-11 px-5 text-sm rounded-xl gap-2",
       lg: "h-13 px-7 text-base rounded-2xl gap-2.5",
     };

@@ -124,30 +124,22 @@ export function FloatingNavbar({ variant }: FloatingNavbarProps = {}) {
         >
           <Link
             href={effectiveVariant === "student" ? getStudentDomain() + "/" : effectiveVariant === "teacher" ? getEducatorDomain() + "/" : getMainDomain() + "/"}
-            className="flex items-center gap-2 sm:gap-3 px-2.5 sm:px-4 py-1.5 sm:py-2.5 rounded-2xl glass-surface border border-white/80 shadow-lg group transition-transform hover:scale-105"
+            className="flex items-center gap-2 sm:gap-3 px-2.5 sm:px-4 py-1.5 sm:py-2.5 rounded-2xl glass-surface border border-[#DCE5E4] shadow-md group transition-transform hover:scale-105"
           >
-            <div
-              className={`p-1.5 sm:p-2 rounded-xl text-white shadow-md ${
-                effectiveVariant === "teacher"
-                  ? "bg-gradient-to-tr from-indigo-600 to-purple-600"
-                  : effectiveVariant === "student"
-                  ? "bg-gradient-to-tr from-blue-600 to-emerald-600"
-                  : "bg-gradient-to-tr from-blue-600 to-indigo-600"
-              }`}
-            >
+            <div className="p-1.5 sm:p-2 rounded-xl text-white shadow-md bg-[#0B4F4B]">
               <GraduationCap className="h-4 w-4 sm:h-5 sm:w-5" />
             </div>
             <div className="flex flex-col">
-              <span className="text-sm sm:text-base md:text-lg font-black text-slate-900 tracking-tight whitespace-nowrap leading-none">
-                EDU<span className={effectiveVariant === "teacher" ? "text-indigo-600" : "text-blue-600"}>CONNECTS</span>
+              <span className="text-sm sm:text-base md:text-lg font-black text-[#102A2A] tracking-tight whitespace-nowrap leading-none">
+                EDU<span className="text-[#0B4F4B]">CONNECTS</span>
               </span>
               {effectiveVariant === "student" && (
-                <span className="text-[9px] font-extrabold text-emerald-600 tracking-wider uppercase">
+                <span className="text-[9px] font-extrabold text-[#1B6863] tracking-wider uppercase">
                   For Students
                 </span>
               )}
               {effectiveVariant === "teacher" && (
-                <span className="text-[9px] font-extrabold text-indigo-600 tracking-wider uppercase">
+                <span className="text-[9px] font-extrabold text-[#0B4F4B] tracking-wider uppercase">
                   For Educators
                 </span>
               )}
@@ -160,74 +152,74 @@ export function FloatingNavbar({ variant }: FloatingNavbarProps = {}) {
           initial={{ y: -30, opacity: 0 }}
           animate={{ y: 0, opacity: 1 }}
           transition={{ duration: 0.5, delay: 0.1 }}
-          className="pointer-events-auto hidden lg:flex items-center gap-6 px-6 py-2.5 rounded-full glass-pill border border-white/90 shadow-xl transition-all duration-300"
+          className="pointer-events-auto hidden lg:flex items-center gap-6 px-6 py-2.5 rounded-full glass-pill border border-[#DCE5E4] shadow-lg transition-all duration-300"
         >
           {effectiveVariant === "student" ? (
             /* Student-Specific Navigation Links */
-            <nav className="flex items-center gap-6 text-xs font-bold text-slate-700 uppercase tracking-wider whitespace-nowrap">
-              <Link href="/courses" className="hover:text-blue-600 transition-colors">
+            <nav className="flex items-center gap-6 text-xs font-bold text-[#102A2A] uppercase tracking-wider whitespace-nowrap">
+              <Link href="/courses" className="hover:text-[#0B4F4B] transition-colors">
                 Courses
               </Link>
-              <Link href="/find-teachers" className="hover:text-blue-600 transition-colors">
+              <Link href="/find-teachers" className="hover:text-[#0B4F4B] transition-colors">
                 Teachers
               </Link>
-              <Link href="/#live-classes" className="hover:text-blue-600 transition-colors">
+              <Link href="/#live-classes" className="hover:text-[#0B4F4B] transition-colors">
                 Live Classes
               </Link>
-              <Link href="/#benefits" className="hover:text-blue-600 transition-colors">
+              <Link href="/#benefits" className="hover:text-[#0B4F4B] transition-colors">
                 Benefits
               </Link>
-              <Link href="/#faq" className="hover:text-blue-600 transition-colors">
+              <Link href="/#faq" className="hover:text-[#0B4F4B] transition-colors">
                 FAQ
               </Link>
-              <Link href={getEducatorDomain() + "/"} className="text-slate-400 hover:text-indigo-600 text-[11px] font-semibold transition-colors pl-2 border-l border-slate-200">
+              <Link href={getEducatorDomain() + "/"} className="text-[#5D7373] hover:text-[#0B4F4B] text-[11px] font-semibold transition-colors pl-2 border-l border-[#DCE5E4]">
                 Teach on EduConnects →
               </Link>
             </nav>
           ) : effectiveVariant === "teacher" ? (
             /* Teacher-Specific Navigation Links */
-            <nav className="flex items-center gap-6 text-xs font-bold text-slate-700 uppercase tracking-wider whitespace-nowrap">
-              <Link href="/#how-it-works" className="hover:text-indigo-600 transition-colors">
+            <nav className="flex items-center gap-6 text-xs font-bold text-[#102A2A] uppercase tracking-wider whitespace-nowrap">
+              <Link href="/#how-it-works" className="hover:text-[#0B4F4B] transition-colors">
                 How It Works
               </Link>
-              <Link href="/#courses" className="hover:text-indigo-600 transition-colors">
+              <Link href="/#courses" className="hover:text-[#0B4F4B] transition-colors">
                 Create Courses
               </Link>
-              <Link href="/#live-classes" className="hover:text-indigo-600 transition-colors">
+              <Link href="/#live-classes" className="hover:text-[#0B4F4B] transition-colors">
                 Live Classes
               </Link>
-              <Link href="/#earnings" className="hover:text-indigo-600 transition-colors">
+              <Link href="/#earnings" className="hover:text-[#0B4F4B] transition-colors">
                 Earnings
               </Link>
-              <Link href="/#benefits" className="hover:text-indigo-600 transition-colors">
+              <Link href="/#benefits" className="hover:text-[#0B4F4B] transition-colors">
                 Benefits
               </Link>
-              <Link href="/#faq" className="hover:text-indigo-600 transition-colors">
+              <Link href="/#faq" className="hover:text-[#0B4F4B] transition-colors">
                 FAQ
               </Link>
-              <Link href={getStudentDomain() + "/"} className="text-slate-400 hover:text-blue-600 text-[11px] font-semibold transition-colors pl-2 border-l border-slate-200">
+              <Link href={getStudentDomain() + "/"} className="text-[#5D7373] hover:text-[#0B4F4B] text-[11px] font-semibold transition-colors pl-2 border-l border-[#DCE5E4]">
                 Student Portal →
               </Link>
             </nav>
           ) : (
             /* Default Global Homepage Navigation Links */
-            <nav className="flex items-center gap-6 text-xs font-bold text-slate-700 uppercase tracking-wider whitespace-nowrap">
-              <Link href="/" className="hover:text-blue-600 transition-colors">
+            <nav className="flex items-center gap-6 text-xs font-bold text-[#102A2A] uppercase tracking-wider whitespace-nowrap">
+              <Link href="/" className="hover:text-[#0B4F4B] transition-colors">
                 Home
               </Link>
-              <Link href="/services" className="hover:text-blue-600 transition-colors">
+              <Link href="/services" className="hover:text-[#0B4F4B] transition-colors">
                 Services
               </Link>
-              <Link href="/courses" className="hover:text-blue-600 transition-colors">
+              <Link href="/courses" className="hover:text-[#0B4F4B] transition-colors">
                 Courses
               </Link>
-              <Link href="/find-teachers" className="hover:text-blue-600 transition-colors">
+              <Link href="/find-teachers" className="hover:text-[#0B4F4B] transition-colors">
                 Find Tutors
               </Link>
-              <Link href="/pricing" className="hover:text-blue-600 transition-colors">
+              <Link href="/pricing" className="hover:text-[#0B4F4B] transition-colors">
                 Pricing
               </Link>
-              <Link href="/contact" className="hover:text-blue-600 transition-colors">
+              <Link href="/contact" className="hover:text-[#0B4F4B] transition-colors">
                 Contact
               </Link>
             </nav>
@@ -244,7 +236,7 @@ export function FloatingNavbar({ variant }: FloatingNavbarProps = {}) {
           {/* Mobile/Tablet: compact icon-only search button */}
           <button
             onClick={() => setSearchModalOpen(true)}
-            className="lg:hidden p-2 sm:p-2.5 rounded-2xl bg-white/95 border border-slate-200/90 text-slate-700 hover:text-blue-600 hover:border-blue-300 transition-all shadow-sm flex items-center justify-center"
+            className="lg:hidden p-2 sm:p-2.5 rounded-2xl bg-white border border-[#DCE5E4] text-[#102A2A] hover:text-[#0B4F4B] hover:border-[#0B4F4B] transition-all shadow-sm flex items-center justify-center"
             aria-label="Open Search"
           >
             <Search className="h-4 w-4" />
@@ -253,11 +245,11 @@ export function FloatingNavbar({ variant }: FloatingNavbarProps = {}) {
           {/* Large Desktop: expanded search bar */}
           <button
             onClick={() => setSearchModalOpen(true)}
-            className="hidden lg:flex w-48 xl:w-60 px-3.5 py-2 rounded-2xl bg-white/95 border border-slate-200/90 text-slate-700 hover:text-blue-600 hover:border-blue-400 hover:shadow-md transition-all text-xs font-semibold items-center justify-between shadow-sm group"
+            className="hidden lg:flex w-48 xl:w-60 px-3.5 py-2 rounded-2xl bg-white border border-[#DCE5E4] text-[#102A2A] hover:text-[#0B4F4B] hover:border-[#0B4F4B] hover:shadow-md transition-all text-xs font-semibold items-center justify-between shadow-sm group"
           >
             <div className="flex items-center gap-2.5 overflow-hidden">
-              <Search className="h-3.5 w-3.5 text-slate-500 group-hover:text-blue-600 shrink-0 transition-colors" />
-              <span className="text-slate-700 font-semibold group-hover:text-blue-600 transition-colors truncate">
+              <Search className="h-3.5 w-3.5 text-[#5D7373] group-hover:text-[#0B4F4B] shrink-0 transition-colors" />
+              <span className="text-[#5D7373] font-semibold group-hover:text-[#0B4F4B] transition-colors truncate">
                 {effectiveVariant === "teacher"
                   ? "Search teaching guides..."
                   : effectiveVariant === "student"
@@ -265,7 +257,7 @@ export function FloatingNavbar({ variant }: FloatingNavbarProps = {}) {
                   : "Search tutors, courses..."}
               </span>
             </div>
-            <kbd className="hidden xl:inline-block bg-slate-100 px-1.5 py-0.5 rounded text-[10px] text-slate-700 font-mono font-bold border border-slate-200/90 shadow-2xs shrink-0">
+            <kbd className="hidden xl:inline-block bg-[#F5F7F8] px-1.5 py-0.5 rounded text-[10px] text-[#5D7373] font-mono font-bold border border-[#DCE5E4] shrink-0">
               ⌘K
             </kbd>
           </button>
@@ -279,7 +271,7 @@ export function FloatingNavbar({ variant }: FloatingNavbarProps = {}) {
                     <GlassButton
                       variant="ghost"
                       size="sm"
-                      leftIcon={<LogIn className="h-3.5 w-3.5 text-slate-600" />}
+                      leftIcon={<LogIn className="h-3.5 w-3.5 text-[#5D7373]" />}
                     >
                       Teacher Login
                     </GlassButton>
@@ -288,7 +280,7 @@ export function FloatingNavbar({ variant }: FloatingNavbarProps = {}) {
                     <GlassButton
                       variant="primary"
                       size="sm"
-                      className="bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-700 hover:to-purple-700 text-white"
+                      className="bg-[#0B4F4B] hover:bg-[#073F3C] text-white rounded-full px-5"
                       leftIcon={<UserPlus className="h-3.5 w-3.5" />}
                     >
                       Start Teaching
@@ -301,7 +293,7 @@ export function FloatingNavbar({ variant }: FloatingNavbarProps = {}) {
                     <GlassButton
                       variant="ghost"
                       size="sm"
-                      leftIcon={<LogIn className="h-3.5 w-3.5 text-slate-600" />}
+                      leftIcon={<LogIn className="h-3.5 w-3.5 text-[#5D7373]" />}
                     >
                       Student Login
                     </GlassButton>
@@ -310,6 +302,7 @@ export function FloatingNavbar({ variant }: FloatingNavbarProps = {}) {
                     <GlassButton
                       variant="primary"
                       size="sm"
+                      className="bg-[#0B4F4B] hover:bg-[#073F3C] text-white rounded-full px-5"
                       leftIcon={<UserPlus className="h-3.5 w-3.5" />}
                     >
                       Start Learning
@@ -322,7 +315,7 @@ export function FloatingNavbar({ variant }: FloatingNavbarProps = {}) {
                     <GlassButton
                       variant="ghost"
                       size="sm"
-                      leftIcon={<LogIn className="h-3.5 w-3.5 text-slate-600" />}
+                      leftIcon={<LogIn className="h-3.5 w-3.5 text-[#5D7373]" />}
                     >
                       Login
                     </GlassButton>
@@ -331,6 +324,7 @@ export function FloatingNavbar({ variant }: FloatingNavbarProps = {}) {
                     <GlassButton
                       variant="primary"
                       size="sm"
+                      className="bg-[#0B4F4B] hover:bg-[#073F3C] text-white rounded-full px-5"
                       leftIcon={<UserPlus className="h-3.5 w-3.5" />}
                     >
                       Get Started

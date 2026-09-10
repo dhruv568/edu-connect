@@ -30,14 +30,14 @@ export const Input = React.forwardRef<HTMLInputElement, InputProps>(
     return (
       <div className="w-full space-y-1.5">
         {label && (
-          <label htmlFor={inputId} className="block text-xs font-semibold text-slate-700 uppercase tracking-wider">
+          <label htmlFor={inputId} className="block text-xs font-semibold text-[#102A2A] uppercase tracking-wider">
             {label}
           </label>
         )}
 
         <div className="relative flex items-center">
           {leftIcon && (
-            <div className="absolute left-3.5 pointer-events-none text-slate-400">
+            <div className="absolute left-3.5 pointer-events-none text-[#5D7373]">
               {leftIcon}
             </div>
           )}
@@ -46,10 +46,10 @@ export const Input = React.forwardRef<HTMLInputElement, InputProps>(
             id={inputId}
             type={effectiveType}
             className={cn(
-              "w-full h-11 px-4 text-sm rounded-xl transition-all shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500",
+              "w-full h-11 px-4 text-sm rounded-xl transition-all shadow-sm focus:outline-none focus:ring-2 focus:ring-[#0B4F4B]/20 focus:border-[#0B4F4B]",
               className?.includes("bg-slate-") || className?.includes("text-white")
-                ? "bg-slate-800/95 border border-slate-700 text-white placeholder:text-slate-400 dark-input-crisp"
-                : "bg-white border border-slate-200 text-slate-900 placeholder:text-slate-400 focus:border-transparent",
+                ? "bg-[#073F3C] border border-[#1B6863] text-white placeholder:text-teal-200/60 dark-input-crisp"
+                : "bg-white border border-[#DCE5E4] text-[#102A2A] placeholder:text-[#5D7373]",
               leftIcon && "pl-10",
               (rightIcon || hasPasswordToggle) && "pr-10",
               error && "border-red-500 focus:ring-red-500",
@@ -64,7 +64,7 @@ export const Input = React.forwardRef<HTMLInputElement, InputProps>(
               type="button"
               tabIndex={-1}
               onClick={() => setShowPassword(!showPassword)}
-              className="absolute right-3.5 text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 focus:outline-none transition-colors p-1 rounded-md hover:bg-slate-100 dark:hover:bg-slate-700/50"
+              className="absolute right-3.5 text-[#5D7373] hover:text-[#102A2A] focus:outline-none transition-colors p-1 rounded-md hover:bg-[#F5F7F8]"
               aria-label={showPassword ? "Hide password" : "Show password"}
               title={showPassword ? "Hide password" : "Show password"}
             >
@@ -75,7 +75,7 @@ export const Input = React.forwardRef<HTMLInputElement, InputProps>(
               )}
             </button>
           ) : rightIcon ? (
-            <div className="absolute right-3.5 text-slate-400">
+            <div className="absolute right-3.5 text-[#5D7373]">
               {rightIcon}
             </div>
           ) : null}
@@ -84,7 +84,7 @@ export const Input = React.forwardRef<HTMLInputElement, InputProps>(
         {error ? (
           <p className="text-xs text-red-500 font-medium">{error}</p>
         ) : helperText ? (
-          <p className="text-xs text-slate-500">{helperText}</p>
+          <p className="text-xs text-[#5D7373]">{helperText}</p>
         ) : null}
       </div>
     );

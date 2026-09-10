@@ -1005,5 +1005,17 @@ model StaffInvitation {
   @@map("staff_invitations")
 }
 
+model EventRegistration {
+  id             String   @id @default(uuid())
+  name           String
+  whatsappNumber String
+  eventSlug      String   @default("educonnects-grand-opening")
+  source         String   @default("LIVE_PAGE")
+  status         String   @default("CONFIRMED")
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
 
-
+  @@unique([eventSlug, whatsappNumber])
+  @@index([eventSlug])
+  @@map("event_registrations")
+}

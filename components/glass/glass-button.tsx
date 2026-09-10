@@ -35,17 +35,17 @@ export const GlassButton = React.forwardRef<HTMLButtonElement, GlassButtonProps>
     ref
   ) => {
     const baseStyles =
-      "inline-flex items-center justify-center font-bold transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 disabled:pointer-events-none disabled:opacity-50 select-none cursor-pointer relative overflow-hidden backdrop-blur-md";
+      "inline-flex items-center justify-center font-bold transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#0B4F4B] disabled:pointer-events-none disabled:opacity-50 select-none cursor-pointer relative overflow-hidden backdrop-blur-md";
 
     const variants = {
       primary:
-        "bg-gradient-to-r from-blue-600 via-indigo-600 to-purple-600 text-white shadow-liquid-button border border-white/30 hover:shadow-xl hover:from-blue-700 hover:to-purple-700",
+        "bg-[#0B4F4B] text-white shadow-md border border-white/20 hover:bg-[#073F3C] hover:shadow-lg",
       secondary:
-        "bg-white/80 text-slate-900 border border-white/90 shadow-sm hover:bg-white hover:border-blue-300 hover:shadow-md",
+        "bg-[#F2C14E] text-[#102A2A] border border-[#F2C14E]/60 shadow-sm hover:bg-[#E0B03C] hover:shadow-md font-bold",
       ghost:
-        "bg-transparent text-slate-700 hover:bg-white/50 hover:text-slate-900 border border-transparent",
+        "bg-transparent text-[#102A2A] hover:bg-white/60 hover:text-[#0B4F4B] border border-transparent",
       glow:
-        "bg-blue-600/90 text-white shadow-[0_0_25px_rgba(37,99,235,0.4)] border border-blue-400/40 hover:bg-blue-600 hover:shadow-[0_0_35px_rgba(37,99,235,0.6)]",
+        "bg-[#0B4F4B] text-white shadow-[0_0_20px_rgba(11,79,75,0.3)] border border-teal-400/40 hover:bg-[#073F3C] hover:shadow-[0_0_30px_rgba(11,79,75,0.5)]",
     };
 
     const sizes = {

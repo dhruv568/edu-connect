@@ -177,25 +177,25 @@ export function DashboardLayout({ role, userName, userEmail, children }: Dashboa
 
   return (
     <PermissionProvider>
-      <div className="min-h-screen flex bg-slate-50">
+      <div className="min-h-screen flex bg-[#F5F7F8]">
       {/* Mobile Backdrop & Sidebar */}
       {sidebarOpen && (
         <div
-          className="fixed inset-0 bg-slate-900/80 z-40 lg:hidden backdrop-blur-xs"
+          className="fixed inset-0 bg-[#102A2A]/80 z-40 lg:hidden backdrop-blur-xs"
           onClick={() => setSidebarOpen(false)}
         />
       )}
 
       {/* Desktop & Mobile Sidebar */}
       <aside
-        className={`fixed lg:static inset-y-0 left-0 z-50 flex flex-col w-64 bg-slate-900 text-slate-300 border-r border-slate-800 shrink-0 transition-transform duration-300 ${
+        className={`fixed lg:static inset-y-0 left-0 z-50 flex flex-col w-64 bg-[#073F3C] text-teal-100 border-r border-[#1B6863]/30 shrink-0 transition-transform duration-300 ${
           sidebarOpen ? "translate-x-0" : "-translate-x-full lg:translate-x-0"
         }`}
       >
-        <div className="p-6 border-b border-slate-800 flex items-center justify-between">
+        <div className="p-6 border-b border-[#1B6863]/30 flex items-center justify-between">
           <div className="flex items-center gap-3">
-            <div className="p-2 rounded-xl bg-blue-600 text-white">
-              <GraduationCap className="h-6 w-6" />
+            <div className="p-2 rounded-xl bg-[#0B4F4B] text-white shadow-md border border-[#F2C14E]/30">
+              <GraduationCap className="h-6 w-6 text-[#F2C14E]" />
             </div>
             <div>
               <h1 className="text-lg font-black text-white tracking-tight">EDUCONNECTS</h1>
@@ -204,7 +204,7 @@ export function DashboardLayout({ role, userName, userEmail, children }: Dashboa
               </Badge>
             </div>
           </div>
-          <button onClick={() => setSidebarOpen(false)} className="lg:hidden text-slate-400 hover:text-white">
+          <button onClick={() => setSidebarOpen(false)} className="lg:hidden text-teal-200 hover:text-white">
             <X className="h-5 w-5" />
           </button>
         </div>
@@ -226,21 +226,21 @@ export function DashboardLayout({ role, userName, userEmail, children }: Dashboa
                 onClick={() => setSidebarOpen(false)}
                 className={`flex items-center gap-3 px-3.5 py-2.5 rounded-xl text-sm font-semibold transition-colors ${
                   isActive
-                    ? "bg-blue-600 text-white shadow-md shadow-blue-500/20"
-                    : "text-slate-300 hover:bg-slate-800 hover:text-white"
+                    ? "bg-[#0B4F4B] text-white shadow-md border border-[#F2C14E]/30"
+                    : "text-teal-100/80 hover:bg-[#1B6863]/40 hover:text-white"
                 }`}
               >
-                <IconComponent className={`h-4 w-4 ${isActive ? "text-white" : "text-slate-400"}`} />
+                <IconComponent className={`h-4 w-4 ${isActive ? "text-[#F2C14E]" : "text-teal-200/70"}`} />
                 <span>{item.label}</span>
               </Link>
             );
           })}
         </nav>
 
-        <div className="p-4 border-t border-slate-800">
+        <div className="p-4 border-t border-[#1B6863]/30">
           <button
             onClick={handleLogout}
-            className="flex items-center gap-3 w-full px-3.5 py-2.5 rounded-xl text-sm font-semibold text-rose-400 hover:bg-rose-500/10 transition-colors"
+            className="flex items-center gap-3 w-full px-3.5 py-2.5 rounded-xl text-sm font-semibold text-rose-300 hover:bg-rose-500/15 transition-colors"
           >
             <LogOut className="h-4 w-4" />
             <span>Sign Out</span>
@@ -251,20 +251,20 @@ export function DashboardLayout({ role, userName, userEmail, children }: Dashboa
       {/* Main Container */}
       <div className="flex-1 flex flex-col min-w-0">
         {/* Topbar */}
-        <header className="h-16 bg-white border-b border-slate-200/80 px-6 flex items-center justify-between sticky top-0 z-20">
+        <header className="h-16 bg-white border-b border-[#DCE5E4] px-6 flex items-center justify-between sticky top-0 z-20">
           <div className="flex items-center gap-4">
             <button
               onClick={() => setSidebarOpen(!sidebarOpen)}
-              className="lg:hidden p-2 rounded-xl text-slate-600 hover:bg-slate-100"
+              className="lg:hidden p-2 rounded-xl text-[#102A2A] hover:bg-[#F5F7F8]"
             >
               <Menu className="h-6 w-6" />
             </button>
             <div className="relative hidden sm:block w-64">
-              <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-400" />
+              <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-[#5D7373]" />
               <input
                 type="text"
                 placeholder="Search portal..."
-                className="w-full h-9 pl-9 pr-4 bg-slate-100 border-none rounded-xl text-xs text-slate-900 focus:ring-2 focus:ring-blue-500 outline-none"
+                className="w-full h-9 pl-9 pr-4 bg-[#F5F7F8] border border-[#DCE5E4] rounded-xl text-xs text-[#102A2A] focus:border-[#0B4F4B] outline-none"
               />
             </div>
           </div>
@@ -272,24 +272,24 @@ export function DashboardLayout({ role, userName, userEmail, children }: Dashboa
           <div className="flex items-center gap-4">
             <NotificationPopover />
 
-            <div className="flex items-center gap-3 pl-4 border-l border-slate-200">
+            <div className="flex items-center gap-3 pl-4 border-l border-[#DCE5E4]">
               {avatarUrl ? (
                 <img
                   src={avatarUrl}
                   alt={currentUserName || "User"}
-                  className="w-9 h-9 rounded-full object-cover shadow-sm ring-1 ring-slate-200"
+                  className="w-9 h-9 rounded-full object-cover shadow-sm ring-1 ring-[#DCE5E4]"
                 />
               ) : (
-                <div className="w-9 h-9 rounded-full bg-blue-600 text-white font-bold flex items-center justify-center text-sm shadow-sm uppercase">
+                <div className="w-9 h-9 rounded-full bg-[#0B4F4B] text-white font-bold flex items-center justify-center text-sm shadow-sm uppercase">
                   {currentUserName ? currentUserName.trim().charAt(0) : "U"}
                 </div>
               )}
               <div className="hidden md:block text-left">
-                <div className="text-xs font-bold text-slate-900">
+                <div className="text-xs font-bold text-[#102A2A]">
                   {currentUserName || "User"}
                 </div>
                 {currentUserEmail && (
-                  <div className="text-[10px] text-slate-500 truncate max-w-[160px]">
+                  <div className="text-[10px] text-[#5D7373] truncate max-w-[160px]">
                     {currentUserEmail}
                   </div>
                 )}
