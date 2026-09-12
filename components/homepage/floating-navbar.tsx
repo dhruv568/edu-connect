@@ -153,16 +153,16 @@ export function FloatingNavbar({ variant }: FloatingNavbarProps = {}) {
             : "bg-transparent py-4 sm:py-5"
         }`}
       >
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex items-center justify-between">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex items-center justify-between gap-4">
           {/* Logo & Page Identity Indicator */}
-          <div className="flex items-center gap-2.5 sm:gap-3">
+          <div className="flex items-center gap-2.5 sm:gap-3 shrink-0">
             <Link
               href={getMainDomain() + "/"}
               className="flex items-center gap-2.5 group shrink-0"
               onClick={() => setMobileOpen(false)}
             >
               <div
-                className={`p-2 sm:p-2.5 rounded-xl text-white shadow-sm group-hover:scale-105 transition-transform ${
+                className={`p-2 sm:p-2.5 rounded-xl text-white shadow-sm group-hover:scale-105 transition-transform shrink-0 ${
                   isLearner
                     ? "bg-[#2563EB] text-white"
                     : isEducator
@@ -172,8 +172,8 @@ export function FloatingNavbar({ variant }: FloatingNavbarProps = {}) {
               >
                 <GraduationCap className="h-5 w-5 sm:h-6 sm:w-6" />
               </div>
-              <div className="flex flex-col">
-                <span className="text-lg sm:text-xl font-black text-[#102A2A] tracking-tight leading-none">
+              <div className="flex flex-col shrink-0">
+                <span className="text-lg sm:text-xl font-black text-[#102A2A] tracking-tight leading-none whitespace-nowrap">
                   EDU
                   <span
                     className={
@@ -187,7 +187,7 @@ export function FloatingNavbar({ variant }: FloatingNavbarProps = {}) {
                     CONNECTS
                   </span>
                 </span>
-                <span className="text-[10px] font-semibold text-[#5D7373] tracking-wide">
+                <span className="text-[10px] font-semibold text-[#5D7373] tracking-wide whitespace-nowrap">
                   {isLearner
                     ? "Learner Experience"
                     : isEducator
@@ -199,13 +199,13 @@ export function FloatingNavbar({ variant }: FloatingNavbarProps = {}) {
 
             {/* Visual Page Identity Pill Badges */}
             {isLearner && (
-              <span className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-[10px] sm:text-[11px] font-extrabold uppercase tracking-wider bg-blue-50 text-blue-700 border border-blue-200/90 shadow-2xs">
+              <span className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-[10px] sm:text-[11px] font-extrabold uppercase tracking-wider bg-blue-50 text-blue-700 border border-blue-200/90 shadow-2xs whitespace-nowrap shrink-0">
                 <span className="w-1.5 h-1.5 rounded-full bg-blue-600 animate-pulse" />
                 Learners
               </span>
             )}
             {isEducator && (
-              <span className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-[10px] sm:text-[11px] font-extrabold uppercase tracking-wider bg-emerald-50 text-emerald-800 border border-emerald-300 shadow-2xs">
+              <span className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-[10px] sm:text-[11px] font-extrabold uppercase tracking-wider bg-emerald-50 text-emerald-800 border border-emerald-300 shadow-2xs whitespace-nowrap shrink-0">
                 <span className="w-1.5 h-1.5 rounded-full bg-emerald-600 animate-pulse" />
                 Educators
               </span>
@@ -213,14 +213,14 @@ export function FloatingNavbar({ variant }: FloatingNavbarProps = {}) {
           </div>
 
           {/* Desktop Navigation Links */}
-          <nav className="hidden lg:flex items-center gap-6 xl:gap-7 text-sm font-semibold text-[#102A2A]">
+          <nav className="hidden lg:flex items-center gap-5 xl:gap-8 text-sm font-semibold text-[#102A2A]">
             {/* Explore Dropdown (Only for Learners and Main Site) */}
             {!isEducator && (
-              <div className="relative" ref={dropdownRef}>
+              <div className="relative shrink-0" ref={dropdownRef}>
                 <button
                   onClick={() => setExploreDropdownOpen(!exploreDropdownOpen)}
                   onMouseEnter={() => setExploreDropdownOpen(true)}
-                  className={`flex items-center gap-1.5 transition-colors py-2 focus:outline-none ${
+                  className={`flex items-center gap-1.5 transition-colors py-2 focus:outline-none whitespace-nowrap ${
                     isLearner ? "hover:text-[#2563EB]" : "hover:text-[#0B4F4B]"
                   }`}
                   aria-expanded={exploreDropdownOpen}
@@ -310,38 +310,26 @@ export function FloatingNavbar({ variant }: FloatingNavbarProps = {}) {
               <>
                 <a
                   href="#courses"
-                  className="hover:text-[#0B4F4B] transition-colors py-2 cursor-pointer"
+                  className="hover:text-[#0B4F4B] transition-colors py-2 cursor-pointer whitespace-nowrap shrink-0"
                 >
                   Teaching Toolkit
                 </a>
                 <a
                   href="#earnings"
-                  className="hover:text-[#0B4F4B] transition-colors py-2 cursor-pointer"
+                  className="hover:text-[#0B4F4B] transition-colors py-2 cursor-pointer whitespace-nowrap shrink-0"
                 >
                   Earnings Calculator
                 </a>
                 <a
                   href="#how-it-works"
                   onClick={handleHowItWorksClick}
-                  className="hover:text-[#0B4F4B] transition-colors py-2 cursor-pointer"
+                  className="hover:text-[#0B4F4B] transition-colors py-2 cursor-pointer whitespace-nowrap shrink-0"
                 >
                   How It Works
                 </a>
                 <a
-                  href="#benefits"
-                  className="hover:text-[#0B4F4B] transition-colors py-2 cursor-pointer"
-                >
-                  Advantages
-                </a>
-                <a
-                  href="#faq"
-                  className="hover:text-[#0B4F4B] transition-colors py-2 cursor-pointer"
-                >
-                  FAQ
-                </a>
-                <a
                   href={getLiveDomain()}
-                  className="flex items-center gap-1.5 hover:text-[#0B4F4B] transition-colors py-2 group"
+                  className="flex items-center gap-1.5 hover:text-[#0B4F4B] transition-colors py-2 group whitespace-nowrap shrink-0"
                 >
                   <span className="relative flex h-2 w-2">
                     <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-red-400 opacity-75"></span>
@@ -351,35 +339,35 @@ export function FloatingNavbar({ variant }: FloatingNavbarProps = {}) {
                 </a>
                 <Link
                   href="/student"
-                  className="text-xs font-semibold text-[#5D7373] hover:text-[#0B4F4B] transition-colors py-1.5 px-3 rounded-full bg-slate-100/90 hover:bg-emerald-50 hover:text-emerald-800 border border-slate-200/80 inline-flex items-center gap-1 ml-1"
+                  className="text-xs font-semibold text-slate-500 hover:text-[#0B4F4B] transition-colors py-2 whitespace-nowrap shrink-0 inline-flex items-center gap-1"
                 >
-                  Learner Portal →
+                  For Learners →
                 </Link>
               </>
             ) : isLearner ? (
               <>
                 <a
                   href="#live-classes"
-                  className="hover:text-[#2563EB] transition-colors py-2 cursor-pointer"
+                  className="hover:text-[#2563EB] transition-colors py-2 cursor-pointer whitespace-nowrap shrink-0"
                 >
                   Live Classes
                 </a>
                 <a
                   href="#courses"
-                  className="hover:text-[#2563EB] transition-colors py-2 cursor-pointer"
+                  className="hover:text-[#2563EB] transition-colors py-2 cursor-pointer whitespace-nowrap shrink-0"
                 >
                   Courses
                 </a>
                 <a
                   href="#how-it-works"
                   onClick={handleHowItWorksClick}
-                  className="hover:text-[#2563EB] transition-colors py-2 cursor-pointer"
+                  className="hover:text-[#2563EB] transition-colors py-2 cursor-pointer whitespace-nowrap shrink-0"
                 >
                   How It Works
                 </a>
                 <a
                   href={getLiveDomain()}
-                  className="flex items-center gap-1.5 hover:text-[#2563EB] transition-colors py-2 group"
+                  className="flex items-center gap-1.5 hover:text-[#2563EB] transition-colors py-2 group whitespace-nowrap shrink-0"
                 >
                   <span className="relative flex h-2 w-2">
                     <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-red-400 opacity-75"></span>
@@ -389,7 +377,7 @@ export function FloatingNavbar({ variant }: FloatingNavbarProps = {}) {
                 </a>
                 <Link
                   href="/teacher"
-                  className="text-xs font-semibold text-[#5D7373] hover:text-[#0B4F4B] transition-colors py-1.5 px-3 rounded-full bg-slate-100/90 hover:bg-emerald-50 hover:text-emerald-800 border border-slate-200/80 inline-flex items-center gap-1 ml-1"
+                  className="text-xs font-semibold text-slate-500 hover:text-[#0B4F4B] transition-colors py-2 whitespace-nowrap shrink-0 inline-flex items-center gap-1"
                 >
                   Teach on EduConnects →
                 </Link>
@@ -400,7 +388,7 @@ export function FloatingNavbar({ variant }: FloatingNavbarProps = {}) {
                 <a
                   href="#how-it-works"
                   onClick={handleHowItWorksClick}
-                  className="hover:text-[#0B4F4B] transition-colors py-2 cursor-pointer"
+                  className="hover:text-[#0B4F4B] transition-colors py-2 cursor-pointer whitespace-nowrap shrink-0"
                 >
                   How It Works
                 </a>
@@ -408,7 +396,7 @@ export function FloatingNavbar({ variant }: FloatingNavbarProps = {}) {
                 {/* Live Link */}
                 <a
                   href={getLiveDomain()}
-                  className="flex items-center gap-1.5 hover:text-[#0B4F4B] transition-colors py-2 group"
+                  className="flex items-center gap-1.5 hover:text-[#0B4F4B] transition-colors py-2 group whitespace-nowrap shrink-0"
                 >
                   <span className="relative flex h-2 w-2">
                     <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-red-400 opacity-75"></span>
@@ -420,7 +408,7 @@ export function FloatingNavbar({ variant }: FloatingNavbarProps = {}) {
                 {/* Become an Educator Link */}
                 <Link
                   href="/teacher"
-                  className="hover:text-[#0B4F4B] transition-colors py-2 text-[#1B6863] font-bold"
+                  className="hover:text-[#0B4F4B] transition-colors py-2 text-[#1B6863] font-bold whitespace-nowrap shrink-0"
                 >
                   Become an Educator
                 </Link>
@@ -429,7 +417,7 @@ export function FloatingNavbar({ variant }: FloatingNavbarProps = {}) {
           </nav>
 
           {/* Desktop Right Actions */}
-          <div className="hidden lg:flex items-center gap-3">
+          <div className="hidden lg:flex items-center gap-3 shrink-0">
             {!userSession ? (
               <>
                 <Link
@@ -440,11 +428,12 @@ export function FloatingNavbar({ variant }: FloatingNavbarProps = {}) {
                       ? "/student/login"
                       : "/login"
                   }
+                  className="shrink-0"
                 >
                   <GlassButton
                     variant="ghost"
                     size="sm"
-                    className={`text-[#102A2A] ${
+                    className={`text-[#102A2A] whitespace-nowrap ${
                       isLearner
                         ? "hover:text-[#2563EB]"
                         : isEducator
@@ -464,13 +453,14 @@ export function FloatingNavbar({ variant }: FloatingNavbarProps = {}) {
                       ? "/student/register"
                       : "/register"
                   }
+                  className="shrink-0"
                 >
                   <GlassButton
                     variant={
                       isLearner ? "learner" : isEducator ? "educator" : "primary"
                     }
                     size="sm"
-                    className="rounded-full px-5 font-bold shadow-md"
+                    className="rounded-full px-5 font-bold shadow-md whitespace-nowrap"
                     leftIcon={<UserPlus className="h-4 w-4" />}
                   >
                     {isEducator
@@ -483,22 +473,23 @@ export function FloatingNavbar({ variant }: FloatingNavbarProps = {}) {
               </>
             ) : (
               <>
-                <Link href={getDashboardPath(userSession)}>
+                <Link href={getDashboardPath(userSession)} className="shrink-0">
                   <GlassButton
                     variant={
                       isLearner ? "learner" : isEducator ? "educator" : "primary"
                     }
                     size="sm"
-                    className="rounded-full px-4"
+                    className="rounded-full px-4 whitespace-nowrap"
                     leftIcon={<LayoutDashboard className="h-4 w-4" />}
                   >
                     {getDashboardLabel(userSession)}
                   </GlassButton>
                 </Link>
-                <Link href="/profile">
+                <Link href="/profile" className="shrink-0">
                   <GlassButton
                     variant="secondary"
                     size="sm"
+                    className="whitespace-nowrap"
                     leftIcon={<User className="h-4 w-4" />}
                   >
                     Profile
@@ -507,6 +498,7 @@ export function FloatingNavbar({ variant }: FloatingNavbarProps = {}) {
                 <GlassButton
                   variant="ghost"
                   size="sm"
+                  className="whitespace-nowrap"
                   onClick={handleLogout}
                   leftIcon={<LogOut className="h-4 w-4 text-[#5D7373]" />}
                 >
