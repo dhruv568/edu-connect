@@ -51,8 +51,8 @@ export function LiveFooter() {
                 </a>
               </li>
               <li>
-                <a href="#schedule" className="hover:text-[#FFD700] transition-colors">
-                  Event Schedule
+                <a href="#live-session" className="hover:text-[#FFD700] transition-colors">
+                  Live Session
                 </a>
               </li>
               <li>

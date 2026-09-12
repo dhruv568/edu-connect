@@ -1,12 +1,3 @@
-export interface ScheduleItem {
-  time: string;
-  title: string;
-  description: string;
-  speaker?: string;
-  icon?: string;
-  isHighlight?: boolean;
-}
-
 export interface LiveEventConfig {
   slug: string;
   title: string;
@@ -26,7 +17,6 @@ export interface LiveEventConfig {
   recordingUrl?: string | null;
   registrationEnabled: boolean;
   whatsappGroupUrl?: string;
-  schedule: ScheduleItem[];
 }
 
 export const liveEventConfig: LiveEventConfig = {
@@ -50,44 +40,6 @@ export const liveEventConfig: LiveEventConfig = {
   recordingUrl: null,
   registrationEnabled: true,
   whatsappGroupUrl: "https://wa.me/918062181499",
-  schedule: [
-    {
-      time: "10:10 AM IST",
-      title: "Festive Welcome & Bappa's Blessings",
-      description: "Opening address by Founder Neeraj Shrivastava, Ganesh Chaturthi inauguration, and platform reveal.",
-      speaker: "Neeraj Shrivastava (Founder)",
-      isHighlight: true,
-    },
-    {
-      time: "10:25 AM IST",
-      title: "Welcome to EduConnects Live",
-      description: "Discover how real-time live classrooms connect students with top tutors across India.",
-      speaker: "Lead Educator Panel",
-    },
-    {
-      time: "10:40 AM IST",
-      title: "The Vision of Connected Education",
-      description: "Interactive showcase of liquid learning models, 1-on-1 tutoring, and group classrooms.",
-      speaker: "EduConnects Mentors",
-    },
-    {
-      time: "10:55 AM IST",
-      title: "Live Learning & Educator Showcase",
-      description: "Live interactive class demo showcasing instant Q&A, digital whiteboard, and instant feedback.",
-      isHighlight: true,
-    },
-    {
-      time: "11:15 AM IST",
-      title: "Quality Education & Growth Roadmaps",
-      description: "Empowering educators and creating new opportunities for a stronger learning community.",
-    },
-    {
-      time: "11:35 AM IST",
-      title: "Open Q&A & Interactive Discussion",
-      description: "Direct interaction with Founder Neeraj Shrivastava and mentors, answering student queries live.",
-      speaker: "Neeraj Shrivastava & Mentors",
-    },
-  ],
 };
 
 /**

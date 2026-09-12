@@ -51,10 +51,10 @@ export function LiveHeader({ onRegisterClick }: LiveHeaderProps) {
               Why EduConnects
             </a>
             <a
-              href="#schedule"
+              href="#live-session"
               className="text-sm font-semibold text-[#3B0202] hover:text-[#7A0000] transition-colors"
             >
-              Event Schedule
+              Live Session
             </a>
 
             {/* Prominent Live Event Pill Button */}
@@ -103,13 +103,6 @@ export function LiveHeader({ onRegisterClick }: LiveHeaderProps) {
                 className="text-base font-semibold text-slate-800 hover:text-[#7A0000] py-2 border-b border-slate-100"
               >
                 Why EduConnects
-              </a>
-              <a
-                href="#schedule"
-                onClick={() => setMobileMenuOpen(false)}
-                className="text-base font-semibold text-slate-800 hover:text-[#7A0000] py-2 border-b border-slate-100"
-              >
-                Event Schedule
               </a>
               <a
                 href="#live-session"

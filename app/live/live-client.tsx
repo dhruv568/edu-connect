@@ -6,7 +6,6 @@ import { LiveHero } from "@/components/live/live-hero";
 import { LiveSessionSection } from "@/components/live/live-session-section";
 import { LiveExperienceSection } from "@/components/live/live-experience-section";
 import { WhyLiveSection } from "@/components/live/why-live-section";
-import { LiveScheduleSection } from "@/components/live/live-schedule-section";
 import { WhatsAppRegistrationModal } from "@/components/live/whatsapp-registration-modal";
 import { LiveFooter } from "@/components/live/live-footer";
 import { liveEventConfig, getEventStatus, EventStatus } from "@/lib/live-event-config";
@@ -60,12 +59,9 @@ export function LivePageClient() {
 
         {/* 5. "Why Join EduConnects Live?" 4-Block Section (Deep Maroon Theme, No Fake Stats) */}
         <WhyLiveSection />
-
-        {/* 6. Data-driven Live Event Schedule Timeline Section */}
-        <LiveScheduleSection />
       </main>
 
-      {/* 7. Dark Footer without Parents section */}
+      {/* 6. Dark Footer */}
       <LiveFooter />
 
       {/* 8. WhatsApp Registration Popup Modal */}

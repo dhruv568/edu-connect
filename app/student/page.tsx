@@ -144,7 +144,7 @@ export default function StudentLandingPage() {
   const testimonials = [
     {
       name: "Aarav Mehta",
-      role: "Class 12 CBSE Aspirant",
+      role: "Class 12 CBSE Learner",
       avatar: "https://images.unsplash.com/photo-1539571696357-5a69c17a67c6?w=150&auto=format&fit=crop&q=80",
       rating: 5,
       subject: "Calculus & Linear Algebra",
@@ -198,12 +198,12 @@ export default function StudentLandingPage() {
     {
       question: "How does progress tracking work?",
       answer:
-        "Your Student Dashboard automatically tracks your completed lessons, upcoming live classes, study hours, and daily learning streak so you always know what to study next.",
+        "Your Learner Dashboard automatically tracks your completed lessons, upcoming live classes, study hours, and daily learning streak so you always know what to study next.",
     },
     {
       question: "What if I need help or have payment issues?",
       answer:
-        "EduConnects provides 24/7 student support and transparent escrow payment protection. If a scheduled live class is cancelled by a teacher, automated refund processing ensures your funds are protected.",
+        "EduConnects provides 24/7 learner support and transparent escrow payment protection. If a scheduled live class is cancelled by a teacher, automated refund processing ensures your funds are protected.",
     },
   ];
 
@@ -213,31 +213,31 @@ export default function StudentLandingPage() {
 
   return (
     <div className="min-h-screen flex flex-col bg-slate-50 relative overflow-hidden font-sans text-slate-900">
-      {/* 1. Student-Oriented Role Navbar */}
+      {/* 1. Learner-Oriented Role Navbar */}
       <FloatingNavbar variant="student" />
 
       <main className="flex-1">
         {/* ========================================================================= */}
         {/* 1. HERO SECTION */}
         {/* ========================================================================= */}
-        <section className="relative pt-32 sm:pt-36 lg:pt-44 pb-20 lg:pb-28 overflow-hidden bg-gradient-to-b from-blue-50/60 via-slate-50 to-white">
+        <section className="relative pt-32 sm:pt-36 lg:pt-44 pb-20 lg:pb-28 overflow-hidden bg-gradient-to-b from-blue-50/70 via-slate-50 to-white">
           {/* Subtle Background Elements */}
           <div className="absolute top-20 left-1/2 -translate-x-1/2 w-full max-w-7xl h-[500px] pointer-events-none -z-10">
-            <div className="absolute top-10 left-10 w-96 h-96 bg-blue-400/10 rounded-full blur-3xl" />
-            <div className="absolute top-20 right-10 w-96 h-96 bg-emerald-400/10 rounded-full blur-3xl" />
+            <div className="absolute top-10 left-10 w-96 h-96 bg-blue-500/15 rounded-full blur-3xl" />
+            <div className="absolute top-20 right-10 w-96 h-96 bg-sky-400/15 rounded-full blur-3xl" />
           </div>
 
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <div className="grid grid-cols-1 lg:grid-cols-12 gap-12 lg:gap-8 items-center">
               {/* Hero Left Column: Copy & CTAs */}
               <div className="lg:col-span-7 space-y-6 text-center lg:text-left">
-                <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-blue-100/80 border border-blue-200 text-blue-700 text-xs font-extrabold uppercase tracking-wider shadow-2xs">
+                <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-blue-50 border border-blue-200 text-blue-700 text-xs font-extrabold uppercase tracking-wider shadow-2xs">
                   <Sparkles className="h-3.5 w-3.5 text-blue-600 animate-spin" />
-                  <span>The Learning Platform for Ambitious Students</span>
+                  <span>The Learning Platform for Ambitious Learners</span>
                 </div>
 
                 <h1 className="text-4xl sm:text-5xl lg:text-6xl font-black text-slate-900 tracking-tight leading-[1.15]">
-                  Learn from the <span className="bg-gradient-to-r from-blue-600 via-indigo-600 to-emerald-600 bg-clip-text text-transparent">right teacher.</span> <br />
+                  Learn from the <span className="bg-gradient-to-r from-blue-600 via-indigo-600 to-blue-700 bg-clip-text text-transparent">right teacher.</span> <br />
                   Build the skills for your future.
                 </h1>
 
@@ -250,18 +250,18 @@ export default function StudentLandingPage() {
                   {userSession?.role === "STUDENT" ? (
                     <Link href="/student/dashboard" className="w-full sm:w-auto">
                       <GlassButton
-                        variant="primary"
+                        variant="learner"
                         size="lg"
                         className="w-full sm:w-auto shadow-xl shadow-blue-500/25 text-sm"
                         leftIcon={<LayoutDashboard className="h-4 w-4" />}
                       >
-                        Go to Student Dashboard
+                        Go to Learner Dashboard
                       </GlassButton>
                     </Link>
                   ) : (
                     <Link href="/student/register" className="w-full sm:w-auto">
                       <GlassButton
-                        variant="primary"
+                        variant="learner"
                         size="lg"
                         className="w-full sm:w-auto shadow-xl shadow-blue-500/25 text-sm"
                         rightIcon={<ArrowRight className="h-4 w-4" />}
@@ -282,7 +282,7 @@ export default function StudentLandingPage() {
                 <div className="pt-6 border-t border-slate-200/80 grid grid-cols-3 gap-4 text-left max-w-lg mx-auto lg:mx-0">
                   <div>
                     <div className="text-2xl lg:text-3xl font-black text-slate-900">15,000+</div>
-                    <div className="text-xs text-slate-500 font-medium">Active Students</div>
+                    <div className="text-xs text-slate-500 font-medium">Active Learners</div>
                   </div>
                   <div>
                     <div className="text-2xl lg:text-3xl font-black text-blue-600">850+</div>
@@ -383,12 +383,12 @@ export default function StudentLandingPage() {
         </section>
 
         {/* ========================================================================= */}
-        {/* 2. WHY EDUCONNECTS FOR STUDENTS */}
+        {/* 2. WHY EDUCONNECTS FOR LEARNERS */}
         {/* ========================================================================= */}
         <section className="py-20 bg-white border-y border-slate-200/80">
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 space-y-12">
             <div className="text-center max-w-3xl mx-auto space-y-3">
-              <GlassBadge variant="blue">DESIGNED FOR MAXIMUM STUDENT SUCCESS</GlassBadge>
+              <GlassBadge variant="learner">DESIGNED FOR MAXIMUM LEARNER SUCCESS</GlassBadge>
               <h2 className="text-3xl sm:text-4xl font-black text-slate-900 tracking-tight">
                 Everything You Need to Master Any Subject
               </h2>
@@ -432,7 +432,7 @@ export default function StudentLandingPage() {
             {/* Header & Filter Controls */}
             <div className="flex flex-col md:flex-row md:items-end justify-between gap-6">
               <div className="space-y-2 max-w-xl">
-                <GlassBadge variant="emerald">REAL-TIME COURSE CATALOG</GlassBadge>
+                <GlassBadge variant="learner">REAL-TIME COURSE CATALOG</GlassBadge>
                 <h2 className="text-3xl sm:text-4xl font-black text-slate-900 tracking-tight">
                   Explore Verified Courses
                 </h2>
@@ -443,7 +443,7 @@ export default function StudentLandingPage() {
 
               <div className="flex items-center gap-3">
                 <Link href="/courses">
-                  <GlassButton variant="primary" size="sm" rightIcon={<ArrowRight className="h-4 w-4" />}>
+                  <GlassButton variant="learner" size="sm" rightIcon={<ArrowRight className="h-4 w-4" />}>
                     View All Courses ({courses.length}+)
                   </GlassButton>
                 </Link>
@@ -458,7 +458,7 @@ export default function StudentLandingPage() {
                   onClick={() => setActiveCategory(cat.value)}
                   className={`px-4 py-2 rounded-xl text-xs font-bold transition-all ${
                     activeCategory === cat.value
-                      ? "bg-blue-600 text-white shadow-md shadow-blue-500/20"
+                      ? "bg-[#2563EB] text-white shadow-md shadow-blue-500/25"
                       : "bg-white text-slate-700 border border-slate-200 hover:bg-slate-100"
                   }`}
                 >
@@ -484,7 +484,7 @@ export default function StudentLandingPage() {
                 <div className="pt-2 flex justify-center gap-3">
                   <button
                     onClick={() => setActiveCategory("ALL")}
-                    className="px-4 py-2 bg-blue-600 text-white text-xs font-bold rounded-xl shadow-md"
+                    className="px-4 py-2 bg-[#2563EB] text-white text-xs font-bold rounded-xl shadow-md shadow-blue-500/25"
                   >
                     Reset Filter
                   </button>
@@ -568,7 +568,7 @@ export default function StudentLandingPage() {
                         P
                       </div>
                       <div>
-                        <span className="font-bold text-slate-300">Priya (Student):</span>
+                        <span className="font-bold text-slate-300">Priya (Learner):</span>
                         <span className="text-slate-400 ml-2">"Understood! Can we solve question 4 from the problem set next?"</span>
                       </div>
                     </div>
@@ -578,7 +578,7 @@ export default function StudentLandingPage() {
 
               {/* Right Column: Features Explanation */}
               <div className="lg:col-span-6 space-y-6">
-                <GlassBadge variant="indigo">BUILT-IN VIRTUAL CLASSROOM</GlassBadge>
+                <GlassBadge variant="learner">BUILT-IN VIRTUAL CLASSROOM</GlassBadge>
                 <h2 className="text-3xl sm:text-4xl font-black text-slate-900 tracking-tight leading-tight">
                   High-Definition Live Learning Without External Apps
                 </h2>
@@ -620,7 +620,7 @@ export default function StudentLandingPage() {
 
                 <div className="pt-4">
                   <Link href="/find-teachers">
-                    <GlassButton variant="primary" size="md" rightIcon={<ArrowRight className="h-4 w-4" />}>
+                    <GlassButton variant="learner" size="md" rightIcon={<ArrowRight className="h-4 w-4" />}>
                       Find a Live Tutor Now
                     </GlassButton>
                   </Link>
@@ -631,14 +631,14 @@ export default function StudentLandingPage() {
         </section>
 
         {/* ========================================================================= */}
-        {/* 5. STUDENT TESTIMONIALS */}
+        {/* 5. LEARNER TESTIMONIALS */}
         {/* ========================================================================= */}
         <section className="py-20 bg-slate-50 border-t border-slate-200">
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 space-y-12">
             <div className="text-center max-w-2xl mx-auto space-y-3">
-              <GlassBadge variant="blue">VERIFIED LEARNING OUTCOMES</GlassBadge>
+              <GlassBadge variant="learner">VERIFIED LEARNING OUTCOMES</GlassBadge>
               <h2 className="text-3xl sm:text-4xl font-black text-slate-900 tracking-tight">
-                Trusted by Top Performing Students
+                Trusted by Top Performing Learners
               </h2>
               <p className="text-sm text-slate-600">
                 Read how EduConnects learners achieved their target grades and examination scores.
@@ -687,14 +687,14 @@ export default function StudentLandingPage() {
         </section>
 
         {/* ========================================================================= */}
-        {/* 6. STUDENT FAQ ACCORDION */}
+        {/* 6. LEARNER FAQ ACCORDION */}
         {/* ========================================================================= */}
         <section id="faq" className="py-20 lg:py-28 bg-white border-t border-slate-200">
           <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 space-y-12">
             <div className="text-center space-y-3">
-              <GlassBadge variant="indigo">STUDENT FAQ</GlassBadge>
+              <GlassBadge variant="learner">LEARNER FAQ</GlassBadge>
               <h2 className="text-3xl sm:text-4xl font-black text-slate-900 tracking-tight">
-                Frequently Asked Questions
+                Frequently Asked Questions for Learners
               </h2>
               <p className="text-sm text-slate-600">
                 Got questions about how learning on EduConnects works? We have answers.
@@ -735,7 +735,7 @@ export default function StudentLandingPage() {
         {/* ========================================================================= */}
         {/* 7. FINAL CALL TO ACTION */}
         {/* ========================================================================= */}
-        <section className="py-20 bg-gradient-to-r from-blue-700 via-indigo-700 to-purple-800 text-white relative overflow-hidden">
+        <section className="py-20 bg-gradient-to-r from-blue-700 via-blue-800 to-indigo-900 text-white relative overflow-hidden">
           <div className="max-w-5xl mx-auto px-4 sm:px-6 text-center space-y-6 relative z-10">
             <span className="px-3.5 py-1.5 rounded-full bg-white/10 backdrop-blur-md text-blue-200 text-xs font-bold uppercase tracking-wider border border-white/20">
               Start Today with Zero Risk
@@ -746,7 +746,7 @@ export default function StudentLandingPage() {
             </h2>
 
             <p className="text-sm sm:text-base text-blue-100 max-w-xl mx-auto font-medium">
-              Join 15,000+ students mastering difficult subjects, passing entrance exams, and building skills with verified mentors.
+              Join 15,000+ learners mastering difficult subjects, passing entrance exams, and building skills with verified mentors.
             </p>
 
             <div className="pt-4 flex flex-col sm:flex-row items-center justify-center gap-4">
@@ -757,7 +757,7 @@ export default function StudentLandingPage() {
                   className="w-full sm:w-auto bg-white text-slate-900 hover:bg-slate-100 font-black shadow-xl"
                   rightIcon={<ArrowRight className="h-4 w-4" />}
                 >
-                  Join as a Student
+                  Join as a Learner
                 </GlassButton>
               </Link>
 
@@ -773,7 +773,7 @@ export default function StudentLandingPage() {
             </div>
 
             <div className="pt-6 flex items-center justify-center gap-6 text-xs text-blue-200">
-              <span>✓ Free student registration</span>
+              <span>✓ Free learner registration</span>
               <span>•</span>
               <span>✓ Instant access to demo sessions</span>
               <span>•</span>

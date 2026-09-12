@@ -11,7 +11,7 @@ function cn(...inputs: any[]) {
 }
 
 export interface GlassButtonProps extends HTMLMotionProps<"button"> {
-  variant?: "primary" | "secondary" | "ghost" | "glow";
+  variant?: "primary" | "secondary" | "ghost" | "glow" | "learner" | "educator";
   size?: "sm" | "md" | "lg";
   isLoading?: boolean;
   leftIcon?: React.ReactNode;
@@ -35,17 +35,21 @@ export const GlassButton = React.forwardRef<HTMLButtonElement, GlassButtonProps>
     ref
   ) => {
     const baseStyles =
-      "inline-flex items-center justify-center font-bold transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#0B4F4B] disabled:pointer-events-none disabled:opacity-50 select-none cursor-pointer relative overflow-hidden backdrop-blur-md";
+      "inline-flex items-center justify-center font-bold transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-current disabled:pointer-events-none disabled:opacity-50 select-none cursor-pointer relative overflow-hidden backdrop-blur-md";
 
     const variants = {
       primary:
-        "bg-[#0B4F4B] text-white shadow-md border border-white/20 hover:bg-[#073F3C] hover:shadow-lg",
+        "bg-[#0B4F4B] text-white shadow-md border border-white/20 hover:bg-[#073F3C] hover:shadow-lg focus-visible:ring-[#0B4F4B]",
       secondary:
-        "bg-[#F2C14E] text-[#102A2A] border border-[#F2C14E]/60 shadow-sm hover:bg-[#E0B03C] hover:shadow-md font-bold",
+        "bg-[#F2C14E] text-[#102A2A] border border-[#F2C14E]/60 shadow-sm hover:bg-[#E0B03C] hover:shadow-md font-bold focus-visible:ring-[#F2C14E]",
       ghost:
         "bg-transparent text-[#102A2A] hover:bg-white/60 hover:text-[#0B4F4B] border border-transparent",
       glow:
-        "bg-[#0B4F4B] text-white shadow-[0_0_20px_rgba(11,79,75,0.3)] border border-teal-400/40 hover:bg-[#073F3C] hover:shadow-[0_0_30px_rgba(11,79,75,0.5)]",
+        "bg-[#0B4F4B] text-white shadow-[0_0_20px_rgba(11,79,75,0.3)] border border-teal-400/40 hover:bg-[#073F3C] hover:shadow-[0_0_30px_rgba(11,79,75,0.5)] focus-visible:ring-[#0B4F4B]",
+      learner:
+        "bg-[#2563EB] text-white shadow-md shadow-blue-500/25 border border-white/25 hover:bg-[#1D4ED8] hover:shadow-lg hover:shadow-blue-500/30 focus-visible:ring-[#2563EB] font-bold",
+      educator:
+        "bg-[#0B4F4B] text-white shadow-md shadow-teal-900/25 border border-white/25 hover:bg-[#073F3C] hover:shadow-lg hover:shadow-teal-900/30 focus-visible:ring-[#0B4F4B] font-bold",
     };
 
     const sizes = {
