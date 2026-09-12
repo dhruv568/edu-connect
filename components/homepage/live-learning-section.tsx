@@ -28,7 +28,7 @@ export function LiveLearningSection() {
   }, []);
 
   return (
-    <section className="py-20 lg:py-28 bg-[#073F3C] text-white border-b border-[#1B6863]/30 font-sans relative overflow-hidden">
+    <section className="py-20 lg:py-28 bg-[#083F3D] text-white border-b border-[#1B6863]/30 font-sans relative overflow-hidden">
       {/* Glow background */}
       <div className="absolute top-0 right-1/4 w-96 h-96 bg-[#1B6863]/30 blur-3xl rounded-full pointer-events-none" />
 
@@ -36,7 +36,7 @@ export function LiveLearningSection() {
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-12 items-center">
           {/* Left Column Copy */}
           <div className="lg:col-span-7 space-y-6 text-center lg:text-left">
-            <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-[#0B4F4B] border border-[#1B6863] text-[#F2C14E] text-xs font-black uppercase tracking-wider">
+            <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-[#0F5C5A] border border-[#1B6863] text-[#F2C14E] text-xs font-black uppercase tracking-wider">
               <span className="relative flex h-2 w-2">
                 <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-red-400 opacity-75"></span>
                 <span className="relative inline-flex rounded-full h-2 w-2 bg-red-500"></span>
@@ -75,7 +75,7 @@ export function LiveLearningSection() {
 
           {/* Right Column Visual Card */}
           <div className="lg:col-span-5">
-            <div className="p-6 rounded-3xl bg-[#0B4F4B]/90 border border-[#1B6863] shadow-2xl space-y-5">
+            <div className="p-6 rounded-3xl bg-[#0F5C5A]/90 border border-[#1B6863] shadow-2xl space-y-5">
               <div className="flex items-center justify-between border-b border-[#1B6863]/60 pb-3">
                 <div className="flex items-center gap-2.5">
                   <div className="p-2 rounded-xl bg-red-500/20 text-red-400">
@@ -83,13 +83,13 @@ export function LiveLearningSection() {
                   </div>
                   <span className="text-xs font-bold text-white">Browser-Based WebRTC</span>
                 </div>
-                <span className="text-[10px] font-black uppercase tracking-wider text-[#F2C14E] bg-[#073F3C] px-2.5 py-1 rounded-full border border-[#1B6863]">
+                <span className="text-[10px] font-black uppercase tracking-wider text-[#F2C14E] bg-[#083F3D] px-2.5 py-1 rounded-full border border-[#1B6863]">
                   Zero Downloads
                 </span>
               </div>
 
               <div className="space-y-3 text-xs text-teal-100/90">
-                <div className="p-3.5 rounded-2xl bg-[#073F3C]/80 border border-[#1B6863]/50 flex items-center justify-between">
+                <div className="p-3.5 rounded-2xl bg-[#083F3D]/80 border border-[#1B6863]/50 flex items-center justify-between">
                   <div className="flex items-center gap-2.5">
                     <Users className="h-4 w-4 text-[#F2C14E]" />
                     <span className="font-semibold">Interactive Group Batches</span>
@@ -97,7 +97,7 @@ export function LiveLearningSection() {
                   <span className="text-[11px] text-teal-200">1-on-1 or Groups</span>
                 </div>
 
-                <div className="p-3.5 rounded-2xl bg-[#073F3C]/80 border border-[#1B6863]/50 flex items-center justify-between">
+                <div className="p-3.5 rounded-2xl bg-[#083F3D]/80 border border-[#1B6863]/50 flex items-center justify-between">
                   <div className="flex items-center gap-2.5">
                     <MessageSquare className="h-4 w-4 text-[#F2C14E]" />
                     <span className="font-semibold">In-Class Live Q&A & Notes</span>

@@ -49,7 +49,7 @@ export function WhatYouCanDoSection() {
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 space-y-12">
         {/* Section Header */}
         <div className="text-center max-w-3xl mx-auto space-y-3">
-          <span className="text-xs font-black text-[#0B4F4B] uppercase tracking-widest px-3 py-1 rounded-full bg-[#E6F0EF]">
+          <span className="text-xs font-black text-[#0F5C5A] uppercase tracking-widest px-3 py-1 rounded-full bg-[#E6F0EF]">
             PLATFORM CAPABILITIES
           </span>
           <h2 className="text-3xl sm:text-4xl lg:text-5xl font-black text-[#102A2A] tracking-tight">
@@ -67,10 +67,10 @@ export function WhatYouCanDoSection() {
             return (
               <div
                 key={idx}
-                className="p-7 rounded-3xl bg-white border border-[#DCE5E4] hover:border-[#0B4F4B]/40 hover:shadow-xl transition-all space-y-4 flex flex-col justify-between group"
+                className="p-7 rounded-3xl bg-white border border-[#DCE5E4] hover:border-[#0F5C5A]/40 hover:shadow-xl transition-all space-y-4 flex flex-col justify-between group"
               >
                 <div className="space-y-3">
-                  <div className="p-3 rounded-2xl bg-[#E6F0EF] text-[#0B4F4B] w-fit group-hover:bg-[#0B4F4B] group-hover:text-white transition-colors">
+                  <div className="p-3 rounded-2xl bg-[#E6F0EF] text-[#0F5C5A] w-fit group-hover:bg-[#0F5C5A] group-hover:text-white transition-colors">
                     <IconComp className="h-6 w-6" />
                   </div>
                   <h3 className="text-lg sm:text-xl font-black text-[#102A2A]">

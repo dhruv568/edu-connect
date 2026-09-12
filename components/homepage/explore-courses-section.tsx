@@ -49,7 +49,7 @@ export function ExploreCoursesSection() {
         {/* Section Header */}
         <div className="flex flex-col md:flex-row items-center justify-between gap-6">
           <div className="space-y-2 text-center md:text-left">
-            <span className="text-xs font-black text-[#0B4F4B] uppercase tracking-widest px-3 py-1 rounded-full bg-[#E6F0EF]">
+            <span className="text-xs font-black text-[#0F5C5A] uppercase tracking-widest px-3 py-1 rounded-full bg-[#E6F0EF]">
               STRUCTURED LMS CURRICULA
             </span>
             <h2 className="text-3xl sm:text-4xl font-black text-[#102A2A] tracking-tight">
@@ -63,7 +63,7 @@ export function ExploreCoursesSection() {
           <Link href="/courses">
             <GlassButton
               variant="primary"
-              className="bg-[#0B4F4B] hover:bg-[#073F3C] text-white font-extrabold px-6 rounded-full"
+              className="bg-[#0F5C5A] hover:bg-[#083F3D] text-white font-extrabold px-6 rounded-full"
               rightIcon={<ArrowRight className="h-4 w-4" />}
             >
               Explore All Courses →
@@ -103,7 +103,7 @@ export function ExploreCoursesSection() {
                     )}
                   </div>
 
-                  <h3 className="text-base font-extrabold text-[#102A2A] line-clamp-2 group-hover:text-[#0B4F4B] transition-colors">
+                  <h3 className="text-base font-extrabold text-[#102A2A] line-clamp-2 group-hover:text-[#0F5C5A] transition-colors">
                     {c.title}
                   </h3>
 
@@ -117,7 +117,7 @@ export function ExploreCoursesSection() {
                     {c.level && (
                       <span className="text-[#5D7373] font-semibold">{c.level}</span>
                     )}
-                    <span className="text-base font-black text-[#0B4F4B]">
+                    <span className="text-base font-black text-[#0F5C5A]">
                       {c.price ? `₹${c.price}` : "Free"}
                     </span>
                   </div>
@@ -134,7 +134,7 @@ export function ExploreCoursesSection() {
         ) : (
           /* Polished Empty State for Courses */
           <div className="p-10 rounded-3xl bg-[#F5F7F8] border border-[#DCE5E4] text-center space-y-4 max-w-xl mx-auto">
-            <div className="p-3.5 rounded-full bg-[#E6F0EF] text-[#0B4F4B] w-fit mx-auto">
+            <div className="p-3.5 rounded-full bg-[#E6F0EF] text-[#0F5C5A] w-fit mx-auto">
               <BookOpen className="h-8 w-8" />
             </div>
             <h3 className="text-xl font-black text-[#102A2A]">Courses Coming Soon</h3>
@@ -143,7 +143,7 @@ export function ExploreCoursesSection() {
             </p>
             <div className="pt-2">
               <Link href="/find-teachers">
-                <GlassButton variant="primary" className="bg-[#0B4F4B] text-white text-xs font-extrabold">
+                <GlassButton variant="primary" className="bg-[#0F5C5A] text-white text-xs font-extrabold">
                   Find Live Educators →
                 </GlassButton>
               </Link>

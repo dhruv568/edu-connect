@@ -34,7 +34,7 @@ export function HeroSection() {
     <section className="relative pt-28 sm:pt-36 lg:pt-40 pb-20 lg:pb-28 bg-gradient-to-b from-[#FBF7EE] via-[#F5F7F8] to-white border-b border-[#DCE5E4] overflow-hidden font-sans">
       {/* Background Soft Glow Orbs */}
       <div className="absolute top-10 left-1/2 -translate-x-1/2 w-full max-w-7xl h-96 pointer-events-none -z-10">
-        <div className="absolute top-10 left-10 w-96 h-96 bg-[#0B4F4B]/5 rounded-full blur-3xl" />
+        <div className="absolute top-10 left-10 w-96 h-96 bg-[#0F5C5A]/5 rounded-full blur-3xl" />
         <div className="absolute top-20 right-10 w-96 h-96 bg-[#F2C14E]/10 rounded-full blur-3xl" />
       </div>
 
@@ -43,15 +43,15 @@ export function HeroSection() {
           {/* Left Column: Copy & Search */}
           <div className="lg:col-span-7 space-y-6 text-center lg:text-left">
             {/* Small Badge */}
-            <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-[#E6F0EF] border border-[#DCE5E4] text-[#0B4F4B] text-xs font-black uppercase tracking-wider shadow-2xs">
-              <Sparkles className="h-3.5 w-3.5 text-[#0B4F4B]" />
+            <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-[#E6F0EF] border border-[#DCE5E4] text-[#0F5C5A] text-xs font-black uppercase tracking-wider shadow-2xs">
+              <Sparkles className="h-3.5 w-3.5 text-[#0F5C5A]" />
               <span>PERSONALIZED EDUCATION, BEAUTIFULLY SIMPLE</span>
             </div>
 
             {/* Main Heading */}
             <h1 className="text-4xl sm:text-5xl lg:text-6xl font-black text-[#102A2A] tracking-tight leading-[1.15]">
               Find the right educators. <br />
-              <span className="text-[#0B4F4B]">Unlock your potential.</span>
+              <span className="text-[#0F5C5A]">Unlock your potential.</span>
             </h1>
 
             {/* Supporting Text */}
@@ -65,7 +65,7 @@ export function HeroSection() {
                 <GlassButton
                   variant="primary"
                   size="lg"
-                  className="w-full sm:w-auto bg-[#0B4F4B] hover:bg-[#073F3C] text-white shadow-lg text-sm font-extrabold px-7 py-3 rounded-full"
+                  className="w-full sm:w-auto bg-[#0F5C5A] hover:bg-[#083F3D] text-white shadow-lg text-sm font-extrabold px-7 py-3 rounded-full"
                   rightIcon={<ArrowRight className="h-4 w-4" />}
                 >
                   Find an Educator
@@ -86,15 +86,15 @@ export function HeroSection() {
             {/* Trust Points */}
             <div className="flex flex-wrap items-center justify-center lg:justify-start gap-6 pt-3 text-xs sm:text-sm font-bold text-[#102A2A]">
               <div className="flex items-center gap-1.5">
-                <CheckCircle2 className="h-4.5 w-4.5 text-[#0B4F4B]" />
+                <CheckCircle2 className="h-4.5 w-4.5 text-[#0F5C5A]" />
                 <span>Verified profiles</span>
               </div>
               <div className="flex items-center gap-1.5">
-                <CheckCircle2 className="h-4.5 w-4.5 text-[#0B4F4B]" />
+                <CheckCircle2 className="h-4.5 w-4.5 text-[#0F5C5A]" />
                 <span>Flexible schedules</span>
               </div>
               <div className="flex items-center gap-1.5">
-                <CheckCircle2 className="h-4.5 w-4.5 text-[#0B4F4B]" />
+                <CheckCircle2 className="h-4.5 w-4.5 text-[#0F5C5A]" />
                 <span>Trusted learning</span>
               </div>
             </div>
@@ -103,7 +103,7 @@ export function HeroSection() {
             <div className="pt-6">
               <div className="p-5 sm:p-6 rounded-3xl bg-white border border-[#DCE5E4] shadow-xl text-left space-y-4 max-w-2xl mx-auto lg:mx-0">
                 <div className="text-xs font-black text-[#102A2A] uppercase tracking-wider flex items-center gap-2">
-                  <Search className="h-4 w-4 text-[#0B4F4B]" />
+                  <Search className="h-4 w-4 text-[#0F5C5A]" />
                   <span>What do you want to learn?</span>
                 </div>
 
@@ -116,7 +116,7 @@ export function HeroSection() {
                       placeholder="e.g. Mathematics, Physics, Python..."
                       value={searchQuery}
                       onChange={(e) => setSearchQuery(e.target.value)}
-                      className="w-full px-3.5 py-2.5 rounded-xl border border-[#DCE5E4] bg-[#F5F7F8] text-xs font-semibold text-[#102A2A] placeholder:text-[#5D7373] focus:outline-none focus:border-[#0B4F4B] focus:bg-white transition-colors"
+                      className="w-full px-3.5 py-2.5 rounded-xl border border-[#DCE5E4] bg-[#F5F7F8] text-xs font-semibold text-[#102A2A] placeholder:text-[#5D7373] focus:outline-none focus:border-[#0F5C5A] focus:bg-white transition-colors"
                     />
                   </div>
 
@@ -126,7 +126,7 @@ export function HeroSection() {
                     <select
                       value={selectedLevel}
                       onChange={(e) => setSelectedLevel(e.target.value)}
-                      className="w-full px-3 py-2.5 rounded-xl border border-[#DCE5E4] bg-[#F5F7F8] text-xs font-semibold text-[#102A2A] focus:outline-none focus:border-[#0B4F4B] focus:bg-white transition-colors cursor-pointer"
+                      className="w-full px-3 py-2.5 rounded-xl border border-[#DCE5E4] bg-[#F5F7F8] text-xs font-semibold text-[#102A2A] focus:outline-none focus:border-[#0F5C5A] focus:bg-white transition-colors cursor-pointer"
                     >
                       <option value="All levels">All levels</option>
                       <option value="School Academics">School Academics</option>
@@ -144,7 +144,7 @@ export function HeroSection() {
                     <select
                       value={selectedMode}
                       onChange={(e) => setSelectedMode(e.target.value)}
-                      className="w-full px-3 py-2.5 rounded-xl border border-[#DCE5E4] bg-[#F5F7F8] text-xs font-semibold text-[#102A2A] focus:outline-none focus:border-[#0B4F4B] focus:bg-white transition-colors cursor-pointer"
+                      className="w-full px-3 py-2.5 rounded-xl border border-[#DCE5E4] bg-[#F5F7F8] text-xs font-semibold text-[#102A2A] focus:outline-none focus:border-[#0F5C5A] focus:bg-white transition-colors cursor-pointer"
                     >
                       <option value="Online or Offline">Online or Offline</option>
                       <option value="Online Live">Online Live</option>
@@ -157,7 +157,7 @@ export function HeroSection() {
                     <button
                       type="submit"
                       aria-label="Search"
-                      className="w-full h-[42px] rounded-xl bg-[#0B4F4B] hover:bg-[#073F3C] text-white flex items-center justify-center font-bold transition-colors shadow-sm"
+                      className="w-full h-[42px] rounded-xl bg-[#0F5C5A] hover:bg-[#083F3D] text-white flex items-center justify-center font-bold transition-colors shadow-sm"
                     >
                       <ArrowRight className="h-4 w-4" />
                     </button>
@@ -180,14 +180,14 @@ export function HeroSection() {
                     <img
                       src="https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?w=120&auto=format&fit=crop&q=80"
                       alt="Verified educator"
-                      className="w-14 h-14 rounded-2xl object-cover ring-2 ring-[#0B4F4B]/20 shadow-md"
+                      className="w-14 h-14 rounded-2xl object-cover ring-2 ring-[#0F5C5A]/20 shadow-md"
                     />
-                    <div className="absolute -bottom-1 -right-1 bg-[#0B4F4B] text-white p-1 rounded-full">
+                    <div className="absolute -bottom-1 -right-1 bg-[#0F5C5A] text-white p-1 rounded-full">
                       <ShieldCheck className="h-3.5 w-3.5" />
                     </div>
                   </div>
                   <div>
-                    <span className="px-2 py-0.5 rounded-full text-[10px] font-black bg-[#E6F0EF] text-[#0B4F4B] uppercase tracking-wider">
+                    <span className="px-2 py-0.5 rounded-full text-[10px] font-black bg-[#E6F0EF] text-[#0F5C5A] uppercase tracking-wider">
                       Verified Educator
                     </span>
                     <h2 className="text-base font-extrabold text-[#102A2A] mt-0.5">
@@ -203,7 +203,7 @@ export function HeroSection() {
                 <div className="grid grid-cols-2 gap-3 pt-1">
                   <div className="p-3.5 rounded-2xl bg-[#FBF7EE] border border-[#F2C14E]/30 space-y-1">
                     <div className="flex items-center gap-1.5 text-xs font-bold text-[#102A2A]">
-                      <Video className="h-4 w-4 text-[#0B4F4B]" />
+                      <Video className="h-4 w-4 text-[#0F5C5A]" />
                       <span>Live Classroom</span>
                     </div>
                     <p className="text-[11px] text-[#5D7373] leading-snug">
@@ -223,7 +223,7 @@ export function HeroSection() {
                 </div>
 
                 {/* Bottom Trust Snippet */}
-                <div className="p-3.5 rounded-2xl bg-[#E6F0EF]/60 border border-[#0B4F4B]/15 flex items-center justify-between text-xs font-bold text-[#0B4F4B]">
+                <div className="p-3.5 rounded-2xl bg-[#E6F0EF]/60 border border-[#0F5C5A]/15 flex items-center justify-between text-xs font-bold text-[#0F5C5A]">
                   <div className="flex items-center gap-2">
                     <GraduationCap className="h-4 w-4" />
                     <span>Direct Connection. Zero Middlemen.</span>

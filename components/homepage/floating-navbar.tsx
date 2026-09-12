@@ -17,6 +17,9 @@ import {
   Users,
   BookOpen,
   Grid,
+  Award,
+  HelpCircle,
+  ShieldCheck,
 } from "lucide-react";
 import { GlassButton } from "@/components/glass/glass-button";
 import { UserSession } from "@/types/auth";
@@ -33,9 +36,11 @@ export function FloatingNavbar({ variant }: FloatingNavbarProps = {}) {
   const [scrolled, setScrolled] = useState(false);
   const [mobileOpen, setMobileOpen] = useState(false);
   const [exploreDropdownOpen, setExploreDropdownOpen] = useState(false);
+  const [moreDropdownOpen, setMoreDropdownOpen] = useState(false);
   const [userSession, setUserSession] = useState<UserSession | null>(null);
 
   const dropdownRef = useRef<HTMLDivElement>(null);
+  const moreDropdownRef = useRef<HTMLDivElement>(null);
   const mobileMenuRef = useRef<HTMLDivElement>(null);
 
   const checkAuthStatus = async () => {
@@ -63,13 +68,17 @@ export function FloatingNavbar({ variant }: FloatingNavbarProps = {}) {
     return () => window.removeEventListener("scroll", handleScroll);
   }, []);
 
-  // Close dropdown & mobile menu when clicking outside or pressing Escape
+  // Close dropdowns & mobile menu when clicking outside or pressing Escape
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
-      if (dropdownRef.current && !dropdownRef.current.contains(event.target as Node)) {
+      const target = event.target as Node;
+      if (dropdownRef.current && !dropdownRef.current.contains(target)) {
         setExploreDropdownOpen(false);
       }
-      if (mobileMenuRef.current && !mobileMenuRef.current.contains(event.target as Node)) {
+      if (moreDropdownRef.current && !moreDropdownRef.current.contains(target)) {
+        setMoreDropdownOpen(false);
+      }
+      if (mobileMenuRef.current && !mobileMenuRef.current.contains(target)) {
         setMobileOpen(false);
       }
     };
@@ -77,6 +86,7 @@ export function FloatingNavbar({ variant }: FloatingNavbarProps = {}) {
     const handleKeyDown = (event: KeyboardEvent) => {
       if (event.key === "Escape") {
         setExploreDropdownOpen(false);
+        setMoreDropdownOpen(false);
         setMobileOpen(false);
       }
     };
@@ -149,12 +159,14 @@ export function FloatingNavbar({ variant }: FloatingNavbarProps = {}) {
       <header
         className={`fixed top-0 left-0 right-0 z-50 transition-all duration-300 ${
           scrolled
-            ? "bg-white/95 backdrop-blur-md border-b border-[#DCE5E4] shadow-sm py-3"
-            : "bg-transparent py-4 sm:py-5"
+            ? "bg-white/95 backdrop-blur-md border-b border-slate-200/80 shadow-xs py-2.5 sm:py-3"
+            : "bg-white/80 backdrop-blur-xs border-b border-slate-200/50 py-3 sm:py-3.5"
         }`}
       >
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex items-center justify-between gap-4">
-          {/* Logo & Page Identity Indicator */}
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex items-center justify-between gap-3 sm:gap-4">
+          {/* ========================================================================= */}
+          {/* 1. LEFT: LOGO & ROLE CONTEXT BADGE */}
+          {/* ========================================================================= */}
           <div className="flex items-center gap-2.5 sm:gap-3 shrink-0">
             <Link
               href={getMainDomain() + "/"}
@@ -162,34 +174,34 @@ export function FloatingNavbar({ variant }: FloatingNavbarProps = {}) {
               onClick={() => setMobileOpen(false)}
             >
               <div
-                className={`p-2 sm:p-2.5 rounded-xl text-white shadow-sm group-hover:scale-105 transition-transform shrink-0 ${
+                className={`w-9 h-9 sm:w-10 sm:h-10 rounded-xl flex items-center justify-center shadow-xs transition-transform group-hover:scale-105 shrink-0 ${
                   isLearner
-                    ? "bg-[#2563EB] text-white"
+                    ? "bg-[#3157D5] text-white"
                     : isEducator
-                    ? "bg-[#0B4F4B] text-[#F2C14E]"
-                    : "bg-[#0B4F4B] text-[#F2C14E]"
+                    ? "bg-[#16805B] text-white"
+                    : "bg-[#0F5C5A] text-[#F2C14E]"
                 }`}
               >
-                <GraduationCap className="h-5 w-5 sm:h-6 sm:w-6" />
+                <GraduationCap className="h-5 w-5 sm:h-5.5 sm:w-5.5" />
               </div>
-              <div className="flex flex-col shrink-0">
-                <span className="text-lg sm:text-xl font-black text-[#102A2A] tracking-tight leading-none whitespace-nowrap">
+              <div className="flex flex-col">
+                <span className="text-base sm:text-lg font-black text-slate-900 tracking-tight leading-none">
                   EDU
                   <span
                     className={
                       isLearner
-                        ? "text-[#2563EB]"
+                        ? "text-[#3157D5]"
                         : isEducator
-                        ? "text-[#0B4F4B]"
-                        : "text-[#0B4F4B]"
+                        ? "text-[#16805B]"
+                        : "text-[#0F5C5A]"
                     }
                   >
                     CONNECTS
                   </span>
                 </span>
-                <span className="text-[10px] font-semibold text-[#5D7373] tracking-wide whitespace-nowrap">
+                <span className="text-[10px] font-semibold text-slate-500 tracking-wide mt-0.5">
                   {isLearner
-                    ? "Learner Experience"
+                    ? "Learner Portal"
                     : isEducator
                     ? "Educator Network"
                     : "Learn • Grow • Belong"}
@@ -197,227 +209,372 @@ export function FloatingNavbar({ variant }: FloatingNavbarProps = {}) {
               </div>
             </Link>
 
-            {/* Visual Page Identity Pill Badges */}
+            {/* Clean Context Role Badge */}
             {isLearner && (
-              <span className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-[10px] sm:text-[11px] font-extrabold uppercase tracking-wider bg-blue-50 text-blue-700 border border-blue-200/90 shadow-2xs whitespace-nowrap shrink-0">
-                <span className="w-1.5 h-1.5 rounded-full bg-blue-600 animate-pulse" />
-                Learners
+              <span className="hidden sm:inline-flex items-center px-2.5 py-0.5 rounded-full text-[10px] font-black uppercase tracking-wider bg-[#F3F6FF] text-[#3157D5] border border-[#BFDBFE] shadow-2xs whitespace-nowrap">
+                Learner
               </span>
             )}
             {isEducator && (
-              <span className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-[10px] sm:text-[11px] font-extrabold uppercase tracking-wider bg-emerald-50 text-emerald-800 border border-emerald-300 shadow-2xs whitespace-nowrap shrink-0">
-                <span className="w-1.5 h-1.5 rounded-full bg-emerald-600 animate-pulse" />
-                Educators
+              <span className="hidden sm:inline-flex items-center px-2.5 py-0.5 rounded-full text-[10px] font-black uppercase tracking-wider bg-[#F0FAF5] text-[#16805B] border border-[#A7F3D0] shadow-2xs whitespace-nowrap">
+                Educator
               </span>
             )}
           </div>
 
-          {/* Desktop Navigation Links */}
-          <nav className="hidden lg:flex items-center gap-5 xl:gap-8 text-sm font-semibold text-[#102A2A]">
-            {/* Explore Dropdown (Only for Learners and Main Site) */}
-            {!isEducator && (
-              <div className="relative shrink-0" ref={dropdownRef}>
-                <button
-                  onClick={() => setExploreDropdownOpen(!exploreDropdownOpen)}
-                  onMouseEnter={() => setExploreDropdownOpen(true)}
-                  className={`flex items-center gap-1.5 transition-colors py-2 focus:outline-none whitespace-nowrap ${
-                    isLearner ? "hover:text-[#2563EB]" : "hover:text-[#0B4F4B]"
-                  }`}
-                  aria-expanded={exploreDropdownOpen}
-                >
-                  <span>Explore</span>
-                  <ChevronDown
-                    className={`h-4 w-4 text-[#5D7373] transition-transform duration-200 ${
-                      exploreDropdownOpen
-                        ? isLearner
-                          ? "rotate-180 text-[#2563EB]"
-                          : "rotate-180 text-[#0B4F4B]"
-                        : ""
-                    }`}
-                  />
-                </button>
-
-                <AnimatePresence>
-                  {exploreDropdownOpen && (
-                    <motion.div
-                      initial={{ opacity: 0, y: 8, scale: 0.98 }}
-                      animate={{ opacity: 1, y: 0, scale: 1 }}
-                      exit={{ opacity: 0, y: 6, scale: 0.98 }}
-                      transition={{ duration: 0.15 }}
-                      onMouseLeave={() => setExploreDropdownOpen(false)}
-                      className="absolute top-full left-0 mt-1 w-72 bg-white rounded-2xl border border-[#DCE5E4] shadow-xl p-3 space-y-1 z-50"
-                    >
-                      <Link
-                        href="/find-teachers"
-                        onClick={() => setExploreDropdownOpen(false)}
-                        className="flex items-start gap-3 p-3 rounded-xl hover:bg-[#F5F7F8] transition-colors group"
-                      >
-                        <div className="p-2 rounded-lg bg-[#E6F0EF] text-[#0B4F4B] group-hover:bg-[#0B4F4B] group-hover:text-white transition-colors shrink-0">
-                          <Users className="h-4 w-4" />
-                        </div>
-                        <div>
-                          <div className="text-xs font-bold text-[#102A2A] group-hover:text-[#0B4F4B] transition-colors">
-                            Find an Educator
-                          </div>
-                          <div className="text-[11px] text-[#5D7373] font-normal leading-tight mt-0.5">
-                            Find educators based on subject, level and learning mode.
-                          </div>
-                        </div>
-                      </Link>
-
-                      <Link
-                        href="/courses"
-                        onClick={() => setExploreDropdownOpen(false)}
-                        className="flex items-start gap-3 p-3 rounded-xl hover:bg-[#F5F7F8] transition-colors group"
-                      >
-                        <div className="p-2 rounded-lg bg-[#FBF7EE] text-[#B8860B] group-hover:bg-[#F2C14E] group-hover:text-[#102A2A] transition-colors shrink-0">
-                          <BookOpen className="h-4 w-4" />
-                        </div>
-                        <div>
-                          <div className="text-xs font-bold text-[#102A2A] group-hover:text-[#0B4F4B] transition-colors">
-                            Explore Courses
-                          </div>
-                          <div className="text-[11px] text-[#5D7373] font-normal leading-tight mt-0.5">
-                            Browse available courses.
-                          </div>
-                        </div>
-                      </Link>
-
-                      <Link
-                        href="/courses"
-                        onClick={() => setExploreDropdownOpen(false)}
-                        className="flex items-start gap-3 p-3 rounded-xl hover:bg-[#F5F7F8] transition-colors group"
-                      >
-                        <div className="p-2 rounded-lg bg-[#F5F7F8] text-[#5D7373] group-hover:bg-[#1B6863] group-hover:text-white transition-colors shrink-0">
-                          <Grid className="h-4 w-4" />
-                        </div>
-                        <div>
-                          <div className="text-xs font-bold text-[#102A2A] group-hover:text-[#0B4F4B] transition-colors">
-                            Browse Subjects
-                          </div>
-                          <div className="text-[11px] text-[#5D7373] font-normal leading-tight mt-0.5">
-                            Explore learning categories and subjects.
-                          </div>
-                        </div>
-                      </Link>
-                    </motion.div>
-                  )}
-                </AnimatePresence>
-              </div>
-            )}
-
+          {/* ========================================================================= */}
+          {/* 2. CENTER: PRIMARY NAVIGATION (ZERO 2-LINE WRAPS) */}
+          {/* ========================================================================= */}
+          <nav className="hidden lg:flex items-center gap-1 xl:gap-2 text-sm font-semibold text-slate-700">
             {isEducator ? (
+              /* EDUCATOR NAVIGATION */
               <>
                 <a
                   href="#courses"
-                  className="hover:text-[#0B4F4B] transition-colors py-2 cursor-pointer whitespace-nowrap shrink-0"
+                  className="px-3 py-1.5 rounded-lg hover:text-[#16805B] hover:bg-[#F0FAF5] transition-colors whitespace-nowrap"
                 >
                   Teaching Toolkit
                 </a>
                 <a
                   href="#earnings"
-                  className="hover:text-[#0B4F4B] transition-colors py-2 cursor-pointer whitespace-nowrap shrink-0"
+                  className="px-3 py-1.5 rounded-lg hover:text-[#16805B] hover:bg-[#F0FAF5] transition-colors whitespace-nowrap"
                 >
                   Earnings Calculator
                 </a>
                 <a
                   href="#how-it-works"
                   onClick={handleHowItWorksClick}
-                  className="hover:text-[#0B4F4B] transition-colors py-2 cursor-pointer whitespace-nowrap shrink-0"
+                  className="px-3 py-1.5 rounded-lg hover:text-[#16805B] hover:bg-[#F0FAF5] transition-colors whitespace-nowrap"
                 >
                   How It Works
                 </a>
                 <a
                   href={getLiveDomain()}
-                  className="flex items-center gap-1.5 hover:text-[#0B4F4B] transition-colors py-2 group whitespace-nowrap shrink-0"
+                  className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg hover:text-[#16805B] hover:bg-[#F0FAF5] transition-colors whitespace-nowrap group"
                 >
                   <span className="relative flex h-2 w-2">
-                    <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-red-400 opacity-75"></span>
-                    <span className="relative inline-flex rounded-full h-2 w-2 bg-red-500"></span>
+                    <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-red-400 opacity-75" />
+                    <span className="relative inline-flex rounded-full h-2 w-2 bg-red-500" />
                   </span>
-                  <span className="font-bold text-red-600 group-hover:text-red-700">🔴 Live</span>
+                  <span className="font-bold text-red-600 group-hover:text-red-700">Live</span>
                 </a>
-                <Link
-                  href="/student"
-                  className="text-xs font-semibold text-slate-500 hover:text-[#0B4F4B] transition-colors py-2 whitespace-nowrap shrink-0 inline-flex items-center gap-1"
-                >
-                  For Learners →
-                </Link>
+
+                {/* More Dropdown for Educator */}
+                <div className="relative" ref={moreDropdownRef}>
+                  <button
+                    onClick={() => setMoreDropdownOpen(!moreDropdownOpen)}
+                    onMouseEnter={() => setMoreDropdownOpen(true)}
+                    className="flex items-center gap-1 px-3 py-1.5 rounded-lg hover:text-[#16805B] hover:bg-[#F0FAF5] transition-colors whitespace-nowrap focus:outline-none"
+                    aria-expanded={moreDropdownOpen}
+                  >
+                    <span>More</span>
+                    <ChevronDown
+                      className={`h-3.5 w-3.5 text-slate-500 transition-transform duration-200 ${
+                        moreDropdownOpen ? "rotate-180 text-[#16805B]" : ""
+                      }`}
+                    />
+                  </button>
+
+                  <AnimatePresence>
+                    {moreDropdownOpen && (
+                      <motion.div
+                        initial={{ opacity: 0, y: 6, scale: 0.98 }}
+                        animate={{ opacity: 1, y: 0, scale: 1 }}
+                        exit={{ opacity: 0, y: 6, scale: 0.98 }}
+                        transition={{ duration: 0.15 }}
+                        onMouseLeave={() => setMoreDropdownOpen(false)}
+                        className="absolute top-full left-0 mt-1 w-60 bg-white rounded-2xl border border-slate-200 shadow-xl p-2 space-y-1 z-50"
+                      >
+                        <a
+                          href="#benefits"
+                          onClick={() => setMoreDropdownOpen(false)}
+                          className="flex items-start gap-2.5 p-2 rounded-xl hover:bg-[#F0FAF5] transition-colors group"
+                        >
+                          <div className="p-1.5 rounded-lg bg-[#F0FAF5] text-[#16805B] group-hover:bg-[#16805B] group-hover:text-white transition-colors shrink-0">
+                            <Award className="h-4 w-4" />
+                          </div>
+                          <div>
+                            <div className="text-xs font-bold text-slate-900 group-hover:text-[#16805B] transition-colors">
+                              Advantages & Benefits
+                            </div>
+                            <div className="text-[11px] text-slate-500 font-normal">
+                              Why top educators teach with us
+                            </div>
+                          </div>
+                        </a>
+
+                        <a
+                          href="#faq"
+                          onClick={() => setMoreDropdownOpen(false)}
+                          className="flex items-start gap-2.5 p-2 rounded-xl hover:bg-[#F0FAF5] transition-colors group"
+                        >
+                          <div className="p-1.5 rounded-lg bg-slate-100 text-slate-700 group-hover:bg-[#16805B] group-hover:text-white transition-colors shrink-0">
+                            <HelpCircle className="h-4 w-4" />
+                          </div>
+                          <div>
+                            <div className="text-xs font-bold text-slate-900 group-hover:text-[#16805B] transition-colors">
+                              Frequently Asked Questions
+                            </div>
+                            <div className="text-[11px] text-slate-500 font-normal">
+                              Verification, payouts, and classes
+                            </div>
+                          </div>
+                        </a>
+                      </motion.div>
+                    )}
+                  </AnimatePresence>
+                </div>
               </>
             ) : isLearner ? (
+              /* LEARNER NAVIGATION */
               <>
                 <a
+                  href="#courses"
+                  className="px-3 py-1.5 rounded-lg hover:text-[#2563EB] hover:bg-blue-50/70 transition-colors whitespace-nowrap"
+                >
+                  Courses
+                </a>
+                <Link
+                  href="/find-teachers"
+                  className="px-3 py-1.5 rounded-lg hover:text-[#2563EB] hover:bg-blue-50/70 transition-colors whitespace-nowrap"
+                >
+                  Find Teachers
+                </Link>
+                <a
                   href="#live-classes"
-                  className="hover:text-[#2563EB] transition-colors py-2 cursor-pointer whitespace-nowrap shrink-0"
+                  className="px-3 py-1.5 rounded-lg hover:text-[#2563EB] hover:bg-blue-50/70 transition-colors whitespace-nowrap"
                 >
                   Live Classes
                 </a>
                 <a
-                  href="#courses"
-                  className="hover:text-[#2563EB] transition-colors py-2 cursor-pointer whitespace-nowrap shrink-0"
-                >
-                  Courses
-                </a>
-                <a
                   href="#how-it-works"
                   onClick={handleHowItWorksClick}
-                  className="hover:text-[#2563EB] transition-colors py-2 cursor-pointer whitespace-nowrap shrink-0"
+                  className="px-3 py-1.5 rounded-lg hover:text-[#2563EB] hover:bg-blue-50/70 transition-colors whitespace-nowrap"
                 >
                   How It Works
                 </a>
                 <a
                   href={getLiveDomain()}
-                  className="flex items-center gap-1.5 hover:text-[#2563EB] transition-colors py-2 group whitespace-nowrap shrink-0"
+                  className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg hover:text-[#2563EB] hover:bg-blue-50/70 transition-colors whitespace-nowrap group"
                 >
                   <span className="relative flex h-2 w-2">
-                    <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-red-400 opacity-75"></span>
-                    <span className="relative inline-flex rounded-full h-2 w-2 bg-red-500"></span>
+                    <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-red-400 opacity-75" />
+                    <span className="relative inline-flex rounded-full h-2 w-2 bg-red-500" />
                   </span>
-                  <span className="font-bold text-red-600 group-hover:text-red-700">🔴 Live</span>
+                  <span className="font-bold text-red-600 group-hover:text-red-700">Live</span>
                 </a>
-                <Link
-                  href="/teacher"
-                  className="text-xs font-semibold text-slate-500 hover:text-[#0B4F4B] transition-colors py-2 whitespace-nowrap shrink-0 inline-flex items-center gap-1"
-                >
-                  Teach on EduConnects →
-                </Link>
+
+                {/* More Dropdown for Learner */}
+                <div className="relative" ref={moreDropdownRef}>
+                  <button
+                    onClick={() => setMoreDropdownOpen(!moreDropdownOpen)}
+                    onMouseEnter={() => setMoreDropdownOpen(true)}
+                    className="flex items-center gap-1 px-3 py-1.5 rounded-lg hover:text-[#2563EB] hover:bg-blue-50/70 transition-colors whitespace-nowrap focus:outline-none"
+                    aria-expanded={moreDropdownOpen}
+                  >
+                    <span>More</span>
+                    <ChevronDown
+                      className={`h-3.5 w-3.5 text-slate-500 transition-transform duration-200 ${
+                        moreDropdownOpen ? "rotate-180 text-[#2563EB]" : ""
+                      }`}
+                    />
+                  </button>
+
+                  <AnimatePresence>
+                    {moreDropdownOpen && (
+                      <motion.div
+                        initial={{ opacity: 0, y: 6, scale: 0.98 }}
+                        animate={{ opacity: 1, y: 0, scale: 1 }}
+                        exit={{ opacity: 0, y: 6, scale: 0.98 }}
+                        transition={{ duration: 0.15 }}
+                        onMouseLeave={() => setMoreDropdownOpen(false)}
+                        className="absolute top-full left-0 mt-1 w-60 bg-white rounded-2xl border border-slate-200 shadow-xl p-2 space-y-1 z-50"
+                      >
+                        <a
+                          href="#benefits"
+                          onClick={() => setMoreDropdownOpen(false)}
+                          className="flex items-start gap-2.5 p-2 rounded-xl hover:bg-blue-50/70 transition-colors group"
+                        >
+                          <div className="p-1.5 rounded-lg bg-blue-100 text-blue-700 shrink-0">
+                            <ShieldCheck className="h-4 w-4" />
+                          </div>
+                          <div>
+                            <div className="text-xs font-bold text-slate-900 group-hover:text-[#2563EB]">
+                              Why EduConnects
+                            </div>
+                            <div className="text-[11px] text-slate-500 font-normal">
+                              Verified tutors & student protection
+                            </div>
+                          </div>
+                        </a>
+
+                        <a
+                          href="#faq"
+                          onClick={() => setMoreDropdownOpen(false)}
+                          className="flex items-start gap-2.5 p-2 rounded-xl hover:bg-blue-50/70 transition-colors group"
+                        >
+                          <div className="p-1.5 rounded-lg bg-slate-100 text-slate-700 shrink-0">
+                            <HelpCircle className="h-4 w-4" />
+                          </div>
+                          <div>
+                            <div className="text-xs font-bold text-slate-900 group-hover:text-[#2563EB]">
+                              Frequently Asked Questions
+                            </div>
+                            <div className="text-[11px] text-slate-500 font-normal">
+                              Demo sessions, refunds, and tools
+                            </div>
+                          </div>
+                        </a>
+                      </motion.div>
+                    )}
+                  </AnimatePresence>
+                </div>
               </>
             ) : (
+              /* MAIN PLATFORM NAVIGATION */
               <>
-                {/* How It Works Link */}
+                {/* Explore Dropdown */}
+                <div className="relative" ref={dropdownRef}>
+                  <button
+                    onClick={() => setExploreDropdownOpen(!exploreDropdownOpen)}
+                    onMouseEnter={() => setExploreDropdownOpen(true)}
+                    className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg hover:text-[#0F5C5A] hover:bg-slate-100/70 transition-colors whitespace-nowrap focus:outline-none"
+                    aria-expanded={exploreDropdownOpen}
+                  >
+                    <span>Explore</span>
+                    <ChevronDown
+                      className={`h-3.5 w-3.5 text-slate-500 transition-transform duration-200 ${
+                        exploreDropdownOpen ? "rotate-180 text-[#0F5C5A]" : ""
+                      }`}
+                    />
+                  </button>
+
+                  <AnimatePresence>
+                    {exploreDropdownOpen && (
+                      <motion.div
+                        initial={{ opacity: 0, y: 6, scale: 0.98 }}
+                        animate={{ opacity: 1, y: 0, scale: 1 }}
+                        exit={{ opacity: 0, y: 6, scale: 0.98 }}
+                        transition={{ duration: 0.15 }}
+                        onMouseLeave={() => setExploreDropdownOpen(false)}
+                        className="absolute top-full left-0 mt-1 w-72 bg-white rounded-2xl border border-slate-200 shadow-xl p-2.5 space-y-1 z-50"
+                      >
+                        <Link
+                          href="/find-teachers"
+                          onClick={() => setExploreDropdownOpen(false)}
+                          className="flex items-start gap-3 p-2.5 rounded-xl hover:bg-slate-50 transition-colors group"
+                        >
+                          <div className="p-2 rounded-lg bg-teal-50 text-[#0F5C5A] group-hover:bg-[#0F5C5A] group-hover:text-white transition-colors shrink-0">
+                            <Users className="h-4 w-4" />
+                          </div>
+                          <div>
+                            <div className="text-xs font-bold text-slate-900 group-hover:text-[#0F5C5A] transition-colors">
+                              Find an Educator
+                            </div>
+                            <div className="text-[11px] text-slate-500 font-normal mt-0.5">
+                              Search certified tutors by subject and mode.
+                            </div>
+                          </div>
+                        </Link>
+
+                        <Link
+                          href="/courses"
+                          onClick={() => setExploreDropdownOpen(false)}
+                          className="flex items-start gap-3 p-2.5 rounded-xl hover:bg-slate-50 transition-colors group"
+                        >
+                          <div className="p-2 rounded-lg bg-amber-50 text-[#B8860B] group-hover:bg-[#F2C14E] group-hover:text-slate-900 transition-colors shrink-0">
+                            <BookOpen className="h-4 w-4" />
+                          </div>
+                          <div>
+                            <div className="text-xs font-bold text-slate-900 group-hover:text-[#0F5C5A] transition-colors">
+                              Explore Courses
+                            </div>
+                            <div className="text-[11px] text-slate-500 font-normal mt-0.5">
+                              Browse structured video courses.
+                            </div>
+                          </div>
+                        </Link>
+
+                        <Link
+                          href="/courses"
+                          onClick={() => setExploreDropdownOpen(false)}
+                          className="flex items-start gap-3 p-2.5 rounded-xl hover:bg-slate-50 transition-colors group"
+                        >
+                          <div className="p-2 rounded-lg bg-slate-100 text-slate-600 group-hover:bg-[#0F5C5A] group-hover:text-white transition-colors shrink-0">
+                            <Grid className="h-4 w-4" />
+                          </div>
+                          <div>
+                            <div className="text-xs font-bold text-slate-900 group-hover:text-[#0F5C5A] transition-colors">
+                              Browse Subjects
+                            </div>
+                            <div className="text-[11px] text-slate-500 font-normal mt-0.5">
+                              Academic, test-prep, and technical subjects.
+                            </div>
+                          </div>
+                        </Link>
+                      </motion.div>
+                    )}
+                  </AnimatePresence>
+                </div>
+
+                <Link
+                  href="/student"
+                  className="px-3 py-1.5 rounded-lg hover:text-[#0F5C5A] hover:bg-slate-100/70 transition-colors whitespace-nowrap"
+                >
+                  For Learners
+                </Link>
+                <Link
+                  href="/teacher"
+                  className="px-3 py-1.5 rounded-lg hover:text-[#0F5C5A] hover:bg-slate-100/70 transition-colors whitespace-nowrap"
+                >
+                  For Educators
+                </Link>
                 <a
                   href="#how-it-works"
                   onClick={handleHowItWorksClick}
-                  className="hover:text-[#0B4F4B] transition-colors py-2 cursor-pointer whitespace-nowrap shrink-0"
+                  className="px-3 py-1.5 rounded-lg hover:text-[#0F5C5A] hover:bg-slate-100/70 transition-colors whitespace-nowrap"
                 >
                   How It Works
                 </a>
-
-                {/* Live Link */}
                 <a
                   href={getLiveDomain()}
-                  className="flex items-center gap-1.5 hover:text-[#0B4F4B] transition-colors py-2 group whitespace-nowrap shrink-0"
+                  className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg hover:text-[#0F5C5A] hover:bg-slate-100/70 transition-colors whitespace-nowrap group"
                 >
                   <span className="relative flex h-2 w-2">
-                    <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-red-400 opacity-75"></span>
-                    <span className="relative inline-flex rounded-full h-2 w-2 bg-red-500"></span>
+                    <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-red-400 opacity-75" />
+                    <span className="relative inline-flex rounded-full h-2 w-2 bg-red-500" />
                   </span>
-                  <span className="font-bold text-red-600 group-hover:text-red-700">🔴 Live</span>
+                  <span className="font-bold text-red-600 group-hover:text-red-700">Live</span>
                 </a>
-
-                {/* Become an Educator Link */}
-                <Link
-                  href="/teacher"
-                  className="hover:text-[#0B4F4B] transition-colors py-2 text-[#1B6863] font-bold whitespace-nowrap shrink-0"
-                >
-                  Become an Educator
-                </Link>
               </>
             )}
           </nav>
 
-          {/* Desktop Right Actions */}
-          <div className="hidden lg:flex items-center gap-3 shrink-0">
+          {/* ========================================================================= */}
+          {/* 3. RIGHT: CONTEXT SWITCHER, LOGIN & PRIMARY CTA */}
+          {/* ========================================================================= */}
+          <div className="hidden lg:flex items-center gap-2.5 xl:gap-3 shrink-0">
+            {/* Subtle Role Switcher Pill */}
+            {isEducator ? (
+              <Link
+                href="/student"
+                className="hidden xl:inline-flex items-center gap-1 text-xs font-semibold text-slate-600 hover:text-[#16805B] px-3 py-1.5 rounded-xl border border-slate-200 hover:border-[#A7F3D0] bg-slate-50/80 hover:bg-[#F0FAF5] transition-all whitespace-nowrap shadow-2xs"
+              >
+                Learner Portal →
+              </Link>
+            ) : isLearner ? (
+              <Link
+                href="/teacher"
+                className="hidden xl:inline-flex items-center gap-1 text-xs font-semibold text-slate-600 hover:text-[#3157D5] px-3 py-1.5 rounded-xl border border-slate-200 hover:border-[#BFDBFE] bg-slate-50/80 hover:bg-[#F3F6FF] transition-all whitespace-nowrap shadow-2xs"
+              >
+                Teach on EduConnects →
+              </Link>
+            ) : null}
+
+            {(isEducator || isLearner) && (
+              <div className="hidden xl:block h-4 w-px bg-slate-200" />
+            )}
+
             {!userSession ? (
               <>
                 <Link
@@ -428,22 +585,9 @@ export function FloatingNavbar({ variant }: FloatingNavbarProps = {}) {
                       ? "/student/login"
                       : "/login"
                   }
-                  className="shrink-0"
+                  className="text-sm font-semibold text-slate-700 hover:text-slate-950 px-3 py-1.5 rounded-lg hover:bg-slate-100 transition-colors whitespace-nowrap"
                 >
-                  <GlassButton
-                    variant="ghost"
-                    size="sm"
-                    className={`text-[#102A2A] whitespace-nowrap ${
-                      isLearner
-                        ? "hover:text-[#2563EB]"
-                        : isEducator
-                        ? "hover:text-[#0B4F4B]"
-                        : "hover:text-[#0B4F4B]"
-                    }`}
-                    leftIcon={<LogIn className="h-4 w-4 text-[#5D7373]" />}
-                  >
-                    Login
-                  </GlassButton>
+                  Login
                 </Link>
                 <Link
                   href={
@@ -453,57 +597,57 @@ export function FloatingNavbar({ variant }: FloatingNavbarProps = {}) {
                       ? "/student/register"
                       : "/register"
                   }
-                  className="shrink-0"
                 >
-                  <GlassButton
-                    variant={
-                      isLearner ? "learner" : isEducator ? "educator" : "primary"
-                    }
-                    size="sm"
-                    className="rounded-full px-5 font-bold shadow-md whitespace-nowrap"
-                    leftIcon={<UserPlus className="h-4 w-4" />}
+                  <button
+                    className={`h-9.5 px-4 sm:px-5 rounded-xl text-sm font-bold shadow-xs hover:shadow-md transition-all whitespace-nowrap flex items-center gap-1.5 cursor-pointer ${
+                      isLearner
+                        ? "bg-[#3157D5] hover:bg-[#243B9B] text-white shadow-blue-500/25"
+                        : isEducator
+                        ? "bg-[#16805B] hover:bg-[#0D5C41] text-white shadow-emerald-700/25"
+                        : "bg-[#0F5C5A] hover:bg-[#083F3D] text-white shadow-teal-900/20"
+                    }`}
                   >
-                    {isEducator
-                      ? "Start Teaching"
-                      : isLearner
-                      ? "Start Learning"
-                      : "Get Started"}
-                  </GlassButton>
+                    <UserPlus className="h-4 w-4" />
+                    <span>
+                      {isEducator
+                        ? "Start Teaching"
+                        : isLearner
+                        ? "Start Learning"
+                        : "Get Started"}
+                    </span>
+                  </button>
                 </Link>
               </>
             ) : (
               <>
-                <Link href={getDashboardPath(userSession)} className="shrink-0">
-                  <GlassButton
-                    variant={
-                      isLearner ? "learner" : isEducator ? "educator" : "primary"
-                    }
-                    size="sm"
-                    className="rounded-full px-4 whitespace-nowrap"
-                    leftIcon={<LayoutDashboard className="h-4 w-4" />}
+                <Link href={getDashboardPath(userSession)}>
+                  <button
+                    className={`h-9.5 px-4 rounded-xl text-sm font-bold text-white shadow-xs transition-all flex items-center gap-1.5 ${
+                      isLearner
+                        ? "bg-[#3157D5] hover:bg-[#243B9B]"
+                        : isEducator
+                        ? "bg-[#16805B] hover:bg-[#0D5C41]"
+                        : "bg-[#0F5C5A] hover:bg-[#083F3D]"
+                    }`}
                   >
-                    {getDashboardLabel(userSession)}
-                  </GlassButton>
+                    <LayoutDashboard className="h-4 w-4" />
+                    <span>{getDashboardLabel(userSession)}</span>
+                  </button>
                 </Link>
-                <Link href="/profile" className="shrink-0">
-                  <GlassButton
-                    variant="secondary"
-                    size="sm"
-                    className="whitespace-nowrap"
-                    leftIcon={<User className="h-4 w-4" />}
-                  >
-                    Profile
-                  </GlassButton>
-                </Link>
-                <GlassButton
-                  variant="ghost"
-                  size="sm"
-                  className="whitespace-nowrap"
-                  onClick={handleLogout}
-                  leftIcon={<LogOut className="h-4 w-4 text-[#5D7373]" />}
+                <Link
+                  href="/profile"
+                  className="p-2 rounded-xl text-slate-600 hover:text-slate-900 hover:bg-slate-100 transition-colors"
+                  aria-label="Profile"
                 >
-                  Logout
-                </GlassButton>
+                  <User className="h-4 w-4" />
+                </Link>
+                <button
+                  onClick={handleLogout}
+                  className="p-2 rounded-xl text-slate-600 hover:text-rose-600 hover:bg-rose-50 transition-colors"
+                  aria-label="Logout"
+                >
+                  <LogOut className="h-4 w-4" />
+                </button>
               </>
             )}
           </div>
@@ -544,49 +688,49 @@ export function FloatingNavbar({ variant }: FloatingNavbarProps = {}) {
               <nav className="flex flex-col space-y-3 font-semibold text-[#102A2A] text-sm">
                 {isEducator ? (
                   <>
-                    <div className="text-xs font-black uppercase text-emerald-800 tracking-wider px-2 py-1.5 rounded-lg bg-emerald-50 flex items-center gap-1.5">
-                      <span className="w-1.5 h-1.5 rounded-full bg-emerald-600" />
+                    <div className="text-xs font-black uppercase text-[#16805B] tracking-wider px-2 py-1.5 rounded-lg bg-[#F0FAF5] flex items-center gap-1.5">
+                      <span className="w-1.5 h-1.5 rounded-full bg-[#16805B]" />
                       Educator Network
                     </div>
                     <a
                       href="#courses"
                       onClick={() => setMobileOpen(false)}
-                      className="py-2 px-2 hover:bg-emerald-50 rounded-xl border-b border-[#DCE5E4]"
+                      className="py-2 px-2 hover:bg-[#F0FAF5] hover:text-[#16805B] rounded-xl border-b border-[#DCE5E4]"
                     >
                       Teaching Toolkit
                     </a>
                     <a
                       href="#earnings"
                       onClick={() => setMobileOpen(false)}
-                      className="py-2 px-2 hover:bg-emerald-50 rounded-xl border-b border-[#DCE5E4]"
+                      className="py-2 px-2 hover:bg-[#F0FAF5] hover:text-[#16805B] rounded-xl border-b border-[#DCE5E4]"
                     >
                       Earnings Calculator
                     </a>
                     <a
                       href="#how-it-works"
                       onClick={handleHowItWorksClick}
-                      className="py-2 px-2 hover:bg-emerald-50 rounded-xl border-b border-[#DCE5E4]"
+                      className="py-2 px-2 hover:bg-[#F0FAF5] hover:text-[#16805B] rounded-xl border-b border-[#DCE5E4]"
                     >
                       How It Works
                     </a>
                     <a
                       href="#benefits"
                       onClick={() => setMobileOpen(false)}
-                      className="py-2 px-2 hover:bg-emerald-50 rounded-xl border-b border-[#DCE5E4]"
+                      className="py-2 px-2 hover:bg-[#F0FAF5] hover:text-[#16805B] rounded-xl border-b border-[#DCE5E4]"
                     >
                       Advantages
                     </a>
                     <a
                       href="#faq"
                       onClick={() => setMobileOpen(false)}
-                      className="py-2 px-2 hover:bg-emerald-50 rounded-xl border-b border-[#DCE5E4]"
+                      className="py-2 px-2 hover:bg-[#F0FAF5] hover:text-[#16805B] rounded-xl border-b border-[#DCE5E4]"
                     >
                       FAQ
                     </a>
                     <a
                       href={getLiveDomain()}
                       onClick={() => setMobileOpen(false)}
-                      className="py-2 px-2 hover:bg-emerald-50 rounded-xl border-b border-[#DCE5E4] flex items-center justify-between"
+                      className="py-2 px-2 hover:bg-[#F0FAF5] rounded-xl border-b border-[#DCE5E4] flex items-center justify-between"
                     >
                       <span>Live Events</span>
                       <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-bold bg-red-100 text-red-600">
@@ -597,15 +741,15 @@ export function FloatingNavbar({ variant }: FloatingNavbarProps = {}) {
                     <Link
                       href="/student"
                       onClick={() => setMobileOpen(false)}
-                      className="py-2 px-2 hover:bg-emerald-50 rounded-xl text-emerald-800 font-bold"
+                      className="py-2 px-2 hover:bg-[#F3F6FF] rounded-xl text-[#3157D5] font-bold"
                     >
                       Learner Portal →
                     </Link>
                   </>
                 ) : isLearner ? (
                   <>
-                    <div className="text-xs font-black uppercase text-blue-700 tracking-wider px-2 py-1.5 rounded-lg bg-blue-50 flex items-center gap-1.5">
-                      <span className="w-1.5 h-1.5 rounded-full bg-blue-600" />
+                    <div className="text-xs font-black uppercase text-[#3157D5] tracking-wider px-2 py-1.5 rounded-lg bg-[#F3F6FF] flex items-center gap-1.5">
+                      <span className="w-1.5 h-1.5 rounded-full bg-[#3157D5]" />
                       Learner Experience
                     </div>
                     <div className="pb-2 border-b border-[#DCE5E4] space-y-2">
@@ -615,45 +759,59 @@ export function FloatingNavbar({ variant }: FloatingNavbarProps = {}) {
                       <Link
                         href="/find-teachers"
                         onClick={() => setMobileOpen(false)}
-                        className="flex items-center gap-2.5 p-2 rounded-xl hover:bg-blue-50 text-[#102A2A] font-bold"
+                        className="flex items-center gap-2.5 p-2 rounded-xl hover:bg-[#F3F6FF] text-[#102A2A] font-bold"
                       >
-                        <Users className="h-4 w-4 text-[#2563EB]" />
+                        <Users className="h-4 w-4 text-[#3157D5]" />
                         Find an Educator
                       </Link>
                       <Link
                         href="/courses"
                         onClick={() => setMobileOpen(false)}
-                        className="flex items-center gap-2.5 p-2 rounded-xl hover:bg-blue-50 text-[#102A2A] font-bold"
+                        className="flex items-center gap-2.5 p-2 rounded-xl hover:bg-[#F3F6FF] text-[#102A2A] font-bold"
                       >
-                        <BookOpen className="h-4 w-4 text-[#2563EB]" />
+                        <BookOpen className="h-4 w-4 text-[#3157D5]" />
                         Explore Courses
                       </Link>
                     </div>
                     <a
                       href="#live-classes"
                       onClick={() => setMobileOpen(false)}
-                      className="py-2 px-2 hover:bg-blue-50 rounded-xl border-b border-[#DCE5E4]"
+                      className="py-2 px-2 hover:bg-[#F3F6FF] hover:text-[#3157D5] rounded-xl border-b border-[#DCE5E4]"
                     >
                       Live Classes
                     </a>
                     <a
                       href="#courses"
                       onClick={() => setMobileOpen(false)}
-                      className="py-2 px-2 hover:bg-blue-50 rounded-xl border-b border-[#DCE5E4]"
+                      className="py-2 px-2 hover:bg-[#F3F6FF] hover:text-[#3157D5] rounded-xl border-b border-[#DCE5E4]"
                     >
                       Courses
                     </a>
                     <a
                       href="#how-it-works"
                       onClick={handleHowItWorksClick}
-                      className="py-2 px-2 hover:bg-blue-50 rounded-xl border-b border-[#DCE5E4]"
+                      className="py-2 px-2 hover:bg-[#F3F6FF] hover:text-[#3157D5] rounded-xl border-b border-[#DCE5E4]"
                     >
                       How It Works
                     </a>
                     <a
+                      href="#benefits"
+                      onClick={() => setMobileOpen(false)}
+                      className="py-2 px-2 hover:bg-[#F3F6FF] hover:text-[#3157D5] rounded-xl border-b border-[#DCE5E4]"
+                    >
+                      Why EduConnects
+                    </a>
+                    <a
+                      href="#faq"
+                      onClick={() => setMobileOpen(false)}
+                      className="py-2 px-2 hover:bg-[#F3F6FF] hover:text-[#3157D5] rounded-xl border-b border-[#DCE5E4]"
+                    >
+                      FAQ
+                    </a>
+                    <a
                       href={getLiveDomain()}
                       onClick={() => setMobileOpen(false)}
-                      className="py-2 px-2 hover:bg-blue-50 rounded-xl border-b border-[#DCE5E4] flex items-center justify-between"
+                      className="py-2 px-2 hover:bg-[#F3F6FF] rounded-xl border-b border-[#DCE5E4] flex items-center justify-between"
                     >
                       <span>Live Events</span>
                       <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-bold bg-red-100 text-red-600">
@@ -664,7 +822,7 @@ export function FloatingNavbar({ variant }: FloatingNavbarProps = {}) {
                     <Link
                       href="/teacher"
                       onClick={() => setMobileOpen(false)}
-                      className="py-2 px-2 hover:bg-emerald-50 rounded-xl text-[#0B4F4B] font-bold"
+                      className="py-2 px-2 hover:bg-[#F0FAF5] rounded-xl text-[#16805B] font-bold"
                     >
                       Teach on EduConnects →
                     </Link>
@@ -680,7 +838,7 @@ export function FloatingNavbar({ variant }: FloatingNavbarProps = {}) {
                         onClick={() => setMobileOpen(false)}
                         className="flex items-center gap-2.5 p-2 rounded-xl hover:bg-[#F5F7F8] text-[#102A2A] font-bold"
                       >
-                        <Users className="h-4 w-4 text-[#0B4F4B]" />
+                        <Users className="h-4 w-4 text-[#0F5C5A]" />
                         Find an Educator
                       </Link>
                       <Link
@@ -701,6 +859,20 @@ export function FloatingNavbar({ variant }: FloatingNavbarProps = {}) {
                       </Link>
                     </div>
 
+                    <Link
+                      href="/student"
+                      onClick={() => setMobileOpen(false)}
+                      className="py-2 px-2 hover:bg-[#F5F7F8] rounded-xl border-b border-[#DCE5E4]"
+                    >
+                      For Learners
+                    </Link>
+                    <Link
+                      href="/teacher"
+                      onClick={() => setMobileOpen(false)}
+                      className="py-2 px-2 hover:bg-[#F5F7F8] rounded-xl border-b border-[#DCE5E4]"
+                    >
+                      For Educators
+                    </Link>
                     <a
                       href="#how-it-works"
                       onClick={handleHowItWorksClick}
@@ -708,7 +880,6 @@ export function FloatingNavbar({ variant }: FloatingNavbarProps = {}) {
                     >
                       How It Works
                     </a>
-
                     <a
                       href={getLiveDomain()}
                       onClick={() => setMobileOpen(false)}
@@ -720,14 +891,6 @@ export function FloatingNavbar({ variant }: FloatingNavbarProps = {}) {
                         🔴 Live
                       </span>
                     </a>
-
-                    <Link
-                      href="/teacher"
-                      onClick={() => setMobileOpen(false)}
-                      className="py-2 px-2 hover:bg-[#F5F7F8] rounded-xl text-[#0B4F4B] font-bold"
-                    >
-                      Become an Educator
-                    </Link>
                   </>
                 )}
               </nav>

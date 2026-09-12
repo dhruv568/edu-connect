@@ -12,7 +12,7 @@ export interface PremiumFooterProps {
 
 export function PremiumFooter({ showCta = false }: PremiumFooterProps = {}) {
   return (
-    <footer className="bg-[#073F3C] text-white pt-16 pb-12 border-t border-[#1B6863]/30 relative overflow-hidden font-sans">
+    <footer className="bg-[#083F3D] text-white pt-16 pb-12 border-t border-[#1B6863]/30 relative overflow-hidden font-sans">
       {/* Background Glow */}
       <div className="absolute top-0 left-1/2 -translate-x-1/2 w-3/4 h-32 bg-[#F2C14E]/10 blur-3xl rounded-full pointer-events-none" />
 
@@ -22,7 +22,7 @@ export function PremiumFooter({ showCta = false }: PremiumFooterProps = {}) {
           {/* Brand Column */}
           <div className="space-y-4 md:col-span-2">
             <Link href="/" className="flex items-center gap-2.5">
-              <div className="p-2 rounded-xl bg-[#0B4F4B] text-[#F2C14E] border border-[#F2C14E]/30">
+              <div className="p-2 rounded-xl bg-[#0F5C5A] text-[#F2C14E] border border-[#F2C14E]/30">
                 <GraduationCap className="h-6 w-6" />
               </div>
               <span className="text-xl font-black text-white tracking-tight">
@@ -130,7 +130,7 @@ export function PremiumFooter({ showCta = false }: PremiumFooterProps = {}) {
                 </Link>
               </li>
             </ul>
-            <div className="p-3 bg-[#0B4F4B]/80 rounded-2xl border border-[#1B6863] text-xs text-[#F2C14E] space-y-1">
+            <div className="p-3 bg-[#0F5C5A]/80 rounded-2xl border border-[#1B6863] text-xs text-[#F2C14E] space-y-1">
               <div className="flex items-center gap-1.5 font-bold">
                 <Shield className="h-4 w-4 text-[#F2C14E]" /> Cashfree Payments
               </div>

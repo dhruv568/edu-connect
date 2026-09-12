@@ -2,7 +2,10 @@
 
 import React, { useState, useEffect } from "react";
 import Link from "next/link";
+import Image from "next/image";
 import { motion, AnimatePresence } from "framer-motion";
+import photo2 from "@/photo2.jpeg";
+import photo3 from "@/photo3.jpeg";
 import { FloatingNavbar } from "@/components/homepage/floating-navbar";
 import { PremiumFooter } from "@/components/homepage/premium-footer";
 import { GlassCard } from "@/components/glass/glass-card";
@@ -33,16 +36,21 @@ import {
   CreditCard,
   Laptop,
   Check,
+  X,
+  Calendar,
   MessageSquare,
   HelpCircle,
   LayoutDashboard,
 } from "lucide-react";
+import { formatCurrency } from "@/lib/currency";
 import { UserRole, UserSession } from "@/types/auth";
 
 export default function StudentLandingPage() {
   const [authModalOpen, setAuthModalOpen] = useState(false);
   const [courses, setCourses] = useState<any[]>([]);
   const [loadingCourses, setLoadingCourses] = useState(true);
+  const [featuredTeachers, setFeaturedTeachers] = useState<any[]>([]);
+  const [loadingTeachers, setLoadingTeachers] = useState(true);
   const [activeCategory, setActiveCategory] = useState("ALL");
   const [courseSearch, setCourseSearch] = useState("");
   const [openFaqIndex, setOpenFaqIndex] = useState<number | null>(0);
@@ -86,6 +94,26 @@ export default function StudentLandingPage() {
 
     fetchCourses();
   }, [activeCategory, courseSearch]);
+
+  // Fetch verified top teachers from API
+  useEffect(() => {
+    const fetchTeachers = async () => {
+      setLoadingTeachers(true);
+      try {
+        const res = await fetch("/api/teachers?sortBy=rating&ratingMin=4");
+        const json = await res.json();
+        if (json.success && json.data?.teachers && json.data.teachers.length > 0) {
+          setFeaturedTeachers(json.data.teachers.slice(0, 4));
+        }
+      } catch (err) {
+        console.error("Failed to load featured teachers:", err);
+      } finally {
+        setLoadingTeachers(false);
+      }
+    };
+
+    fetchTeachers();
+  }, []);
 
   const categories = [
     { label: "All Subjects", value: "ALL" },
@@ -207,12 +235,110 @@ export default function StudentLandingPage() {
     },
   ];
 
+  const fallbackTeachers = [
+    {
+      id: "t-1",
+      name: "Dr. Rajesh Sharma",
+      headline: "Senior Mathematics Faculty & IIT JEE Coach",
+      avatarUrl: "https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=150&auto=format&fit=crop&q=80",
+      subjects: ["Calculus", "Algebra", "JEE Advanced"],
+      experienceYears: 12,
+      hourlyRate: 850,
+      rating: 4.98,
+    },
+    {
+      id: "t-2",
+      name: "Priya Sundaram",
+      headline: "NEET & Board Exam Physics Specialist",
+      avatarUrl: "https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?w=150&auto=format&fit=crop&q=80",
+      subjects: ["Physics", "Mechanics", "Electrostatics"],
+      experienceYears: 9,
+      hourlyRate: 750,
+      rating: 4.95,
+    },
+    {
+      id: "t-3",
+      name: "Amit Joshi",
+      headline: "Computer Science & Full-Stack Mentor",
+      avatarUrl: "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=150&auto=format&fit=crop&q=80",
+      subjects: ["Python", "Algorithms", "Web Dev"],
+      experienceYears: 8,
+      hourlyRate: 900,
+      rating: 4.96,
+    },
+    {
+      id: "t-4",
+      name: "Ananya Roy",
+      headline: "Organic & Physical Chemistry Faculty",
+      avatarUrl: "https://images.unsplash.com/photo-1580489944761-15a19d654956?w=150&auto=format&fit=crop&q=80",
+      subjects: ["Chemistry", "Organic Synthesis", "CBSE 12th"],
+      experienceYears: 7,
+      hourlyRate: 700,
+      rating: 4.92,
+    },
+  ];
+
+  const studentJourneySteps = [
+    {
+      step: "01",
+      title: "Find Your Educator or Course",
+      desc: "Search our directory of verified educators by subject, exam syllabus (CBSE, ICSE, JEE, NEET), or explore structured courses.",
+      icon: Search,
+    },
+    {
+      step: "02",
+      title: "Book a Trial or Enroll",
+      desc: "Schedule a risk-free 1-on-1 demo with your preferred mentor, or enroll in a comprehensive curriculum with instant access.",
+      icon: Calendar,
+    },
+    {
+      step: "03",
+      title: "Learn Live in the Browser",
+      desc: "Join high-definition interactive classes featuring a collaborative digital whiteboard, live chat, and instant doubt resolution.",
+      icon: Video,
+    },
+    {
+      step: "04",
+      title: "Track Progress & Excel",
+      desc: "Access recorded lesson replays, complete homework assignments, maintain study streaks, and earn verified certificates.",
+      icon: Award,
+    },
+  ];
+
+  const comparisonPoints = [
+    {
+      feature: "Class Size & Personalized Attention",
+      traditional: "Overcrowded batches of 40-60+ students. Hesitant to ask doubts.",
+      educonnects: "1-on-1 personalized tutorials or small interactive focus cohorts.",
+    },
+    {
+      feature: "Tutor Quality & Verification",
+      traditional: "Assigned arbitrarily by coaching center. Uncertain teacher qualifications.",
+      educonnects: "100% verified degrees, identity checks, and transparent student reviews.",
+    },
+    {
+      feature: "Missed Lectures & Exam Revision",
+      traditional: "Miss a class and the concept is gone. Rely on photocopied friend notes.",
+      educonnects: "Lifetime on-demand access to HD video replays and downloadable PDF notes.",
+    },
+    {
+      feature: "Commute & Flexibility",
+      traditional: "2+ hours wasted daily stuck in traffic commuting to physical coaching centers.",
+      educonnects: "100% browser-based. Zero commute, learn safely and comfortably from home.",
+    },
+    {
+      feature: "Pricing & Payment Terms",
+      traditional: "Expensive non-refundable upfront annual fees of ₹50,000 to ₹1,50,000+.",
+      educonnects: "Pay per lesson or course. Escrow protection and instant refund guarantees.",
+    },
+  ];
+
   const handleOpenAuth = () => {
     setAuthModalOpen(true);
   };
 
   return (
-    <div className="min-h-screen flex flex-col bg-slate-50 relative overflow-hidden font-sans text-slate-900">
+    <div data-theme="learner" className="min-h-screen flex flex-col bg-[#F3F6FF]/30 relative overflow-hidden font-sans text-slate-900">
       {/* 1. Learner-Oriented Role Navbar */}
       <FloatingNavbar variant="student" />
 
@@ -231,9 +357,28 @@ export default function StudentLandingPage() {
             <div className="grid grid-cols-1 lg:grid-cols-12 gap-12 lg:gap-8 items-center">
               {/* Hero Left Column: Copy & CTAs */}
               <div className="lg:col-span-7 space-y-6 text-center lg:text-left">
-                <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-blue-50 border border-blue-200 text-blue-700 text-xs font-extrabold uppercase tracking-wider shadow-2xs">
-                  <Sparkles className="h-3.5 w-3.5 text-blue-600 animate-spin" />
-                  <span>The Learning Platform for Ambitious Learners</span>
+                <div className="flex flex-wrap items-center justify-center lg:justify-start gap-3">
+                  <div className="inline-flex items-center gap-2.5 px-3 py-1.5 rounded-2xl bg-white border border-blue-200 text-blue-700 shadow-2xs">
+                    <Image
+                      src={photo3}
+                      alt="EduConnects - Find an Educator"
+                      className="h-8 w-auto object-contain"
+                      priority
+                    />
+                    <div className="border-l border-blue-100 pl-2.5 text-left">
+                      <span className="block text-[10px] font-black text-blue-700 uppercase tracking-wider">
+                        Official Learner Gateway
+                      </span>
+                      <span className="block text-[11px] font-semibold text-slate-700">
+                        Learn • Grow • Belong
+                      </span>
+                    </div>
+                  </div>
+
+                  <div className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-blue-50 border border-blue-200 text-blue-700 text-xs font-extrabold uppercase tracking-wider shadow-2xs">
+                    <Sparkles className="h-3.5 w-3.5 text-blue-600" />
+                    <span>Ambitious Learners</span>
+                  </div>
                 </div>
 
                 <h1 className="text-4xl sm:text-5xl lg:text-6xl font-black text-slate-900 tracking-tight leading-[1.15]">
@@ -295,80 +440,40 @@ export default function StudentLandingPage() {
                 </div>
               </div>
 
-              {/* Hero Right Column: Interactive Visual Showcase Card */}
+              {/* Hero Right Column: Photo 2 Learner Experience Showcase Card */}
               <div className="lg:col-span-5 relative">
                 <div className="relative mx-auto max-w-md lg:max-w-none">
-                  {/* Floating Live Classroom Glass Preview */}
-                  <GlassCard
-                    glowColor="rgba(37, 99, 235, 0.2)"
-                    className="p-6 border-2 border-white shadow-2xl space-y-5 rounded-3xl bg-white/90 backdrop-blur-xl"
-                  >
-                    {/* Header bar */}
-                    <div className="flex items-center justify-between border-b border-slate-100 pb-3">
-                      <div className="flex items-center gap-2.5">
-                        <div className="w-3 h-3 rounded-full bg-rose-500 animate-pulse" />
-                        <span className="text-xs font-bold text-slate-900 uppercase tracking-wider">
-                          Live Interactive Classroom
-                        </span>
-                      </div>
-                      <span className="px-2 py-0.5 rounded-full text-[10px] font-extrabold bg-emerald-100 text-emerald-800">
-                        HD 1080p WebRTC
-                      </span>
-                    </div>
+                  {/* Subtle Indigo/Blue Glow Backdrop */}
+                  <div className="absolute -inset-2 bg-gradient-to-tr from-blue-600/20 via-indigo-500/20 to-sky-400/20 rounded-[2.2rem] blur-xl -z-10" />
 
-                    {/* Classroom Simulation Video Stage */}
-                    <div className="relative aspect-video rounded-2xl overflow-hidden bg-slate-900 border border-slate-800 shadow-inner group">
-                      <img
-                        src="https://images.unsplash.com/photo-1577896851231-70ef18881754?w=800&auto=format&fit=crop&q=80"
-                        alt="Teacher conducting live session"
-                        className="w-full h-full object-cover opacity-80 group-hover:scale-105 transition-transform duration-500"
+                  {/* Main Card Graphic Preserving 1:1 Aspect Ratio */}
+                  <div className="p-3 sm:p-4 rounded-3xl bg-white border-2 border-white/80 shadow-2xl space-y-3 relative overflow-hidden backdrop-blur-md">
+                    <div className="relative aspect-square w-full rounded-2xl overflow-hidden bg-slate-50 border border-slate-200/80">
+                      <Image
+                        src={photo2}
+                        alt="Find the Right Educator for a Brighter Future - EduConnects Learner Experience"
+                        priority
+                        sizes="(max-width: 768px) 100vw, (max-width: 1200px) 45vw, 520px"
+                        className="w-full h-full object-contain"
                       />
-                      <div className="absolute inset-0 bg-gradient-to-t from-slate-950 via-transparent to-transparent opacity-90" />
-
-                      {/* Floating In-Class Overlay Elements */}
-                      <div className="absolute top-3 left-3 flex items-center gap-2 bg-slate-900/80 backdrop-blur-md px-2.5 py-1 rounded-lg border border-white/10 text-white text-[11px] font-semibold">
-                        <Video className="w-3 h-3 text-emerald-400" />
-                        <span>Prof. Rajesh Sharma</span>
-                      </div>
-
-                      <div className="absolute bottom-3 left-3 right-3 flex items-center justify-between text-white text-xs">
-                        <div className="flex items-center gap-2">
-                          <span className="w-2 h-2 rounded-full bg-emerald-400" />
-                          <span className="font-semibold text-[11px]">Calculus & Advanced Vectors</span>
-                        </div>
-                        <span className="text-[10px] bg-blue-600/90 px-2 py-0.5 rounded font-mono font-bold">
-                          45:20
-                        </span>
-                      </div>
                     </div>
 
-                    {/* Student Dashboard Widget Preview */}
-                    <div className="grid grid-cols-2 gap-3 pt-1">
-                      <div className="p-3 rounded-2xl bg-blue-50/80 border border-blue-100 flex items-center gap-3">
-                        <div className="p-2 rounded-xl bg-blue-600 text-white shrink-0">
-                          <Flame className="w-4 h-4" />
-                        </div>
-                        <div>
-                          <div className="text-[10px] font-bold uppercase tracking-wider text-blue-600">Daily Streak</div>
-                          <div className="text-xs font-black text-slate-900">7 Days Active 🔥</div>
-                        </div>
+                    {/* Bottom Feature Badges Strip */}
+                    <div className="grid grid-cols-2 gap-2 pt-0.5 text-xs">
+                      <div className="p-2.5 rounded-xl bg-blue-50/80 border border-blue-100 flex items-center gap-2 text-slate-900">
+                        <ShieldCheck className="w-4 h-4 text-blue-600 shrink-0" />
+                        <span className="font-bold text-[11px] leading-tight">Verified Educators</span>
                       </div>
-
-                      <div className="p-3 rounded-2xl bg-emerald-50/80 border border-emerald-100 flex items-center gap-3">
-                        <div className="p-2 rounded-xl bg-emerald-600 text-white shrink-0">
-                          <BookOpen className="w-4 h-4" />
-                        </div>
-                        <div>
-                          <div className="text-[10px] font-bold uppercase tracking-wider text-emerald-700">Course Lessons</div>
-                          <div className="text-xs font-black text-slate-900">84% Completed</div>
-                        </div>
+                      <div className="p-2.5 rounded-xl bg-emerald-50/80 border border-emerald-100 flex items-center gap-2 text-slate-900">
+                        <CheckCircle2 className="w-4 h-4 text-emerald-600 shrink-0" />
+                        <span className="font-bold text-[11px] leading-tight">Safe & Trusted</span>
                       </div>
                     </div>
-                  </GlassCard>
+                  </div>
 
                   {/* Floating Trust Chip Badge */}
                   <div className="absolute -bottom-5 -left-5 bg-white p-3.5 rounded-2xl shadow-xl border border-slate-200/90 flex items-center gap-3 hidden sm:flex">
-                    <div className="p-2 bg-emerald-100 text-emerald-600 rounded-xl">
+                    <div className="p-2 bg-blue-100 text-blue-600 rounded-xl">
                       <CheckCircle2 className="h-5 w-5" />
                     </div>
                     <div className="text-left">
@@ -385,7 +490,7 @@ export default function StudentLandingPage() {
         {/* ========================================================================= */}
         {/* 2. WHY EDUCONNECTS FOR LEARNERS */}
         {/* ========================================================================= */}
-        <section className="py-20 bg-white border-y border-slate-200/80">
+        <section id="benefits" className="py-20 bg-white border-y border-slate-200/80">
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 space-y-12">
             <div className="text-center max-w-3xl mx-auto space-y-3">
               <GlassBadge variant="learner">DESIGNED FOR MAXIMUM LEARNER SUCCESS</GlassBadge>
@@ -526,9 +631,114 @@ export default function StudentLandingPage() {
         </section>
 
         {/* ========================================================================= */}
-        {/* 4. LIVE LEARNING DEEP DIVE */}
+        {/* 4. TOP VERIFIED EDUCATORS */}
         {/* ========================================================================= */}
-        <section id="live-classes" className="py-20 lg:py-28 bg-white border-t border-slate-200">
+        <section id="educators" className="py-20 lg:py-28 bg-white border-t border-slate-200">
+          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 space-y-12">
+            <div className="flex flex-col md:flex-row md:items-end justify-between gap-6">
+              <div className="space-y-3 max-w-2xl">
+                <div className="flex items-center gap-3">
+                  <GlassBadge variant="learner">TOP VERIFIED FACULTY</GlassBadge>
+                  <div className="hidden sm:inline-flex items-center gap-2 px-2.5 py-1 rounded-full bg-blue-50 border border-blue-200 text-[11px] font-bold text-blue-700">
+                    <Image
+                      src={photo3}
+                      alt="EduConnects - Find an Educator"
+                      className="h-5 w-auto object-contain"
+                    />
+                    <span>Verified Educator Roster</span>
+                  </div>
+                </div>
+                <h2 className="text-3xl sm:text-4xl font-black text-slate-900 tracking-tight">
+                  Learn from Top Verified Educators
+                </h2>
+                <p className="text-sm text-slate-600 leading-relaxed">
+                  Book 1-on-1 trial lessons or join cohort batches with experienced professors, Olympiad mentors, and senior subject specialists.
+                </p>
+              </div>
+
+              <Link href="/find-teachers">
+                <GlassButton variant="learner" size="sm" rightIcon={<ArrowRight className="h-4 w-4" />}>
+                  Explore All 850+ Educators
+                </GlassButton>
+              </Link>
+            </div>
+
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+              {(featuredTeachers.length > 0 ? featuredTeachers : fallbackTeachers).map((teacher) => (
+                <GlassCard
+                  key={teacher.id}
+                  className="p-6 rounded-3xl border border-slate-200/90 bg-slate-50/50 hover:bg-white hover:border-blue-300 hover:shadow-xl transition-all duration-300 flex flex-col justify-between group"
+                >
+                  <div className="space-y-4">
+                    {/* Educator Avatar & Verification */}
+                    <div className="relative w-fit">
+                      <img
+                        src={teacher.avatarUrl}
+                        alt={teacher.name}
+                        className="w-16 h-16 rounded-2xl object-cover ring-2 ring-blue-500/20 group-hover:ring-blue-500 transition-all shadow-sm"
+                      />
+                      <div className="absolute -bottom-1.5 -right-1.5 p-1 bg-emerald-600 text-white rounded-full shadow-xs" title="Identity & Degree Verified">
+                        <ShieldCheck className="h-3.5 w-3.5" />
+                      </div>
+                    </div>
+
+                    <div>
+                      <div className="flex items-center justify-between">
+                        <h3 className="text-base font-black text-slate-900 group-hover:text-blue-600 transition-colors">
+                          {teacher.name}
+                        </h3>
+                      </div>
+                      <p className="text-xs text-slate-500 font-medium line-clamp-2 mt-0.5">
+                        {teacher.headline}
+                      </p>
+                    </div>
+
+                    {/* Subject Badges */}
+                    <div className="flex flex-wrap gap-1">
+                      {(teacher.subjects || []).slice(0, 3).map((sub: string, sIdx: number) => (
+                        <span
+                          key={sIdx}
+                          className="px-2 py-0.5 rounded-md text-[10px] font-bold bg-blue-50 text-blue-700 border border-blue-100"
+                        >
+                          {sub}
+                        </span>
+                      ))}
+                    </div>
+
+                    {/* Stats & Hourly Rate */}
+                    <div className="pt-3 border-t border-slate-200/80 flex items-center justify-between text-xs">
+                      <div className="flex items-center gap-1 font-extrabold text-amber-600">
+                        <Star className="h-3.5 w-3.5 fill-amber-400 stroke-amber-500" />
+                        <span>{teacher.rating ? Number(teacher.rating).toFixed(1) : "4.9"}</span>
+                        <span className="text-[10px] text-slate-400 font-normal">
+                          ({teacher.experienceYears ? `${teacher.experienceYears}y exp` : "Expert"})
+                        </span>
+                      </div>
+                      <div className="font-black text-slate-900">
+                        {formatCurrency(teacher.hourlyRate || 800)}
+                        <span className="text-[10px] text-slate-500 font-normal">/hr</span>
+                      </div>
+                    </div>
+                  </div>
+
+                  <div className="pt-5 mt-4 border-t border-slate-100">
+                    <Link href="/find-teachers" className="w-full block">
+                      <button className="w-full py-2 px-3 rounded-xl bg-blue-600 hover:bg-blue-700 text-white text-xs font-bold transition-colors flex items-center justify-center gap-1 shadow-sm">
+                        <span>Book Trial Lesson</span>
+                        <ArrowRight className="h-3.5 w-3.5" />
+                      </button>
+                    </Link>
+                  </div>
+                </GlassCard>
+              ))}
+            </div>
+          </div>
+        </section>
+
+        {/* ========================================================================= */}
+        {/* 5. LIVE LEARNING DEEP DIVE */}
+        {/* ========================================================================= */}
+        <section id="live-classes" className="py-20 lg:py-28 bg-slate-50 border-t border-slate-200">
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <div className="grid grid-cols-1 lg:grid-cols-12 gap-12 items-center">
               {/* Left Column: Visual Mock of WebRTC Classroom */}
@@ -631,7 +841,53 @@ export default function StudentLandingPage() {
         </section>
 
         {/* ========================================================================= */}
-        {/* 5. LEARNER TESTIMONIALS */}
+        {/* 6. HOW IT WORKS (FOR LEARNERS) */}
+        {/* ========================================================================= */}
+        <section id="how-it-works" className="py-20 lg:py-28 bg-white border-t border-slate-200">
+          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 space-y-16">
+            <div className="text-center max-w-2xl mx-auto space-y-3">
+              <GlassBadge variant="learner">SIMPLE 4-STEP LEARNER JOURNEY</GlassBadge>
+              <h2 className="text-3xl sm:text-4xl font-black text-slate-900 tracking-tight">
+                How Learning on EduConnects Works
+              </h2>
+              <p className="text-sm text-slate-600 leading-relaxed">
+                From finding your ideal subject mentor to mastering complex topics, start learning in four straightforward steps.
+              </p>
+            </div>
+
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+              {studentJourneySteps.map((s, idx) => {
+                const IconComp = s.icon;
+                return (
+                  <div
+                    key={idx}
+                    className="p-7 rounded-3xl bg-slate-50 border border-slate-200 hover:border-blue-400 hover:shadow-lg transition-all space-y-4 relative flex flex-col justify-between group"
+                  >
+                    <div className="space-y-4">
+                      <div className="flex items-center justify-between">
+                        <span className="text-2xl font-black text-blue-600/30 group-hover:text-blue-600/60 transition-colors">
+                          {s.step}
+                        </span>
+                        <div className="p-3 rounded-2xl bg-blue-100 text-blue-700">
+                          <IconComp className="h-5 w-5" />
+                        </div>
+                      </div>
+                      <h3 className="text-lg font-black text-slate-900">{s.title}</h3>
+                      <p className="text-xs sm:text-sm text-slate-600 leading-relaxed">{s.desc}</p>
+                    </div>
+
+                    <div className="pt-4 border-t border-slate-200/60 flex items-center text-xs font-bold text-blue-600">
+                      <span>Step {s.step}</span>
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+          </div>
+        </section>
+
+        {/* ========================================================================= */}
+        {/* 7. LEARNER TESTIMONIALS */}
         {/* ========================================================================= */}
         <section className="py-20 bg-slate-50 border-t border-slate-200">
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 space-y-12">
@@ -687,9 +943,63 @@ export default function StudentLandingPage() {
         </section>
 
         {/* ========================================================================= */}
-        {/* 6. LEARNER FAQ ACCORDION */}
+        {/* 8. COMPARISON & TRUST SECTION */}
         {/* ========================================================================= */}
-        <section id="faq" className="py-20 lg:py-28 bg-white border-t border-slate-200">
+        <section className="py-20 lg:py-28 bg-white border-t border-slate-200">
+          <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 space-y-12">
+            <div className="text-center max-w-3xl mx-auto space-y-3">
+              <GlassBadge variant="learner">THE MODERN WAY TO LEARN</GlassBadge>
+              <h2 className="text-3xl sm:text-4xl font-black text-slate-900 tracking-tight">
+                Why Learners Choose EduConnects over Traditional Coaching
+              </h2>
+              <p className="text-sm text-slate-600 leading-relaxed">
+                Compare the flexibility, verified mentor quality, and learner-first economics of EduConnects against rigid offline coaching centers.
+              </p>
+            </div>
+
+            {/* Comparison Table */}
+            <div className="overflow-hidden rounded-3xl border border-slate-200 shadow-xl bg-white">
+              <div className="grid grid-cols-12 bg-slate-100/90 border-b border-slate-200 text-xs font-black uppercase tracking-wider text-slate-700 py-4 px-6">
+                <div className="col-span-4 sm:col-span-4">Category</div>
+                <div className="col-span-4 sm:col-span-4 text-slate-500">Traditional Coaching</div>
+                <div className="col-span-4 sm:col-span-4 text-blue-700 font-extrabold flex items-center gap-1">
+                  <span>EduConnects</span>
+                  <span className="text-[10px] bg-blue-100 text-blue-700 px-1.5 py-0.2 rounded font-bold">Recommended</span>
+                </div>
+              </div>
+
+              <div className="divide-y divide-slate-100">
+                {comparisonPoints.map((item, idx) => (
+                  <div
+                    key={idx}
+                    className={`grid grid-cols-12 py-4.5 px-6 items-center text-xs sm:text-sm ${
+                      idx % 2 === 0 ? "bg-white" : "bg-slate-50/40"
+                    }`}
+                  >
+                    <div className="col-span-4 sm:col-span-4 font-bold text-slate-900 pr-3">
+                      {item.feature}
+                    </div>
+                    <div className="col-span-4 sm:col-span-4 text-slate-500 pr-3 flex items-start gap-2">
+                      <X className="h-4 w-4 text-rose-400 shrink-0 mt-0.5" />
+                      <span className="text-xs leading-relaxed">{item.traditional}</span>
+                    </div>
+                    <div className="col-span-4 sm:col-span-4 font-semibold text-slate-900 flex items-start gap-2 bg-blue-50/40 -my-4.5 py-4.5 px-3 rounded-xl border-l border-blue-200/60">
+                      <Check className="h-4 w-4 text-emerald-600 shrink-0 mt-0.5 stroke-[3]" />
+                      <span className="text-xs leading-relaxed text-blue-950 font-bold">
+                        {item.educonnects}
+                      </span>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+          </div>
+        </section>
+
+        {/* ========================================================================= */}
+        {/* 9. LEARNER FAQ ACCORDION */}
+        {/* ========================================================================= */}
+        <section id="faq" className="py-20 lg:py-28 bg-slate-50 border-t border-slate-200">
           <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 space-y-12">
             <div className="text-center space-y-3">
               <GlassBadge variant="learner">LEARNER FAQ</GlassBadge>

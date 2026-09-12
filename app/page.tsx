@@ -4,6 +4,7 @@ import React from "react";
 import { FloatingNavbar } from "@/components/homepage/floating-navbar";
 import { HeroSection } from "@/components/homepage/hero-section";
 import { WhoIsItForSection } from "@/components/homepage/who-is-it-for-section";
+import { BrandVisionSection } from "@/components/homepage/brand-vision-section";
 import { WhatYouCanDoSection } from "@/components/homepage/what-you-can-do-section";
 import { HowItWorksSection } from "@/components/homepage/how-it-works-section";
 import { ExploreEducatorsSection } from "@/components/homepage/explore-educators-section";
@@ -16,7 +17,7 @@ import { PremiumFooter } from "@/components/homepage/premium-footer";
 
 export default function EduConnectsHomePage() {
   return (
-    <div className="min-h-screen flex flex-col relative bg-[#F5F7F8] overflow-x-hidden font-sans">
+    <div data-theme="home" className="min-h-screen flex flex-col relative bg-[#F2FAF8]/30 overflow-x-hidden font-sans">
       {/* 1. Simplified Modern Glass Navbar */}
       <FloatingNavbar />
 
@@ -26,6 +27,9 @@ export default function EduConnectsHomePage() {
 
         {/* 3. Who Is EduConnects For? (Learners & Educators) */}
         <WhoIsItForSection />
+
+        {/* 3.5 Brand Vision: Better Learning, Brighter Tomorrows */}
+        <BrandVisionSection />
 
         {/* 4. What Can You Do On EduConnects? */}
         <WhatYouCanDoSection />

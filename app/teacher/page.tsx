@@ -32,6 +32,7 @@ import {
   FileCheck,
   Zap,
   TrendingUp,
+  Star,
   LayoutDashboard,
 } from "lucide-react";
 import { formatCurrency } from "@/lib/currency";
@@ -138,6 +139,42 @@ export default function TeacherLandingPage() {
     },
   ];
 
+  const teacherTestimonials = [
+    {
+      name: "Dr. Kavita Narang",
+      role: "Senior Mathematics Educator",
+      location: "New Delhi",
+      avatar: "https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=150&auto=format&fit=crop&q=80",
+      rating: 5,
+      achievement: "₹84,000 / mo Avg. Earnings",
+      subjects: "JEE Advanced Calculus",
+      quote:
+        "Transitioning from offline coaching centers to EduConnects was the best career decision I've made. I teach 15 hours weekly from my study, enjoy complete syllabus autonomy, and receive automatic weekly bank deposits.",
+    },
+    {
+      name: "Prof. Sanjeev Kapoor",
+      role: "Physics Mentor & Olympiad Coach",
+      location: "Bangalore",
+      avatar: "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=150&auto=format&fit=crop&q=80",
+      rating: 5,
+      achievement: "240+ Active Learners",
+      subjects: "Mechanics & Electromagnetism",
+      quote:
+        "The built-in LiveKit classroom with interactive whiteboard is smoother than any third-party app I used. My students love live problem-solving, and on-demand video course sales provide reliable passive revenue.",
+    },
+    {
+      name: "Meenakshi Sundaram",
+      role: "Computer Science & AI Instructor",
+      location: "Hyderabad",
+      avatar: "https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?w=150&auto=format&fit=crop&q=80",
+      rating: 5,
+      achievement: "₹1,15,000+ Gross Monthly Revenue",
+      subjects: "Python & Data Structures",
+      quote:
+        "Combining weekend live batches with self-paced LMS modules helped me scale to students across 8 states without burning out. EduConnects manages all the streaming and billing seamlessly.",
+    },
+  ];
+
   const teacherFaqs = [
     {
       question: "How do I become a verified educator on EduConnects?",
@@ -172,7 +209,7 @@ export default function TeacherLandingPage() {
   ];
 
   return (
-    <div className="min-h-screen flex flex-col bg-slate-50 relative overflow-hidden font-sans text-slate-900">
+    <div data-theme="educator" className="min-h-screen flex flex-col bg-[#F0FAF5]/30 relative overflow-hidden font-sans text-slate-900">
       {/* 1. Educator-Oriented Role Navbar */}
       <FloatingNavbar variant="teacher" />
 
@@ -180,25 +217,25 @@ export default function TeacherLandingPage() {
         {/* ========================================================================= */}
         {/* 1. HERO SECTION */}
         {/* ========================================================================= */}
-        <section className="relative pt-32 sm:pt-36 lg:pt-44 pb-20 lg:pb-28 overflow-hidden bg-gradient-to-b from-emerald-50/70 via-slate-50 to-white">
+        <section className="relative pt-32 sm:pt-36 lg:pt-44 pb-20 lg:pb-28 overflow-hidden bg-gradient-to-b from-[#F0FAF5] via-slate-50 to-white">
           {/* Subtle Background Glow Elements */}
           <div className="absolute top-20 left-1/2 -translate-x-1/2 w-full max-w-7xl h-[500px] pointer-events-none -z-10">
-            <div className="absolute top-10 left-10 w-96 h-96 bg-emerald-500/15 rounded-full blur-3xl" />
-            <div className="absolute top-20 right-10 w-96 h-96 bg-teal-400/15 rounded-full blur-3xl" />
+            <div className="absolute top-10 left-10 w-96 h-96 bg-[#16805B]/15 rounded-full blur-3xl" />
+            <div className="absolute top-20 right-10 w-96 h-96 bg-[#35A979]/15 rounded-full blur-3xl" />
           </div>
 
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <div className="grid grid-cols-1 lg:grid-cols-12 gap-12 lg:gap-8 items-center">
               {/* Left Column: Copy & CTAs */}
               <div className="lg:col-span-7 space-y-6 text-center lg:text-left">
-                <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-emerald-50 border border-emerald-200 text-emerald-800 text-xs font-extrabold uppercase tracking-wider shadow-2xs">
-                  <Sparkles className="h-3.5 w-3.5 text-emerald-700" />
+                <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-[#F0FAF5] border border-[#A7F3D0] text-[#0D5C41] text-xs font-extrabold uppercase tracking-wider shadow-2xs">
+                  <Sparkles className="h-3.5 w-3.5 text-[#16805B]" />
                   <span>The Platform Built for Independent Educators</span>
                 </div>
 
                 <h1 className="text-4xl sm:text-5xl lg:text-6xl font-black text-slate-900 tracking-tight leading-[1.15]">
                   Turn your knowledge into impact. <br />
-                  <span className="bg-gradient-to-r from-emerald-800 via-teal-700 to-emerald-900 bg-clip-text text-transparent">
+                  <span className="bg-gradient-to-r from-[#16805B] via-[#0D5C41] to-[#16805B] bg-clip-text text-transparent">
                     Teach. Grow. Earn.
                   </span>
                 </h1>
@@ -214,7 +251,7 @@ export default function TeacherLandingPage() {
                       <GlassButton
                         variant="educator"
                         size="lg"
-                        className="w-full sm:w-auto text-white shadow-xl shadow-teal-900/25 text-sm font-bold"
+                        className="w-full sm:w-auto text-white shadow-xl shadow-emerald-700/25 text-sm font-bold"
                         leftIcon={<LayoutDashboard className="h-4 w-4" />}
                       >
                         Go to Educator Dashboard
@@ -225,7 +262,7 @@ export default function TeacherLandingPage() {
                       <GlassButton
                         variant="educator"
                         size="lg"
-                        className="w-full sm:w-auto text-white shadow-xl shadow-teal-900/25 text-sm font-bold"
+                        className="w-full sm:w-auto text-white shadow-xl shadow-emerald-700/25 text-sm font-bold"
                         rightIcon={<ArrowRight className="h-4 w-4" />}
                       >
                         Start Teaching
@@ -248,7 +285,7 @@ export default function TeacherLandingPage() {
                 {/* Educator Trust Stats */}
                 <div className="pt-6 border-t border-slate-200/80 grid grid-cols-3 gap-4 text-left max-w-lg mx-auto lg:mx-0">
                   <div>
-                    <div className="text-2xl lg:text-3xl font-black text-emerald-800">85%+</div>
+                    <div className="text-2xl lg:text-3xl font-black text-[#16805B]">85%+</div>
                     <div className="text-xs text-slate-500 font-medium">Revenue Share</div>
                   </div>
                   <div>
@@ -256,7 +293,7 @@ export default function TeacherLandingPage() {
                     <div className="text-xs text-slate-500 font-medium">Cashfree Payouts</div>
                   </div>
                   <div>
-                    <div className="text-2xl lg:text-3xl font-black text-emerald-700">100%</div>
+                    <div className="text-2xl lg:text-3xl font-black text-[#0D5C41]">100%</div>
                     <div className="text-xs text-slate-500 font-medium">Content Ownership</div>
                   </div>
                 </div>
@@ -266,7 +303,7 @@ export default function TeacherLandingPage() {
               <div className="lg:col-span-5 relative">
                 <div className="relative mx-auto max-w-md lg:max-w-none">
                   <GlassCard
-                    glowColor="rgba(11, 79, 75, 0.2)"
+                    glowColor="rgba(22, 128, 91, 0.2)"
                     className="p-6 border-2 border-white shadow-2xl space-y-5 rounded-3xl bg-white/90 backdrop-blur-xl"
                   >
                     {/* Header with Verification Status */}
@@ -275,34 +312,34 @@ export default function TeacherLandingPage() {
                         <img
                           src="https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=100&auto=format&fit=crop&q=80"
                           alt="Educator avatar"
-                          className="w-10 h-10 rounded-2xl object-cover ring-2 ring-emerald-500/25 shadow-sm"
+                          className="w-10 h-10 rounded-2xl object-cover ring-2 ring-[#16805B]/30 shadow-sm"
                         />
                         <div>
                           <div className="text-xs font-black text-slate-900">Dr. Kavita Narang</div>
                           <div className="text-[10px] text-slate-500 font-semibold">Senior Mathematics Educator</div>
                         </div>
                       </div>
-                      <span className="px-2.5 py-1 rounded-full text-[10px] font-extrabold bg-emerald-100 text-emerald-800 border border-emerald-200 flex items-center gap-1">
-                        <ShieldCheck className="h-3 w-3 text-emerald-600" />
+                      <span className="px-2.5 py-1 rounded-full text-[10px] font-extrabold bg-[#F0FAF5] text-[#0D5C41] border border-[#A7F3D0] flex items-center gap-1">
+                        <ShieldCheck className="h-3 w-3 text-[#16805B]" />
                         Verified
                       </span>
                     </div>
 
                     {/* Educator Metrics Row Preview */}
                     <div className="grid grid-cols-2 gap-3">
-                      <div className="p-3.5 rounded-2xl bg-emerald-50/80 border border-emerald-100 space-y-1">
+                      <div className="p-3.5 rounded-2xl bg-[#F0FAF5] border border-[#A7F3D0] space-y-1">
                         <div className="flex items-center justify-between">
-                          <span className="text-[10px] font-extrabold uppercase text-emerald-800">This Month</span>
-                          <IndianRupee className="h-3.5 w-3.5 text-emerald-700" />
+                          <span className="text-[10px] font-extrabold uppercase text-[#0D5C41]">This Month</span>
+                          <IndianRupee className="h-3.5 w-3.5 text-[#16805B]" />
                         </div>
                         <div className="text-xl font-black text-slate-900">₹72,400</div>
                         <div className="text-[10px] text-slate-500 font-medium">+18% vs last month</div>
                       </div>
 
-                      <div className="p-3.5 rounded-2xl bg-teal-50/80 border border-teal-100 space-y-1">
+                      <div className="p-3.5 rounded-2xl bg-emerald-50/80 border border-emerald-100 space-y-1">
                         <div className="flex items-center justify-between">
-                          <span className="text-[10px] font-extrabold uppercase text-teal-800">Enrolled Learners</span>
-                          <Users className="h-3.5 w-3.5 text-teal-700" />
+                          <span className="text-[10px] font-extrabold uppercase text-[#0D5C41]">Enrolled Learners</span>
+                          <Users className="h-3.5 w-3.5 text-[#16805B]" />
                         </div>
                         <div className="text-xl font-black text-slate-900">148</div>
                         <div className="text-[10px] text-slate-500 font-medium">Active learners</div>
@@ -313,10 +350,10 @@ export default function TeacherLandingPage() {
                     <div className="p-4 rounded-2xl bg-slate-50 border border-slate-200/80 space-y-2">
                       <div className="flex items-center justify-between text-xs font-bold text-slate-700">
                         <span className="flex items-center gap-1.5">
-                          <Clock className="w-3.5 h-3.5 text-emerald-700" />
+                          <Clock className="w-3.5 h-3.5 text-[#16805B]" />
                           Next Live Session
                         </span>
-                        <span className="text-[10px] bg-emerald-100 text-emerald-800 font-bold px-2 py-0.5 rounded-md">
+                        <span className="text-[10px] bg-[#F0FAF5] text-[#0D5C41] border border-[#A7F3D0] font-bold px-2 py-0.5 rounded-md">
                           Starts in 25m
                         </span>
                       </div>
@@ -325,14 +362,14 @@ export default function TeacherLandingPage() {
                       </div>
                       <div className="text-[11px] text-slate-500 flex items-center justify-between pt-1">
                         <span>18 / 20 Learners Confirmed</span>
-                        <span className="font-bold text-emerald-800">Enter Classroom →</span>
+                        <span className="font-bold text-[#16805B]">Enter Classroom →</span>
                       </div>
                     </div>
                   </GlassCard>
 
                   {/* Floating Trust Badge */}
                   <div className="absolute -bottom-5 -right-5 bg-white p-3.5 rounded-2xl shadow-xl border border-slate-200/90 flex items-center gap-3 hidden sm:flex">
-                    <div className="p-2 bg-emerald-100 text-emerald-800 rounded-xl">
+                    <div className="p-2 bg-[#F0FAF5] text-[#16805B] rounded-xl border border-[#A7F3D0]">
                       <Zap className="h-5 w-5" />
                     </div>
                     <div className="text-left">
@@ -364,8 +401,8 @@ export default function TeacherLandingPage() {
             {/* Feature 1: Profile & Platform Listing */}
             <div className="grid grid-cols-1 lg:grid-cols-12 gap-12 items-center">
               <div className="lg:col-span-6 space-y-5">
-                <div className="p-3 bg-emerald-100 text-emerald-800 rounded-2xl w-fit">
-                  <GraduationCap className="h-6 w-6" />
+                <div className="p-3 bg-[#F0FAF5] text-[#0D5C41] border border-[#A7F3D0] rounded-2xl w-fit">
+                  <GraduationCap className="h-6 w-6 text-[#16805B]" />
                 </div>
                 <h3 className="text-2xl sm:text-3xl font-black text-slate-900">
                   Build Your Verified Educator Brand
@@ -375,15 +412,15 @@ export default function TeacherLandingPage() {
                 </p>
                 <div className="space-y-2.5 text-xs sm:text-sm text-slate-700 font-semibold">
                   <div className="flex items-center gap-2">
-                    <CheckCircle2 className="h-4 w-4 text-emerald-600 shrink-0" />
+                    <CheckCircle2 className="h-4 w-4 text-[#16805B] shrink-0" />
                     <span>Display verified degrees, certificates, and years of experience</span>
                   </div>
                   <div className="flex items-center gap-2">
-                    <CheckCircle2 className="h-4 w-4 text-emerald-600 shrink-0" />
+                    <CheckCircle2 className="h-4 w-4 text-[#16805B] shrink-0" />
                     <span>Set custom hourly rates in ₹ INR for live 1-on-1 tutoring</span>
                   </div>
                   <div className="flex items-center gap-2">
-                    <CheckCircle2 className="h-4 w-4 text-emerald-600 shrink-0" />
+                    <CheckCircle2 className="h-4 w-4 text-[#16805B] shrink-0" />
                     <span>Collect ratings and reviews from verified attending learners</span>
                   </div>
                 </div>
@@ -393,7 +430,7 @@ export default function TeacherLandingPage() {
                 <div className="p-6 rounded-3xl bg-slate-50 border border-slate-200/90 shadow-lg space-y-4">
                   <div className="flex items-center justify-between border-b border-slate-200 pb-3">
                     <span className="text-xs font-bold uppercase text-slate-500">Platform Search Preview</span>
-                    <span className="text-xs font-bold text-emerald-800">⭐ 4.98 (84 Reviews)</span>
+                    <span className="text-xs font-bold text-[#0D5C41]">⭐ 4.98 (84 Reviews)</span>
                   </div>
                   <div className="space-y-2">
                     <div className="text-sm font-extrabold text-slate-900">
@@ -401,7 +438,7 @@ export default function TeacherLandingPage() {
                     </div>
                     <div className="flex flex-wrap gap-1.5">
                       {["Mathematics", "Physics", "Calculus", "Competitive Exam Prep"].map((s) => (
-                        <span key={s} className="px-2 py-0.5 rounded-md text-[10px] font-bold bg-emerald-100 text-emerald-800">
+                        <span key={s} className="px-2 py-0.5 rounded-md text-[10px] font-bold bg-[#F0FAF5] text-[#0D5C41] border border-[#A7F3D0]">
                           {s}
                         </span>
                       ))}
@@ -420,7 +457,7 @@ export default function TeacherLandingPage() {
                 <div className="p-6 rounded-3xl bg-slate-50 border border-slate-200/90 shadow-lg space-y-3">
                   <div className="flex items-center justify-between border-b border-slate-200 pb-2 text-xs font-bold text-slate-700">
                     <span>LMS Course Builder</span>
-                    <span className="text-emerald-600">Status: Published</span>
+                    <span className="text-[#16805B]">Status: Published</span>
                   </div>
                   <div className="space-y-2 text-xs">
                     <div className="p-3 bg-white rounded-xl border border-slate-200 flex items-center justify-between font-bold">
@@ -440,8 +477,8 @@ export default function TeacherLandingPage() {
               </div>
 
               <div className="lg:col-span-6 order-1 lg:order-2 space-y-5">
-                <div className="p-3 bg-teal-100 text-teal-800 rounded-2xl w-fit">
-                  <BookOpen className="h-6 w-6" />
+                <div className="p-3 bg-[#F0FAF5] text-[#0D5C41] border border-[#A7F3D0] rounded-2xl w-fit">
+                  <BookOpen className="h-6 w-6 text-[#16805B]" />
                 </div>
                 <h3 className="text-2xl sm:text-3xl font-black text-slate-900">
                   Publish On-Demand Video Courses
@@ -451,15 +488,15 @@ export default function TeacherLandingPage() {
                 </p>
                 <div className="space-y-2.5 text-xs sm:text-sm text-slate-700 font-semibold">
                   <div className="flex items-center gap-2">
-                    <CheckCircle2 className="h-4 w-4 text-emerald-600 shrink-0" />
+                    <CheckCircle2 className="h-4 w-4 text-[#16805B] shrink-0" />
                     <span>Fast video uploads with automated streaming encoding</span>
                   </div>
                   <div className="flex items-center gap-2">
-                    <CheckCircle2 className="h-4 w-4 text-emerald-600 shrink-0" />
+                    <CheckCircle2 className="h-4 w-4 text-[#16805B] shrink-0" />
                     <span>Set one-time course purchase pricing in ₹ INR</span>
                   </div>
                   <div className="flex items-center gap-2">
-                    <CheckCircle2 className="h-4 w-4 text-emerald-600 shrink-0" />
+                    <CheckCircle2 className="h-4 w-4 text-[#16805B] shrink-0" />
                     <span>Automatic learner progress tracking and completion certificates</span>
                   </div>
                 </div>
@@ -469,8 +506,8 @@ export default function TeacherLandingPage() {
             {/* Feature 3: Live Classes & Availability Scheduler */}
             <div id="live-classes" className="grid grid-cols-1 lg:grid-cols-12 gap-12 items-center">
               <div className="lg:col-span-6 space-y-5">
-                <div className="p-3 bg-emerald-100 text-emerald-800 rounded-2xl w-fit">
-                  <Video className="h-6 w-6" />
+                <div className="p-3 bg-[#F0FAF5] text-[#0D5C41] border border-[#A7F3D0] rounded-2xl w-fit">
+                  <Video className="h-6 w-6 text-[#16805B]" />
                 </div>
                 <h3 className="text-2xl sm:text-3xl font-black text-slate-900">
                   Schedule Live Classes with Built-In Whiteboard
@@ -480,15 +517,15 @@ export default function TeacherLandingPage() {
                 </p>
                 <div className="space-y-2.5 text-xs sm:text-sm text-slate-700 font-semibold">
                   <div className="flex items-center gap-2">
-                    <CheckCircle2 className="h-4 w-4 text-emerald-600 shrink-0" />
+                    <CheckCircle2 className="h-4 w-4 text-[#16805B] shrink-0" />
                     <span>Interactive whiteboard with pen, shapes, and drawing permission control</span>
                   </div>
                   <div className="flex items-center gap-2">
-                    <CheckCircle2 className="h-4 w-4 text-emerald-600 shrink-0" />
+                    <CheckCircle2 className="h-4 w-4 text-[#16805B] shrink-0" />
                     <span>In-session group chat and instant homework PDF sharing</span>
                   </div>
                   <div className="flex items-center gap-2">
-                    <CheckCircle2 className="h-4 w-4 text-emerald-600 shrink-0" />
+                    <CheckCircle2 className="h-4 w-4 text-[#16805B] shrink-0" />
                     <span>Automated learner attendance tracking and session logs</span>
                   </div>
                 </div>
@@ -498,20 +535,20 @@ export default function TeacherLandingPage() {
                 <div className="p-6 rounded-3xl bg-slate-900 text-white shadow-xl space-y-4">
                   <div className="flex items-center justify-between text-xs border-b border-slate-800 pb-3 font-semibold">
                     <span>Weekly Availability Schedule</span>
-                    <span className="text-emerald-300">● 6 Slots Available This Week</span>
+                    <span className="text-[#35A979]">● 6 Slots Available This Week</span>
                   </div>
                   <div className="space-y-2 text-xs">
                     <div className="p-3 bg-slate-800/80 rounded-xl flex items-center justify-between">
                       <span>Mon, Wed, Fri (4:00 PM - 7:00 PM)</span>
-                      <span className="text-emerald-300 font-mono">1-on-1 Demos</span>
+                      <span className="text-[#35A979] font-mono">1-on-1 Demos</span>
                     </div>
                     <div className="p-3 bg-slate-800/80 rounded-xl flex items-center justify-between">
                       <span>Saturday (10:00 AM - 1:00 PM)</span>
-                      <span className="text-teal-300 font-mono">Group Live Class (Max 20)</span>
+                      <span className="text-[#35A979] font-mono">Group Live Class (Max 20)</span>
                     </div>
                     <div className="p-3 bg-slate-800/80 rounded-xl flex items-center justify-between">
                       <span>Sunday (11:00 AM - 1:00 PM)</span>
-                      <span className="text-emerald-300 font-mono">Doubt Resolution Clinic</span>
+                      <span className="text-[#35A979] font-mono">Doubt Resolution Clinic</span>
                     </div>
                   </div>
                 </div>
@@ -545,7 +582,7 @@ export default function TeacherLandingPage() {
                       <label className="text-xs font-bold text-slate-700 uppercase tracking-wider">
                         Live Class Hourly Rate (₹)
                       </label>
-                      <span className="text-base font-black text-emerald-800">₹{hourlyRate}/hr</span>
+                      <span className="text-base font-black text-[#0D5C41]">₹{hourlyRate}/hr</span>
                     </div>
                     <input
                       type="range"
@@ -554,7 +591,7 @@ export default function TeacherLandingPage() {
                       step={50}
                       value={hourlyRate}
                       onChange={(e) => setHourlyRate(Number(e.target.value))}
-                      className="w-full h-2 bg-slate-200 rounded-lg appearance-none cursor-pointer accent-emerald-700"
+                      className="w-full h-2 bg-slate-200 rounded-lg appearance-none cursor-pointer accent-[#16805B]"
                     />
                     <div className="flex justify-between text-[10px] text-slate-400 font-semibold">
                       <span>₹300/hr</span>
@@ -569,7 +606,7 @@ export default function TeacherLandingPage() {
                       <label className="text-xs font-bold text-slate-700 uppercase tracking-wider">
                         Live Teaching Hours / Week
                       </label>
-                      <span className="text-base font-black text-emerald-800">{hoursPerWeek} hrs/wk</span>
+                      <span className="text-base font-black text-[#0D5C41]">{hoursPerWeek} hrs/wk</span>
                     </div>
                     <input
                       type="range"
@@ -578,7 +615,7 @@ export default function TeacherLandingPage() {
                       step={1}
                       value={hoursPerWeek}
                       onChange={(e) => setHoursPerWeek(Number(e.target.value))}
-                      className="w-full h-2 bg-slate-200 rounded-lg appearance-none cursor-pointer accent-emerald-700"
+                      className="w-full h-2 bg-slate-200 rounded-lg appearance-none cursor-pointer accent-[#16805B]"
                     />
                     <div className="flex justify-between text-[10px] text-slate-400 font-semibold">
                       <span>2 hrs</span>
@@ -593,7 +630,7 @@ export default function TeacherLandingPage() {
                       <label className="text-xs font-bold text-slate-700 uppercase tracking-wider">
                         Course Enrollments / Month
                       </label>
-                      <span className="text-base font-black text-emerald-800">{coursesSoldPerMonth} sales</span>
+                      <span className="text-base font-black text-[#0D5C41]">{coursesSoldPerMonth} sales</span>
                     </div>
                     <input
                       type="range"
@@ -602,7 +639,7 @@ export default function TeacherLandingPage() {
                       step={1}
                       value={coursesSoldPerMonth}
                       onChange={(e) => setCoursesSoldPerMonth(Number(e.target.value))}
-                      className="w-full h-2 bg-slate-200 rounded-lg appearance-none cursor-pointer accent-emerald-700"
+                      className="w-full h-2 bg-slate-200 rounded-lg appearance-none cursor-pointer accent-[#16805B]"
                     />
                     <div className="flex justify-between text-[10px] text-slate-400 font-semibold">
                       <span>0</span>
@@ -613,25 +650,25 @@ export default function TeacherLandingPage() {
                 </div>
 
                 {/* Right: Projected Breakdown Card */}
-                <div className="p-7 rounded-3xl bg-gradient-to-br from-[#064E3B] via-[#0B4F4B] to-[#022C22] text-white flex flex-col justify-between space-y-6 shadow-xl">
+                <div className="p-7 rounded-3xl bg-gradient-to-br from-[#0D5C41] via-[#16805B] to-[#083827] text-white flex flex-col justify-between space-y-6 shadow-xl">
                   <div className="space-y-2">
-                    <span className="text-[10px] font-extrabold uppercase tracking-widest text-emerald-200">
+                    <span className="text-[10px] font-extrabold uppercase tracking-widest text-[#A7F3D0]">
                       Estimated Gross Monthly Revenue
                     </span>
                     <div className="text-4xl sm:text-5xl font-black text-white">
                       {formatCurrency(totalEstimatedMonthly)}
                     </div>
-                    <p className="text-xs text-emerald-200 leading-relaxed pt-1">
+                    <p className="text-xs text-[#A7F3D0] leading-relaxed pt-1">
                       Based on {hoursPerWeek} hrs/week live classes + {coursesSoldPerMonth} monthly course enrollments.
                     </p>
                   </div>
 
-                  <div className="space-y-2 pt-4 border-t border-emerald-700/60 text-xs">
-                    <div className="flex items-center justify-between text-emerald-200">
+                  <div className="space-y-2 pt-4 border-t border-[#35A979]/30 text-xs">
+                    <div className="flex items-center justify-between text-[#A7F3D0]">
                       <span>Live Tutoring Income:</span>
                       <span className="font-bold text-white">{formatCurrency(Math.round(liveIncome))}</span>
                     </div>
-                    <div className="flex items-center justify-between text-emerald-200">
+                    <div className="flex items-center justify-between text-[#A7F3D0]">
                       <span>Recorded Course Income:</span>
                       <span className="font-bold text-white">{formatCurrency(Math.round(courseIncome))}</span>
                     </div>
@@ -673,13 +710,13 @@ export default function TeacherLandingPage() {
                 return (
                   <div
                     key={idx}
-                    className="p-6 rounded-3xl bg-slate-50 border border-slate-200 hover:border-emerald-400 hover:shadow-lg transition-all space-y-4 relative flex flex-col justify-between"
+                    className="p-6 rounded-3xl bg-slate-50 border border-slate-200 hover:border-[#35A979] hover:shadow-lg transition-all space-y-4 relative flex flex-col justify-between"
                   >
                     <div className="space-y-3">
                       <div className="flex items-center justify-between">
-                        <span className="text-2xl font-black text-emerald-600/40">{s.step}</span>
-                        <div className="p-2.5 rounded-xl bg-emerald-100 text-emerald-800">
-                          <IconComp className="h-5 w-5" />
+                        <span className="text-2xl font-black text-[#16805B]/40">{s.step}</span>
+                        <div className="p-2.5 rounded-xl bg-[#F0FAF5] text-[#0D5C41] border border-[#A7F3D0]">
+                          <IconComp className="h-5 w-5 text-[#16805B]" />
                         </div>
                       </div>
                       <h3 className="text-base font-black text-slate-900">{s.title}</h3>
@@ -713,12 +750,12 @@ export default function TeacherLandingPage() {
                 return (
                   <GlassCard
                     key={idx}
-                    className="p-7 rounded-3xl border border-slate-200 bg-white hover:border-emerald-400 hover:shadow-xl transition-all flex flex-col justify-between space-y-4"
+                    className="p-7 rounded-3xl border border-slate-200 bg-white hover:border-[#35A979] hover:shadow-xl transition-all flex flex-col justify-between space-y-4"
                   >
                     <div className="space-y-3">
                       <div className="flex items-center justify-between">
-                        <div className="p-3 bg-emerald-100 text-emerald-800 rounded-2xl w-fit">
-                          <IconComp className="h-6 w-6" />
+                        <div className="p-3 bg-[#F0FAF5] text-[#0D5C41] border border-[#A7F3D0] rounded-2xl w-fit">
+                          <IconComp className="h-6 w-6 text-[#16805B]" />
                         </div>
                         <span className="text-[10px] font-extrabold uppercase px-2.5 py-1 rounded-full bg-slate-100 text-slate-700">
                           {b.badge}
@@ -735,7 +772,63 @@ export default function TeacherLandingPage() {
         </section>
 
         {/* ========================================================================= */}
-        {/* 6. TEACHER FAQ ACCORDION */}
+        {/* 6. EDUCATOR SUCCESS STORIES */}
+        {/* ========================================================================= */}
+        <section className="py-20 bg-slate-50 border-b border-slate-200">
+          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 space-y-12">
+            <div className="text-center max-w-2xl mx-auto space-y-3">
+              <GlassBadge variant="educator">PROVEN EDUCATOR SUCCESS</GlassBadge>
+              <h2 className="text-3xl sm:text-4xl font-black text-slate-900 tracking-tight">
+                Join Top Educators Earning on EduConnects
+              </h2>
+              <p className="text-sm text-slate-600 leading-relaxed">
+                See how independent educators across India are building thriving online teaching careers with complete curriculum autonomy.
+              </p>
+            </div>
+
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+              {teacherTestimonials.map((t, idx) => (
+                <GlassCard
+                  key={idx}
+                  className="p-7 rounded-3xl border border-slate-200 bg-white shadow-md hover:shadow-xl transition-all duration-300 flex flex-col justify-between"
+                >
+                  <div className="space-y-4">
+                    {/* Star Rating */}
+                    <div className="flex items-center gap-1 text-amber-500">
+                      {[...Array(t.rating)].map((_, i) => (
+                        <Star key={i} className="w-4 h-4 fill-amber-400 stroke-amber-400" />
+                      ))}
+                    </div>
+
+                    <p className="text-xs sm:text-sm text-slate-700 italic leading-relaxed">
+                      &ldquo;{t.quote}&rdquo;
+                    </p>
+
+                    <div className="px-3 py-1.5 rounded-xl bg-[#F0FAF5] border border-[#A7F3D0] text-[#0D5C41] text-xs font-bold w-fit">
+                      🎯 {t.achievement}
+                    </div>
+                  </div>
+
+                  <div className="pt-6 border-t border-slate-100 flex items-center gap-3 mt-4">
+                    <img
+                      src={t.avatar}
+                      alt={t.name}
+                      className="w-11 h-11 rounded-full object-cover ring-2 ring-[#16805B]/30"
+                    />
+                    <div>
+                      <div className="text-xs font-extrabold text-slate-900">{t.name}</div>
+                      <div className="text-[10px] text-slate-500">{t.role} • {t.location}</div>
+                      <div className="text-[10px] text-[#0D5C41] font-semibold">{t.subjects}</div>
+                    </div>
+                  </div>
+                </GlassCard>
+              ))}
+            </div>
+          </div>
+        </section>
+
+        {/* ========================================================================= */}
+        {/* 7. TEACHER FAQ ACCORDION */}
         {/* ========================================================================= */}
         <section id="faq" className="py-20 lg:py-28 bg-white">
           <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 space-y-12">
@@ -759,12 +852,12 @@ export default function TeacherLandingPage() {
                   >
                     <button
                       onClick={() => setOpenFaqIndex(isOpen ? null : idx)}
-                      className="w-full p-5 text-left flex items-center justify-between gap-4 font-bold text-sm sm:text-base text-slate-900 hover:text-emerald-800 transition-colors"
+                      className="w-full p-5 text-left flex items-center justify-between gap-4 font-bold text-sm sm:text-base text-slate-900 hover:text-[#16805B] transition-colors"
                     >
                       <span>{faq.question}</span>
                       <ChevronDown
                         className={`w-5 h-5 text-slate-500 shrink-0 transition-transform duration-300 ${
-                          isOpen ? "rotate-180 text-emerald-800" : ""
+                          isOpen ? "rotate-180 text-[#16805B]" : ""
                         }`}
                       />
                     </button>
@@ -781,11 +874,11 @@ export default function TeacherLandingPage() {
         </section>
 
         {/* ========================================================================= */}
-        {/* 7. FINAL CALL TO ACTION */}
+        {/* 8. FINAL CALL TO ACTION */}
         {/* ========================================================================= */}
-        <section className="py-20 bg-gradient-to-br from-[#064E3B] via-[#0B4F4B] to-[#022C22] text-white relative overflow-hidden">
+        <section className="py-20 bg-gradient-to-br from-[#0D5C41] via-[#16805B] to-[#083827] text-white relative overflow-hidden">
           <div className="max-w-5xl mx-auto px-4 sm:px-6 text-center space-y-6 relative z-10">
-            <span className="px-3.5 py-1.5 rounded-full bg-emerald-800/50 backdrop-blur-md text-emerald-200 text-xs font-bold uppercase tracking-wider border border-emerald-500/30">
+            <span className="px-3.5 py-1.5 rounded-full bg-[#0D5C41]/50 backdrop-blur-md text-[#A7F3D0] text-xs font-bold uppercase tracking-wider border border-[#35A979]/40">
               Join EduConnects Educator Network
             </span>
 
@@ -793,7 +886,7 @@ export default function TeacherLandingPage() {
               Ready to Inspire as an Educator?
             </h2>
 
-            <p className="text-sm sm:text-base text-emerald-100 max-w-xl mx-auto font-medium">
+            <p className="text-sm sm:text-base text-[#F0FAF5] max-w-xl mx-auto font-medium">
               Create your profile, submit your verification documents, and start earning by teaching learners across India and beyond.
             </p>
 
@@ -820,7 +913,7 @@ export default function TeacherLandingPage() {
               </Link>
             </div>
 
-            <div className="pt-6 flex items-center justify-center gap-6 text-xs text-emerald-200">
+            <div className="pt-6 flex items-center justify-center gap-6 text-xs text-[#A7F3D0]">
               <span>✓ Free application</span>
               <span>•</span>
               <span>✓ Verified Educator Badge</span>

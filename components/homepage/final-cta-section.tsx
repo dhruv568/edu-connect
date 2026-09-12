@@ -7,12 +7,12 @@ import { GlassButton } from "@/components/glass/glass-button";
 
 export function FinalCtaSection() {
   return (
-    <section className="py-20 lg:py-24 bg-[#0B4F4B] text-white border-b border-[#073F3C] font-sans relative overflow-hidden">
+    <section className="py-20 lg:py-24 bg-[#0F5C5A] text-white border-b border-[#083F3D] font-sans relative overflow-hidden">
       {/* Background Subtle Accent Glow */}
       <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-3/4 h-64 bg-[#F2C14E]/10 blur-3xl rounded-full pointer-events-none" />
 
       <div className="max-w-4xl mx-auto px-4 sm:px-6 text-center space-y-6 relative z-10">
-        <span className="px-3.5 py-1.5 rounded-full bg-[#E6F0EF] text-[#0B4F4B] text-xs font-black uppercase tracking-wider">
+        <span className="px-3.5 py-1.5 rounded-full bg-[#E6F0EF] text-[#0F5C5A] text-xs font-black uppercase tracking-wider">
           TAKE YOUR NEXT STEP
         </span>
 

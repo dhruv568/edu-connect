@@ -4,9 +4,34 @@
 
 @layer base {
   :root {
-    --primary: #0B4F4B;
-    --primary-dark: #073F3C;
-    --primary-light: #1B6863;
+    /* 1. Main Home Experience Theme (Deep Teal) */
+    --home-primary: #0F5C5A;
+    --home-primary-dark: #083F3D;
+    --home-accent: #2A8C84;
+    --home-background: #F2FAF8;
+    --home-tint: #E6F0EF;
+    --home-border: #DCE5E4;
+
+    /* 2. Learner Experience Theme (Royal Blue / Indigo) */
+    --learner-primary: #3157D5;
+    --learner-primary-dark: #243B9B;
+    --learner-accent: #667EEA;
+    --learner-background: #F3F6FF;
+    --learner-tint: #EFF6FF;
+    --learner-border: #BFDBFE;
+
+    /* 3. Educator Experience Theme (Emerald / Forest Green) */
+    --educator-primary: #16805B;
+    --educator-primary-dark: #0D5C41;
+    --educator-accent: #35A979;
+    --educator-background: #F0FAF5;
+    --educator-tint: #DCFCE7;
+    --educator-border: #A7F3D0;
+
+    /* Base Fallbacks */
+    --primary: #0F5C5A;
+    --primary-dark: #083F3D;
+    --primary-light: #2A8C84;
 
     --accent: #F2C14E;
 
@@ -19,6 +44,33 @@
 
     --border: #DCE5E4;
     --radius: 1.25rem;
+  }
+
+  [data-theme="home"] {
+    --theme-primary: var(--home-primary);
+    --theme-primary-dark: var(--home-primary-dark);
+    --theme-accent: var(--home-accent);
+    --theme-background: var(--home-background);
+    --theme-tint: var(--home-tint);
+    --theme-border: var(--home-border);
+  }
+
+  [data-theme="learner"] {
+    --theme-primary: var(--learner-primary);
+    --theme-primary-dark: var(--learner-primary-dark);
+    --theme-accent: var(--learner-accent);
+    --theme-background: var(--learner-background);
+    --theme-tint: var(--learner-tint);
+    --theme-border: var(--learner-border);
+  }
+
+  [data-theme="educator"] {
+    --theme-primary: var(--educator-primary);
+    --theme-primary-dark: var(--educator-primary-dark);
+    --theme-accent: var(--educator-accent);
+    --theme-background: var(--educator-background);
+    --theme-tint: var(--educator-tint);
+    --theme-border: var(--educator-border);
   }
 
   body {
