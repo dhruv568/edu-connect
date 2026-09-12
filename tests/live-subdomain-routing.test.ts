@@ -64,7 +64,18 @@ async function testLiveSubdomainRouting() {
   }
   console.log("✅ educonnects.co.in/ serves main homepage without rewrite");
 
-  // 6. Test Request to students.educonnects.co.in/
+  // 6. Test Request to learners.educonnects.co.in/
+  const reqLearnerRoot = new NextRequest("https://learners.educonnects.co.in/", {
+    headers: { host: "learners.educonnects.co.in" },
+  });
+  const resLearnerRoot = middleware(reqLearnerRoot);
+  const rewriteLearner = resLearnerRoot?.headers.get("x-middleware-rewrite");
+  if (!rewriteLearner || !rewriteLearner.endsWith("/student")) {
+    throw new Error(`Expected learners.educonnects.co.in to rewrite to /student, got: ${rewriteLearner}`);
+  }
+  console.log("✅ learners.educonnects.co.in/ correctly rewrites to /student");
+
+  // 6b. Test Request to students.educonnects.co.in/ (backward compatibility)
   const reqStudentRoot = new NextRequest("https://students.educonnects.co.in/", {
     headers: { host: "students.educonnects.co.in" },
   });

@@ -2,11 +2,11 @@ import type { Metadata } from "next";
 import React from "react";
 
 export const metadata: Metadata = {
-  title: "EduConnects for Students",
+  title: "EduConnects for Learners",
   description:
     "Connect with verified top-tier educators, join interactive live video classrooms with real-time digital whiteboards, and master structured self-paced courses on EduConnects.",
   alternates: {
-    canonical: "https://students.educonnects.co.in/",
+    canonical: "https://learners.educonnects.co.in/",
   },
 };
 

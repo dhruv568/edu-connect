@@ -26,8 +26,11 @@ export function middleware(request: NextRequest) {
     cleanHost.startsWith("live.") ||
     cleanHost === "live.educonnects.co.in";
   const isStudentSubdomain =
+    cleanHost.startsWith("learners.") ||
+    cleanHost.startsWith("learner.") ||
     cleanHost.startsWith("students.") ||
     cleanHost.startsWith("student.") ||
+    cleanHost === "learners.educonnects.co.in" ||
     cleanHost === "students.educonnects.co.in";
   const isEducatorSubdomain =
     cleanHost.startsWith("educators.") ||
@@ -37,7 +40,9 @@ export function middleware(request: NextRequest) {
     cleanHost === "educators.educonnects.co.in";
 
   const studentDomainUrl =
-    process.env.NEXT_PUBLIC_STUDENT_DOMAIN || "https://students.educonnects.co.in";
+    process.env.NEXT_PUBLIC_STUDENT_DOMAIN ||
+    process.env.NEXT_PUBLIC_LEARNER_DOMAIN ||
+    "https://learners.educonnects.co.in";
   const educatorDomainUrl =
     process.env.NEXT_PUBLIC_EDUCATOR_DOMAIN || "https://educators.educonnects.co.in";
 

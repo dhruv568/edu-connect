@@ -50,7 +50,7 @@ export function HeroSection() {
 
             {/* Main Heading */}
             <h1 className="text-4xl sm:text-5xl lg:text-6xl font-black text-[#102A2A] tracking-tight leading-[1.15]">
-              Find the right educator. <br />
+              Find the right educators. <br />
               <span className="text-[#0B4F4B]">Unlock your potential.</span>
             </h1>
 

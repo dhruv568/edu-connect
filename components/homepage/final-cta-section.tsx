@@ -21,7 +21,7 @@ export function FinalCtaSection() {
         </h2>
 
         <p className="text-base sm:text-lg text-teal-100/90 max-w-xl mx-auto font-normal leading-relaxed">
-          Find the right educator, explore courses and discover new ways to grow with EduConnects.
+          Find the right educators, explore courses and discover new ways to grow with EduConnects.
         </p>
 
         <div className="pt-4 flex flex-col sm:flex-row items-center justify-center gap-4">

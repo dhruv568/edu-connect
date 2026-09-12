@@ -48,11 +48,21 @@ export function getMainDomain(): string {
 }
 
 /**
- * Resolves the Student subdomain URL (e.g. https://students.educonnects.co.in).
+ * Resolves the Learner/Student subdomain URL (e.g. https://learners.educonnects.co.in).
  */
 export function getStudentDomain(): string {
-  const envUrl = process.env.NEXT_PUBLIC_STUDENT_DOMAIN || "https://students.educonnects.co.in";
+  const envUrl =
+    process.env.NEXT_PUBLIC_STUDENT_DOMAIN ||
+    process.env.NEXT_PUBLIC_LEARNER_DOMAIN ||
+    "https://learners.educonnects.co.in";
   return envUrl.trim().replace(/\/+$/, "");
+}
+
+/**
+ * Resolves the canonical Learner subdomain URL.
+ */
+export function getLearnerDomain(): string {
+  return getStudentDomain();
 }
 
 /**
