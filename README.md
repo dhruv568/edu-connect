@@ -116,7 +116,7 @@ npm run db:seed
 ```
 
 **Seeded Credentials (Password for all: `Password123!`):**
-- **Admin**: `admin@educonnects.com`
+- **Admin**: `educonnets.com@gmail.com`
 - **Teacher**: `teacher@educonnects.com`
 - **Student**: `student@educonnects.com`
 - **Parent**: `parent@educonnects.com`

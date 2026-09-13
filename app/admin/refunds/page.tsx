@@ -93,7 +93,7 @@ export default function AdminRefundsPage() {
   };
 
   return (
-    <DashboardLayout role="ADMIN" userName="System Administrator" userEmail="admin@educonnects.com">
+    <DashboardLayout role="ADMIN" userName="System Administrator" userEmail="educonnets.com@gmail.com">
       <div className="space-y-6 pb-16">
         <div>
           <BackButton

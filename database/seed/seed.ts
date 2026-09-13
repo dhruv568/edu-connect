@@ -7,7 +7,39 @@ const prisma = new PrismaClient();
 async function main() {
   console.log("🌱 Starting EduConnects Database Seeding for Module 04...");
 
-  // Clean existing data
+  // Check for existing primary admin user
+  let existingAdmin = await prisma.user.findFirst({
+    where: {
+      OR: [
+        { email: "educonnets.com@gmail.com" },
+        { email: "admin@educonnects.com" },
+        { email: "admin@educonnect.com" },
+        {
+          role: "ADMIN",
+          profile: {
+            firstName: "System",
+            lastName: "Administrator",
+          },
+        },
+      ],
+    },
+    include: {
+      profile: true,
+    },
+  });
+
+  // Check for existing real educator Neeraj Shrivastava (myprofunnels@gmail.com)
+  let existingRealEducator = await prisma.user.findUnique({
+    where: { email: "myprofunnels@gmail.com" },
+    include: {
+      profile: true,
+      teacherProfile: true,
+    },
+  });
+
+  const preservedUserIds = [existingAdmin?.id, existingRealEducator?.id].filter(Boolean) as string[];
+
+  // Clean existing data while preserving admin user and real educator
   await prisma.classroomFile.deleteMany();
   await prisma.classroomMessage.deleteMany();
   await prisma.classAttendance.deleteMany();
@@ -20,33 +52,111 @@ async function main() {
   await prisma.teacherCertificate.deleteMany();
   await prisma.teacherQualification.deleteMany();
   await prisma.course.deleteMany();
-  await prisma.emailVerification.deleteMany();
+  await prisma.emailVerification.deleteMany({
+    where: preservedUserIds.length > 0 ? { userId: { notIn: preservedUserIds } } : {},
+  });
   await prisma.studentProfile.deleteMany();
-  await prisma.teacherProfile.deleteMany();
-  await prisma.profile.deleteMany();
-  await prisma.user.deleteMany();
+  await prisma.teacherProfile.deleteMany({
+    where: existingRealEducator?.teacherProfile?.id ? { id: { not: existingRealEducator.teacherProfile.id } } : {},
+  });
+  if (preservedUserIds.length > 0) {
+    await prisma.profile.deleteMany({
+      where: { userId: { notIn: preservedUserIds } },
+    });
+    await prisma.user.deleteMany({
+      where: { id: { notIn: preservedUserIds } },
+    });
+  } else {
+    await prisma.profile.deleteMany();
+    await prisma.user.deleteMany();
+  }
 
   const defaultPasswordHash = await bcrypt.hash("Password123!", 10);
   const now = new Date();
 
-  // 1. Seed Admin User
-  const admin = await prisma.user.create({
-    data: {
-      email: "admin@educonnects.com",
-      passwordHash: defaultPasswordHash,
-      role: "ADMIN",
-      emailVerified: true,
-      emailVerifiedAt: now,
-      profile: {
-        create: {
+  // 1. Seed or Update Admin User (Idempotent)
+  let admin: any;
+  if (existingAdmin) {
+    admin = await prisma.user.update({
+      where: { id: existingAdmin.id },
+      data: {
+        email: "educonnets.com@gmail.com",
+        role: "ADMIN",
+        emailVerified: true,
+      },
+      include: { profile: true },
+    });
+    if (!admin.profile) {
+      await prisma.profile.create({
+        data: {
+          userId: admin.id,
           firstName: "System",
           lastName: "Administrator",
           bio: "EduConnects Governance & Platform Administrator",
         },
+      });
+    }
+    console.log(`✅ Existing Admin Preserved & Updated: ${admin.email}`);
+  } else {
+    admin = await prisma.user.create({
+      data: {
+        email: "educonnets.com@gmail.com",
+        passwordHash: defaultPasswordHash,
+        role: "ADMIN",
+        emailVerified: true,
+        emailVerifiedAt: now,
+        profile: {
+          create: {
+            firstName: "System",
+            lastName: "Administrator",
+            bio: "EduConnects Governance & Platform Administrator",
+          },
+        },
+      },
+      include: { profile: true },
+    });
+    console.log(`✅ Admin Created: ${admin.email}`);
+  }
+
+  // 1b. Ensure Real Educator Account (Neeraj Shrivastava / myprofunnels@gmail.com) exists
+  const realEducator = await prisma.user.upsert({
+    where: { email: "myprofunnels@gmail.com" },
+    update: {
+      role: "TEACHER",
+      emailVerified: true,
+    },
+    create: {
+      email: "myprofunnels@gmail.com",
+      passwordHash: defaultPasswordHash,
+      role: "TEACHER",
+      emailVerified: true,
+      emailVerifiedAt: now,
+      profile: {
+        create: {
+          firstName: "Neeraj",
+          lastName: "Shrivastava",
+          bio: "Senior Physics & Mathematics Faculty and Platform Educator.",
+          avatarUrl: "/images/educators/educator_01.jpg",
+          phone: "+91 98200 12345",
+        },
+      },
+      teacherProfile: {
+        create: {
+          headline: "Senior STEM Faculty & Competitive Exam Specialist",
+          subjects: "Physics, Mathematics, Calculus",
+          experienceYears: 16,
+          hourlyRate: 850.0,
+          languages: "English, Hindi",
+          teachingMode: "BOTH",
+          verificationStatus: "VERIFIED",
+          verifiedAt: now,
+          isSeededProfile: false,
+        },
       },
     },
+    include: { teacherProfile: true },
   });
-  console.log(`✅ Admin Created: ${admin.email}`);
+  console.log(`✅ Real Educator Preserved/Created: ${realEducator.email}`);
 
   // 2. Seed Verified Teacher 1: Ananya Sharma (Mathematics)
   const teacher1 = await prisma.user.create({
