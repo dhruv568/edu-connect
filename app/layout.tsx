@@ -4,6 +4,7 @@ import { Inter } from "next/font/google";
 import "./globals.css";
 import { ToastProvider } from "@/components/ui/toast";
 import { NavigationHistoryTracker } from "@/components/providers/navigation-history-tracker";
+import { AIAssistantProvider } from "@/components/ai/ai-assistant-provider";
 
 const inter = Inter({ subsets: ["latin"] });
 
@@ -26,6 +27,7 @@ export default function RootLayout({
       <body className={`${inter.className} min-h-screen flex flex-col bg-slate-50 text-slate-900 overflow-x-hidden`}>
         <NavigationHistoryTracker />
         <ToastProvider>{children}</ToastProvider>
+        <AIAssistantProvider />
       </body>
     </html>
   );

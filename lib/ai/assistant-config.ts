@@ -1,0 +1,196 @@
+import { AssistantRole } from "@/services/ai-service";
+export type { AssistantRole };
+
+/**
+ * Check if the AI Assistant should be hidden on the specified pathname.
+ * Must NOT interfere with:
+ * - LiveKit classroom controls
+ * - payment checkout
+ * - critical authentication/OTP forms
+ */
+export function isAiAssistantExcluded(pathname: string): boolean {
+  if (!pathname) return false;
+  const clean = pathname.toLowerCase().trim();
+
+  // Classroom controls
+  if (clean.startsWith("/classroom") || clean.startsWith("/live/session")) {
+    return true;
+  }
+
+  // Payment checkout
+  if (clean.includes("/checkout") || clean === "/payment/checkout" || clean.startsWith("/payment/checkout/")) {
+    return true;
+  }
+
+  // Critical authentication & OTP forms
+  const authRoutes = [
+    "/login",
+    "/register",
+    "/student/login",
+    "/student/register",
+    "/teacher/login",
+    "/teacher/register",
+    "/admin/login",
+    "/staff/login",
+    "/staff/register",
+    "/register/student",
+    "/register/teacher",
+    "/forgot-password",
+    "/reset-password",
+    "/verify-email",
+    "/verify-otp",
+  ];
+
+  for (const route of authRoutes) {
+    if (clean === route || clean.startsWith(`${route}/`)) {
+      return true;
+    }
+  }
+
+  return false;
+}
+
+/**
+ * Determine default section theme based on current pathname and role
+ */
+export function getSectionTheme(pathname: string, role: AssistantRole): "home" | "learner" | "educator" | "admin" {
+  const p = pathname.toLowerCase();
+  if (p.startsWith("/admin") || role === "ADMIN") return "admin";
+  if (p.startsWith("/teacher") || role === "EDUCATOR") return "educator";
+  if (p.startsWith("/student") || role === "LEARNER") return "learner";
+  return "home";
+}
+
+/**
+ * Theme visual configurations conforming to EduConnects design system
+ */
+export interface ThemeConfig {
+  name: string;
+  headerBg: string;
+  headerText: string;
+  accentBg: string;
+  accentHover: string;
+  accentText: string;
+  bubbleAiBg: string;
+  bubbleAiBorder: string;
+  bubbleUserBg: string;
+  bubbleUserText: string;
+  floatingButtonBg: string;
+  badgeBg: string;
+  borderColor: string;
+  pillBg: string;
+  pillBorder: string;
+  pillText: string;
+}
+
+export const THEMES: Record<"home" | "learner" | "educator" | "admin", ThemeConfig> = {
+  home: {
+    name: "Deep Teal",
+    headerBg: "bg-gradient-to-r from-[#0B4F4B] to-[#0F5C5A]",
+    headerText: "text-white",
+    accentBg: "bg-[#0F5C5A]",
+    accentHover: "hover:bg-[#083F3D]",
+    accentText: "text-white",
+    bubbleAiBg: "bg-white text-slate-800",
+    bubbleAiBorder: "border-[#DCE5E4]",
+    bubbleUserBg: "bg-[#0F5C5A]",
+    bubbleUserText: "text-white",
+    floatingButtonBg: "bg-[#0F5C5A] hover:bg-[#083F3D] text-white shadow-teal-900/30",
+    badgeBg: "bg-[#F2C14E] text-[#102A2A]",
+    borderColor: "border-[#DCE5E4]",
+    pillBg: "bg-[#F0F7F6] hover:bg-[#DCE5E4]",
+    pillBorder: "border-[#DCE5E4]",
+    pillText: "text-[#0F5C5A]",
+  },
+  learner: {
+    name: "Blue / Indigo",
+    headerBg: "bg-gradient-to-r from-[#243B9B] to-[#3157D5]",
+    headerText: "text-white",
+    accentBg: "bg-[#3157D5]",
+    accentHover: "hover:bg-[#243B9B]",
+    accentText: "text-white",
+    bubbleAiBg: "bg-white text-slate-800",
+    bubbleAiBorder: "border-[#BFDBFE]",
+    bubbleUserBg: "bg-[#3157D5]",
+    bubbleUserText: "text-white",
+    floatingButtonBg: "bg-[#3157D5] hover:bg-[#243B9B] text-white shadow-blue-900/30",
+    badgeBg: "bg-[#667EEA] text-white",
+    borderColor: "border-[#BFDBFE]",
+    pillBg: "bg-[#EFF6FF] hover:bg-[#DBEAFE]",
+    pillBorder: "border-[#BFDBFE]",
+    pillText: "text-[#243B9B]",
+  },
+  educator: {
+    name: "Emerald / Green",
+    headerBg: "bg-gradient-to-r from-[#0D5C41] to-[#16805B]",
+    headerText: "text-white",
+    accentBg: "bg-[#16805B]",
+    accentHover: "hover:bg-[#0D5C41]",
+    accentText: "text-white",
+    bubbleAiBg: "bg-white text-slate-800",
+    bubbleAiBorder: "border-[#A7F3D0]",
+    bubbleUserBg: "bg-[#16805B]",
+    bubbleUserText: "text-white",
+    floatingButtonBg: "bg-[#16805B] hover:bg-[#0D5C41] text-white shadow-emerald-900/30",
+    badgeBg: "bg-[#35A979] text-white",
+    borderColor: "border-[#A7F3D0]",
+    pillBg: "bg-[#F0FAF5] hover:bg-[#DCFCE7]",
+    pillBorder: "border-[#A7F3D0]",
+    pillText: "text-[#0D5C41]",
+  },
+  admin: {
+    name: "Admin Dark Teal",
+    headerBg: "bg-gradient-to-r from-[#072F2D] to-[#073F3C]",
+    headerText: "text-white",
+    accentBg: "bg-[#073F3C]",
+    accentHover: "hover:bg-[#052C2A]",
+    accentText: "text-white",
+    bubbleAiBg: "bg-white text-slate-800",
+    bubbleAiBorder: "border-slate-200",
+    bubbleUserBg: "bg-[#073F3C]",
+    bubbleUserText: "text-white",
+    floatingButtonBg: "bg-[#073F3C] hover:bg-[#052C2A] text-white shadow-slate-900/40",
+    badgeBg: "bg-amber-400 text-slate-900",
+    borderColor: "border-slate-200",
+    pillBg: "bg-[#F0F7F6] hover:bg-slate-200",
+    pillBorder: "border-slate-200",
+    pillText: "text-[#073F3C]",
+  },
+};
+
+/**
+ * Contextual Quick Questions by Role
+ */
+export const QUICK_QUESTIONS: Record<AssistantRole, string[]> = {
+  LEARNER: [
+    "Find an Educator",
+    "Find a Course",
+    "How do live classes work?",
+    "How do I book a trial?",
+    "How do I update my profile?",
+    "How do I contact support?",
+  ],
+  EDUCATOR: [
+    "How do I create a course?",
+    "How do I become verified?",
+    "How do I create a live class?",
+    "How do payouts work?",
+    "How do I update my profile?",
+    "How do I upload documents?",
+  ],
+  ADMIN: [
+    "Explain Admin Dashboard",
+    "Educator verification",
+    "User management",
+    "Live classes",
+    "Platform overview",
+  ],
+  guest: [
+    "What is EduConnects?",
+    "Find an Educator",
+    "Find Courses",
+    "How does EduConnects work?",
+    "Become an Educator",
+    "Contact Support",
+  ],
+};
