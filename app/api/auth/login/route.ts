@@ -10,6 +10,11 @@ import { UserRole, UserSession } from "@/types/auth";
 
 export async function POST(request: NextRequest) {
   try {
+    const rawHost =
+      request.headers.get("x-forwarded-host") ||
+      request.headers.get("x-original-host") ||
+      request.headers.get("host") ||
+      undefined;
     const body = await request.json();
     const validatedData = LoginSchema.parse(body);
 
@@ -21,7 +26,7 @@ export async function POST(request: NextRequest) {
       const result = await AuthService.verifyOTP(validatedData.email, validatedData.otp);
 
       if (result.user) {
-        await setSessionCookie(result.user);
+        await setSessionCookie(result.user, rawHost);
       }
 
       let redirectPath = result.redirectPath || "/";
@@ -92,7 +97,7 @@ export async function POST(request: NextRequest) {
       status: user.status,
     };
 
-    await setSessionCookie(userSession);
+    await setSessionCookie(userSession, rawHost);
 
     // Step 4: Determine canonical dashboard redirect strictly based on actual server/database role
     let redirectPath = "/";
