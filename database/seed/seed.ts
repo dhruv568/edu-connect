@@ -1,5 +1,6 @@
 import { PrismaClient } from "@prisma/client";
 import bcrypt from "bcryptjs";
+import { seedSyntheticEducators } from "./seed-synthetic-educators";
 
 const prisma = new PrismaClient();
 
@@ -47,7 +48,7 @@ async function main() {
   });
   console.log(`✅ Admin Created: ${admin.email}`);
 
-  // 2. Seed Verified Teacher 1: Sarah Jenkins (Mathematics)
+  // 2. Seed Verified Teacher 1: Ananya Sharma (Mathematics)
   const teacher1 = await prisma.user.create({
     data: {
       email: "teacher@educonnects.com",
@@ -57,11 +58,11 @@ async function main() {
       emailVerifiedAt: now,
       profile: {
         create: {
-          firstName: "Sarah",
-          lastName: "Jenkins",
+          firstName: "Ananya",
+          lastName: "Sharma",
           bio: "Experienced Mathematics & Physics Educator with 8+ years teaching experience.",
-          avatarUrl: "https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?w=150&auto=format&fit=crop&q=80",
-          phone: "+1 (555) 019-2834",
+          avatarUrl: "/images/educators/educator_02.jpg",
+          phone: "+91 98765 43210",
         },
       },
       teacherProfile: {
@@ -69,8 +70,8 @@ async function main() {
           headline: "Senior STEM Educator & Olympiad Coach",
           subjects: "Mathematics, Physics, Calculus",
           experienceYears: 8,
-          hourlyRate: 45.0,
-          languages: "English, Spanish",
+          hourlyRate: 750.0,
+          languages: "English, Hindi",
           teachingMode: "BOTH",
           verificationStatus: "VERIFIED",
           verifiedAt: now,
@@ -79,7 +80,7 @@ async function main() {
             create: [
               {
                 degree: "M.Sc. Mathematics",
-                institution: "MIT - Massachusetts Institute of Technology",
+                institution: "Indian Institute of Technology (IIT) Delhi",
                 year: 2018,
                 specialization: "Applied Calculus & Mechanics",
               },
@@ -89,7 +90,7 @@ async function main() {
             create: [
               {
                 name: "Certified STEM Lead Tutor",
-                issuer: "National Science Foundation",
+                issuer: "National Science Education Board",
                 issueDate: new Date("2020-05-15"),
               },
             ],
@@ -98,10 +99,10 @@ async function main() {
             create: [
               {
                 category: "IDENTITY",
-                fileName: "sarah_jenkins_passport.pdf",
+                fileName: "ananya_sharma_id.pdf",
                 fileType: "application/pdf",
                 fileSize: 450000,
-                storageKey: "seed_sarah_passport.pdf",
+                storageKey: "seed_ananya_id.pdf",
               },
             ],
           },
@@ -112,7 +113,7 @@ async function main() {
   });
   console.log(`✅ Verified Teacher Created: ${teacher1.email}`);
 
-  // 3. Seed Pending Teacher Applicant: Marcus Vance
+  // 3. Seed Pending Teacher Applicant: Rohan Deshmukh
   const pendingTeacher = await prisma.user.create({
     data: {
       email: "pending.teacher@educonnects.com",
@@ -122,11 +123,11 @@ async function main() {
       emailVerifiedAt: now,
       profile: {
         create: {
-          firstName: "Marcus",
-          lastName: "Vance",
+          firstName: "Rohan",
+          lastName: "Deshmukh",
           bio: "Passionate Computer Science instructor specializing in Python, Algorithms, and Web Development.",
-          avatarUrl: "https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=150&auto=format&fit=crop&q=80",
-          phone: "+1 (555) 482-9102",
+          avatarUrl: "/images/educators/educator_11.jpg",
+          phone: "+91 98765 12345",
         },
       },
       teacherProfile: {
@@ -134,8 +135,8 @@ async function main() {
           headline: "Computer Science Lecturer & Coding Mentor",
           subjects: "Computer Science, Programming, Python",
           experienceYears: 5,
-          hourlyRate: 50.0,
-          languages: "English",
+          hourlyRate: 650.0,
+          languages: "English, Marathi, Hindi",
           teachingMode: "ONLINE",
           verificationStatus: "PENDING",
           submittedAt: now,
@@ -333,7 +334,10 @@ async function main() {
     console.log(`✅ Live Class Session Created: ${session.id} (Room: ${session.roomId})`);
   }
 
-  console.log("\n🎉 EduConnects Module 06 Database Seeding Completed Successfully!");
+  // 9. Seed the 20 Indian synthetic educator profiles for public discovery
+  await seedSyntheticEducators();
+
+  console.log("\n🎉 EduConnects Database Seeding Completed Successfully!");
 }
 
 main()

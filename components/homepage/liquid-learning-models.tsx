@@ -44,8 +44,8 @@ export function LiquidLearningModels({ onOpenAuth }: LiquidLearningModelsProps) 
             <div className="flex items-center gap-3">
               <div className="relative shrink-0">
                 <img
-                  src="https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?w=100&auto=format&fit=crop&q=80"
-                  alt="Sarah Jenkins"
+                  src="/images/educators/educator_02.jpg"
+                  alt="Sunita Natarajan"
                   className="w-12 h-12 rounded-xl object-cover ring-2 ring-blue-400"
                 />
                 <div className="absolute -bottom-1 -right-1 w-4 h-4 rounded-full bg-emerald-500 border-2 border-slate-900 flex items-center justify-center">
@@ -53,7 +53,7 @@ export function LiquidLearningModels({ onOpenAuth }: LiquidLearningModelsProps) 
                 </div>
               </div>
               <div>
-                <h5 className="text-xs font-black text-white">Sarah Jenkins, M.Sc.</h5>
+                <h5 className="text-xs font-black text-white">Sunita Natarajan, M.Sc.</h5>
                 <p className="text-[10px] text-blue-300">Physics & Calculus Mentor</p>
                 <div className="flex items-center gap-1 mt-0.5 text-[10px] text-amber-300 font-bold">
                   ★ 4.95 (142 reviews)

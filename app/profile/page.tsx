@@ -10,6 +10,7 @@ import { Button } from "@/components/ui/button";
 import { User, Mail, ShieldCheck, Edit, CheckCircle2, Award } from "lucide-react";
 import { ProfileSkeleton } from "@/components/shared/loading-skeleton";
 import { BackButton } from "@/components/ui/back-button";
+import { ProfilePhotoUploader } from "@/components/profile/profile-photo-uploader";
 
 export default function UserProfilePage() {
   const [userData, setUserData] = useState<any | null>(null);
@@ -74,9 +75,17 @@ export default function UserProfilePage() {
         {/* Profile Header */}
         <Card className="p-8 space-y-6">
           <div className="flex flex-col md:flex-row items-center gap-6">
-            <div className="w-24 h-24 rounded-full bg-blue-600 text-white font-black flex items-center justify-center text-3xl shadow-md">
-              {userData.firstName ? userData.firstName.charAt(0) : "U"}
-            </div>
+            {userData.avatarUrl ? (
+              <img
+                src={userData.avatarUrl}
+                alt={userData.firstName}
+                className="w-24 h-24 rounded-2xl object-cover shadow-md ring-4 ring-blue-500/20 shrink-0"
+              />
+            ) : (
+              <div className="w-24 h-24 rounded-2xl bg-blue-600 text-white font-black flex items-center justify-center text-3xl shadow-md shrink-0">
+                {userData.firstName ? userData.firstName.charAt(0) : "U"}
+              </div>
+            )}
             <div className="space-y-2 text-center md:text-left">
               <div className="flex flex-wrap items-center justify-center md:justify-start gap-2">
                 <h2 className="text-xl font-bold text-slate-900">{userData.firstName} {userData.lastName}</h2>
@@ -90,6 +99,16 @@ export default function UserProfilePage() {
               </div>
             </div>
           </div>
+
+          {/* Profile Photo Uploader Section */}
+          <ProfilePhotoUploader
+            initialAvatarUrl={userData.avatarUrl}
+            userName={`${userData.firstName} ${userData.lastName}`.trim() || userData.email}
+            role={userData.role}
+            onAvatarUpdated={(newUrl) => {
+              setUserData((prev: any) => ({ ...prev, avatarUrl: newUrl }));
+            }}
+          />
 
           {/* Profile Completion Meter */}
           <div className="bg-slate-50 p-4 rounded-2xl border border-slate-100 space-y-2">

@@ -53,17 +53,21 @@ export async function GET(request: NextRequest, { params }: { params: { id: stri
       return apiError("Teacher profile not found", 404);
     }
 
+    const rawName = `${user.profile?.firstName || ''} ${user.profile?.lastName || ''}`.trim();
     const teacher = {
       id: user.id,
       teacherProfileId: user.teacherProfile.id,
-      name: `${user.profile?.firstName || ''} ${user.profile?.lastName || ''}`.trim() || user.email,
-      avatarUrl: user.profile?.avatarUrl || "https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?w=150&auto=format&fit=crop&q=80",
-      bio: user.profile?.bio || "Passionate educator dedicated to student success.",
+      name: rawName || "Educator",
+      avatarUrl: user.profile?.avatarUrl || "/images/educators/educator_01.jpg",
+      bio: user.profile?.bio || user.teacherProfile.bio || "Passionate educator dedicated to student success.",
       headline: user.teacherProfile.headline || "Senior Educator",
       subjects: user.teacherProfile.subjects ? user.teacherProfile.subjects.split(",").map((s) => s.trim()) : [],
       experienceYears: user.teacherProfile.experienceYears,
-      hourlyRate: user.teacherProfile.hourlyRate,
+      hourlyRate: user.teacherProfile.hourlyRate || 750.0,
       rating: user.teacherProfile.rating,
+      location: user.teacherProfile.location || "India",
+      languages: user.teacherProfile.languages || "English, Hindi",
+      teachingMode: user.teacherProfile.teachingMode || "ONLINE",
       verificationStatus: user.teacherProfile.verificationStatus,
       courses: user.teacherProfile.courses,
       liveClassSlots: user.teacherProfile.liveClassSlots.map((s) => ({

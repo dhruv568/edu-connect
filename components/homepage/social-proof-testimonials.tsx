@@ -53,9 +53,9 @@ export function SocialProofTestimonials({ onOpenAuth }: SocialProofTestimonialsP
       achievement: "170/180 in NEET Physics Section",
       achievementIcon: Award,
       rating: 5,
-      tutor: "Sarah Jenkins, M.Sc.",
+      tutor: "Dr. Vikramaditya Sen",
       quote:
-        "Booking a 1-on-1 demo first was the best decision. Sarah analyzed my weak areas in optics and created a custom roadmap. No other coaching gave me this level of focused personal attention.",
+        "Booking a 1-on-1 trial session first was the best decision. Dr. Vikramaditya analyzed my weak areas in mechanics and created a custom roadmap. No other platform gave me this level of focused personal attention.",
     },
     {
       id: 3,
@@ -68,7 +68,7 @@ export function SocialProofTestimonials({ onOpenAuth }: SocialProofTestimonialsP
       achievement: "Built 4 Full-Stack Projects",
       achievementIcon: Sparkles,
       rating: 5,
-      tutor: "Elena Rostova",
+      tutor: "Meenakshi Sundaram",
       quote:
         "The pre-recorded Python & Data Structures curriculum is unmatched. Every module comes with practical downloadable workbooks and auto-graded code challenges that solidified my understanding.",
     },

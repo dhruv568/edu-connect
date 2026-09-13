@@ -20,7 +20,19 @@ export async function GET(request: NextRequest) {
       where: {
         ...(!includeUnverified && {
           verificationStatus: "VERIFIED",
-          user: { emailVerified: true },
+          user: {
+            emailVerified: true,
+            NOT: [
+              { email: { startsWith: "teacher.lms." } },
+              { email: { startsWith: "teacher.mod9." } },
+              { email: { startsWith: "teacher.cf." } },
+              { email: { startsWith: "flow.teacher." } },
+              { email: { startsWith: "test.teacher." } },
+              { email: { startsWith: "pending.teacher." } },
+              { email: { startsWith: "rejected.teacher." } },
+              { email: { startsWith: "suspended.teacher." } },
+            ],
+          },
         }),
         ...(ratingMin !== undefined && { rating: { gte: ratingMin } }),
         ...(priceMax !== undefined && { hourlyRate: { lte: priceMax } }),
@@ -35,19 +47,23 @@ export async function GET(request: NextRequest) {
       },
     });
 
-    let results = teacherProfiles.map((tp) => ({
-      id: tp.user.id,
-      teacherProfileId: tp.id,
-      name: `${tp.user.profile?.firstName || ''} ${tp.user.profile?.lastName || ''}`.trim() || tp.user.email,
-      avatarUrl: tp.user.profile?.avatarUrl || "https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?w=150&auto=format&fit=crop&q=80",
-      bio: tp.user.profile?.bio,
-      headline: tp.headline || "Senior Educator",
-      subjects: tp.subjects ? tp.subjects.split(",").map((s) => s.trim()) : [],
-      experienceYears: tp.experienceYears,
-      hourlyRate: tp.hourlyRate || 40.0,
-      rating: tp.rating,
-      verificationStatus: tp.verificationStatus,
-    }));
+    let results = teacherProfiles.map((tp) => {
+      const rawName = `${tp.user.profile?.firstName || ''} ${tp.user.profile?.lastName || ''}`.trim();
+      return {
+        id: tp.user.id,
+        teacherProfileId: tp.id,
+        name: rawName || "Educator",
+        avatarUrl: tp.user.profile?.avatarUrl || "/images/educators/educator_01.jpg",
+        bio: tp.user.profile?.bio || tp.bio,
+        headline: tp.headline || "Senior Educator",
+        subjects: tp.subjects ? tp.subjects.split(",").map((s) => s.trim()) : [],
+        experienceYears: tp.experienceYears,
+        hourlyRate: tp.hourlyRate || 750.0,
+        rating: tp.rating,
+        location: tp.location || "India",
+        verificationStatus: tp.verificationStatus,
+      };
+    });
 
     // Client-side text filtering if search or subject filter passed
     if (search) {

@@ -9,11 +9,13 @@ import { Button } from "@/components/ui/button";
 import { useToast } from "@/components/ui/toast";
 import { Save, ArrowLeft } from "lucide-react";
 import { BackButton } from "@/components/ui/back-button";
+import { ProfilePhotoUploader } from "@/components/profile/profile-photo-uploader";
 import Link from "next/link";
 
 export default function ProfileEditPage() {
   const [firstName, setFirstName] = useState("");
   const [lastName, setLastName] = useState("");
+  const [avatarUrl, setAvatarUrl] = useState<string | null>(null);
   const [bio, setBio] = useState("");
   const [phone, setPhone] = useState("");
 
@@ -38,6 +40,7 @@ export default function ProfileEditPage() {
           setUserRole(u.role);
           setFirstName(u.firstName);
           setLastName(u.lastName);
+          setAvatarUrl(u.avatarUrl || null);
           setBio(u.bio || "");
           setPhone(u.phone || "");
 
@@ -65,6 +68,7 @@ export default function ProfileEditPage() {
         body: JSON.stringify({
           firstName,
           lastName,
+          avatarUrl,
           bio,
           phone,
           headline,
@@ -105,6 +109,14 @@ export default function ProfileEditPage() {
           />
           <h1 className="text-xl font-bold text-slate-900">Edit Profile</h1>
         </div>
+
+        {/* Profile Photo Uploader */}
+        <ProfilePhotoUploader
+          initialAvatarUrl={avatarUrl}
+          userName={`${firstName} ${lastName}`.trim() || "User"}
+          role={userRole}
+          onAvatarUpdated={(newUrl) => setAvatarUrl(newUrl)}
+        />
 
         <Card className="p-8 space-y-6">
           <form onSubmit={handleSave} className="space-y-4">

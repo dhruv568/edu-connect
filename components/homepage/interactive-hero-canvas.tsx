@@ -140,13 +140,13 @@ export function InteractiveHeroCanvas({ onOpenAuth }: InteractiveHeroCanvasProps
               >
                 <div className="flex items-center gap-3">
                   <img
-                    src="https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?w=120&auto=format&fit=crop&q=80"
-                    alt="Sarah Jenkins"
+                    src="/images/educators/educator_02.jpg"
+                    alt="Sunita Natarajan"
                     className="w-11 h-11 rounded-full object-cover ring-2 ring-indigo-500"
                   />
                   <div>
                     <h4 className="text-xs font-bold text-slate-900 group-hover:text-indigo-600 transition-colors">
-                      Sarah Jenkins
+                      Sunita Natarajan
                     </h4>
                     <p className="text-[11px] text-slate-500">Mathematics & STEM</p>
                   </div>

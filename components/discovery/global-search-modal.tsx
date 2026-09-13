@@ -97,7 +97,7 @@ export function GlobalSearchModal({ isOpen, onClose }: GlobalSearchModalProps) {
                   Quick Search Suggestions
                 </span>
                 <div className="flex flex-wrap justify-center gap-2 pt-2">
-                  {["Mathematics", "Physics", "Python", "Chemistry", "Sarah Jenkins"].map((s, idx) => (
+                  {["Mathematics", "Physics", "Python", "Chemistry", "Vikramaditya Sen"].map((s, idx) => (
                     <button
                       key={idx}
                       onClick={() => setQuery(s)}

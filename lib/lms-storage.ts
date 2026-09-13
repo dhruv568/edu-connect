@@ -150,3 +150,42 @@ export async function saveThumbnailFile(
   // Accessible via public route or storage URL
   return `/api/thumbnails/${randomKey}`;
 }
+
+const ALLOWED_AVATAR_MIME_TYPES = ["image/jpeg", "image/jpg", "image/png", "image/webp"];
+const ALLOWED_AVATAR_EXTENSIONS = [".jpg", ".jpeg", ".png", ".webp"];
+const MAX_AVATAR_SIZE_BYTES = 5 * 1024 * 1024; // 5MB
+
+export async function saveAvatarFile(
+  buffer: Buffer,
+  originalName: string,
+  mimeType: string
+): Promise<string> {
+  const cleanMime = (mimeType || "").split(";")[0].trim().toLowerCase();
+  const ext = path.extname(originalName).toLowerCase();
+
+  if (!ALLOWED_AVATAR_MIME_TYPES.includes(cleanMime)) {
+    throw new Error("Invalid image format. Supported formats: JPG, JPEG, PNG, WebP.");
+  }
+  if (ext && !ALLOWED_AVATAR_EXTENSIONS.includes(ext)) {
+    throw new Error("Invalid file extension. Only .jpg, .jpeg, .png, and .webp files are allowed.");
+  }
+  if (buffer.length > MAX_AVATAR_SIZE_BYTES) {
+    throw new Error("Image file size exceeds maximum limit of 5MB.");
+  }
+
+  ensureDirsExist();
+  const safeExt = ALLOWED_AVATAR_EXTENSIONS.includes(ext)
+    ? ext
+    : cleanMime === "image/png"
+    ? ".png"
+    : cleanMime === "image/webp"
+    ? ".webp"
+    : ".jpg";
+  const randomKey = `avatar_${crypto.randomUUID()}${safeExt}`;
+  const filePath = path.join(THUMBNAILS_DIR, randomKey);
+
+  await fs.promises.writeFile(filePath, buffer);
+
+  return `/api/thumbnails/${randomKey}`;
+}
+

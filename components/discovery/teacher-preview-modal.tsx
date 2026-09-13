@@ -1,8 +1,9 @@
 "use client";
 
 import React from "react";
+import Link from "next/link";
 import { motion, AnimatePresence } from "framer-motion";
-import { X, ShieldCheck, Star, Calendar, Clock, Award, BookOpen, ArrowRight } from "lucide-react";
+import { X, ShieldCheck, Star, MapPin, ExternalLink, ArrowRight } from "lucide-react";
 import { GlassBadge } from "@/components/glass/glass-badge";
 import { GlassButton } from "@/components/glass/glass-button";
 import { UserRole } from "@/types/auth";
@@ -30,28 +31,37 @@ export function TeacherPreviewModal({ teacher, isOpen, onClose, onOpenAuth }: Te
           {/* Close button */}
           <button
             onClick={onClose}
-            className="absolute top-5 right-5 text-slate-400 hover:text-slate-600 p-1.5 rounded-full hover:bg-slate-100"
+            className="absolute top-5 right-5 text-slate-400 hover:text-slate-600 p-1.5 rounded-full hover:bg-slate-100 cursor-pointer"
           >
             <X className="h-5 w-5" />
           </button>
 
           {/* Teacher Header */}
-          <div className="flex items-center gap-4">
+          <div className="flex items-start gap-4">
             <img
               src={teacher.avatarUrl}
               alt={teacher.name}
-              className="w-20 h-20 rounded-full object-cover ring-4 ring-blue-500/20"
+              className="w-20 h-20 rounded-2xl object-cover ring-2 ring-emerald-600/20 aspect-square shrink-0 shadow-sm"
+              onError={(e) => {
+                (e.target as HTMLImageElement).src = "/images/educators/educator_01.jpg";
+              }}
             />
-            <div>
+            <div className="min-w-0 flex-1">
               <div className="flex items-center gap-2">
-                <h2 className="text-xl font-bold text-slate-900">{teacher.name}</h2>
-                <GlassBadge variant="emerald" size="sm" className="flex items-center gap-1">
+                <h2 className="text-xl font-bold text-slate-900 truncate">{teacher.name}</h2>
+                <GlassBadge variant="emerald" size="sm" className="flex items-center gap-1 shrink-0">
                   <ShieldCheck className="h-3 w-3" /> Verified
                 </GlassBadge>
               </div>
-              <p className="text-xs font-bold text-blue-600 mt-0.5">{teacher.headline}</p>
-              <div className="flex items-center gap-2 text-xs text-slate-500 mt-1 font-semibold">
-                <span className="text-amber-500">★ {teacher.rating}</span>
+              <p className="text-xs font-bold text-emerald-700 mt-0.5">{teacher.headline}</p>
+              {teacher.location && (
+                <div className="flex items-center gap-1 text-xs text-slate-400 mt-0.5 font-medium">
+                  <MapPin className="h-3 w-3 shrink-0" />
+                  <span>{teacher.location}</span>
+                </div>
+              )}
+              <div className="flex items-center gap-2 text-xs text-slate-500 mt-1.5 font-semibold">
+                <span className="text-amber-500">★ {typeof teacher.rating === "number" ? teacher.rating.toFixed(2) : teacher.rating}</span>
                 <span>• {teacher.experienceYears} Years Exp</span>
                 <span>• {formatCurrency(teacher.hourlyRate)}/hr</span>
               </div>
@@ -70,7 +80,7 @@ export function TeacherPreviewModal({ teacher, isOpen, onClose, onOpenAuth }: Te
           <div className="space-y-1.5">
             <h4 className="text-xs font-bold text-slate-700 uppercase tracking-wider">Teaching Subjects</h4>
             <div className="flex flex-wrap gap-2">
-              {teacher.subjects.map((sub: string, idx: number) => (
+              {teacher.subjects && teacher.subjects.map((sub: string, idx: number) => (
                 <GlassBadge key={idx} variant="indigo" size="sm">
                   {sub}
                 </GlassBadge>
@@ -78,22 +88,29 @@ export function TeacherPreviewModal({ teacher, isOpen, onClose, onOpenAuth }: Te
             </div>
           </div>
 
-          {/* Demo Booking CTA */}
-          <div className="pt-4 border-t border-slate-100 flex flex-col sm:flex-row items-center justify-between gap-4">
-            <div>
-              <div className="text-xs text-slate-500 font-medium">Trial Session Rate</div>
-              <div className="text-lg font-black text-slate-900">{formatCurrency(teacher.hourlyRate)} / Session</div>
-            </div>
-            <GlassButton
-              variant="primary"
-              onClick={() => {
-                onClose();
-                onOpenAuth("STUDENT");
-              }}
-              rightIcon={<ArrowRight className="h-4 w-4" />}
+          {/* Action CTAs */}
+          <div className="pt-4 border-t border-slate-100 flex flex-col sm:flex-row items-center justify-between gap-3">
+            <Link
+              href={`/find-teachers/${teacher.id}`}
+              onClick={onClose}
+              className="text-xs font-bold text-emerald-700 hover:text-emerald-800 flex items-center gap-1"
             >
-              Book Introductory Demo
-            </GlassButton>
+              <ExternalLink className="h-3.5 w-3.5" />
+              <span>Open Full Profile Page</span>
+            </Link>
+
+            <div className="flex items-center gap-3 w-full sm:w-auto justify-end">
+              <GlassButton
+                variant="primary"
+                onClick={() => {
+                  onClose();
+                  onOpenAuth("STUDENT");
+                }}
+                rightIcon={<ArrowRight className="h-4 w-4" />}
+              >
+                Book Introductory Demo
+              </GlassButton>
+            </div>
           </div>
         </motion.div>
       </div>

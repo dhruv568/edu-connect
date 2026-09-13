@@ -13,6 +13,7 @@ import { DocumentViewerModal } from "@/components/shared/document-viewer-modal";
 import { BackButton } from "@/components/ui/back-button";
 import { QualificationItem, CertificateItem, DocumentItem, VerificationStatus } from "@/types/auth";
 import { formatCurrency } from "@/lib/currency";
+import { ProfilePhotoUploader } from "@/components/profile/profile-photo-uploader";
 import {
   CheckCircle2,
   User,
@@ -701,6 +702,16 @@ export default function TeacherOnboardingPage() {
                   <p className="text-xs text-slate-500">Provide your legal personal and contact information</p>
                 </div>
               </div>
+
+              {/* Profile Photo Upload */}
+              <ProfilePhotoUploader
+                initialAvatarUrl={personal.avatarUrl}
+                userName={`${personal.firstName} ${personal.lastName}`.trim() || "Educator"}
+                role="TEACHER"
+                onAvatarUpdated={(newUrl) => {
+                  setPersonal((prev) => ({ ...prev, avatarUrl: newUrl || "" }));
+                }}
+              />
 
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div>

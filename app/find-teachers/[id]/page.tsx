@@ -8,7 +8,7 @@ import { GlassCard } from "@/components/glass/glass-card";
 import { GlassBadge } from "@/components/glass/glass-badge";
 import { GlassButton } from "@/components/glass/glass-button";
 import { AuthModal } from "@/components/shared/auth-modal";
-import { ShieldCheck, Star, ArrowLeft, Calendar, BookOpen, Clock } from "lucide-react";
+import { ShieldCheck, Star, ArrowLeft, Calendar, BookOpen, Clock, MapPin, Globe } from "lucide-react";
 import { UserRole } from "@/types/auth";
 import { formatCurrency } from "@/lib/currency";
 import { BackButton } from "@/components/ui/back-button";
@@ -47,15 +47,18 @@ export default function PublicTeacherProfilePage() {
           <div className="h-96 bg-white rounded-3xl animate-pulse border border-slate-200" />
         ) : !teacher ? (
           <div className="text-center py-16 bg-white rounded-3xl border border-slate-200">
-            <h3 className="text-lg font-bold text-slate-900">Teacher Profile Not Found</h3>
+            <h3 className="text-lg font-bold text-slate-900">Educator Profile Not Found</h3>
           </div>
         ) : (
-          <GlassCard glowColor="rgba(37, 99, 235, 0.2)" className="p-8 space-y-6 border-2 border-white/90 shadow-xl">
+          <GlassCard glowColor="rgba(16, 128, 91, 0.2)" className="p-8 space-y-6 border-2 border-white/90 shadow-xl">
             <div className="flex flex-col sm:flex-row items-center gap-6">
               <img
                 src={teacher.avatarUrl}
                 alt={teacher.name}
-                className="w-28 h-28 rounded-full object-cover ring-4 ring-blue-500/20"
+                className="w-28 h-28 rounded-3xl object-cover ring-4 ring-emerald-500/20 shadow-md aspect-square shrink-0"
+                onError={(e) => {
+                  (e.target as HTMLImageElement).src = "/images/educators/educator_01.jpg";
+                }}
               />
               <div className="space-y-2 text-center sm:text-left">
                 <div className="flex flex-wrap items-center justify-center sm:justify-start gap-2">
@@ -64,11 +67,21 @@ export default function PublicTeacherProfilePage() {
                     <ShieldCheck className="h-3.5 w-3.5" /> Verified Educator
                   </GlassBadge>
                 </div>
-                <p className="text-sm font-bold text-blue-600">{teacher.headline}</p>
-                <div className="flex items-center justify-center sm:justify-start gap-3 text-xs text-slate-600 font-semibold">
-                  <span className="text-amber-500">★ {teacher.rating} Rating</span>
+                <p className="text-sm font-bold text-emerald-700">{teacher.headline}</p>
+                <div className="flex flex-wrap items-center justify-center sm:justify-start gap-3 text-xs text-slate-600 font-semibold">
+                  <span className="text-amber-500">★ {typeof teacher.rating === "number" ? teacher.rating.toFixed(2) : teacher.rating} Rating</span>
                   <span>• {teacher.experienceYears} Years Experience</span>
                   <span className="text-slate-900 font-extrabold">{formatCurrency(teacher.hourlyRate)}/hr</span>
+                  {teacher.location && (
+                    <span className="flex items-center gap-1 text-slate-500">
+                      <MapPin className="h-3 w-3" /> {teacher.location}
+                    </span>
+                  )}
+                  {teacher.languages && (
+                    <span className="flex items-center gap-1 text-slate-500">
+                      <Globe className="h-3 w-3" /> {teacher.languages}
+                    </span>
+                  )}
                 </div>
               </div>
             </div>

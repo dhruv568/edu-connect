@@ -55,7 +55,7 @@ export function LiveClassroomPreview({ onOpenAuth }: LiveClassroomPreviewProps) 
                   <h3 className="text-sm sm:text-base font-bold text-slate-900">Advanced Calculus & Graphing</h3>
                   <GlassBadge variant="rose" size="sm">LIVE NOW</GlassBadge>
                 </div>
-                <p className="text-[11px] sm:text-xs text-slate-500">Instructor: Sarah Jenkins • Room 4B</p>
+                <p className="text-[11px] sm:text-xs text-slate-500">Instructor: Sunita Natarajan • Room 4B</p>
               </div>
             </div>
 
