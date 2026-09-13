@@ -89,27 +89,36 @@ export async function clearSessionCookie(host?: string) {
 
 /**
  * Injects multi-domain cookie expiration and anti-cache headers directly
- * into a NextResponse instance. Guarantees cross-subdomain logout invalidation.
+ * into a NextResponse or standard Response instance. Guarantees cross-subdomain logout invalidation.
  */
 export function applyLogoutCookies<T extends Response>(response: T, host?: string): T {
+  const cleanHost = host ? host.split(":")[0].toLowerCase().trim() : "";
   const isProd = process.env.NODE_ENV === "production";
-  const domainVariants: (string | undefined)[] = [".educonnects.co.in", "educonnects.co.in", undefined];
+  const isSecure = isProd || (cleanHost !== "" && cleanHost.endsWith("educonnects.co.in"));
 
-  if (host) {
-    const clean = host.split(":")[0].toLowerCase();
-    if (clean && !domainVariants.includes(clean) && !domainVariants.includes(`.${clean}`)) {
-      domainVariants.push(clean);
-      domainVariants.push(`.${clean}`);
-    }
+  const domainVariants: (string | undefined)[] = [
+    ".educonnects.co.in",
+    "educonnects.co.in",
+    ".learners.educonnects.co.in",
+    "learners.educonnects.co.in",
+    ".educators.educonnects.co.in",
+    "educators.educonnects.co.in",
+    undefined,
+  ];
+
+  if (cleanHost && !domainVariants.includes(cleanHost) && !domainVariants.includes(`.${cleanHost}`)) {
+    domainVariants.push(cleanHost);
+    domainVariants.push(`.${cleanHost}`);
   }
 
-  const cookieNames = [
-    SESSION_COOKIE_NAME,
-    "educonnect_session",
-    "educonnects_session",
-    "educonnects_token",
-    "token",
-  ];
+  const cookieNames = Array.from(
+    new Set([
+      SESSION_COOKIE_NAME,
+      "educonnect_session",
+      "educonnects_token",
+      "token",
+    ])
+  );
 
   for (const name of cookieNames) {
     for (const domain of domainVariants) {
@@ -124,14 +133,14 @@ export function applyLogoutCookies<T extends Response>(response: T, host?: strin
       if (domain) {
         parts.push(`Domain=${domain}`);
       }
-      if (isProd) {
+      if (isSecure) {
         parts.push("Secure");
       }
       response.headers.append("Set-Cookie", parts.join("; "));
     }
   }
 
-  // Set-Cookie header fallbacks for any response type
+  // Anti-cache headers to prevent browser back button or bfcache restoring old state
   response.headers.set(
     "Cache-Control",
     "no-store, no-cache, must-revalidate, proxy-revalidate, max-age=0, post-check=0, pre-check=0"

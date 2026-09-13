@@ -26,6 +26,7 @@ import {
   Activity,
   Server,
   ShieldAlert,
+  Loader2,
 } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { UserRole } from "@/types/auth";
@@ -60,6 +61,7 @@ export function DashboardLayout({ role, userName, userEmail, children }: Dashboa
   const [currentRoleTitle, setCurrentRoleTitle] = useState<string>(getDisplayRole(role));
   const [avatarUrl, setAvatarUrl] = useState<string | null>(null);
   const [dynamicNav, setDynamicNav] = useState<any[] | null>(null);
+  const [isLoggingOut, setIsLoggingOut] = useState(false);
 
   useEffect(() => {
     if (userName && userName !== "User" && userName !== "Loading...") {
@@ -222,27 +224,52 @@ export function DashboardLayout({ role, userName, userEmail, children }: Dashboa
     activeNav = staticNavItems[role] || [];
   }
 
-  const handleLogout = async () => {
+  const handleLogout = async (e?: React.MouseEvent) => {
+    if (e) {
+      e.preventDefault();
+      e.stopPropagation();
+    }
+    if (isLoggingOut) return;
+    setIsLoggingOut(true);
+
     try {
-      await fetch("/api/auth/logout", {
+      const res = await fetch("/api/auth/logout", {
         method: "POST",
         cache: "no-store",
-        headers: { Pragma: "no-cache" },
+        headers: {
+          "Content-Type": "application/json",
+          Pragma: "no-cache",
+        },
       });
-    } catch {}
 
-    if (typeof window !== "undefined") {
-      window.dispatchEvent(new Event("educonnect_auth_changed"));
-    }
+      if (!res.ok) {
+        throw new Error("Unable to sign out. Please try again.");
+      }
 
-    showToast("Logged out", "You have been signed out.", "info");
+      if (typeof window !== "undefined") {
+        try {
+          sessionStorage.removeItem("educonnect_auth");
+          localStorage.removeItem("educonnect_auth");
+        } catch {}
+        window.dispatchEvent(new Event("educonnect_auth_changed"));
+      }
 
-    if (role === "TEACHER") {
-      window.location.replace("/teacher/logout");
-    } else if (role === "ADMIN" || role === "STAFF") {
-      window.location.replace("/login");
-    } else {
-      window.location.replace("/");
+      showToast("Logged out", "You have been signed out.", "info");
+
+      if (role === "TEACHER") {
+        window.location.replace("/teacher/logout");
+      } else if (role === "ADMIN" || role === "STAFF") {
+        window.location.replace("/login");
+      } else {
+        window.location.replace("/student/login");
+      }
+    } catch (err: any) {
+      setIsLoggingOut(false);
+      showToast(
+        "Sign Out Failed",
+        err?.message || "Unable to sign out. Please try again.",
+        "error"
+      );
     }
   };
 
@@ -310,11 +337,17 @@ export function DashboardLayout({ role, userName, userEmail, children }: Dashboa
 
         <div className="p-4 border-t border-[#1B6863]/30">
           <button
-            onClick={handleLogout}
-            className="flex items-center gap-3 w-full px-3.5 py-2.5 rounded-xl text-sm font-semibold text-rose-300 hover:bg-rose-500/15 transition-colors"
+            type="button"
+            onClick={(e) => handleLogout(e)}
+            disabled={isLoggingOut}
+            className="flex items-center gap-3 w-full px-3.5 py-2.5 rounded-xl text-sm font-semibold text-rose-300 hover:bg-rose-500/15 transition-colors disabled:opacity-60 disabled:cursor-not-allowed cursor-pointer"
           >
-            <LogOut className="h-4 w-4" />
-            <span>Sign Out</span>
+            {isLoggingOut ? (
+              <Loader2 className="h-4 w-4 animate-spin text-rose-300" />
+            ) : (
+              <LogOut className="h-4 w-4" />
+            )}
+            <span>{isLoggingOut ? "Signing out..." : "Sign Out"}</span>
           </button>
         </div>
       </aside>

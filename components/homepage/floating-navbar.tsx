@@ -38,6 +38,7 @@ import {
   getEducatorSubdomainUrl,
 } from "@/lib/app-url";
 import { NotificationPopover } from "@/components/layout/notification-popover";
+import { useToast } from "@/components/ui/toast";
 
 export interface FloatingNavbarProps {
   variant?: "default" | "student" | "teacher";
@@ -46,6 +47,7 @@ export interface FloatingNavbarProps {
 export function FloatingNavbar({ variant }: FloatingNavbarProps = {}) {
   const pathname = usePathname();
   const router = useRouter();
+  const { showToast } = useToast();
 
   const [scrolled, setScrolled] = useState(false);
   const [mobileOpen, setMobileOpen] = useState(false);
@@ -158,31 +160,59 @@ export function FloatingNavbar({ variant }: FloatingNavbarProps = {}) {
   }, []);
 
   // Logout invalidation with real server call, visual loading state & hard navigation
-  const handleLogout = async () => {
+  const handleLogout = async (e?: React.MouseEvent) => {
+    if (e) {
+      e.preventDefault();
+      e.stopPropagation();
+    }
     if (isLoggingOut) return;
     setIsLoggingOut(true);
+
     const role = userSession?.role;
-    setUserSession(null);
-    setProfileDropdownOpen(false);
-    setMobileOpen(false);
 
     try {
-      await fetch("/api/auth/logout", {
+      const res = await fetch("/api/auth/logout", {
         method: "POST",
         cache: "no-store",
-        headers: { Pragma: "no-cache" },
+        headers: {
+          "Content-Type": "application/json",
+          Pragma: "no-cache",
+        },
       });
-    } catch {}
 
-    if (typeof window !== "undefined") {
-      window.dispatchEvent(new Event("educonnect_auth_changed"));
-    }
+      if (!res.ok) {
+        throw new Error("Unable to sign out. Please try again.");
+      }
 
-    // Role-specific hard redirect to flush router cache & memory
-    if (role === "TEACHER") {
-      window.location.replace("/teacher/logout");
-    } else {
-      window.location.replace(getMainDomain() + "/");
+      // 1. Invalidate client auth state
+      setUserSession(null);
+      setProfileDropdownOpen(false);
+      setMobileOpen(false);
+
+      // 2. Clear any browser storage (if any auth state was kept)
+      if (typeof window !== "undefined") {
+        try {
+          sessionStorage.removeItem("educonnect_auth");
+          localStorage.removeItem("educonnect_auth");
+        } catch {}
+        window.dispatchEvent(new Event("educonnect_auth_changed"));
+      }
+
+      // 3. Hard redirect to prevent bfcache / memory restoration
+      if (role === "TEACHER") {
+        window.location.replace("/teacher/logout");
+      } else if (role === "ADMIN" || role === "STAFF") {
+        window.location.replace("/login");
+      } else {
+        window.location.replace("/student/login");
+      }
+    } catch (err: any) {
+      setIsLoggingOut(false);
+      showToast(
+        "Sign Out Failed",
+        err?.message || "Unable to sign out. Please try again.",
+        "error"
+      );
     }
   };
 
@@ -790,7 +820,8 @@ export function FloatingNavbar({ variant }: FloatingNavbarProps = {}) {
 
                         <div className="pt-1 mt-1 border-t border-slate-100">
                           <button
-                            onClick={handleLogout}
+                            type="button"
+                            onClick={(e) => handleLogout(e)}
                             disabled={isLoggingOut}
                             className="w-full flex items-center gap-2.5 px-3 py-2 rounded-xl text-xs font-semibold text-rose-600 hover:bg-rose-50 transition-colors text-left cursor-pointer disabled:opacity-60 disabled:cursor-not-allowed"
                           >
@@ -1081,7 +1112,8 @@ export function FloatingNavbar({ variant }: FloatingNavbarProps = {}) {
                     </Link>
 
                     <button
-                      onClick={handleLogout}
+                      type="button"
+                      onClick={(e) => handleLogout(e)}
                       disabled={isLoggingOut}
                       className="w-full py-2 rounded-xl text-rose-600 text-xs font-semibold hover:bg-rose-50 flex items-center justify-center gap-2 border border-rose-100 cursor-pointer disabled:opacity-60 disabled:cursor-not-allowed"
                     >
