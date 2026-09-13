@@ -54,26 +54,21 @@ export async function POST(req: NextRequest) {
     }
 
     // 2. Verify OTP
-    const universalOtp = process.env.ADMIN_UNIVERSAL_OTP || "123456";
-    const isUniversal = otp === universalOtp;
-
     const pending = await prisma.pendingRegistration.findUnique({
       where: { email: normalizedEmail },
     });
 
-    if (!isUniversal) {
-      if (!pending) {
-        return apiBadRequest("No active verification request found. Please request a new code.");
-      }
+    if (!pending) {
+      return apiBadRequest("No active verification request found. Please request a new code.");
+    }
 
-      if (new Date() > pending.expiresAt) {
-        return apiBadRequest("Verification code has expired. Please request a new code.");
-      }
+    if (new Date() > pending.expiresAt) {
+      return apiBadRequest("Verification code has expired. Please request a new code.");
+    }
 
-      const isValid = verifyTokenHash(otp, pending.codeHash);
-      if (!isValid) {
-        return apiBadRequest("Incorrect verification code.");
-      }
+    const isValid = verifyTokenHash(otp, pending.codeHash);
+    if (!isValid) {
+      return apiBadRequest("Incorrect verification code.");
     }
 
     // 3. Resolve names

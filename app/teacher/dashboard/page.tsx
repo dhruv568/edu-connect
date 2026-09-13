@@ -61,7 +61,7 @@ export default function TeacherDashboardPage() {
   useEffect(() => {
     fetch("/api/teacher/dashboard", { cache: "no-store", headers: { Pragma: "no-cache" } })
       .then((res) => {
-        if (!res.ok || res.status === 401) {
+        if (res.status === 401) {
           window.location.replace("/teacher/login");
           return null;
         }
@@ -73,7 +73,7 @@ export default function TeacherDashboardPage() {
         }
       })
       .catch(() => {
-        window.location.replace("/teacher/login");
+        // Network or fetch failure: let layout handle auth verification
       })
       .finally(() => setLoading(false));
   }, []);

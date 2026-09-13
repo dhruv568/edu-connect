@@ -2,6 +2,15 @@ import { getSession } from "@/lib/auth/session";
 import { UserRole, UserSession } from "@/types/auth";
 import { prisma } from "@/lib/prisma";
 
+export {
+  isEducatorRole,
+  isLearnerRole,
+  isAdminRole,
+  getDashboardPathForRole,
+  matchesRole,
+} from "@/lib/auth/roles";
+import { isEducatorRole, isLearnerRole, matchesRole } from "@/lib/auth/roles";
+
 export async function requireAuth(): Promise<UserSession & { userId: string }> {
   const session = await getSession();
   if (!session) {
@@ -34,10 +43,12 @@ export async function requireVerifiedEmail(): Promise<UserSession & { userId: st
   return session;
 }
 
-export async function requireRole(allowedRoles: UserRole[]): Promise<UserSession & { userId: string }> {
+export async function requireRole(allowedRoles: string | string[]): Promise<UserSession & { userId: string }> {
   const session = await requireVerifiedEmail();
-  if (!allowedRoles.includes(session.role)) {
-    throw new Error(`FORBIDDEN: Access restricted to roles [${allowedRoles.join(", ")}].`);
+  const roles = Array.isArray(allowedRoles) ? allowedRoles : [allowedRoles];
+  const hasMatch = roles.some((role) => matchesRole(session.role, role));
+  if (!hasMatch) {
+    throw new Error(`FORBIDDEN: Access restricted to roles [${roles.join(", ")}].`);
   }
   return session;
 }
@@ -47,13 +58,21 @@ export async function requireStaffOrAdmin(): Promise<UserSession & { userId: str
 }
 
 export async function requireVerifiedEducator(): Promise<UserSession & { userId: string; teacherProfile: any }> {
-  const session = await requireRole(["TEACHER"]);
-  const teacherProfile = await prisma.teacherProfile.findUnique({
+  const session = await requireRole(["EDUCATOR", "TEACHER"]);
+  let teacherProfile = await prisma.teacherProfile.findUnique({
     where: { userId: session.userId },
   });
 
   if (!teacherProfile) {
-    throw new Error("NOT_FOUND: Educator profile record not found.");
+    teacherProfile = await prisma.teacherProfile.create({
+      data: {
+        userId: session.userId,
+        headline: "Educator",
+        teachingMode: "ONLINE",
+        verificationStatus: "PENDING",
+        isSeededProfile: false,
+      },
+    });
   }
 
   if (teacherProfile.isSeededProfile) {

@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { FloatingNavbar } from "@/components/homepage/floating-navbar";
@@ -10,6 +10,7 @@ import { GlassBadge } from "@/components/glass/glass-badge";
 import { GlassButton } from "@/components/glass/glass-button";
 import { Input } from "@/components/ui/input";
 import { useToast } from "@/components/ui/toast";
+import { isEducatorRole, isLearnerRole } from "@/lib/auth/roles";
 import {
   Mail,
   Lock,
@@ -29,6 +30,44 @@ export default function StudentLoginPage() {
   const router = useRouter();
   const { showToast } = useToast();
 
+  // Authentication & Back-Button (bfcache) Protection
+  useEffect(() => {
+    const checkAuthenticatedState = async () => {
+      try {
+        const res = await fetch("/api/auth/me", {
+          cache: "no-store",
+          headers: { Pragma: "no-cache" },
+        });
+        if (res.ok) {
+          const json = await res.json();
+          if (json?.data?.user) {
+            const role = json.data.user.role;
+            if (isLearnerRole(role)) {
+              window.location.replace("/student/dashboard");
+            } else if (isEducatorRole(role)) {
+              window.location.replace("/teacher/dashboard");
+            } else if (role === "ADMIN") {
+              window.location.replace("/admin");
+            } else if (role === "STAFF") {
+              window.location.replace("/staff/dashboard");
+            } else {
+              window.location.replace("/student/dashboard");
+            }
+          }
+        }
+      } catch {}
+    };
+
+    checkAuthenticatedState();
+
+    const onPageShow = (event: PageTransitionEvent) => {
+      checkAuthenticatedState();
+    };
+
+    window.addEventListener("pageshow", onPageShow);
+    return () => window.removeEventListener("pageshow", onPageShow);
+  }, []);
+
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
@@ -41,7 +80,7 @@ export default function StudentLoginPage() {
       });
 
       const data = await res.json();
-      if (!res.ok) throw new Error(data.error || "Student login failed.");
+      if (!res.ok) throw new Error(data.error || "Learner login failed.");
 
       if (data.data?.requiresVerification || data.data?.requiresOtp) {
         showToast(
@@ -51,9 +90,10 @@ export default function StudentLoginPage() {
         );
         router.push(`/verify-email?email=${encodeURIComponent(email)}`);
       } else {
-        showToast("Welcome Back!", `Signed in as ${data.data.user.firstName}`, "success");
-        // Direct students straight to their dashboard
-        router.push(data.data.redirectPath || "/student/dashboard");
+        showToast("Welcome Back!", `Signed in as ${data.data.user.firstName || "Learner"}`, "success");
+        // Hard navigate to bypass client router cache
+        const destination = data.data.redirectPath || "/student/dashboard";
+        window.location.replace(destination);
       }
     } catch (err: any) {
       showToast("Authentication Error", err.message, "error");
@@ -184,14 +224,14 @@ export default function StudentLoginPage() {
                   isLoading={loading}
                   rightIcon={<ArrowRight className="h-4 w-4" />}
                 >
-                  Sign In as Student
+                  Sign In as Learner
                 </GlassButton>
               </form>
 
-              {/* Quick Student Demo Account */}
+              {/* Quick Learner Demo Account */}
               <div className="pt-4 border-t border-slate-100 text-xs space-y-2">
                 <span className="font-bold text-slate-700 uppercase tracking-wider text-[10px]">
-                  Quick Student Demo:
+                  Quick Learner Demo:
                 </span>
                 <div>
                   <button
@@ -202,7 +242,7 @@ export default function StudentLoginPage() {
                     }}
                     className="w-full px-3 py-2 bg-emerald-50 text-emerald-700 rounded-xl font-bold border border-emerald-100 hover:bg-emerald-100 transition-colors text-xs flex items-center justify-between"
                   >
-                    <span>Use Demo Student Account</span>
+                    <span>Use Demo Learner Account</span>
                     <span className="text-[10px] text-emerald-600">student@educonnects.com</span>
                   </button>
                 </div>
@@ -212,7 +252,7 @@ export default function StudentLoginPage() {
               <div className="pt-2 text-center text-xs text-slate-500 border-t border-slate-100">
                 Are you an educator?{" "}
                 <Link href="/teacher/login" className="text-indigo-600 hover:underline font-bold">
-                  Sign in as Teacher →
+                  Sign in as Educator →
                 </Link>
               </div>
             </GlassCard>

@@ -15,6 +15,7 @@ export interface SendEmailPayload {
   to: string;
   subject: string;
   templateParams: EmailTemplateParams;
+  from?: string;
 }
 
 export interface SendPasswordResetPayload {
@@ -40,18 +41,13 @@ export class ConsoleEmailProvider implements IEmailProvider {
 
   async sendVerificationEmail(payload: SendEmailPayload): Promise<boolean> {
     const { to, templateParams } = payload;
-    const isProduction = process.env.NODE_ENV === "production";
 
     console.log("\n==================================================");
     console.log("✉️ [EMAIL SERVICE: VERIFICATION DISPATCH]");
     console.log(`To: ${to}`);
     console.log(`Subject: ${payload.subject || "Your EduConnects Verification Code 🎓"}`);
     console.log(`Recipient: ${templateParams.firstName || "User"}`);
-    if (!isProduction) {
-      console.log(`🔑 6-Digit OTP: >>> ${templateParams.otp} <<<`);
-    } else {
-      console.log(`🔑 6-Digit OTP: [REDACTED IN PRODUCTION LOGS]`);
-    }
+    console.log(`🔑 6-Digit OTP: [REDACTED FOR SECURITY]`);
     console.log(`⏱️ Expiry:      ${templateParams.expiresInMinutes || 10} minutes`);
     console.log("==================================================\n");
     return true;
@@ -253,8 +249,16 @@ export class EmailService {
     otp: string;
     verificationUrl?: string;
     expiresInMinutes?: number;
+    isAdminLogin?: boolean;
+    subject?: string;
+    from?: string;
   }): Promise<boolean> {
     const provider = getEmailProvider();
+    const isLogin = !!params.isAdminLogin;
+    const defaultSubject = isLogin ? "EduConnects Admin Login - Verification Code" : "Your EduConnects Verification Code 🎓";
+    const subject = params.subject || defaultSubject;
+    const from = params.from || (isLogin ? "EduConnects <noreply@educonnects.co.in>" : undefined);
+
     try {
       let timer: NodeJS.Timeout | undefined;
       const timeoutPromise = new Promise<boolean>((resolve) => {
@@ -267,7 +271,8 @@ export class EmailService {
       const result = await Promise.race([
         provider.sendVerificationEmail({
           to: params.email,
-          subject: "Your EduConnects Verification Code 🎓",
+          subject,
+          from,
           templateParams: {
             recipientEmail: params.email,
             firstName: params.userName,
@@ -275,6 +280,7 @@ export class EmailService {
             verificationUrl: params.verificationUrl,
             expiresInMinutes: params.expiresInMinutes || Number(process.env.OTP_EXPIRY_MINUTES) || 10,
             appUrl: getPublicAppUrl(),
+            isAdminLogin: isLogin,
           },
         }),
         timeoutPromise,

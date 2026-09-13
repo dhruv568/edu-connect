@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { FloatingNavbar } from "@/components/homepage/floating-navbar";
@@ -10,6 +10,7 @@ import { GlassBadge } from "@/components/glass/glass-badge";
 import { GlassButton } from "@/components/glass/glass-button";
 import { Input } from "@/components/ui/input";
 import { useToast } from "@/components/ui/toast";
+import { isEducatorRole, isLearnerRole } from "@/lib/auth/roles";
 import {
   Mail,
   Lock,
@@ -28,6 +29,44 @@ export default function TeacherLoginPage() {
 
   const router = useRouter();
   const { showToast } = useToast();
+
+  // Authentication & Back-Button (bfcache) Protection
+  useEffect(() => {
+    const checkAuthenticatedState = async () => {
+      try {
+        const res = await fetch("/api/auth/me", {
+          cache: "no-store",
+          headers: { Pragma: "no-cache" },
+        });
+        if (res.ok) {
+          const json = await res.json();
+          if (json?.data?.user) {
+            const role = json.data.user.role;
+            if (isEducatorRole(role)) {
+              window.location.replace("/teacher/dashboard");
+            } else if (isLearnerRole(role)) {
+              window.location.replace("/student/dashboard");
+            } else if (role === "ADMIN") {
+              window.location.replace("/admin");
+            } else if (role === "STAFF") {
+              window.location.replace("/staff/dashboard");
+            } else {
+              window.location.replace("/teacher/dashboard");
+            }
+          }
+        }
+      } catch {}
+    };
+
+    checkAuthenticatedState();
+
+    const onPageShow = (event: PageTransitionEvent) => {
+      checkAuthenticatedState();
+    };
+
+    window.addEventListener("pageshow", onPageShow);
+    return () => window.removeEventListener("pageshow", onPageShow);
+  }, []);
 
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -51,9 +90,10 @@ export default function TeacherLoginPage() {
         );
         router.push(`/verify-email?email=${encodeURIComponent(email)}`);
       } else {
-        showToast("Welcome Back!", `Signed in as ${data.data.user.firstName}`, "success");
-        // Direct teachers straight to their dashboard
-        router.push(data.data.redirectPath || "/teacher/dashboard");
+        showToast("Welcome Back!", `Signed in as ${data.data.user.firstName || "Educator"}`, "success");
+        // Trigger hard navigation to guarantee fresh session and bypass client router caching
+        const destination = data.data.redirectPath || "/teacher/dashboard";
+        window.location.replace(destination);
       }
     } catch (err: any) {
       showToast("Authentication Error", err.message, "error");
@@ -184,7 +224,7 @@ export default function TeacherLoginPage() {
                   isLoading={loading}
                   rightIcon={<ArrowRight className="h-4 w-4" />}
                 >
-                  Sign In as Teacher
+                  Sign In as Educator
                 </GlassButton>
               </form>
 
@@ -202,7 +242,7 @@ export default function TeacherLoginPage() {
                     }}
                     className="w-full px-3 py-2 bg-indigo-50 text-indigo-700 rounded-xl font-bold border border-indigo-100 hover:bg-indigo-100 transition-colors text-xs flex items-center justify-between"
                   >
-                    <span>Use Demo Teacher Account</span>
+                    <span>Use Demo Educator Account</span>
                     <span className="text-[10px] text-indigo-600">teacher@educonnects.com</span>
                   </button>
                 </div>
@@ -210,9 +250,9 @@ export default function TeacherLoginPage() {
 
               {/* Cross Role Links */}
               <div className="pt-2 text-center text-xs text-slate-500 border-t border-slate-100">
-                Are you a student?{" "}
+                Are you a learner?{" "}
                 <Link href="/student/login" className="text-emerald-600 hover:underline font-bold">
-                  Sign in as Student →
+                  Sign in as Learner →
                 </Link>
               </div>
             </GlassCard>

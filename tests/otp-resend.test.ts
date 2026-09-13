@@ -1,3 +1,5 @@
+process.env.EMAIL_PROVIDER = "console";
+
 import assert from "node:assert";
 import { AuthService } from "../services/auth-service";
 import { getEmailProvider, EmailService } from "../lib/email/email-service";

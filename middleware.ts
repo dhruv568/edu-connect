@@ -275,6 +275,56 @@ export function middleware(request: NextRequest) {
   }
 
   // Verified user role-protected route guards
+  const isEducatorRole = (r?: string) => r === "TEACHER" || r === "EDUCATOR";
+  const isLearnerRole = (r?: string) => r === "STUDENT" || r === "LEARNER";
+
+  // If user is already authenticated with a valid session, never show login pages
+  const isLoginRoute =
+    pathname === "/login" ||
+    pathname === "/teacher/login" ||
+    pathname === "/educator/login" ||
+    pathname === "/student/login" ||
+    pathname === "/learner/login" ||
+    pathname === "/admin/login" ||
+    pathname === "/staff/login";
+
+  if (isLoginRoute) {
+    if (isEducatorRole(userSession.role)) {
+      const target = isEducatorSubdomain ? "/dashboard" : "/teacher/dashboard";
+      return NextResponse.redirect(new URL(target, request.url));
+    }
+    if (isLearnerRole(userSession.role)) {
+      const target = isStudentSubdomain ? "/dashboard" : "/student/dashboard";
+      return NextResponse.redirect(new URL(target, request.url));
+    }
+    if (userSession.role === "ADMIN") {
+      return NextResponse.redirect(new URL("/admin", request.url));
+    }
+    if (userSession.role === "STAFF") {
+      return NextResponse.redirect(new URL("/staff/dashboard", request.url));
+    }
+    return NextResponse.redirect(new URL("/", request.url));
+  }
+
+  // Subdomain dashboard cross-role protection
+  if (isEducatorSubdomain && (pathname === "/dashboard" || pathname.startsWith("/dashboard/"))) {
+    if (!isEducatorRole(userSession.role)) {
+      if (isLearnerRole(userSession.role)) {
+        return NextResponse.redirect(new URL(pathname, studentDomainUrl));
+      }
+      return NextResponse.redirect(new URL("/teacher/login", request.url));
+    }
+  }
+
+  if (isStudentSubdomain && (pathname === "/dashboard" || pathname.startsWith("/dashboard/"))) {
+    if (!isLearnerRole(userSession.role)) {
+      if (isEducatorRole(userSession.role)) {
+        return NextResponse.redirect(new URL(pathname, educatorDomainUrl));
+      }
+      return NextResponse.redirect(new URL("/student/login", request.url));
+    }
+  }
+
   if (pathname.startsWith("/staff") && pathname !== "/staff/login" && pathname !== "/staff/register") {
     if (userSession.role !== "STAFF" && userSession.role !== "ADMIN") {
       return NextResponse.redirect(new URL("/staff/login", request.url));
@@ -283,18 +333,28 @@ export function middleware(request: NextRequest) {
 
   if (pathname.startsWith("/admin") && pathname !== "/admin/login") {
     if (userSession.role !== "ADMIN" && userSession.role !== "STAFF") {
+      if (isEducatorRole(userSession.role)) {
+        return NextResponse.redirect(new URL("/teacher/dashboard", request.url));
+      }
+      if (isLearnerRole(userSession.role)) {
+        return NextResponse.redirect(new URL("/student/dashboard", request.url));
+      }
       return NextResponse.redirect(new URL("/admin/login", request.url));
     }
   }
 
-  // Protect private teacher subroutes (allow public /teacher, /teacher/login, /teacher/register)
+  // Protect private teacher subroutes (allow public /teacher, /teacher/login, /teacher/register, /teacher/logout)
   if (
     pathname.startsWith("/teacher") &&
     pathname !== "/teacher" &&
     pathname !== "/teacher/login" &&
-    pathname !== "/teacher/register"
+    pathname !== "/teacher/register" &&
+    pathname !== "/teacher/logout"
   ) {
-    if (userSession.role !== "TEACHER") {
+    if (!isEducatorRole(userSession.role)) {
+      if (isLearnerRole(userSession.role)) {
+        return NextResponse.redirect(new URL("/student/dashboard", request.url));
+      }
       return NextResponse.redirect(new URL("/teacher/login", request.url));
     }
   }
@@ -306,7 +366,10 @@ export function middleware(request: NextRequest) {
     pathname !== "/student/login" &&
     pathname !== "/student/register"
   ) {
-    if (userSession.role !== "STUDENT") {
+    if (!isLearnerRole(userSession.role)) {
+      if (isEducatorRole(userSession.role)) {
+        return NextResponse.redirect(new URL("/teacher/dashboard", request.url));
+      }
       return NextResponse.redirect(new URL("/student/login", request.url));
     }
   }

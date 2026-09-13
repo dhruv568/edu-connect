@@ -30,6 +30,7 @@ import {
 } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { UserRole } from "@/types/auth";
+import { isEducatorRole, isLearnerRole, isAdminRole, getDashboardPathForRole } from "@/lib/auth/roles";
 import { useToast } from "@/components/ui/toast";
 import { NotificationPopover } from "@/components/layout/notification-popover";
 import { PermissionProvider } from "@/components/shared/permission-guard";
@@ -51,8 +52,8 @@ export function DashboardLayout({ role, userName, userEmail, children }: Dashboa
   const getDisplayRole = (r: string) => {
     if (r === "ADMIN") return "SUPER ADMIN";
     if (r === "STAFF") return "STAFF";
-    if (r === "TEACHER") return "EDUCATOR";
-    if (r === "STUDENT") return "LEARNER";
+    if (r === "TEACHER" || r === "EDUCATOR") return "EDUCATOR";
+    if (r === "STUDENT" || r === "LEARNER") return "LEARNER";
     return r;
   };
 
@@ -79,28 +80,32 @@ export function DashboardLayout({ role, userName, userEmail, children }: Dashboa
         });
 
         if (!res.ok) {
-          const loginTarget =
-            role === "TEACHER"
-              ? "/teacher/login"
-              : role === "ADMIN"
-              ? "/admin/login"
-              : role === "STAFF"
-              ? "/staff/login"
-              : "/student/login";
-          window.location.replace(loginTarget);
+          if (res.status === 401) {
+            const loginTarget =
+              isEducatorRole(role)
+                ? "/teacher/login"
+                : isAdminRole(role)
+                ? "/admin/login"
+                : "/student/login";
+            window.location.replace(loginTarget);
+          }
           return;
         }
 
         const json = await res.json();
         if (json?.data?.user) {
           const u = json.data.user;
-          // Protect against role mismatch
-          if (role === "TEACHER" && u.role !== "TEACHER") {
-            window.location.replace("/teacher/login");
+          // Protect against role mismatch: redirect user to their actual dashboard
+          if (isEducatorRole(role) && !isEducatorRole(u.role)) {
+            window.location.replace(getDashboardPathForRole(u.role));
             return;
           }
-          if (role === "STUDENT" && u.role !== "STUDENT") {
-            window.location.replace("/student/login");
+          if (isLearnerRole(role) && !isLearnerRole(u.role)) {
+            window.location.replace(getDashboardPathForRole(u.role));
+            return;
+          }
+          if (isAdminRole(role) && !isAdminRole(u.role)) {
+            window.location.replace(getDashboardPathForRole(u.role));
             return;
           }
 
@@ -118,23 +123,15 @@ export function DashboardLayout({ role, userName, userEmail, children }: Dashboa
           if (u.avatarUrl) {
             setAvatarUrl(u.avatarUrl);
           }
-          if (u.roleName) {
-            setCurrentRoleTitle(getDisplayRole(u.roleName.toUpperCase()));
+          if (u.roleName || u.role) {
+            setCurrentRoleTitle(getDisplayRole((u.roleName || u.role).toUpperCase()));
           }
           if (Array.isArray(u.navigation) && u.navigation.length > 0) {
             setDynamicNav(u.navigation);
           }
         }
-      } catch {
-        const loginTarget =
-          role === "TEACHER"
-            ? "/teacher/login"
-            : role === "ADMIN"
-            ? "/admin/login"
-            : role === "STAFF"
-            ? "/staff/login"
-            : "/student/login";
-        window.location.replace(loginTarget);
+      } catch (err) {
+        console.warn("Session verification warning:", err);
       }
     };
 
@@ -154,7 +151,9 @@ export function DashboardLayout({ role, userName, userEmail, children }: Dashboa
     ADMIN: "admin",
     STAFF: "admin",
     TEACHER: "teacher",
+    EDUCATOR: "teacher",
     STUDENT: "student",
+    LEARNER: "student",
   };
 
   const iconMap: Record<string, any> = {
@@ -221,7 +220,7 @@ export function DashboardLayout({ role, userName, userEmail, children }: Dashboa
       href: role === "STAFF" && item.href === "/admin" ? "/staff/dashboard" : item.href,
     }));
   } else {
-    activeNav = staticNavItems[role] || [];
+    activeNav = (isEducatorRole(role) ? staticNavItems.TEACHER : isLearnerRole(role) ? staticNavItems.STUDENT : (staticNavItems as any)[role]) || [];
   }
 
   const handleLogout = async (e?: React.MouseEvent) => {
@@ -256,9 +255,9 @@ export function DashboardLayout({ role, userName, userEmail, children }: Dashboa
 
       showToast("Logged out", "You have been signed out.", "info");
 
-      if (role === "TEACHER") {
+      if (isEducatorRole(role)) {
         window.location.replace("/teacher/logout");
-      } else if (role === "ADMIN" || role === "STAFF") {
+      } else if (isAdminRole(role)) {
         window.location.replace("/login");
       } else {
         window.location.replace("/student/login");

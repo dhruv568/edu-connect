@@ -1,5 +1,6 @@
 import { prisma } from "@/lib/prisma";
 import { formatPaise } from "@/lib/currency";
+import { isLearnerRole } from "@/lib/auth/roles";
 
 export class AnalyticsService {
   /**
@@ -50,7 +51,7 @@ export class AnalyticsService {
       include: { profile: true, studentProfile: true },
     });
 
-    if (!user || user.role !== "STUDENT") {
+    if (!user || !isLearnerRole(user.role)) {
       throw new Error("UNAUTHORIZED: Student account required.");
     }
 
@@ -349,13 +350,22 @@ export class AnalyticsService {
   // =========================================================================
 
   static async getTeacherDashboardData(userId: string) {
-    const teacherProfile = await prisma.teacherProfile.findUnique({
+    let teacherProfile = await prisma.teacherProfile.findUnique({
       where: { userId },
       include: { user: { include: { profile: true } } },
     });
 
     if (!teacherProfile) {
-      throw new Error("NOT_FOUND: Teacher profile not found.");
+      teacherProfile = await prisma.teacherProfile.create({
+        data: {
+          userId,
+          headline: "Educator",
+          teachingMode: "ONLINE",
+          verificationStatus: "PENDING",
+          isSeededProfile: false,
+        },
+        include: { user: { include: { profile: true } } },
+      });
     }
 
     const teacherId = teacherProfile.id;

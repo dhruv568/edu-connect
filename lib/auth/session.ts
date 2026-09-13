@@ -1,4 +1,4 @@
-import { cookies } from "next/headers";
+import { cookies, headers } from "next/headers";
 import { UserSession } from "@/types/auth";
 
 const SESSION_COOKIE_NAME = "educonnects_session";
@@ -30,7 +30,7 @@ export function decodeSession(token: string): UserSession | null {
 
 export function getCookieDomain(host?: string): string | undefined {
   if (host) {
-    const clean = host.split(":")[0].toLowerCase();
+    const clean = host.split(":")[0].toLowerCase().trim();
     if (clean.endsWith("educonnects.co.in")) {
       return ".educonnects.co.in";
     }
@@ -50,14 +50,25 @@ export function getCookieDomain(host?: string): string | undefined {
 export async function setSessionCookie(session: UserSession, host?: string) {
   const cookieStore = await cookies();
   const encoded = encodeSession(session);
+  let resolvedHost = host;
+  if (!resolvedHost) {
+    try {
+      const h = await headers();
+      resolvedHost = h.get("x-forwarded-host") || h.get("host") || undefined;
+    } catch {}
+  }
+  const cleanHost = resolvedHost ? resolvedHost.split(":")[0].toLowerCase().trim() : "";
+  const isProd = process.env.NODE_ENV === "production";
+  const isEduconnects = cleanHost.endsWith("educonnects.co.in");
+
   const cookieOptions: any = {
     httpOnly: true,
-    secure: process.env.NODE_ENV === "production",
+    secure: isProd || isEduconnects,
     sameSite: "lax",
     path: "/",
     maxAge: SESSION_DURATION_DAYS * 24 * 60 * 60,
   };
-  const domain = getCookieDomain(host);
+  const domain = getCookieDomain(resolvedHost);
   if (domain) {
     cookieOptions.domain = domain;
   }
@@ -79,12 +90,18 @@ export async function getSession(): Promise<UserSession | null> {
  */
 export async function clearSessionCookie(host?: string) {
   const cookieStore = await cookies();
-  const domain = getCookieDomain(host);
+  let resolvedHost = host;
+  if (!resolvedHost) {
+    try {
+      const h = await headers();
+      resolvedHost = h.get("x-forwarded-host") || h.get("host") || undefined;
+    } catch {}
+  }
+  const domain = getCookieDomain(resolvedHost);
   if (domain) {
     cookieStore.delete({ name: SESSION_COOKIE_NAME, path: "/", domain });
-  } else {
-    cookieStore.delete({ name: SESSION_COOKIE_NAME, path: "/" });
   }
+  cookieStore.delete({ name: SESSION_COOKIE_NAME, path: "/" });
 }
 
 /**

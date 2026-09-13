@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { FloatingNavbar } from "@/components/homepage/floating-navbar";
 import { PremiumFooter } from "@/components/homepage/premium-footer";
@@ -9,6 +9,7 @@ import { GlassBadge } from "@/components/glass/glass-badge";
 import { GlassButton } from "@/components/glass/glass-button";
 import { Input } from "@/components/ui/input";
 import { useToast } from "@/components/ui/toast";
+import { isEducatorRole, isLearnerRole } from "@/lib/auth/roles";
 import {
   ShieldCheck,
   Lock,
@@ -33,6 +34,44 @@ export default function AdminLoginPage() {
   const router = useRouter();
   const { showToast } = useToast();
 
+  // Authentication & Back-Button (bfcache) Protection
+  useEffect(() => {
+    const checkAuthenticatedState = async () => {
+      try {
+        const res = await fetch("/api/auth/me", {
+          cache: "no-store",
+          headers: { Pragma: "no-cache" },
+        });
+        if (res.ok) {
+          const json = await res.json();
+          if (json?.data?.user) {
+            const role = json.data.user.role;
+            if (role === "ADMIN") {
+              window.location.replace("/admin");
+            } else if (role === "STAFF") {
+              window.location.replace("/staff/dashboard");
+            } else if (isEducatorRole(role)) {
+              window.location.replace("/teacher/dashboard");
+            } else if (isLearnerRole(role)) {
+              window.location.replace("/student/dashboard");
+            } else {
+              window.location.replace("/admin");
+            }
+          }
+        }
+      } catch {}
+    };
+
+    checkAuthenticatedState();
+
+    const onPageShow = (event: PageTransitionEvent) => {
+      checkAuthenticatedState();
+    };
+
+    window.addEventListener("pageshow", onPageShow);
+    return () => window.removeEventListener("pageshow", onPageShow);
+  }, []);
+
   const handleAdminLogin = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
@@ -41,24 +80,24 @@ export default function AdminLoginPage() {
       const res = await fetch("/api/auth/login", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ email, password }),
+        body: JSON.stringify({ email: email.trim(), ...(password ? { password } : {}) }),
       });
 
       const data = await res.json();
       if (!res.ok) throw new Error(data.error || "Admin login failed.");
 
-      if (data.data?.user?.role !== "ADMIN") {
+      if (data.data?.user?.role && data.data?.user?.role !== "ADMIN") {
         throw new Error("Access denied: Account does not possess Administrative privileges.");
       }
 
       if (data.data?.requiresVerification || data.data?.requiresOtp) {
-        showToast("Verification Required ✉️", "Please enter the 6-digit OTP sent to your admin email.", "info");
-        router.push(`/verify-email?email=${encodeURIComponent(email)}&redirectTo=/admin`);
+        showToast("Verification Code Dispatched ✉️", "A 6-digit OTP has been sent to your authorized admin email.", "info");
+        router.push(`/verify-email?email=${encodeURIComponent(email.trim())}&redirectTo=/admin`);
         return;
       }
 
       showToast("Admin Authenticated!", "Welcome to System Governance.", "success");
-      router.push("/admin");
+      window.location.replace("/admin");
     } catch (err: any) {
       showToast("Authorization Error", err.message, "error");
     } finally {
@@ -179,7 +218,7 @@ export default function AdminLoginPage() {
                   </div>
                   <h2 className="text-xl font-black text-white tracking-tight">Admin Authentication</h2>
                 </div>
-                <p className="text-xs text-slate-400">Enter system administrator credentials to continue</p>
+                <p className="text-xs text-slate-400">Enter authorized admin email to receive a dynamic 6-digit OTP</p>
               </div>
 
               <form onSubmit={handleAdminLogin} className="space-y-4">
@@ -202,17 +241,19 @@ export default function AdminLoginPage() {
                 </div>
 
                 <div className="space-y-1.5">
-                  <label className="block text-xs font-bold uppercase tracking-wider text-slate-300">
-                    Admin Password
-                  </label>
+                  <div className="flex items-center justify-between">
+                    <label className="block text-xs font-bold uppercase tracking-wider text-slate-300">
+                      Admin Password
+                    </label>
+                    <span className="text-[10px] text-slate-400 font-medium">(Optional)</span>
+                  </div>
                   <div className="relative">
                     <Lock className="absolute left-3.5 top-1/2 -translate-y-1/2 h-4 w-4 text-blue-400" />
                     <input
                       type={showPassword ? "text" : "password"}
-                      placeholder="••••••••"
+                      placeholder="•••••••• (optional)"
                       value={password}
                       onChange={(e) => setPassword(e.target.value)}
-                      required
                       style={{ color: "#ffffff", WebkitTextFillColor: "#ffffff" }}
                       className="w-full pl-10 pr-10 py-2.5 bg-slate-800 text-white placeholder:text-slate-400 text-sm rounded-xl border border-slate-600 focus:outline-none focus:border-blue-400 focus:ring-2 focus:ring-blue-500/30 font-medium transition-all dark-input-crisp"
                     />
@@ -235,16 +276,16 @@ export default function AdminLoginPage() {
                   isLoading={loading}
                   rightIcon={<ShieldCheck className="h-4 w-4" />}
                 >
-                  Authenticate Admin Session
+                  Send Admin Verification OTP
                 </GlassButton>
               </form>
 
               {/* Developer Fast-Fill Assistant */}
               <div className="pt-4 border-t border-slate-800 space-y-2.5">
                 <div className="flex items-center justify-between text-[11px]">
-                  <span className="font-bold text-slate-400 uppercase tracking-wider">Dev Gateway Credentials:</span>
+                  <span className="font-bold text-slate-400 uppercase tracking-wider">Authorized Admin Account:</span>
                   <span className="text-[10px] text-emerald-400 font-mono font-bold bg-emerald-500/10 px-2 py-0.5 rounded border border-emerald-500/20">
-                    READY
+                    2FA REQUIRED
                   </span>
                 </div>
 
@@ -252,20 +293,12 @@ export default function AdminLoginPage() {
                   type="button"
                   onClick={() => {
                     setEmail("educonnets.com@gmail.com");
-                    setPassword("Password123!");
                   }}
                   className="w-full py-2 px-3 rounded-xl bg-blue-500/10 hover:bg-blue-500/20 border border-blue-500/30 text-blue-300 hover:text-blue-200 text-xs font-bold transition-all flex items-center justify-center gap-2 group"
                 >
-                  <span>Auto-fill Admin Credentials</span>
+                  <span>Auto-fill Admin Email</span>
                   <ArrowRight className="h-3.5 w-3.5 group-hover:translate-x-0.5 transition-transform" />
                 </button>
-
-                <div className="flex items-center justify-between text-[11px] bg-slate-950/80 p-2.5 rounded-xl border border-slate-800/80">
-                  <span className="text-slate-400 font-medium">Universal 2FA OTP:</span>
-                  <code className="font-mono text-xs font-bold text-amber-300 bg-amber-500/10 px-2 py-0.5 rounded border border-amber-500/20">
-                    123456
-                  </code>
-                </div>
               </div>
 
               <p className="text-[10px] text-center text-slate-500 leading-normal">

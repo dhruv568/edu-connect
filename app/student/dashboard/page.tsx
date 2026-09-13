@@ -63,8 +63,11 @@ export default function StudentDashboardPage() {
   useEffect(() => {
     fetch("/api/student/dashboard", { cache: "no-store", headers: { Pragma: "no-cache" } })
       .then((res) => {
-        if (!res.ok || res.status === 401) {
+        if (res.status === 401) {
           window.location.replace("/student/login");
+          return null;
+        }
+        if (!res.ok) {
           return null;
         }
         return res.json();
@@ -74,8 +77,8 @@ export default function StudentDashboardPage() {
           setData(json.data);
         }
       })
-      .catch(() => {
-        window.location.replace("/student/login");
+      .catch((err) => {
+        console.warn("Student dashboard fetch warning:", err);
       })
       .finally(() => setLoading(false));
   }, []);

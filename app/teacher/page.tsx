@@ -37,6 +37,7 @@ import {
 } from "lucide-react";
 import { formatCurrency } from "@/lib/currency";
 import { UserRole, UserSession } from "@/types/auth";
+import { isEducatorRole, isLearnerRole, isAdminRole } from "@/lib/auth/roles";
 
 export default function TeacherLandingPage() {
   const [authModalOpen, setAuthModalOpen] = useState(false);
@@ -246,7 +247,7 @@ export default function TeacherLandingPage() {
 
                 {/* Hero CTAs */}
                 <div className="flex flex-col sm:flex-row items-center justify-center lg:justify-start gap-4 pt-2">
-                  {userSession?.role === "TEACHER" ? (
+                  {userSession && isEducatorRole(userSession.role) ? (
                     <Link href="/teacher/dashboard" className="w-full sm:w-auto">
                       <GlassButton
                         variant="educator"
@@ -255,6 +256,28 @@ export default function TeacherLandingPage() {
                         leftIcon={<LayoutDashboard className="h-4 w-4" />}
                       >
                         Go to Educator Dashboard
+                      </GlassButton>
+                    </Link>
+                  ) : userSession && isLearnerRole(userSession.role) ? (
+                    <Link href="/student/dashboard" className="w-full sm:w-auto">
+                      <GlassButton
+                        variant="primary"
+                        size="lg"
+                        className="w-full sm:w-auto text-white shadow-xl text-sm font-bold"
+                        leftIcon={<LayoutDashboard className="h-4 w-4" />}
+                      >
+                        Go to Learner Dashboard
+                      </GlassButton>
+                    </Link>
+                  ) : userSession && isAdminRole(userSession.role) ? (
+                    <Link href="/admin" className="w-full sm:w-auto">
+                      <GlassButton
+                        variant="primary"
+                        size="lg"
+                        className="w-full sm:w-auto text-white shadow-xl text-sm font-bold"
+                        leftIcon={<LayoutDashboard className="h-4 w-4" />}
+                      >
+                        Go to Admin Dashboard
                       </GlassButton>
                     </Link>
                   ) : (

@@ -117,9 +117,7 @@ export class AuthService {
       expiresInMinutes: expiryMinutes,
     });
 
-    if (!sent) {
-      console.warn(`⚠️ Note: Cloud host email delivery failed to reach external inbox (port blocked or unverified domain). 6-digit OTP is printed in the server logs above.`);
-    }
+
 
     return {
       id: pending.id,
@@ -135,7 +133,7 @@ export class AuthService {
    * Generates OTP/Token, invalidates prior active OTPs so ONLY the newest OTP is valid,
    * stores hashes in DB, and dispatches email via Resend / EmailService.
    */
-  static async createAndSendVerification(userId: string, email: string, firstName: string) {
+  static async createAndSendVerification(userId: string, email: string, firstName: string, isAdminLogin: boolean = false) {
     const expiryMinutes = getOtpExpiryMinutes();
 
     // Invalidate all previous unverified OTP records for this user (Single Active OTP requirement)
@@ -156,7 +154,7 @@ export class AuthService {
     const expiresAt = new Date(Date.now() + expiryMinutes * 60 * 1000);
 
     // Save hashed tokens to database
-    await prisma.emailVerification.create({
+    const record = await prisma.emailVerification.create({
       data: {
         userId,
         codeHash,
@@ -173,10 +171,15 @@ export class AuthService {
       otp,
       verificationUrl,
       expiresInMinutes: expiryMinutes,
+      isAdminLogin,
     });
 
     if (!sent) {
-      console.warn(`⚠️ Note: Cloud host email delivery failed to reach external inbox. 6-digit OTP is printed in the server logs above.`);
+      // Invalidate the un-delivered OTP record immediately
+      await prisma.emailVerification.delete({
+        where: { id: record.id },
+      }).catch(() => {});
+      throw new Error("Unable to deliver verification code to your email at this time. Please try again.");
     }
   }
 
@@ -259,7 +262,13 @@ export class AuthService {
       }
     }
 
-    await this.createAndSendVerification(user.id, user.email, user.profile?.firstName || "Learner");
+    const isAdmin = user.role === "ADMIN";
+    await this.createAndSendVerification(
+      user.id,
+      user.email,
+      user.profile?.firstName || (isAdmin ? "System Administrator" : "Learner"),
+      isAdmin
+    );
 
     return {
       success: true,
@@ -429,50 +438,45 @@ export class AuthService {
       throw new Error("No pending registration or account found for this email address.");
     }
 
-    const universalAdminOtp = process.env.ADMIN_UNIVERSAL_OTP || "123456";
-    const isAdminUniversal = user.role === "ADMIN" && otp === universalAdminOtp;
-
     const record = user.emailVerifications[0];
 
-    if (!isAdminUniversal) {
-      if (!record) {
-        throw new Error("No active verification code found. Please request a new code.");
-      }
+    if (!record) {
+      throw new Error("No active verification code found. Please request a new code.");
+    }
 
-      // Check attempt count limit
-      if (record.attempts >= maxAttempts) {
-        // Invalidate expired/exhausted OTP
-        await prisma.emailVerification.update({
-          where: { id: record.id },
-          data: { expiresAt: now },
-        });
+    // Check attempt count limit
+    if (record.attempts >= maxAttempts) {
+      // Invalidate expired/exhausted OTP
+      await prisma.emailVerification.update({
+        where: { id: record.id },
+        data: { expiresAt: now },
+      });
+      throw new Error("Too many incorrect attempts. Please request a new verification code.");
+    }
+
+    // Check expiration
+    if (now > record.expiresAt) {
+      throw new Error("This verification code has expired. Please request a new code.");
+    }
+
+    const isValid = verifyTokenHash(otp, record.codeHash);
+
+    if (!isValid) {
+      const newAttempts = record.attempts + 1;
+      // Increment attempt counter
+      await prisma.emailVerification.update({
+        where: { id: record.id },
+        data: {
+          attempts: newAttempts,
+          ...(newAttempts >= maxAttempts ? { expiresAt: now } : {}),
+        },
+      });
+
+      if (newAttempts >= maxAttempts) {
         throw new Error("Too many incorrect attempts. Please request a new verification code.");
       }
 
-      // Check expiration
-      if (now > record.expiresAt) {
-        throw new Error("This verification code has expired. Please request a new code.");
-      }
-
-      const isValid = verifyTokenHash(otp, record.codeHash);
-
-      if (!isValid) {
-        const newAttempts = record.attempts + 1;
-        // Increment attempt counter
-        await prisma.emailVerification.update({
-          where: { id: record.id },
-          data: {
-            attempts: newAttempts,
-            ...(newAttempts >= maxAttempts ? { expiresAt: now } : {}),
-          },
-        });
-
-        if (newAttempts >= maxAttempts) {
-          throw new Error("Too many incorrect attempts. Please request a new verification code.");
-        }
-
-        throw new Error("Incorrect verification code. Please check your email and try again.");
-      }
+      throw new Error("Incorrect verification code. Please check your email and try again.");
     }
 
     // Transactionally verify user and mark verification record (if present)
@@ -796,13 +800,70 @@ export class AuthService {
 
   /**
    * Authenticates user credentials and dispatches mandatory OTP verification code.
+   * For ADMIN account (educonnets.com@gmail.com): verifies admin role and dispatches dynamic OTP via Resend.
    * Session cookie is NOT created until OTP is verified.
    */
   static async loginUser(input: LoginInput) {
-    const user = await this.validateCredentials(input.email, input.password);
+    const normalizedEmail = input.email.toLowerCase().trim();
+    const user = await prisma.user.findUnique({
+      where: { email: normalizedEmail },
+      include: { profile: true },
+    });
+
+    if (!user) {
+      await logAuditEvent(null, "LOGIN_FAILED", { email: normalizedEmail });
+      throw new Error("Invalid email or password.");
+    }
+
+    if (user.status !== "ACTIVE") {
+      await logAuditEvent(user.id, "LOGIN_BLOCKED_INACTIVE", { email: normalizedEmail, status: user.status });
+      throw new Error("Your account is currently inactive or suspended. Please contact system support.");
+    }
+
+    const isAdmin = user.role === "ADMIN";
+
+    // Non-admin accounts require password validation
+    if (!isAdmin) {
+      if (!input.password) {
+        throw new Error("Password is required.");
+      }
+      const isMatch = await verifyPassword(input.password, user.passwordHash);
+      if (!isMatch) {
+        await logAuditEvent(user.id, "LOGIN_FAILED", { email: user.email });
+        throw new Error("Invalid email or password.");
+      }
+    } else {
+      // If admin entered password, verify it
+      if (input.password) {
+        const isMatch = await verifyPassword(input.password, user.passwordHash);
+        if (!isMatch) {
+          await logAuditEvent(user.id, "LOGIN_FAILED", { email: user.email });
+          throw new Error("Invalid email or password.");
+        }
+      }
+
+      // Check resend cooldown for admin login requests to prevent spamming OTP generation
+      const cooldownSeconds = getResendCooldownSeconds();
+      const latestVerification = await prisma.emailVerification.findFirst({
+        where: { userId: user.id },
+        orderBy: { createdAt: "desc" },
+      });
+      if (latestVerification) {
+        const secondsSinceLast = Math.floor((Date.now() - latestVerification.createdAt.getTime()) / 1000);
+        if (secondsSinceLast < cooldownSeconds) {
+          const waitTime = cooldownSeconds - secondsSinceLast;
+          throw new Error(`Please wait ${waitTime} seconds before requesting another code.`);
+        }
+      }
+    }
 
     // Generate and dispatch fresh 6-digit OTP to user's email
-    await this.createAndSendVerification(user.id, user.email, user.profile?.firstName || "Learner");
+    await this.createAndSendVerification(
+      user.id,
+      user.email,
+      user.profile?.firstName || (isAdmin ? "System Administrator" : "Learner"),
+      isAdmin
+    );
 
     await logAuditEvent(user.id, "LOGIN_OTP_DISPATCHED", { role: user.role });
 
@@ -812,8 +873,8 @@ export class AuthService {
       email: user.email,
       role: user.role as UserRole,
       emailVerified: false,
-      firstName: user.profile?.firstName || "User",
-      lastName: user.profile?.lastName || "",
+      firstName: user.profile?.firstName || (isAdmin ? "System" : "User"),
+      lastName: user.profile?.lastName || (isAdmin ? "Administrator" : ""),
       requiresOtp: true,
       requiresVerification: true,
     };

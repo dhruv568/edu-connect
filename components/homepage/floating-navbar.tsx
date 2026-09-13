@@ -29,6 +29,7 @@ import {
 } from "lucide-react";
 import { GlassButton } from "@/components/glass/glass-button";
 import { UserSession } from "@/types/auth";
+import { isEducatorRole, isLearnerRole, isAdminRole } from "@/lib/auth/roles";
 import {
   getMainDomain,
   getLiveDomain,
@@ -201,7 +202,9 @@ export function FloatingNavbar({ variant }: FloatingNavbarProps = {}) {
       // 3. Hard redirect to prevent bfcache / memory restoration
       if (role === "TEACHER") {
         window.location.replace("/teacher/logout");
-      } else if (role === "ADMIN" || role === "STAFF") {
+      } else if (isEducatorRole(role)) {
+        window.location.replace("/teacher/logout");
+      } else if (isAdminRole(role)) {
         window.location.replace("/login");
       } else {
         window.location.replace("/student/login");
@@ -251,14 +254,14 @@ export function FloatingNavbar({ variant }: FloatingNavbarProps = {}) {
 
   // Role-derived Portal Destinations & Labels (Strictly derived from server auth truth)
   const getDashboardPath = (session: UserSession) => {
-    if (session.role === "TEACHER") return getEducatorSubdomainUrl("/teacher/dashboard");
+    if (isEducatorRole(session.role)) return getEducatorSubdomainUrl("/teacher/dashboard");
     if (session.role === "ADMIN") return "/admin";
     if (session.role === "STAFF") return "/staff/dashboard";
     return getLearnerSubdomainUrl("/student/dashboard");
   };
 
   const getDashboardLabel = (session: UserSession) => {
-    if (session.role === "TEACHER") return "Educator Portal";
+    if (isEducatorRole(session.role)) return "Educator Portal";
     if (session.role === "ADMIN") return "Admin Governance";
     if (session.role === "STAFF") return "Staff Dashboard";
     return "Learner Portal";
@@ -613,7 +616,7 @@ export function FloatingNavbar({ variant }: FloatingNavbarProps = {}) {
               /* STATE 2: Authenticated User (Strictly Role-Aware) */
               <div className="flex items-center gap-3">
                 {/* A. Role-Specific Portal Button */}
-                {userSession.role === "STUDENT" ? (
+                {(userSession.role === "STUDENT" || isLearnerRole(userSession.role)) ? (
                   <Link
                     href={getLearnerSubdomainUrl("/student/dashboard")}
                     className="h-9 px-3.5 sm:px-4 rounded-xl text-xs sm:text-sm font-bold text-white bg-blue-600 hover:bg-blue-700 shadow-xs hover:shadow-md transition-all flex items-center gap-2 active:scale-95 cursor-pointer"
@@ -621,7 +624,7 @@ export function FloatingNavbar({ variant }: FloatingNavbarProps = {}) {
                     <LayoutDashboard className="h-4 w-4 text-blue-100" />
                     <span>Learner Portal</span>
                   </Link>
-                ) : userSession.role === "TEACHER" ? (
+                ) : (userSession.role === "TEACHER" || isEducatorRole(userSession.role)) ? (
                   <Link
                     href={getEducatorSubdomainUrl("/teacher/dashboard")}
                     className="h-9 px-3.5 sm:px-4 rounded-xl text-xs sm:text-sm font-bold text-white bg-[#16805B] hover:bg-[#0D5C41] shadow-xs hover:shadow-md transition-all flex items-center gap-2 active:scale-95 cursor-pointer"
@@ -669,9 +672,9 @@ export function FloatingNavbar({ variant }: FloatingNavbarProps = {}) {
                     ) : (
                       <div
                         className={`w-7 h-7 sm:w-8 sm:h-8 rounded-lg text-white font-black text-xs flex items-center justify-center shadow-2xs ${
-                          userSession.role === "STUDENT"
+                          isLearnerRole(userSession.role)
                             ? "bg-blue-600"
-                            : userSession.role === "TEACHER"
+                            : isEducatorRole(userSession.role)
                             ? "bg-[#16805B]"
                             : "bg-[#0B4F4B]"
                         }`}
@@ -685,9 +688,9 @@ export function FloatingNavbar({ variant }: FloatingNavbarProps = {}) {
                         {getUserDisplayName(userSession)}
                       </span>
                       <span className="text-[10px] text-slate-500 font-medium leading-none">
-                        {userSession.role === "STUDENT"
+                        {isLearnerRole(userSession.role)
                           ? "Learner"
-                          : userSession.role === "TEACHER"
+                          : isEducatorRole(userSession.role)
                           ? "Educator"
                           : userSession.role === "ADMIN"
                           ? "Admin"
@@ -719,16 +722,16 @@ export function FloatingNavbar({ variant }: FloatingNavbarProps = {}) {
                             </span>
                             <span
                               className={`text-[9px] font-black uppercase px-2 py-0.5 rounded-full ${
-                                userSession.role === "STUDENT"
+                                isLearnerRole(userSession.role)
                                   ? "bg-blue-100 text-blue-700"
-                                  : userSession.role === "TEACHER"
+                                  : isEducatorRole(userSession.role)
                                   ? "bg-emerald-100 text-emerald-700"
                                   : "bg-amber-100 text-amber-800"
                               }`}
                             >
-                              {userSession.role === "STUDENT"
+                              {isLearnerRole(userSession.role)
                                 ? "Learner"
-                                : userSession.role === "TEACHER"
+                                : isEducatorRole(userSession.role)
                                 ? "Educator"
                                 : "Administrator"}
                             </span>
@@ -741,7 +744,7 @@ export function FloatingNavbar({ variant }: FloatingNavbarProps = {}) {
                         </div>
 
                         {/* Dropdown Links based on authenticated role */}
-                        {userSession.role === "STUDENT" && (
+                        {(userSession.role === "STUDENT" || isLearnerRole(userSession.role)) && (
                           <>
                             <Link
                               href={getLearnerSubdomainUrl("/student/dashboard")}
@@ -767,7 +770,7 @@ export function FloatingNavbar({ variant }: FloatingNavbarProps = {}) {
                           </>
                         )}
 
-                        {userSession.role === "TEACHER" && (
+                        {(userSession.role === "TEACHER" || isEducatorRole(userSession.role)) && (
                           <>
                             <Link
                               href={getEducatorSubdomainUrl("/teacher/dashboard")}
@@ -800,7 +803,7 @@ export function FloatingNavbar({ variant }: FloatingNavbarProps = {}) {
                           </>
                         )}
 
-                        {(userSession.role === "ADMIN" || userSession.role === "STAFF") && (
+                        {isAdminRole(userSession.role) && (
                           <Link
                             href={userSession.role === "ADMIN" ? "/admin" : "/staff/dashboard"}
                             className="flex items-center gap-2.5 px-3 py-2 rounded-xl text-xs font-semibold text-slate-700 hover:text-teal-800 hover:bg-teal-50 transition-colors cursor-pointer"
@@ -881,9 +884,9 @@ export function FloatingNavbar({ variant }: FloatingNavbarProps = {}) {
                   <div className="flex items-center gap-3">
                     <div
                       className={`w-10 h-10 rounded-xl text-white font-black text-sm flex items-center justify-center ${
-                        userSession.role === "STUDENT"
+                        userSession.role === "STUDENT" || isLearnerRole(userSession.role)
                           ? "bg-blue-600"
-                          : userSession.role === "TEACHER"
+                          : userSession.role === "TEACHER" || isEducatorRole(userSession.role)
                           ? "bg-[#16805B]"
                           : "bg-[#0B4F4B]"
                       }`}
@@ -901,16 +904,16 @@ export function FloatingNavbar({ variant }: FloatingNavbarProps = {}) {
                   </div>
                   <span
                     className={`text-[9px] font-black uppercase px-2 py-0.5 rounded-full ${
-                      userSession.role === "STUDENT"
+                      userSession.role === "STUDENT" || isLearnerRole(userSession.role)
                         ? "bg-blue-100 text-blue-700"
-                        : userSession.role === "TEACHER"
+                        : userSession.role === "TEACHER" || isEducatorRole(userSession.role)
                         ? "bg-emerald-100 text-emerald-700"
                         : "bg-amber-100 text-amber-800"
                     }`}
                   >
-                    {userSession.role === "STUDENT"
+                    {userSession.role === "STUDENT" || isLearnerRole(userSession.role)
                       ? "Learner"
-                      : userSession.role === "TEACHER"
+                      : userSession.role === "TEACHER" || isEducatorRole(userSession.role)
                       ? "Educator"
                       : "Admin"}
                   </span>
@@ -1091,9 +1094,9 @@ export function FloatingNavbar({ variant }: FloatingNavbarProps = {}) {
                       href={getDashboardPath(userSession)}
                       onClick={() => setMobileOpen(false)}
                       className={`w-full py-2.5 rounded-xl text-white text-sm font-bold shadow-xs transition-colors flex items-center justify-center gap-2 cursor-pointer ${
-                        userSession.role === "STUDENT"
+                        isLearnerRole(userSession.role)
                           ? "bg-blue-600 hover:bg-blue-700"
-                          : userSession.role === "TEACHER"
+                          : isEducatorRole(userSession.role)
                           ? "bg-[#16805B] hover:bg-[#0D5C41]"
                           : "bg-[#0B4F4B] hover:bg-[#073F3C]"
                       }`}

@@ -45,6 +45,9 @@ export async function POST(request: NextRequest) {
     }
 
     // 4. Validate credentials
+    if (!validatedData.password) {
+      return apiError("Password is required for staff login.", 400);
+    }
     await AuthService.validateCredentials(normalizedEmail, validatedData.password);
 
     // 5. If OTP provided, verify and establish session

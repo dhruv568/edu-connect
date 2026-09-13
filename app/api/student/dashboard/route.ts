@@ -5,7 +5,7 @@ import { apiError, apiSuccess } from "@/lib/api-response";
 
 export async function GET(req: NextRequest) {
   try {
-    const session = await requireRole(["STUDENT"]);
+    const session = await requireRole(["STUDENT", "LEARNER"]);
     const dashboardData = await AnalyticsService.getStudentDashboardData(session.userId);
 
     return apiSuccess(dashboardData);

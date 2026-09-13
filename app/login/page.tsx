@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { FloatingNavbar } from "@/components/homepage/floating-navbar";
@@ -10,6 +10,7 @@ import { GlassBadge } from "@/components/glass/glass-badge";
 import { GlassButton } from "@/components/glass/glass-button";
 import { Input } from "@/components/ui/input";
 import { useToast } from "@/components/ui/toast";
+import { isEducatorRole, isLearnerRole } from "@/lib/auth/roles";
 import { LogIn, Mail, Lock, ArrowRight, Sparkles } from "lucide-react";
 
 export default function LoginPage() {
@@ -19,6 +20,44 @@ export default function LoginPage() {
 
   const router = useRouter();
   const { showToast } = useToast();
+
+  // Authentication & Back-Button (bfcache) Protection
+  useEffect(() => {
+    const checkAuthenticatedState = async () => {
+      try {
+        const res = await fetch("/api/auth/me", {
+          cache: "no-store",
+          headers: { Pragma: "no-cache" },
+        });
+        if (res.ok) {
+          const json = await res.json();
+          if (json?.data?.user) {
+            const role = json.data.user.role;
+            if (isEducatorRole(role)) {
+              window.location.replace("/teacher/dashboard");
+            } else if (isLearnerRole(role)) {
+              window.location.replace("/student/dashboard");
+            } else if (role === "ADMIN") {
+              window.location.replace("/admin");
+            } else if (role === "STAFF") {
+              window.location.replace("/staff/dashboard");
+            } else {
+              window.location.replace("/");
+            }
+          }
+        }
+      } catch {}
+    };
+
+    checkAuthenticatedState();
+
+    const onPageShow = (event: PageTransitionEvent) => {
+      checkAuthenticatedState();
+    };
+
+    window.addEventListener("pageshow", onPageShow);
+    return () => window.removeEventListener("pageshow", onPageShow);
+  }, []);
 
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -36,10 +75,11 @@ export default function LoginPage() {
 
       if (data.data?.requiresVerification || data.data?.requiresOtp) {
         showToast("Verification Code Sent ✉️", "Please enter the 6-digit OTP code sent to your email to complete login.", "info");
+        router.push(data.data.redirectPath || `/verify-email?email=${encodeURIComponent(email)}`);
       } else {
-        showToast("Welcome Back!", `Signed in as ${data.data.user.firstName}`, "success");
+        showToast("Welcome Back!", `Signed in as ${data.data.user.firstName || "User"}`, "success");
+        window.location.replace(data.data.redirectPath || "/");
       }
-      router.push(data.data.redirectPath || `/verify-email?email=${encodeURIComponent(email)}`);
     } catch (err: any) {
       showToast("Authentication Error", err.message, "error");
     } finally {
@@ -170,7 +210,7 @@ export default function LoginPage() {
                     }}
                     className="px-2.5 py-1.5 bg-indigo-50 text-indigo-700 rounded-lg font-bold border border-indigo-100 hover:bg-indigo-100 transition-colors"
                   >
-                    Teacher Demo
+                    Educator Demo
                   </button>
                   <button
                     type="button"
@@ -180,7 +220,7 @@ export default function LoginPage() {
                     }}
                     className="px-2.5 py-1.5 bg-emerald-50 text-emerald-700 rounded-lg font-bold border border-emerald-100 hover:bg-emerald-100 transition-colors"
                   >
-                    Student Demo
+                    Learner Demo
                   </button>
                 </div>
               </div>

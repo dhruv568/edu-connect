@@ -17,11 +17,11 @@ export class ResendEmailProvider implements IEmailProvider {
     this.domainId = process.env.RESEND_DOMAIN_ID;
 
     const fromName = process.env.RESEND_FROM_NAME || "EduConnects";
-    let fromEmail = process.env.RESEND_FROM_EMAIL || "onboarding@resend.dev";
+    let fromEmail = process.env.RESEND_FROM_EMAIL || "noreply@educonnects.co.in";
     
-    // If using placeholder or non-custom sender, fallback to Resend onboarding sender
+    // If using placeholder or non-custom sender, default to verified custom domain sender
     if (fromEmail.includes("no-reply@educonnects.com") || fromEmail.includes("example.com") || fromEmail.includes("@gmail.com")) {
-      fromEmail = "onboarding@resend.dev";
+      fromEmail = "noreply@educonnects.co.in";
     }
     
     if (fromEmail.includes("<")) {
@@ -56,7 +56,7 @@ export class ResendEmailProvider implements IEmailProvider {
       const headers = this.getCustomHeaders();
 
       const { data, error } = await this.resend.emails.send({
-        from: this.defaultFrom,
+        from: payload.from || this.defaultFrom,
         to: payload.to,
         subject: subject,
         html: html,

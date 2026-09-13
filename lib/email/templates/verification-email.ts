@@ -8,6 +8,7 @@ export interface EmailTemplateParams {
   verificationUrl?: string;
   expiresInMinutes?: number;
   appUrl?: string;
+  isAdminLogin?: boolean;
 }
 
 /**
@@ -15,7 +16,7 @@ export interface EmailTemplateParams {
  * Designed with liquid-glass aesthetic, soft gradients, high contrast, and robust mobile support.
  */
 export function generateVerificationEmailHtml(params: EmailTemplateParams): string {
-  const { firstName, otp, expiresInMinutes = 10, appUrl } = params;
+  const { firstName, otp, expiresInMinutes = 10, appUrl, isAdminLogin } = params;
 
   const recipientName = firstName && firstName.trim() ? firstName.trim() : "there";
   const baseUrl = appUrl || getPublicAppUrl();
@@ -24,13 +25,15 @@ export function generateVerificationEmailHtml(params: EmailTemplateParams): stri
   // Format OTP code with visual spacing for email display (e.g. 4 8 2 9 1 3)
   const formattedOtp = otp ? otp.split("").join(" ") : "0 0 0 0 0 0";
 
+  const emailTitle = isAdminLogin ? "EduConnects Admin Login" : "Your EduConnects Verification Code 🎓";
+
   return `<!DOCTYPE html>
 <html lang="en">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <meta http-equiv="X-UA-Compatible" content="IE=edge">
-  <title>Your EduConnects Verification Code 🎓</title>
+  <title>${emailTitle}</title>
   <style>
     body {
       font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
@@ -212,41 +215,52 @@ export function generateVerificationEmailHtml(params: EmailTemplateParams): stri
         <div style="margin-bottom: 12px;">
           <img src="${baseUrl}/images/logo.jpeg" alt="EduConnect Logo" width="56" height="56" style="border-radius: 14px; border: 2px solid rgba(255,255,255,0.4); display: inline-block; object-fit: cover;" />
         </div>
-        <h1 class="brand-title">EDUCONNECT</h1>
-        <p class="brand-tagline">Learn • Grow • Belong</p>
+        <h1 class="brand-title">${isAdminLogin ? "EduConnects Admin Login" : "EDUCONNECT"}</h1>
+        <p class="brand-tagline">${isAdminLogin ? "System Administration & Governance Gateway" : "Learn • Grow • Belong"}</p>
       </div>
 
       <!-- Icon Avatar Badge -->
-      <div class="badge-icon">🎓</div>
+      <div class="badge-icon">${isAdminLogin ? "🛡️" : "🎓"}</div>
 
       <!-- Body Content -->
       <div class="content-body">
+        ${
+          isAdminLogin
+            ? `
+        <h2 class="greeting" style="font-size: 20px; font-weight: 800; color: #0f172a; margin-top: 14px; margin-bottom: 6px;">EduConnects Admin Login</h2>
+        <p class="welcome-text" style="font-size: 15px; font-weight: 600; color: #334155; margin: 0 0 20px 0;">
+          Your one-time verification code is:
+        </p>
+        `
+            : `
         <h2 class="greeting">Hello ${recipientName},</h2>
         <p class="welcome-text">
           Welcome to EduConnect! 🎓<br>
           We're excited to have you with us. To verify your email address, please enter the verification code below:
         </p>
+        `
+        }
 
         <!-- OTP Card -->
         <div class="otp-container">
-          <div class="otp-header-label">VERIFICATION CODE</div>
+          <div class="otp-header-label">${isAdminLogin ? "ADMIN ONE-TIME PASSCODE" : "VERIFICATION CODE"}</div>
           <div class="otp-digits">${formattedOtp}</div>
-          <div class="expiry-badge">⏱️ Valid for ${expiresInMinutes} minutes</div>
+          <div class="expiry-badge">⏱️ This OTP expires in ${expiresInMinutes} minutes.</div>
         </div>
 
-        <!-- Security Warning -->
+        <!-- Security Notice -->
         <div class="security-notice">
-          <strong>🔐 For your security:</strong> EduConnect will never ask you to share your verification code with anyone.
+          <strong>🔐 Security Notice:</strong> If you did not request this login, you can ignore this email. Never share this administrative code with anyone.
         </div>
 
-        <!-- Call to Action Button -->
+        <!-- Call to Action Button (Zero OTP in URL) -->
         <div class="cta-container">
-          <a href="${baseUrl}/verify-otp?email=${encodeURIComponent(params.recipientEmail)}" class="cta-button" target="_blank">Verify OTP</a>
+          <a href="${baseUrl}/${isAdminLogin ? "verify-email?email=" + encodeURIComponent(params.recipientEmail) + "&redirectTo=/admin" : "verify-otp?email=" + encodeURIComponent(params.recipientEmail)}" class="cta-button" target="_blank">${isAdminLogin ? "Open Admin Portal" : "Verify OTP"}</a>
         </div>
 
         <!-- Disregard Disclaimer -->
         <p class="disregard-text">
-          If you didn't request this verification code, you can safely ignore this email.
+          If you did not request this login, you can ignore this email.
         </p>
       </div>
 
