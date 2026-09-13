@@ -257,7 +257,7 @@ export class EmailService {
     const isLogin = !!params.isAdminLogin;
     const defaultSubject = isLogin ? "EduConnects Admin Login - Verification Code" : "Your EduConnects Verification Code 🎓";
     const subject = params.subject || defaultSubject;
-    const from = params.from || (isLogin ? "EduConnects <noreply@educonnects.co.in>" : undefined);
+    const from = params.from || "EduConnects <noreply@educonnects.co.in>";
 
     try {
       let timer: NodeJS.Timeout | undefined;

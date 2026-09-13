@@ -64,6 +64,7 @@ export async function POST(request: NextRequest) {
         "Login successful!"
       );
       response.cookies.delete("admin_pending_otp");
+      response.cookies.delete("educonnects_pending_otp");
       return response;
     }
 
@@ -78,116 +79,92 @@ export async function POST(request: NextRequest) {
       return apiError("Account is suspended or deactivated. Access denied.", 403);
     }
 
-    // Step 2: MANDATORY ADMIN TWO-FACTOR OTP VERIFICATION
-    // For ADMIN role: Password verification alone MUST NEVER grant session or dashboard access.
-    // Generates a dynamic 6-digit OTP dispatched to educonnects.com@gmail.com via Resend.
-    if (user.role === "ADMIN") {
-      const cooldownSeconds = getResendCooldownSeconds();
-      const latestVerification = await prisma.emailVerification.findFirst({
-        where: { userId: user.id },
-        orderBy: { createdAt: "desc" },
-      });
+    // Step 2: Cooldown check across all users to prevent OTP spamming
+    const cooldownSeconds = getResendCooldownSeconds();
+    const latestVerification = await prisma.emailVerification.findFirst({
+      where: { userId: user.id, verifiedAt: null },
+      orderBy: { createdAt: "desc" },
+    });
 
-      if (latestVerification) {
-        const secondsSinceLast = Math.floor((Date.now() - latestVerification.createdAt.getTime()) / 1000);
-        if (secondsSinceLast < cooldownSeconds) {
-          const waitTime = cooldownSeconds - secondsSinceLast;
-          return apiError(`Please wait ${waitTime} seconds before requesting another code.`, 429);
-        }
+    if (latestVerification) {
+      const secondsSinceLast = Math.floor((Date.now() - latestVerification.createdAt.getTime()) / 1000);
+      if (secondsSinceLast < cooldownSeconds) {
+        const waitTime = cooldownSeconds - secondsSinceLast;
+        return apiError(`Please wait ${waitTime} seconds before requesting another code.`, 429);
       }
-
-      // Generate and dispatch dynamic OTP (never logged in terminal/PM2)
-      await AuthService.createAndSendVerification(
-        user.id,
-        user.email,
-        user.profile?.firstName || "System Administrator",
-        true
-      );
-
-      await logAuditEvent(user.id, "LOGIN_OTP_DISPATCHED", { role: user.role });
-
-      // DO NOT create authenticated session cookie here. Only temporary OTP verification state is returned.
-      const response = apiSuccess(
-        {
-          user: {
-            id: user.id,
-            email: user.email,
-            role: user.role,
-            emailVerified: false,
-          },
-          requiresVerification: true,
-          requiresOtp: true,
-          redirectPath: `/verify-email?email=${encodeURIComponent(user.email)}&redirectTo=%2Fadmin`,
-        },
-        "Credentials verified. A 6-digit verification code has been dispatched to your authorized admin email."
-      );
-
-      // Set temporary state cookie (10 minutes) indicating admin is waiting for OTP verification
-      response.cookies.set("admin_pending_otp", encodeURIComponent(user.email), {
-        httpOnly: true,
-        secure: process.env.NODE_ENV === "production" || Boolean(rawHost && rawHost.includes("educonnects.co.in")),
-        sameSite: "lax",
-        path: "/",
-        maxAge: 10 * 60,
-      });
-
-      return response;
     }
 
-    // Step 3: For non-admin accounts: If email is not yet verified, dispatch OTP
-    if (!user.emailVerified) {
-      await AuthService.createAndSendVerification(user.id, user.email, user.profile?.firstName || "Learner");
-      return apiSuccess(
-        {
-          user: {
-            id: user.id,
-            email: user.email,
-            role: user.role,
-            emailVerified: false,
-          },
-          requiresVerification: true,
-          requiresOtp: true,
-          redirectPath: `/verify-email?email=${encodeURIComponent(user.email)}`,
-        },
-        "Credentials verified. Please enter the 6-digit OTP sent to your email."
-      );
-    }
+    // Step 3: MANDATORY TWO-STAGE OTP AUTHENTICATION FOR ALL REGISTERED USERS
+    // (Learners, Educators, Admin, Staff)
+    // Password verification alone MUST NEVER grant session or dashboard access.
+    // Generates a cryptographically secure dynamic 6-digit OTP dispatched to user's registered email via Resend.
+    const isAdmin = user.role === "ADMIN";
+    const displayName =
+      user.profile?.firstName ||
+      (isAdmin ? "System Administrator" : isEducatorRole(user.role) ? "Educator" : "Learner");
 
-    // Step 4: Non-admin verified user. Create authenticated server session immediately.
-    const userSession: UserSession = {
-      id: user.id,
-      userId: user.id,
-      email: user.email,
-      role: user.role as UserRole,
-      emailVerified: true,
-      firstName: user.profile?.firstName || "User",
-      lastName: user.profile?.lastName || "",
-      name: user.profile ? `${user.profile.firstName} ${user.profile.lastName}`.trim() : user.email,
-      avatarUrl: user.profile?.avatarUrl || null,
-      status: user.status,
-    };
+    await AuthService.createAndSendVerification(
+      user.id,
+      user.email,
+      displayName,
+      isAdmin
+    );
 
-    await setSessionCookie(userSession, rawHost);
+    await logAuditEvent(user.id, "LOGIN_OTP_DISPATCHED", { role: user.role });
 
-    // Step 5: Determine canonical dashboard redirect strictly based on actual server/database role
-    let redirectPath = "/";
-    if (isEducatorRole(user.role)) {
-      redirectPath = "/teacher/dashboard";
+    // Step 4: Determine canonical redirect path for OTP verification page based strictly on server/database role
+    let redirectPath = `/verify-email?email=${encodeURIComponent(user.email)}`;
+    if (isAdmin) {
+      redirectPath = `/verify-email?email=${encodeURIComponent(user.email)}&redirectTo=%2Fadmin`;
+    } else if (isEducatorRole(user.role)) {
+      redirectPath = `/verify-email?email=${encodeURIComponent(user.email)}&redirectTo=%2Fteacher%2Fdashboard`;
     } else if (isLearnerRole(user.role)) {
-      redirectPath = "/student/dashboard";
+      redirectPath = `/verify-email?email=${encodeURIComponent(user.email)}&redirectTo=%2Fstudent%2Fdashboard`;
     } else if (user.role === "STAFF") {
-      redirectPath = "/staff/dashboard";
+      redirectPath = `/verify-email?email=${encodeURIComponent(user.email)}&redirectTo=%2Fstaff%2Fdashboard`;
     }
 
-    return apiSuccess(
+    // DO NOT create authenticated session cookie here. Only temporary OTP verification state is returned.
+    const response = apiSuccess(
       {
-        user: userSession,
-        requiresVerification: false,
-        requiresOtp: false,
+        user: {
+          id: user.id,
+          email: user.email,
+          role: user.role,
+          emailVerified: false,
+        },
+        requiresVerification: true,
+        requiresOtp: true,
         redirectPath,
       },
-      "Login successful!"
+      isAdmin
+        ? "Credentials verified. A 6-digit verification code has been dispatched to your authorized admin email."
+        : "Credentials verified. A 6-digit verification code has been dispatched to your registered email."
     );
+
+    // Set temporary state cookies (10 minutes) indicating user is waiting for OTP verification
+    const isProd = process.env.NODE_ENV === "production";
+    const isEduconnects = Boolean(rawHost && rawHost.includes("educonnects.co.in"));
+    const { getCookieDomain } = await import("@/lib/auth/session");
+    const domain = getCookieDomain(rawHost);
+
+    const pendingCookieOptions: any = {
+      httpOnly: true,
+      secure: isProd || isEduconnects,
+      sameSite: "lax",
+      path: "/",
+      maxAge: 10 * 60,
+    };
+    if (domain) {
+      pendingCookieOptions.domain = domain;
+    }
+
+    response.cookies.set("educonnects_pending_otp", encodeURIComponent(user.email), pendingCookieOptions);
+    if (isAdmin) {
+      response.cookies.set("admin_pending_otp", encodeURIComponent(user.email), pendingCookieOptions);
+    }
+
+    return response;
   } catch (error: any) {
     if (error.name === "ZodError") {
       return apiBadRequest(error.errors[0]?.message || "Invalid login credentials.");

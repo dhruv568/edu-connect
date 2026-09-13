@@ -60,6 +60,14 @@ export default function StudentLoginPage() {
 
     checkAuthenticatedState();
 
+    try {
+      const searchParams = new URLSearchParams(window.location.search);
+      if (searchParams.get("restart") === "true") {
+        document.cookie = "educonnects_pending_otp=; path=/; max-age=0;";
+        document.cookie = "admin_pending_otp=; path=/; max-age=0;";
+      }
+    } catch {}
+
     const onPageShow = (event: PageTransitionEvent) => {
       checkAuthenticatedState();
     };
@@ -88,7 +96,7 @@ export default function StudentLoginPage() {
           "Please enter the 6-digit OTP code sent to your email to complete login.",
           "info"
         );
-        router.push(`/verify-email?email=${encodeURIComponent(email)}`);
+        router.push(data.data.redirectPath || `/verify-email?email=${encodeURIComponent(email)}&redirectTo=/student/dashboard`);
       } else {
         showToast("Welcome Back!", `Signed in as ${data.data.user.firstName || "Learner"}`, "success");
         // Hard navigate to bypass client router cache

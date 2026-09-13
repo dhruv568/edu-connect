@@ -51,6 +51,14 @@ export default function LoginPage() {
 
     checkAuthenticatedState();
 
+    try {
+      const searchParams = new URLSearchParams(window.location.search);
+      if (searchParams.get("restart") === "true") {
+        document.cookie = "educonnects_pending_otp=; path=/; max-age=0;";
+        document.cookie = "admin_pending_otp=; path=/; max-age=0;";
+      }
+    } catch {}
+
     const onPageShow = (event: PageTransitionEvent) => {
       checkAuthenticatedState();
     };

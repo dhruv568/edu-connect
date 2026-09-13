@@ -173,9 +173,9 @@ function VerifyEmailForm() {
             <div className="w-16 h-16 bg-emerald-100 text-emerald-600 rounded-full flex items-center justify-center mx-auto animate-bounce">
               <CheckCircle2 className="h-10 w-10" />
             </div>
-            <h2 className="text-2xl font-extrabold text-slate-900">Email Verified!</h2>
+            <h2 className="text-2xl font-extrabold text-slate-900">Verification Complete!</h2>
             <p className="text-sm text-slate-600">
-              Your EduConnects account is verified. Redirecting to your dashboard...
+              Identity confirmed. Redirecting to your dashboard...
             </p>
             <Button
               variant="gradient"
@@ -242,10 +242,14 @@ function VerifyEmailForm() {
                   className="w-full h-12 text-base font-bold"
                   isLoading={loading}
                 >
-                  {redirectTo === "/admin" ? "Verify Admin OTP & Sign In" : "Verify Email"}
+                  {redirectTo === "/admin"
+                    ? "Verify Admin OTP & Sign In"
+                    : redirectTo?.includes("/teacher")
+                    ? "Verify Educator OTP & Sign In"
+                    : redirectTo?.includes("/student")
+                    ? "Verify Learner OTP & Sign In"
+                    : "Verify OTP & Continue"}
                 </Button>
-
-
               </form>
             )}
 
@@ -257,10 +261,24 @@ function VerifyEmailForm() {
                 >
                   ← Admin Login
                 </a>
+              ) : redirectTo?.includes("/teacher") ? (
+                <a
+                  href="/teacher/login?restart=true"
+                  className="text-slate-500 hover:text-slate-800 font-semibold flex items-center gap-1 transition-colors"
+                >
+                  ← Educator Login
+                </a>
+              ) : redirectTo?.includes("/student") ? (
+                <a
+                  href="/student/login?restart=true"
+                  className="text-slate-500 hover:text-slate-800 font-semibold flex items-center gap-1 transition-colors"
+                >
+                  ← Learner Login
+                </a>
               ) : (
                 <BackButton
-                  fallbackUrl="/"
-                  label="Back Home"
+                  fallbackUrl="/login?restart=true"
+                  label="Back to Login"
                   variant="ghost"
                 />
               )}

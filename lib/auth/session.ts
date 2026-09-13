@@ -143,6 +143,7 @@ export function applyLogoutCookies<T extends Response>(response: T, host?: strin
       "educonnects_token",
       "token",
       "admin_pending_otp",
+      "educonnects_pending_otp",
     ])
   );
 

@@ -235,8 +235,8 @@ export function generateVerificationEmailHtml(params: EmailTemplateParams): stri
             : `
         <h2 class="greeting">Hello ${recipientName},</h2>
         <p class="welcome-text">
-          Welcome to EduConnect! 🎓<br>
-          We're excited to have you with us. To verify your email address, please enter the verification code below:
+          Welcome to EduConnects! 🎓<br>
+          Your one-time verification code is below. Enter this code to verify your identity and access your dashboard:
         </p>
         `
         }
@@ -250,7 +250,7 @@ export function generateVerificationEmailHtml(params: EmailTemplateParams): stri
 
         <!-- Security Notice -->
         <div class="security-notice">
-          <strong>🔐 Security Notice:</strong> If you did not request this login, you can ignore this email. Never share this administrative code with anyone.
+          <strong>🔐 Security Notice:</strong> If you did not request this login or verification, you can safely ignore this email. Never share this verification code with anyone.
         </div>
 
         <!-- Call to Action Button (Zero OTP in URL) -->

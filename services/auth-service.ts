@@ -6,6 +6,7 @@ import { RegisterInput, LoginInput } from "@/schemas/auth-schemas";
 import { UserRole, UserSession, VerificationResult } from "@/types/auth";
 import { logAuditEvent } from "@/lib/audit-logger";
 import { getVerificationUrl, getPasswordResetUrl } from "@/lib/app-url";
+import { getDashboardPathForRole, isEducatorRole } from "@/lib/auth/roles";
 
 const getOtpExpiryMinutes = () => Number(process.env.OTP_EXPIRY_MINUTES) || 10;
 const getMaxAttempts = () => Number(process.env.OTP_MAX_ATTEMPTS) || 5;
@@ -411,7 +412,7 @@ export class AuthService {
         lastName: createdUser.profile?.lastName || "",
       };
 
-      const redirectPath = createdUser.role === "ADMIN" ? "/admin" : `/${createdUser.role.toLowerCase()}/dashboard`;
+      const redirectPath = createdUser.role === "ADMIN" ? "/admin" : getDashboardPathForRole(createdUser.role);
 
       return {
         success: true,
@@ -511,7 +512,7 @@ export class AuthService {
       lastName: user.profile?.lastName || "",
     };
 
-    const redirectPath = user.role === "ADMIN" ? "/admin" : `/${user.role.toLowerCase()}/dashboard`;
+    const redirectPath = user.role === "ADMIN" ? "/admin" : getDashboardPathForRole(user.role);
 
     return {
       success: true,
@@ -822,47 +823,37 @@ export class AuthService {
 
     const isAdmin = user.role === "ADMIN";
 
-    // Non-admin accounts require password validation
-    if (!isAdmin) {
-      if (!input.password) {
-        throw new Error("Password is required.");
-      }
-      const isMatch = await verifyPassword(input.password, user.passwordHash);
-      if (!isMatch) {
-        await logAuditEvent(user.id, "LOGIN_FAILED", { email: user.email });
-        throw new Error("Invalid email or password.");
-      }
-    } else {
-      // Admin accounts ALWAYS require password validation
-      if (!input.password) {
-        throw new Error("Password is required for admin authentication.");
-      }
-      const isMatch = await verifyPassword(input.password, user.passwordHash);
-      if (!isMatch) {
-        await logAuditEvent(user.id, "LOGIN_FAILED", { email: user.email });
-        throw new Error("Invalid email or password.");
-      }
+    if (!input.password) {
+      throw new Error(isAdmin ? "Password is required for admin authentication." : "Password is required.");
+    }
 
-      // Check resend cooldown for admin login requests to prevent spamming OTP generation
-      const cooldownSeconds = getResendCooldownSeconds();
-      const latestVerification = await prisma.emailVerification.findFirst({
-        where: { userId: user.id },
-        orderBy: { createdAt: "desc" },
-      });
-      if (latestVerification) {
-        const secondsSinceLast = Math.floor((Date.now() - latestVerification.createdAt.getTime()) / 1000);
-        if (secondsSinceLast < cooldownSeconds) {
-          const waitTime = cooldownSeconds - secondsSinceLast;
-          throw new Error(`Please wait ${waitTime} seconds before requesting another code.`);
-        }
+    const isMatch = await verifyPassword(input.password, user.passwordHash);
+    if (!isMatch) {
+      await logAuditEvent(user.id, "LOGIN_FAILED", { email: user.email });
+      throw new Error("Invalid email or password.");
+    }
+
+    // Check resend cooldown for login requests to prevent spamming OTP generation
+    const cooldownSeconds = getResendCooldownSeconds();
+    const latestVerification = await prisma.emailVerification.findFirst({
+      where: { userId: user.id, verifiedAt: null },
+      orderBy: { createdAt: "desc" },
+    });
+    if (latestVerification) {
+      const secondsSinceLast = Math.floor((Date.now() - latestVerification.createdAt.getTime()) / 1000);
+      if (secondsSinceLast < cooldownSeconds) {
+        const waitTime = cooldownSeconds - secondsSinceLast;
+        throw new Error(`Please wait ${waitTime} seconds before requesting another code.`);
       }
     }
 
-    // Generate and dispatch fresh 6-digit OTP to user's email
+    const displayName = user.profile?.firstName || (isAdmin ? "System Administrator" : isEducatorRole(user.role) ? "Educator" : "Learner");
+
+    // Generate and dispatch fresh 6-digit OTP to user's registered email
     await this.createAndSendVerification(
       user.id,
       user.email,
-      user.profile?.firstName || (isAdmin ? "System Administrator" : "Learner"),
+      displayName,
       isAdmin
     );
 
