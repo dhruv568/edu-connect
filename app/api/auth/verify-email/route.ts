@@ -35,6 +35,16 @@ export async function POST(request: NextRequest) {
     }
 
     const response = apiSuccess(result, result.message);
+    if (result.user) {
+      const { encodeSession } = await import("@/lib/auth/session");
+      response.cookies.set("educonnects_session", encodeSession(result.user), {
+        httpOnly: true,
+        secure: process.env.NODE_ENV === "production",
+        sameSite: "lax",
+        path: "/",
+        maxAge: 7 * 24 * 60 * 60,
+      });
+    }
     response.cookies.delete("admin_pending_otp");
     return response;
   } catch (error: any) {

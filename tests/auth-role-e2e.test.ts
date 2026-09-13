@@ -11,7 +11,7 @@ async function runE2ESuite() {
   let passed = 0;
   let failed = 0;
 
-  function record(name, ok, details) {
+  function record(name: string, ok: boolean, details: string) {
     if (ok) {
       console.log(`  [PASS] ${name}`);
       console.log(`      -> ${details}`);

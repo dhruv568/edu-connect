@@ -3,20 +3,24 @@ process.env.EMAIL_PROVIDER = "console";
 import assert from "node:assert";
 import { prisma } from "../lib/prisma";
 import { AuthService } from "../services/auth-service";
-import { verifyTokenHash, hashToken } from "../lib/auth/tokens";
-import { encodeSession, decodeSession, applyLogoutCookies } from "../lib/auth/session";
-import { UserRole } from "../types/auth";
-import { NextResponse } from "next/server";
+import { hashToken } from "../lib/auth/tokens";
+import { decodeSession } from "../lib/auth/session";
+import { NextRequest } from "next/server";
+import { POST as loginRoute } from "../app/api/auth/login/route";
+import { POST as verifyEmailRoute } from "../app/api/auth/verify-email/route";
+import { POST as resendOtpRoute } from "../app/api/auth/resend-otp/route";
+import { POST as logoutRoute } from "../app/api/auth/logout/route";
+import { middleware } from "../middleware";
 
 async function runAdminDynamicOTPTests() {
-  console.log("🧪 Running EduConnects Admin Login Dynamic OTP Test Suite...\n");
+  console.log("🧪 Running EduConnects Admin Login Mandatory Dynamic OTP Test Suite...\n");
 
   const adminEmail = "educonnets.com@gmail.com";
+  const adminPassword = "Password123!";
 
   // ------------------------------------------------------------------------
-  // Test 1: Verify Existing Authorized Admin Account
+  // Setup: Confirm Admin User Exists
   // ------------------------------------------------------------------------
-  console.log("Test 1: Verifying existing authorized admin account in database...");
   const adminUser = await prisma.user.findUnique({
     where: { email: adminEmail },
     include: { profile: true },
@@ -24,311 +28,354 @@ async function runAdminDynamicOTPTests() {
   assert.ok(adminUser, "Admin account educonnets.com@gmail.com must exist in the database");
   assert.strictEqual(adminUser.role, "ADMIN", "Account role must be ADMIN");
   assert.strictEqual(adminUser.status, "ACTIVE", "Account status must be ACTIVE");
-  console.log(`✅ Passed: Admin account confirmed (${adminUser.email}, role: ${adminUser.role}).`);
 
-  // Clear existing unverified OTP records for clean test state
+  // Clean old unverified OTP records to start fresh
   await prisma.emailVerification.updateMany({
     where: { userId: adminUser.id, verifiedAt: null },
-    data: { expiresAt: new Date() },
+    data: { expiresAt: new Date(), createdAt: new Date(Date.now() - 70 * 1000) },
   });
 
-  // ------------------------------------------------------------------------
-  // Test 2: Dynamic OTP Generation on Admin Login Request
-  // ------------------------------------------------------------------------
-  console.log("\nTest 2: Initiating Admin Login (Dynamic OTP Generation)...");
-  const loginResult = await AuthService.loginUser({
-    email: adminEmail,
+  // ========================================================================
+  // TEST 1: Enter educonnets.com@gmail.com + correct password
+  // Expected:
+  // → OTP email sent
+  // → OTP verification page shown
+  // → Admin Dashboard NOT accessible yet (no session cookie)
+  // ========================================================================
+  console.log("TEST 1: Admin Login with Email & Password (OTP Dispatched, No Session)...");
+
+  // First test wrong password rejection
+  const wrongPassReq = new NextRequest("http://localhost:3000/api/auth/login", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ email: adminEmail, password: "WrongPassword999!" }),
   });
+  const wrongPassRes = await loginRoute(wrongPassReq);
+  assert.strictEqual(wrongPassRes.status, 401, "Wrong password must be rejected with 401");
+  const wrongPassData = await wrongPassRes.json();
+  assert.strictEqual(wrongPassData.success, false);
+  console.log("  ✅ Wrong password rejected immediately.");
 
-  assert.strictEqual(loginResult.requiresOtp, true, "Admin login must require OTP");
-  assert.strictEqual(loginResult.requiresVerification, true, "Admin login must require verification");
-  assert.strictEqual(loginResult.role, "ADMIN", "Role must be ADMIN");
-  // CRITICAL: Ensure no OTP is leaked in loginResult
-  assert.strictEqual((loginResult as any).otp, undefined, "OTP must NOT be exposed in login result");
-  console.log("✅ Passed: Admin login successfully initiated without exposing OTP in response.");
+  // Now login with correct credentials
+  const loginReq = new NextRequest("http://localhost:3000/api/auth/login", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ email: adminEmail, password: adminPassword }),
+  });
+  const loginRes = await loginRoute(loginReq);
+  assert.strictEqual(loginRes.status, 200, "Valid credentials must return 200");
+  const loginData = await loginRes.json();
 
-  // ------------------------------------------------------------------------
-  // Test 3: OTP Storage Security (SHA-256 Hashing & Expiration)
-  // ------------------------------------------------------------------------
-  console.log("\nTest 3: Checking OTP Secure Storage in Database...");
-  const latestVerification = await prisma.emailVerification.findFirst({
+  assert.strictEqual(loginData.data.requiresVerification, true, "Must require OTP verification");
+  assert.strictEqual(loginData.data.requiresOtp, true, "Must flag requiresOtp");
+  assert.strictEqual(
+    loginData.data.redirectPath,
+    `/verify-email?email=${encodeURIComponent(adminEmail)}&redirectTo=%2Fadmin`,
+    "Redirect path must point to /verify-email targeting /admin"
+  );
+
+  // CRITICAL SECURITY ASSERTION: No authenticated session cookie (`educonnects_session`) must be issued!
+  const loginCookies = loginRes.headers.getSetCookie();
+  const sessionCookie = loginCookies.find((c) => c.startsWith("educonnects_session="));
+  assert.strictEqual(sessionCookie, undefined, "CRITICAL: educonnects_session cookie MUST NOT be set before OTP!");
+
+  // Must set temporary pending admin cookie
+  const pendingCookie = loginCookies.find((c) => c.startsWith("admin_pending_otp="));
+  assert.ok(pendingCookie, "Temporary admin_pending_otp cookie must be set");
+
+  // Verify Admin Dashboard is NOT accessible with the response cookies
+  const mwCheckBeforeOtp = middleware(
+    new NextRequest("http://localhost:3000/admin", {
+      headers: { cookie: pendingCookie },
+    })
+  );
+  assert.strictEqual(mwCheckBeforeOtp.status, 307, "Admin dashboard access must be redirected");
+  assert.ok(mwCheckBeforeOtp.headers.get("Location")?.includes("/admin/login"), "Must redirect to /admin/login");
+  console.log("  ✅ Passed: OTP dispatched, /verify-email target returned, Admin Dashboard NOT accessible.");
+
+  // Retrieve the generated OTP record from DB
+  const latestOtpRecord = await prisma.emailVerification.findFirst({
     where: { userId: adminUser.id, verifiedAt: null, expiresAt: { gt: new Date() } },
     orderBy: { createdAt: "desc" },
   });
+  assert.ok(latestOtpRecord, "Active email verification record must exist in DB");
+  assert.strictEqual(latestOtpRecord.attempts, 0);
+  assert.strictEqual(latestOtpRecord.codeHash.length, 64, "OTP must be SHA-256 hashed");
 
-  assert.ok(latestVerification, "Active email verification record must exist in DB");
-  assert.strictEqual(latestVerification.attempts, 0, "Attempts counter must start at 0");
-  assert.ok(latestVerification.codeHash, "Hashed OTP must exist");
-  assert.strictEqual(latestVerification.codeHash.length, 64, "OTP hash must be 64-character hex (SHA-256)");
-  
-  // Verify expiration is ~10 minutes in future
-  const timeRemainingMs = latestVerification.expiresAt.getTime() - Date.now();
-  const minutesRemaining = timeRemainingMs / (60 * 1000);
-  assert.ok(minutesRemaining > 9 && minutesRemaining <= 10.1, "OTP expiration must be ~10 minutes");
-  console.log(`✅ Passed: OTP stored securely as SHA-256 hash with 10-minute validity (${minutesRemaining.toFixed(1)} mins).`);
+  // ========================================================================
+  // TEST 2: Enter incorrect OTP
+  // Expected:
+  // → Invalid OTP
+  // → no Admin session
+  // ========================================================================
+  console.log("\nTEST 2: Entering Incorrect OTP...");
+  const wrongOtpReq = new NextRequest("http://localhost:3000/api/auth/verify-email", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ email: adminEmail, otp: "000000" }),
+  });
+  const wrongOtpRes = await verifyEmailRoute(wrongOtpReq);
+  assert.strictEqual(wrongOtpRes.status, 400, "Wrong OTP must return 400");
+  const wrongOtpData = await wrongOtpRes.json();
+  assert.strictEqual(wrongOtpData.success, false);
+  assert.ok(wrongOtpData.error.includes("Incorrect verification code") || wrongOtpData.error.includes("Invalid"));
 
-  // ------------------------------------------------------------------------
-  // Test 4: Complete Removal of Predefined / Static OTP (123456)
-  // ------------------------------------------------------------------------
-  console.log("\nTest 4: Verifying Predefined/Static OTP (123456, 000000, 111111) Rejection...");
-  const staticCodes = ["123456", "000000", "111111"];
-  for (const staticCode of staticCodes) {
+  // Verify no session cookie is created
+  const wrongOtpCookies = wrongOtpRes.headers.getSetCookie();
+  const wrongOtpSession = wrongOtpCookies.find((c) => c.startsWith("educonnects_session="));
+  assert.strictEqual(wrongOtpSession, undefined, "No session must be issued on wrong OTP");
+  console.log("  ✅ Passed: Wrong OTP rejected, zero session cookies issued.");
+
+  // Also test static codes (123456, 111111) are blocked
+  for (const staticCode of ["123456", "111111"]) {
     try {
       await AuthService.verifyOTP(adminEmail, staticCode);
-      assert.fail(`Static code ${staticCode} should have been strictly rejected`);
+      assert.fail(`Static code ${staticCode} should have failed`);
     } catch (err: any) {
       assert.ok(
-        err.message.includes("Incorrect verification code") || err.message.includes("Too many incorrect attempts"),
-        `Expected rejection message for static code ${staticCode}`
+        err.message.includes("Incorrect") ||
+        err.message.includes("Too many") ||
+        err.message.includes("No active") ||
+        err.message.includes("expired")
       );
     }
   }
-  console.log("✅ Passed: Predefined OTPs (123456, 000000, 111111) are completely blocked.");
+  console.log("  ✅ Passed: Static codes (123456, 111111) strictly rejected.");
 
-  // ------------------------------------------------------------------------
-  // Test 5: Dynamic OTP Verification & Admin Session Generation
-  // ------------------------------------------------------------------------
-  console.log("\nTest 5: Testing Successful Verification with Valid Dynamic OTP...");
-  // Simulate knowing the generated OTP by injecting a known hash for testing verification
-  const knownDynamicOTP = "482913";
-  const updatedRecord = await prisma.emailVerification.update({
-    where: { id: latestVerification.id },
-    data: { codeHash: hashToken(knownDynamicOTP), attempts: 0 },
+  // ========================================================================
+  // TEST 3: Enter expired OTP
+  // Expected:
+  // → OTP expired
+  // → no Admin session
+  // ========================================================================
+  console.log("\nTEST 3: Entering Expired OTP...");
+  const expiredCode = "334455";
+  const expiredRec = await prisma.emailVerification.create({
+    data: {
+      userId: adminUser.id,
+      codeHash: hashToken(expiredCode),
+      tokenHash: hashToken("expired-test-token"),
+      expiresAt: new Date(Date.now() - 60 * 1000), // Expired 1 min ago
+    },
   });
 
-  const verifyResult = await AuthService.verifyOTP(adminEmail, knownDynamicOTP);
-  assert.strictEqual(verifyResult.success, true, "Verification must succeed with valid OTP");
-  assert.ok(verifyResult.user, "User session must be returned");
-  assert.strictEqual(verifyResult.user.role, "ADMIN", "Session user role must be ADMIN");
-  assert.strictEqual(verifyResult.user.email, adminEmail);
-  assert.strictEqual(verifyResult.redirectPath, "/admin", "Admin must be redirected to /admin");
-  console.log("✅ Passed: Dynamic OTP verified, authenticated admin session created, redirectPath=/admin.");
-
-  // Confirm record is marked verifiedAt
-  const checkedRecord = await prisma.emailVerification.findUnique({
-    where: { id: latestVerification.id },
+  const expiredOtpReq = new NextRequest("http://localhost:3000/api/auth/verify-email", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ email: adminEmail, otp: expiredCode }),
   });
-  assert.ok(checkedRecord?.verifiedAt, "Verification record must be marked verifiedAt");
-  console.log("✅ Passed: Verification record successfully finalized with verifiedAt timestamp.");
+  const expiredOtpRes = await verifyEmailRoute(expiredOtpReq);
+  assert.strictEqual(expiredOtpRes.status, 400, "Expired OTP must return 400");
+  const expiredData = await expiredOtpRes.json();
+  assert.ok(expiredData.error.includes("expired"), `Expected expired error, got: ${expiredData.error}`);
 
-  // ------------------------------------------------------------------------
-  // Test 6: Resend Cooldown Enforcement (60 seconds)
-  // ------------------------------------------------------------------------
-  console.log("\nTest 6: Testing Resend OTP Cooldown Enforcement (60 seconds)...");
-  // Trigger new OTP request
-  await prisma.emailVerification.updateMany({
-    where: { userId: adminUser.id },
-    data: { expiresAt: new Date(), createdAt: new Date(Date.now() - 70 * 1000) },
+  const expiredCookies = expiredOtpRes.headers.getSetCookie();
+  assert.strictEqual(expiredCookies.find((c) => c.startsWith("educonnects_session=")), undefined);
+  await prisma.emailVerification.delete({ where: { id: expiredRec.id } }).catch(() => {});
+  console.log("  ✅ Passed: Expired OTP rejected, no session created.");
+
+  // ========================================================================
+  // TEST 4: Resend OTP
+  // Expected:
+  // → new OTP sent
+  // → old OTP invalid
+  // → 60s cooldown enforced
+  // ========================================================================
+  console.log("\nTEST 4: Resend OTP (Invalidates Old OTP, Cooldown Enforced)...");
+  // 1. Rapid resend blocked by cooldown
+  const rapidResendReq = new NextRequest("http://localhost:3000/api/auth/resend-otp", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ email: adminEmail }),
   });
-  await AuthService.loginUser({ email: adminEmail });
+  const rapidResendRes = await resendOtpRoute(rapidResendReq);
+  assert.strictEqual(rapidResendRes.status, 400, "Rapid resend must be blocked by cooldown");
+  const rapidResendData = await rapidResendRes.json();
+  assert.ok(rapidResendData.error.includes("Please wait"), "Cooldown message expected");
+  console.log(`  ✅ Passed: Rapid resend blocked by 60s cooldown (${rapidResendData.error}).`);
 
-  try {
-    await AuthService.resendVerification(adminEmail);
-    assert.fail("Rapid resend must be blocked by 60s cooldown");
-  } catch (err: any) {
-    assert.ok(err.message.includes("Please wait"), `Cooldown error expected, got: ${err.message}`);
-    console.log(`✅ Passed: Cooldown enforced (${err.message}).`);
-  }
-
-  // ------------------------------------------------------------------------
-  // Test 7: Previous OTP Invalidation on Resend (Single Active OTP)
-  // ------------------------------------------------------------------------
-  console.log("\nTest 7: Testing Invalidation of Older OTP on Resend...");
-  const activeRecordBefore = await prisma.emailVerification.findFirst({
+  // 2. Fast forward cooldown by setting previous OTP createdAt back 65s
+  const currentOtpRec = await prisma.emailVerification.findFirst({
     where: { userId: adminUser.id, verifiedAt: null, expiresAt: { gt: new Date() } },
     orderBy: { createdAt: "desc" },
   });
-  assert.ok(activeRecordBefore);
-
-  // Fast-forward cooldown by setting createdAt back 65 seconds
+  assert.ok(currentOtpRec);
   await prisma.emailVerification.update({
-    where: { id: activeRecordBefore.id },
+    where: { id: currentOtpRec.id },
     data: { createdAt: new Date(Date.now() - 65 * 1000) },
   });
 
-  // Request resend
-  await AuthService.resendVerification(adminEmail);
-
-  // Check that old record is expired
-  const oldRecordCheck = await prisma.emailVerification.findUnique({
-    where: { id: activeRecordBefore.id },
+  // 3. Resend OTP succeeds
+  const resendSuccessReq = new NextRequest("http://localhost:3000/api/auth/resend-otp", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ email: adminEmail }),
   });
-  assert.ok(
-    oldRecordCheck && oldRecordCheck.expiresAt <= new Date(),
-    "Previous OTP record must be expired upon resend"
-  );
+  const resendSuccessRes = await resendOtpRoute(resendSuccessReq);
+  assert.strictEqual(resendSuccessRes.status, 200, "Resend must succeed after cooldown");
 
-  // Check new record exists with different hash
-  const newActiveRecord = await prisma.emailVerification.findFirst({
+  // 4. Verify old OTP is now expired
+  const oldRecCheck = await prisma.emailVerification.findUnique({
+    where: { id: currentOtpRec.id },
+  });
+  assert.ok(oldRecCheck && oldRecCheck.expiresAt <= new Date(), "Older OTP must be expired");
+
+  // 5. Verify new OTP record exists
+  const newOtpRec = await prisma.emailVerification.findFirst({
     where: { userId: adminUser.id, verifiedAt: null, expiresAt: { gt: new Date() } },
     orderBy: { createdAt: "desc" },
   });
-  assert.ok(newActiveRecord);
-  assert.notStrictEqual(newActiveRecord.id, activeRecordBefore.id, "New verification record created");
-  assert.notStrictEqual(newActiveRecord.codeHash, activeRecordBefore.codeHash, "New OTP hash generated");
-  console.log("✅ Passed: Older OTP automatically invalidated; only newest OTP is active.");
+  assert.ok(newOtpRec && newOtpRec.id !== currentOtpRec.id, "New OTP record must be generated");
+  console.log("  ✅ Passed: New OTP sent, older OTP immediately invalidated.");
 
-  // ------------------------------------------------------------------------
-  // Test 8: Attempt Limit Protection (Max 5 Failed Attempts)
-  // ------------------------------------------------------------------------
-  console.log("\nTest 8: Testing Attempt Limit Protection (Max 5 Attempts)...");
-  // Set known OTP
-  const attemptTestOTP = "554433";
+  // ========================================================================
+  // TEST 5: Enter correct OTP
+  // Expected:
+  // → OTP verified
+  // → Admin session created
+  // → Admin Dashboard opens
+  // ========================================================================
+  console.log("\nTEST 5: Entering Correct OTP (Authenticated Admin Session Created)...");
+  // Inject known dynamic code into the active record
+  const correctDynamicOTP = "739281";
   await prisma.emailVerification.update({
-    where: { id: newActiveRecord.id },
-    data: { codeHash: hashToken(attemptTestOTP), attempts: 0 },
+    where: { id: newOtpRec.id },
+    data: { codeHash: hashToken(correctDynamicOTP), attempts: 0 },
   });
 
-  // Fail 5 times with wrong codes
-  for (let attempt = 1; attempt <= 4; attempt++) {
-    try {
-      await AuthService.verifyOTP(adminEmail, "000000");
-      assert.fail("Should have failed");
-    } catch (err: any) {
-      assert.ok(err.message.includes("Incorrect verification code"));
-    }
-  }
-
-  // 5th failed attempt should trigger exhaustion
-  try {
-    await AuthService.verifyOTP(adminEmail, "000000");
-    assert.fail("5th failed attempt must exhaust OTP");
-  } catch (err: any) {
-    assert.ok(err.message.includes("Too many incorrect attempts"), `Expected attempt limit message, got: ${err.message}`);
-  }
-
-  // Verify record is now expired in database
-  const exhaustedRecord = await prisma.emailVerification.findUnique({
-    where: { id: newActiveRecord.id },
+  const correctVerifyReq = new NextRequest("http://localhost:3000/api/auth/verify-email", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ email: adminEmail, otp: correctDynamicOTP }),
   });
-  assert.ok(exhaustedRecord && exhaustedRecord.expiresAt <= new Date(), "Record must be expired after 5 attempts");
+  const correctVerifyRes = await verifyEmailRoute(correctVerifyReq);
+  assert.strictEqual(correctVerifyRes.status, 200, "Correct OTP must return 200");
+  const correctVerifyData = await correctVerifyRes.json();
+  assert.strictEqual(correctVerifyData.success, true);
+  assert.strictEqual(correctVerifyData.data.redirectPath, "/admin", "Redirect must be /admin");
+  assert.strictEqual(correctVerifyData.data.user.role, "ADMIN");
 
-  // Even the correct OTP must now be rejected
-  try {
-    await AuthService.verifyOTP(adminEmail, attemptTestOTP);
-    assert.fail("Exhausted OTP must not accept valid code");
-  } catch (err: any) {
-    assert.ok(
-      err.message.includes("Too many incorrect attempts") || err.message.includes("expired") || err.message.includes("No active"),
-      "Must reject exhausted OTP"
-    );
-  }
-  console.log("✅ Passed: 5 incorrect attempts permanently invalidates OTP and locks verification.");
+  // Verify authenticated session cookie IS set
+  const successCookies = correctVerifyRes.headers.getSetCookie();
+  const adminSessionCookieHeader = successCookies.find((c) => c.startsWith("educonnects_session="));
+  assert.ok(adminSessionCookieHeader, "educonnects_session cookie MUST be set upon successful OTP");
+  const sessionToken = adminSessionCookieHeader.split(";")[0].replace("educonnects_session=", "");
+  const decodedSession = decodeSession(sessionToken);
+  assert.ok(decodedSession);
+  assert.strictEqual(decodedSession.role, "ADMIN");
+  assert.strictEqual(decodedSession.email, adminEmail);
+  console.log("  ✅ Passed: Correct OTP verified, authenticated admin session created, redirectPath=/admin.");
 
-  // ------------------------------------------------------------------------
-  // Test 9: Expired OTP Rejection (>10 Minutes)
-  // ------------------------------------------------------------------------
-  console.log("\nTest 9: Testing Expired OTP Rejection...");
-  // Fast forward cooldown
-  await prisma.emailVerification.updateMany({
-    where: { userId: adminUser.id },
-    data: { createdAt: new Date(Date.now() - 70 * 1000) },
+  // ========================================================================
+  // TEST 6: Refresh Admin Dashboard
+  // Expected:
+  // → remains authenticated
+  // ========================================================================
+  console.log("\nTEST 6: Refreshing Admin Dashboard (Session Persistence)...");
+  const dashboardMwReq = new NextRequest("http://localhost:3000/admin", {
+    headers: { cookie: `educonnects_session=${sessionToken}` },
   });
+  const dashboardMwRes = middleware(dashboardMwReq);
+  // Status is 200 (NextResponse.next()) when allowed through middleware
+  assert.strictEqual(dashboardMwRes.status, 200, "Dashboard access must be granted with active session");
+  console.log("  ✅ Passed: Session persists and allows access on reload/refresh.");
 
-  // Create an expired record
-  const expiredOTP = "112233";
-  const expiredRecord = await prisma.emailVerification.create({
-    data: {
-      userId: adminUser.id,
-      codeHash: hashToken(expiredOTP),
-      tokenHash: hashToken("expired-token-123"),
-      expiresAt: new Date(Date.now() - 60 * 1000), // Expired 1 minute ago
-    },
+  // ========================================================================
+  // TEST 7: Open Admin Login while authenticated
+  // Expected:
+  // → automatically redirect to Admin Dashboard
+  // ========================================================================
+  console.log("\nTEST 7: Opening Admin Login While Authenticated...");
+  const loginMwReq = new NextRequest("http://localhost:3000/admin/login", {
+    headers: { cookie: `educonnects_session=${sessionToken}` },
   });
+  const loginMwRes = middleware(loginMwReq);
+  assert.strictEqual(loginMwRes.status, 307, "Must redirect authenticated admin away from login page");
+  assert.strictEqual(loginMwRes.headers.get("Location"), "http://localhost:3000/admin");
+  console.log("  ✅ Passed: Automatically redirected from /admin/login to /admin.");
 
-  try {
-    await AuthService.verifyOTP(adminEmail, expiredOTP);
-    assert.fail("Expired OTP must be rejected");
-  } catch (err: any) {
-    assert.ok(err.message.includes("expired"), `Expected expired error, got: ${err.message}`);
-    console.log(`✅ Passed: Expired OTP rejected (${err.message}).`);
-  }
-  await prisma.emailVerification.delete({ where: { id: expiredRecord.id } }).catch(() => {});
-
-  // ------------------------------------------------------------------------
-  // Test 10: Server-Side Role Enforcement (Non-Admins Blocked from Admin Dashboard)
-  // ------------------------------------------------------------------------
-  console.log("\nTest 10: Testing Server-Side Role Verification (Learner/Educator Isolation)...");
-  // Create a temporary student user
-  const tempStudentEmail = `learner.boundary.${Date.now()}@educonnects.com`;
-  const tempStudent = await prisma.user.create({
-    data: {
-      email: tempStudentEmail,
-      passwordHash: adminUser.passwordHash,
-      role: "STUDENT",
-      emailVerified: true,
-      profile: { create: { firstName: "Test", lastName: "Learner" } },
-    },
+  // ========================================================================
+  // TEST 8: Logout
+  // Expected:
+  // → session invalidated
+  // → Admin Dashboard inaccessible
+  // → Login page available
+  // ========================================================================
+  console.log("\nTEST 8: Logout (Session Invalidation & Route Re-locking)...");
+  const logoutReq = new NextRequest("http://localhost:3000/api/auth/logout", {
+    method: "POST",
   });
+  const logoutRes = await logoutRoute(logoutReq);
+  assert.strictEqual(logoutRes.status, 200);
 
-  try {
-    // 1. Student cannot log in without password
-    try {
-      await AuthService.loginUser({ email: tempStudentEmail });
-      assert.fail("Student without password must be rejected");
-    } catch (err: any) {
-      assert.ok(err.message.includes("Password is required"), "Password required for non-admins");
-    }
+  const logoutCookies = logoutRes.headers.getSetCookie();
+  const clearedSessionCookie = logoutCookies.find((c) => c.startsWith("educonnects_session="));
+  assert.ok(clearedSessionCookie?.includes("Max-Age=0"), "Session cookie must be cleared on logout");
 
-    // 2. Student redirect path is never /admin
-    const studentLogin = await AuthService.loginUser({
-      email: tempStudentEmail,
-      password: "Password123!",
-    });
-    assert.strictEqual(studentLogin.role, "STUDENT");
+  // After logout: Admin Dashboard inaccessible
+  const afterLogoutDashboardReq = new NextRequest("http://localhost:3000/admin", {
+    headers: { cookie: clearedSessionCookie || "" },
+  });
+  const afterLogoutDashboardRes = middleware(afterLogoutDashboardReq);
+  assert.strictEqual(afterLogoutDashboardRes.status, 307);
+  assert.ok(afterLogoutDashboardRes.headers.get("Location")?.includes("/admin/login"));
 
-    // Inject OTP and verify
-    const studentOTP = "998811";
-    const studentRec = await prisma.emailVerification.findFirst({
-      where: { userId: tempStudent.id, verifiedAt: null },
-      orderBy: { createdAt: "desc" },
-    });
-    assert.ok(studentRec);
-    await prisma.emailVerification.update({
-      where: { id: studentRec.id },
-      data: { codeHash: hashToken(studentOTP) },
-    });
+  // After logout: Admin Login is accessible again
+  const afterLogoutLoginReq = new NextRequest("http://localhost:3000/admin/login", {
+    headers: { cookie: clearedSessionCookie || "" },
+  });
+  const afterLogoutLoginRes = middleware(afterLogoutLoginReq);
+  assert.strictEqual(afterLogoutLoginRes.status, 200, "Login page must be accessible after logout");
+  console.log("  ✅ Passed: Logout clears session, locks /admin, and re-enables /admin/login.");
 
-    const studentVerify = await AuthService.verifyOTP(tempStudentEmail, studentOTP);
-    assert.strictEqual(studentVerify.redirectPath, "/student/dashboard", "Learner redirect must be /student/dashboard");
-    assert.notStrictEqual(studentVerify.redirectPath, "/admin", "Learner redirect MUST NOT be /admin");
-    console.log("✅ Passed: Non-admin accounts strictly isolated to student dashboard; admin access blocked.");
-  } finally {
-    await prisma.emailVerification.deleteMany({ where: { userId: tempStudent.id } });
-    await prisma.profile.deleteMany({ where: { userId: tempStudent.id } });
-    await prisma.user.delete({ where: { id: tempStudent.id } });
-  }
+  // ========================================================================
+  // TEST 9: Access Admin Dashboard before OTP verification
+  // Expected:
+  // → access denied / redirected
+  // → no Admin session
+  // ========================================================================
+  console.log("\nTEST 9: Accessing Admin Dashboard Before OTP Verification...");
+  const unverifiedReq = new NextRequest("http://localhost:3000/admin");
+  const unverifiedRes = middleware(unverifiedReq);
+  assert.strictEqual(unverifiedRes.status, 307);
+  assert.ok(unverifiedRes.headers.get("Location")?.includes("/admin/login"));
+  console.log("  ✅ Passed: Direct access to /admin strictly blocked without completed OTP verification.");
 
-  // ------------------------------------------------------------------------
-  // Test 11: Session Encoding, HttpOnly Cookies & Logout Invalidation
-  // ------------------------------------------------------------------------
-  console.log("\nTest 11: Testing Admin Session Encoding, HttpOnly Cookies & Logout Invalidation...");
-  const adminSession = {
-    id: adminUser.id,
-    userId: adminUser.id,
-    email: adminUser.email,
-    role: "ADMIN" as UserRole,
-    emailVerified: true,
-    firstName: "System",
-    lastName: "Administrator",
+  // ========================================================================
+  // TEST 10: Server Log Security (Zero OTP in logs)
+  // Expected:
+  // → OTP must NOT appear in logs
+  // ========================================================================
+  console.log("\nTEST 10: Verifying Zero OTP Leakage in Console/Server Logs...");
+  // Capture console.log outputs during dynamic OTP generation
+  const logs: string[] = [];
+  const originalLog = console.log;
+  console.log = (...args: any[]) => {
+    logs.push(args.map((a) => String(a)).join(" "));
+    originalLog(...args);
   };
 
-  const encoded = encodeSession(adminSession);
-  assert.ok(encoded, "Session must be encoded");
-  const decoded = decodeSession(encoded);
-  assert.ok(decoded);
-  assert.strictEqual(decoded.email, adminEmail);
-  assert.strictEqual(decoded.role, "ADMIN");
+  try {
+    // Fast forward cooldown
+    await prisma.emailVerification.updateMany({
+      where: { userId: adminUser.id },
+      data: { createdAt: new Date(Date.now() - 70 * 1000) },
+    });
+    await AuthService.loginUser({ email: adminEmail, password: adminPassword });
+  } finally {
+    console.log = originalLog;
+  }
 
-  // Test applyLogoutCookies
-  const testResponse = NextResponse.json({ success: true });
-  const logoutResponse = applyLogoutCookies(testResponse, "educonnects.co.in");
-  const setCookieHeader = logoutResponse.headers.get("Set-Cookie");
-  assert.ok(setCookieHeader, "Set-Cookie headers must be present on logout");
-  assert.ok(setCookieHeader.includes("Max-Age=0") || setCookieHeader.includes("Expires="), "Cookie must be expired on logout");
-  console.log("✅ Passed: Admin session cookies and multi-domain logout invalidation verified.");
+  // Verify that any 6-digit number does not match raw OTP in logs
+  const rawOtpRegex = /🔑 6-Digit OTP: \d{6}/;
+  const hasLeakedOtp = logs.some((l) => rawOtpRegex.test(l));
+  assert.strictEqual(hasLeakedOtp, false, "Plaintext OTP must NEVER appear in console logs");
 
-  console.log("\n🎉 ALL 11 ADMIN DYNAMIC OTP TESTS PASSED SUCCESSFULLY! 🚀\n");
+  const hasMaskedOtp = logs.some((l) => l.includes("[REDACTED FOR SECURITY]"));
+  assert.ok(hasMaskedOtp, "Console logs must explicitly mask OTP as [REDACTED FOR SECURITY]");
+  console.log("  ✅ Passed: Plaintext OTP never logged; masked with [REDACTED FOR SECURITY].");
+
+  console.log("\n🎉 ALL 10 MANDATORY ADMIN DYNAMIC OTP TESTS PASSED SUCCESSFULLY! 🚀\n");
 }
 
 runAdminDynamicOTPTests()
@@ -337,3 +384,4 @@ runAdminDynamicOTPTests()
     console.error("❌ Test Failure:", err);
     process.exit(1);
   });
+

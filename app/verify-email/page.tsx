@@ -122,10 +122,10 @@ function VerifyEmailForm() {
       const target = data.data?.redirectPath || redirectTo || "/student/dashboard";
       setRedirectTarget(target);
       setVerified(true);
-      showToast("Email Verified!", "Welcome to EduConnects 🎓 Your account is fully active.", "success", true);
+      showToast("Verification Successful!", "Identity confirmed. Redirecting...", "success", true);
       setTimeout(() => {
-        router.push(target);
-      }, 1000);
+        window.location.replace(target);
+      }, 800);
     } catch (err: any) {
       const msg = err.message || "Verification failed.";
       setErrorMessage(msg);
@@ -242,7 +242,7 @@ function VerifyEmailForm() {
                   className="w-full h-12 text-base font-bold"
                   isLoading={loading}
                 >
-                  Verify Email
+                  {redirectTo === "/admin" ? "Verify Admin OTP & Sign In" : "Verify Email"}
                 </Button>
 
 
@@ -250,11 +250,20 @@ function VerifyEmailForm() {
             )}
 
             <div className="pt-4 border-t border-slate-100 flex items-center justify-between text-xs">
-              <BackButton
-                fallbackUrl="/"
-                label="Back Home"
-                variant="ghost"
-              />
+              {redirectTo === "/admin" ? (
+                <a
+                  href="/admin/login?restart=true"
+                  className="text-slate-500 hover:text-slate-800 font-semibold flex items-center gap-1 transition-colors"
+                >
+                  ← Admin Login
+                </a>
+              ) : (
+                <BackButton
+                  fallbackUrl="/"
+                  label="Back Home"
+                  variant="ghost"
+                />
+              )}
 
               <button
                 type="button"

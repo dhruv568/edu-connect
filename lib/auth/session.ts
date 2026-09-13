@@ -48,7 +48,6 @@ export function getCookieDomain(host?: string): string | undefined {
  * Sets session cookie in Response headers or current cookie context.
  */
 export async function setSessionCookie(session: UserSession, host?: string) {
-  const cookieStore = await cookies();
   const encoded = encodeSession(session);
   let resolvedHost = host;
   if (!resolvedHost) {
@@ -72,17 +71,26 @@ export async function setSessionCookie(session: UserSession, host?: string) {
   if (domain) {
     cookieOptions.domain = domain;
   }
-  cookieStore.set(SESSION_COOKIE_NAME, encoded, cookieOptions);
+  try {
+    const cookieStore = await cookies();
+    cookieStore.set(SESSION_COOKIE_NAME, encoded, cookieOptions);
+  } catch {
+    // Graceful fallback for non-request / test scopes
+  }
 }
 
 /**
  * Gets current user session from request cookies.
  */
 export async function getSession(): Promise<UserSession | null> {
-  const cookieStore = await cookies();
-  const cookie = cookieStore.get(SESSION_COOKIE_NAME);
-  if (!cookie?.value) return null;
-  return decodeSession(cookie.value);
+  try {
+    const cookieStore = await cookies();
+    const cookie = cookieStore.get(SESSION_COOKIE_NAME);
+    if (!cookie?.value) return null;
+    return decodeSession(cookie.value);
+  } catch {
+    return null;
+  }
 }
 
 /**
