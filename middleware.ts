@@ -81,16 +81,94 @@ export function middleware(request: NextRequest) {
       if (pathname === "/") {
         return NextResponse.rewrite(new URL("/student", request.url));
       }
-      if (!pathname.startsWith("/student") && !pathname.startsWith("/api/")) {
-        return NextResponse.rewrite(new URL(`/student${pathname}`, request.url));
+      // Routes that should NOT be rewritten to /student/*
+      const isSharedOrExternal =
+        pathname.startsWith("/student") ||
+        pathname.startsWith("/api/") ||
+        pathname.startsWith("/profile") ||
+        pathname.startsWith("/notifications") ||
+        pathname.startsWith("/settings") ||
+        pathname.startsWith("/about") ||
+        pathname.startsWith("/contact") ||
+        pathname.startsWith("/terms") ||
+        pathname.startsWith("/privacy") ||
+        pathname.startsWith("/refund") ||
+        pathname.startsWith("/verify-") ||
+        pathname.startsWith("/courses/") ||
+        pathname.startsWith("/find-teachers");
+
+      if (!isSharedOrExternal) {
+        // Explicit friendly shortcut mappings
+        if (pathname === "/dashboard" || pathname.startsWith("/dashboard/")) {
+          return NextResponse.rewrite(new URL(`/student${pathname}`, request.url));
+        }
+        if (pathname === "/courses") {
+          return NextResponse.rewrite(new URL("/student/courses", request.url));
+        }
+        if (pathname === "/live-classes" || pathname.startsWith("/live-classes/")) {
+          return NextResponse.rewrite(new URL(`/student${pathname}`, request.url));
+        }
+        if (pathname === "/payments" || pathname.startsWith("/payments/")) {
+          return NextResponse.rewrite(new URL(`/student${pathname}`, request.url));
+        }
+        if (pathname === "/teachers" || pathname.startsWith("/teachers/")) {
+          return NextResponse.rewrite(new URL(`/student${pathname}`, request.url));
+        }
+        if (pathname === "/login") {
+          return NextResponse.rewrite(new URL("/student/login", request.url));
+        }
+        if (pathname === "/register") {
+          return NextResponse.rewrite(new URL("/student/register", request.url));
+        }
       }
     }
     if (isEducatorSubdomain) {
       if (pathname === "/") {
         return NextResponse.rewrite(new URL("/teacher", request.url));
       }
-      if (!pathname.startsWith("/teacher") && !pathname.startsWith("/api/")) {
-        return NextResponse.rewrite(new URL(`/teacher${pathname}`, request.url));
+      const isSharedOrExternal =
+        pathname.startsWith("/teacher") ||
+        pathname.startsWith("/api/") ||
+        pathname.startsWith("/profile") ||
+        pathname.startsWith("/notifications") ||
+        pathname.startsWith("/settings") ||
+        pathname.startsWith("/about") ||
+        pathname.startsWith("/contact") ||
+        pathname.startsWith("/terms") ||
+        pathname.startsWith("/privacy") ||
+        pathname.startsWith("/refund") ||
+        pathname.startsWith("/verify-") ||
+        pathname.startsWith("/courses/") ||
+        pathname.startsWith("/find-teachers");
+
+      if (!isSharedOrExternal) {
+        if (pathname === "/dashboard" || pathname.startsWith("/dashboard/")) {
+          return NextResponse.rewrite(new URL(`/teacher${pathname}`, request.url));
+        }
+        if (pathname === "/courses" || pathname.startsWith("/courses/")) {
+          return NextResponse.rewrite(new URL(`/teacher${pathname}`, request.url));
+        }
+        if (pathname === "/live-classes" || pathname.startsWith("/live-classes/")) {
+          return NextResponse.rewrite(new URL(`/teacher${pathname}`, request.url));
+        }
+        if (pathname === "/earnings" || pathname.startsWith("/earnings/")) {
+          return NextResponse.rewrite(new URL(`/teacher${pathname}`, request.url));
+        }
+        if (pathname === "/onboarding") {
+          return NextResponse.rewrite(new URL("/teacher/onboarding", request.url));
+        }
+        if (pathname === "/verification") {
+          return NextResponse.rewrite(new URL("/teacher/verification", request.url));
+        }
+        if (pathname === "/login") {
+          return NextResponse.rewrite(new URL("/teacher/login", request.url));
+        }
+        if (pathname === "/register") {
+          return NextResponse.rewrite(new URL("/teacher/register", request.url));
+        }
+        if (pathname === "/logout") {
+          return NextResponse.rewrite(new URL("/teacher/logout", request.url));
+        }
       }
     }
     return null;

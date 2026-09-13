@@ -43,6 +43,12 @@ export function getAppUrl(): string {
  * Resolves the main website domain (e.g. https://educonnects.co.in).
  */
 export function getMainDomain(): string {
+  if (typeof window !== "undefined") {
+    const host = window.location.hostname.toLowerCase();
+    if (host === "localhost" || host === "127.0.0.1") {
+      return window.location.origin;
+    }
+  }
   const envUrl = process.env.NEXT_PUBLIC_MAIN_DOMAIN || process.env.NEXT_PUBLIC_APP_URL || "https://educonnects.co.in";
   return envUrl.trim().replace(/\/+$/, "");
 }
@@ -51,6 +57,12 @@ export function getMainDomain(): string {
  * Resolves the Learner/Student subdomain URL (e.g. https://learners.educonnects.co.in).
  */
 export function getStudentDomain(): string {
+  if (typeof window !== "undefined") {
+    const host = window.location.hostname.toLowerCase();
+    if (host === "localhost" || host === "127.0.0.1") {
+      return window.location.origin;
+    }
+  }
   const envUrl =
     process.env.NEXT_PUBLIC_LEARNER_DOMAIN ||
     process.env.NEXT_PUBLIC_STUDENT_DOMAIN ||
@@ -69,8 +81,58 @@ export function getLearnerDomain(): string {
  * Resolves the Educator/Teacher subdomain URL (e.g. https://educators.educonnects.co.in).
  */
 export function getEducatorDomain(): string {
+  if (typeof window !== "undefined") {
+    const host = window.location.hostname.toLowerCase();
+    if (host === "localhost" || host === "127.0.0.1") {
+      return window.location.origin;
+    }
+  }
   const envUrl = process.env.NEXT_PUBLIC_EDUCATOR_DOMAIN || "https://educators.educonnects.co.in";
   return envUrl.trim().replace(/\/+$/, "");
+}
+
+/**
+ * Generates an environment and origin-aware URL for Learner routes.
+ * If already on the Learner subdomain, returns a relative path to preserve origin.
+ * If on the main domain or another subdomain, returns the canonical absolute URL on learners.educonnects.co.in.
+ */
+export function getLearnerSubdomainUrl(path: string): string {
+  const norm = path.startsWith("/") ? path : `/${path}`;
+  if (typeof window !== "undefined") {
+    const host = window.location.hostname.toLowerCase();
+    if (
+      host.startsWith("learners.") ||
+      host.startsWith("learner.") ||
+      host.startsWith("students.") ||
+      host.startsWith("student.") ||
+      host === "localhost" ||
+      host === "127.0.0.1"
+    ) {
+      return norm;
+    }
+  }
+  return `${getStudentDomain()}${norm}`;
+}
+
+/**
+ * Generates an environment and origin-aware URL for Educator routes.
+ */
+export function getEducatorSubdomainUrl(path: string): string {
+  const norm = path.startsWith("/") ? path : `/${path}`;
+  if (typeof window !== "undefined") {
+    const host = window.location.hostname.toLowerCase();
+    if (
+      host.startsWith("educators.") ||
+      host.startsWith("educator.") ||
+      host.startsWith("teachers.") ||
+      host.startsWith("teacher.") ||
+      host === "localhost" ||
+      host === "127.0.0.1"
+    ) {
+      return norm;
+    }
+  }
+  return `${getEducatorDomain()}${norm}`;
 }
 
 /**

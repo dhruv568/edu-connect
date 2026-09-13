@@ -54,17 +54,21 @@ export function NotificationPopover() {
     return () => clearInterval(interval);
   }, []);
 
-  // Close popover when clicking outside
+  // Close popover when clicking outside (supports desktop & mobile touch)
   useEffect(() => {
-    const handleClickOutside = (e: MouseEvent) => {
+    const handleClickOutside = (e: MouseEvent | TouchEvent) => {
       if (popoverRef.current && !popoverRef.current.contains(e.target as Node)) {
         setIsOpen(false);
       }
     };
     if (isOpen) {
       document.addEventListener("mousedown", handleClickOutside);
+      document.addEventListener("touchstart", handleClickOutside, { passive: true });
     }
-    return () => document.removeEventListener("mousedown", handleClickOutside);
+    return () => {
+      document.removeEventListener("mousedown", handleClickOutside);
+      document.removeEventListener("touchstart", handleClickOutside);
+    };
   }, [isOpen]);
 
   const handleMarkAllRead = async () => {

@@ -25,10 +25,18 @@ import {
   FileCheck,
   Video,
   Sparkles,
+  Loader2,
 } from "lucide-react";
 import { GlassButton } from "@/components/glass/glass-button";
 import { UserSession } from "@/types/auth";
-import { getMainDomain, getLiveDomain, getStudentDomain, getEducatorDomain } from "@/lib/app-url";
+import {
+  getMainDomain,
+  getLiveDomain,
+  getStudentDomain,
+  getEducatorDomain,
+  getLearnerSubdomainUrl,
+  getEducatorSubdomainUrl,
+} from "@/lib/app-url";
 import { NotificationPopover } from "@/components/layout/notification-popover";
 
 export interface FloatingNavbarProps {
@@ -46,6 +54,7 @@ export function FloatingNavbar({ variant }: FloatingNavbarProps = {}) {
   const [profileDropdownOpen, setProfileDropdownOpen] = useState(false);
   const [userSession, setUserSession] = useState<UserSession | null>(null);
   const [authLoading, setAuthLoading] = useState(true);
+  const [isLoggingOut, setIsLoggingOut] = useState(false);
 
   const dropdownRef = useRef<HTMLDivElement>(null);
   const moreDropdownRef = useRef<HTMLDivElement>(null);
@@ -103,9 +112,17 @@ export function FloatingNavbar({ variant }: FloatingNavbarProps = {}) {
     };
   }, []);
 
-  // Close dropdowns when clicking outside or pressing Escape
+  // Automatically close dropdowns on page navigation
   useEffect(() => {
-    const handleClickOutside = (event: MouseEvent) => {
+    setProfileDropdownOpen(false);
+    setExploreDropdownOpen(false);
+    setMoreDropdownOpen(false);
+    setMobileOpen(false);
+  }, [pathname]);
+
+  // Close dropdowns when clicking outside or pressing Escape (supports touch & desktop)
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent | TouchEvent) => {
       const target = event.target as Node;
       if (dropdownRef.current && !dropdownRef.current.contains(target)) {
         setExploreDropdownOpen(false);
@@ -131,15 +148,19 @@ export function FloatingNavbar({ variant }: FloatingNavbarProps = {}) {
     };
 
     document.addEventListener("mousedown", handleClickOutside);
+    document.addEventListener("touchstart", handleClickOutside, { passive: true });
     document.addEventListener("keydown", handleKeyDown);
     return () => {
       document.removeEventListener("mousedown", handleClickOutside);
+      document.removeEventListener("touchstart", handleClickOutside);
       document.removeEventListener("keydown", handleKeyDown);
     };
   }, []);
 
-  // Logout invalidation with real server call & hard navigation
+  // Logout invalidation with real server call, visual loading state & hard navigation
   const handleLogout = async () => {
+    if (isLoggingOut) return;
+    setIsLoggingOut(true);
     const role = userSession?.role;
     setUserSession(null);
     setProfileDropdownOpen(false);
@@ -161,7 +182,7 @@ export function FloatingNavbar({ variant }: FloatingNavbarProps = {}) {
     if (role === "TEACHER") {
       window.location.replace("/teacher/logout");
     } else {
-      window.location.replace("/");
+      window.location.replace(getMainDomain() + "/");
     }
   };
 
@@ -200,10 +221,10 @@ export function FloatingNavbar({ variant }: FloatingNavbarProps = {}) {
 
   // Role-derived Portal Destinations & Labels (Strictly derived from server auth truth)
   const getDashboardPath = (session: UserSession) => {
-    if (session.role === "TEACHER") return "/teacher/dashboard";
+    if (session.role === "TEACHER") return getEducatorSubdomainUrl("/teacher/dashboard");
     if (session.role === "ADMIN") return "/admin";
     if (session.role === "STAFF") return "/staff/dashboard";
-    return "/student/dashboard";
+    return getLearnerSubdomainUrl("/student/dashboard");
   };
 
   const getDashboardLabel = (session: UserSession) => {
@@ -540,25 +561,22 @@ export function FloatingNavbar({ variant }: FloatingNavbarProps = {}) {
                       ? "/student/register"
                       : "/register"
                   }
+                  className={`h-9 px-4 sm:px-5 rounded-xl text-xs sm:text-sm font-bold text-white shadow-xs hover:shadow-md transition-all whitespace-nowrap flex items-center gap-1.5 cursor-pointer active:scale-95 ${
+                    isLearner
+                      ? "bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 shadow-blue-500/20"
+                      : isEducator
+                      ? "bg-gradient-to-r from-[#16805B] to-[#0D5C41] hover:from-[#12684A] hover:to-[#0A4732] shadow-emerald-700/20"
+                      : "bg-gradient-to-r from-[#0B4F4B] to-[#073F3C] hover:from-[#083F3D] hover:to-[#042423] shadow-teal-900/20"
+                  }`}
                 >
-                  <button
-                    className={`h-9 px-4 sm:px-5 rounded-xl text-xs sm:text-sm font-bold text-white shadow-xs hover:shadow-md transition-all whitespace-nowrap flex items-center gap-1.5 cursor-pointer active:scale-95 ${
-                      isLearner
-                        ? "bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 shadow-blue-500/20"
-                        : isEducator
-                        ? "bg-gradient-to-r from-[#16805B] to-[#0D5C41] hover:from-[#12684A] hover:to-[#0A4732] shadow-emerald-700/20"
-                        : "bg-gradient-to-r from-[#0B4F4B] to-[#073F3C] hover:from-[#083F3D] hover:to-[#042423] shadow-teal-900/20"
-                    }`}
-                  >
-                    <span>
-                      {isEducator
-                        ? "Start Teaching"
-                        : isLearner
-                        ? "Start Learning"
-                        : "Get Started"}
-                    </span>
-                    <ArrowRight className="h-3.5 w-3.5" />
-                  </button>
+                  <span>
+                    {isEducator
+                      ? "Start Teaching"
+                      : isLearner
+                      ? "Start Learning"
+                      : "Get Started"}
+                  </span>
+                  <ArrowRight className="h-3.5 w-3.5" />
                 </Link>
               </div>
             ) : (
@@ -566,32 +584,36 @@ export function FloatingNavbar({ variant }: FloatingNavbarProps = {}) {
               <div className="flex items-center gap-3">
                 {/* A. Role-Specific Portal Button */}
                 {userSession.role === "STUDENT" ? (
-                  <Link href="/student/dashboard">
-                    <button className="h-9 px-3.5 sm:px-4 rounded-xl text-xs sm:text-sm font-bold text-white bg-blue-600 hover:bg-blue-700 shadow-xs hover:shadow-md transition-all flex items-center gap-2 active:scale-95">
-                      <LayoutDashboard className="h-4 w-4 text-blue-100" />
-                      <span>Learner Portal</span>
-                    </button>
+                  <Link
+                    href={getLearnerSubdomainUrl("/student/dashboard")}
+                    className="h-9 px-3.5 sm:px-4 rounded-xl text-xs sm:text-sm font-bold text-white bg-blue-600 hover:bg-blue-700 shadow-xs hover:shadow-md transition-all flex items-center gap-2 active:scale-95 cursor-pointer"
+                  >
+                    <LayoutDashboard className="h-4 w-4 text-blue-100" />
+                    <span>Learner Portal</span>
                   </Link>
                 ) : userSession.role === "TEACHER" ? (
-                  <Link href="/teacher/dashboard">
-                    <button className="h-9 px-3.5 sm:px-4 rounded-xl text-xs sm:text-sm font-bold text-white bg-[#16805B] hover:bg-[#0D5C41] shadow-xs hover:shadow-md transition-all flex items-center gap-2 active:scale-95">
-                      <LayoutDashboard className="h-4 w-4 text-emerald-100" />
-                      <span>Educator Portal</span>
-                    </button>
+                  <Link
+                    href={getEducatorSubdomainUrl("/teacher/dashboard")}
+                    className="h-9 px-3.5 sm:px-4 rounded-xl text-xs sm:text-sm font-bold text-white bg-[#16805B] hover:bg-[#0D5C41] shadow-xs hover:shadow-md transition-all flex items-center gap-2 active:scale-95 cursor-pointer"
+                  >
+                    <LayoutDashboard className="h-4 w-4 text-emerald-100" />
+                    <span>Educator Portal</span>
                   </Link>
                 ) : userSession.role === "ADMIN" ? (
-                  <Link href="/admin">
-                    <button className="h-9 px-3.5 sm:px-4 rounded-xl text-xs sm:text-sm font-bold text-white bg-[#0B4F4B] hover:bg-[#073F3C] shadow-xs hover:shadow-md transition-all flex items-center gap-2 active:scale-95">
-                      <LayoutDashboard className="h-4 w-4 text-[#F2C14E]" />
-                      <span>Admin Governance</span>
-                    </button>
+                  <Link
+                    href="/admin"
+                    className="h-9 px-3.5 sm:px-4 rounded-xl text-xs sm:text-sm font-bold text-white bg-[#0B4F4B] hover:bg-[#073F3C] shadow-xs hover:shadow-md transition-all flex items-center gap-2 active:scale-95 cursor-pointer"
+                  >
+                    <LayoutDashboard className="h-4 w-4 text-[#F2C14E]" />
+                    <span>Admin Governance</span>
                   </Link>
                 ) : (
-                  <Link href="/staff/dashboard">
-                    <button className="h-9 px-3.5 sm:px-4 rounded-xl text-xs sm:text-sm font-bold text-white bg-[#0B4F4B] hover:bg-[#073F3C] shadow-xs hover:shadow-md transition-all flex items-center gap-2 active:scale-95">
-                      <LayoutDashboard className="h-4 w-4 text-teal-100" />
-                      <span>Staff Dashboard</span>
-                    </button>
+                  <Link
+                    href="/staff/dashboard"
+                    className="h-9 px-3.5 sm:px-4 rounded-xl text-xs sm:text-sm font-bold text-white bg-[#0B4F4B] hover:bg-[#073F3C] shadow-xs hover:shadow-md transition-all flex items-center gap-2 active:scale-95 cursor-pointer"
+                  >
+                    <LayoutDashboard className="h-4 w-4 text-teal-100" />
+                    <span>Staff Dashboard</span>
                   </Link>
                 )}
 
@@ -692,25 +714,22 @@ export function FloatingNavbar({ variant }: FloatingNavbarProps = {}) {
                         {userSession.role === "STUDENT" && (
                           <>
                             <Link
-                              href="/student/dashboard"
-                              onClick={() => setProfileDropdownOpen(false)}
-                              className="flex items-center gap-2.5 px-3 py-2 rounded-xl text-xs font-semibold text-slate-700 hover:text-blue-700 hover:bg-blue-50/80 transition-colors"
+                              href={getLearnerSubdomainUrl("/student/dashboard")}
+                              className="flex items-center gap-2.5 px-3 py-2 rounded-xl text-xs font-semibold text-slate-700 hover:text-blue-700 hover:bg-blue-50/80 transition-colors cursor-pointer"
                             >
                               <LayoutDashboard className="h-4 w-4 text-blue-600" />
                               <span>Learner Dashboard</span>
                             </Link>
                             <Link
-                              href="/student/courses"
-                              onClick={() => setProfileDropdownOpen(false)}
-                              className="flex items-center gap-2.5 px-3 py-2 rounded-xl text-xs font-semibold text-slate-700 hover:text-blue-700 hover:bg-blue-50/80 transition-colors"
+                              href={getLearnerSubdomainUrl("/student/courses")}
+                              className="flex items-center gap-2.5 px-3 py-2 rounded-xl text-xs font-semibold text-slate-700 hover:text-blue-700 hover:bg-blue-50/80 transition-colors cursor-pointer"
                             >
                               <BookOpen className="h-4 w-4 text-blue-600" />
                               <span>Enrolled Courses</span>
                             </Link>
                             <Link
-                              href="/student/live-classes"
-                              onClick={() => setProfileDropdownOpen(false)}
-                              className="flex items-center gap-2.5 px-3 py-2 rounded-xl text-xs font-semibold text-slate-700 hover:text-blue-700 hover:bg-blue-50/80 transition-colors"
+                              href={getLearnerSubdomainUrl("/student/live-classes")}
+                              className="flex items-center gap-2.5 px-3 py-2 rounded-xl text-xs font-semibold text-slate-700 hover:text-blue-700 hover:bg-blue-50/80 transition-colors cursor-pointer"
                             >
                               <Video className="h-4 w-4 text-blue-600" />
                               <span>My Live Classes</span>
@@ -721,33 +740,29 @@ export function FloatingNavbar({ variant }: FloatingNavbarProps = {}) {
                         {userSession.role === "TEACHER" && (
                           <>
                             <Link
-                              href="/teacher/dashboard"
-                              onClick={() => setProfileDropdownOpen(false)}
-                              className="flex items-center gap-2.5 px-3 py-2 rounded-xl text-xs font-semibold text-slate-700 hover:text-emerald-700 hover:bg-emerald-50/80 transition-colors"
+                              href={getEducatorSubdomainUrl("/teacher/dashboard")}
+                              className="flex items-center gap-2.5 px-3 py-2 rounded-xl text-xs font-semibold text-slate-700 hover:text-emerald-700 hover:bg-emerald-50/80 transition-colors cursor-pointer"
                             >
                               <LayoutDashboard className="h-4 w-4 text-emerald-600" />
                               <span>Educator Dashboard</span>
                             </Link>
                             <Link
-                              href="/teacher/live-classes"
-                              onClick={() => setProfileDropdownOpen(false)}
-                              className="flex items-center gap-2.5 px-3 py-2 rounded-xl text-xs font-semibold text-slate-700 hover:text-emerald-700 hover:bg-emerald-50/80 transition-colors"
+                              href={getEducatorSubdomainUrl("/teacher/live-classes")}
+                              className="flex items-center gap-2.5 px-3 py-2 rounded-xl text-xs font-semibold text-slate-700 hover:text-emerald-700 hover:bg-emerald-50/80 transition-colors cursor-pointer"
                             >
                               <Video className="h-4 w-4 text-emerald-600" />
                               <span>Live Class Slots</span>
                             </Link>
                             <Link
-                              href="/teacher/courses"
-                              onClick={() => setProfileDropdownOpen(false)}
-                              className="flex items-center gap-2.5 px-3 py-2 rounded-xl text-xs font-semibold text-slate-700 hover:text-emerald-700 hover:bg-emerald-50/80 transition-colors"
+                              href={getEducatorSubdomainUrl("/teacher/courses")}
+                              className="flex items-center gap-2.5 px-3 py-2 rounded-xl text-xs font-semibold text-slate-700 hover:text-emerald-700 hover:bg-emerald-50/80 transition-colors cursor-pointer"
                             >
                               <BookOpen className="h-4 w-4 text-emerald-600" />
                               <span>Course Publisher</span>
                             </Link>
                             <Link
-                              href="/teacher/verification"
-                              onClick={() => setProfileDropdownOpen(false)}
-                              className="flex items-center gap-2.5 px-3 py-2 rounded-xl text-xs font-semibold text-slate-700 hover:text-emerald-700 hover:bg-emerald-50/80 transition-colors"
+                              href={getEducatorSubdomainUrl("/teacher/verification")}
+                              className="flex items-center gap-2.5 px-3 py-2 rounded-xl text-xs font-semibold text-slate-700 hover:text-emerald-700 hover:bg-emerald-50/80 transition-colors cursor-pointer"
                             >
                               <FileCheck className="h-4 w-4 text-emerald-600" />
                               <span>Verification Status</span>
@@ -758,8 +773,7 @@ export function FloatingNavbar({ variant }: FloatingNavbarProps = {}) {
                         {(userSession.role === "ADMIN" || userSession.role === "STAFF") && (
                           <Link
                             href={userSession.role === "ADMIN" ? "/admin" : "/staff/dashboard"}
-                            onClick={() => setProfileDropdownOpen(false)}
-                            className="flex items-center gap-2.5 px-3 py-2 rounded-xl text-xs font-semibold text-slate-700 hover:text-teal-800 hover:bg-teal-50 transition-colors"
+                            className="flex items-center gap-2.5 px-3 py-2 rounded-xl text-xs font-semibold text-slate-700 hover:text-teal-800 hover:bg-teal-50 transition-colors cursor-pointer"
                           >
                             <LayoutDashboard className="h-4 w-4 text-[#0B4F4B]" />
                             <span>Governance Portal</span>
@@ -768,8 +782,7 @@ export function FloatingNavbar({ variant }: FloatingNavbarProps = {}) {
 
                         <Link
                           href="/profile"
-                          onClick={() => setProfileDropdownOpen(false)}
-                          className="flex items-center gap-2.5 px-3 py-2 rounded-xl text-xs font-semibold text-slate-700 hover:text-slate-950 hover:bg-slate-50 transition-colors"
+                          className="flex items-center gap-2.5 px-3 py-2 rounded-xl text-xs font-semibold text-slate-700 hover:text-slate-950 hover:bg-slate-50 transition-colors cursor-pointer"
                         >
                           <User className="h-4 w-4 text-slate-500" />
                           <span>Profile & Account</span>
@@ -778,10 +791,15 @@ export function FloatingNavbar({ variant }: FloatingNavbarProps = {}) {
                         <div className="pt-1 mt-1 border-t border-slate-100">
                           <button
                             onClick={handleLogout}
-                            className="w-full flex items-center gap-2.5 px-3 py-2 rounded-xl text-xs font-semibold text-rose-600 hover:bg-rose-50 transition-colors text-left"
+                            disabled={isLoggingOut}
+                            className="w-full flex items-center gap-2.5 px-3 py-2 rounded-xl text-xs font-semibold text-rose-600 hover:bg-rose-50 transition-colors text-left cursor-pointer disabled:opacity-60 disabled:cursor-not-allowed"
                           >
-                            <LogOut className="h-4 w-4 text-rose-500" />
-                            <span>Sign Out</span>
+                            {isLoggingOut ? (
+                              <Loader2 className="h-4 w-4 animate-spin text-rose-500" />
+                            ) : (
+                              <LogOut className="h-4 w-4 text-rose-500" />
+                            )}
+                            <span>{isLoggingOut ? "Signing out..." : "Sign Out"}</span>
                           </button>
                         </div>
                       </motion.div>
@@ -1004,10 +1022,9 @@ export function FloatingNavbar({ variant }: FloatingNavbarProps = {}) {
                           : "/login"
                       }
                       onClick={() => setMobileOpen(false)}
+                      className="w-full py-2.5 rounded-xl border border-slate-200 text-slate-800 text-sm font-bold hover:bg-slate-50 transition-colors text-center cursor-pointer block"
                     >
-                      <button className="w-full py-2.5 rounded-xl border border-slate-200 text-slate-800 text-sm font-bold hover:bg-slate-50 transition-colors">
-                        Login
-                      </button>
+                      Login
                     </Link>
                     <Link
                       href={
@@ -1018,25 +1035,22 @@ export function FloatingNavbar({ variant }: FloatingNavbarProps = {}) {
                           : "/register"
                       }
                       onClick={() => setMobileOpen(false)}
+                      className={`w-full py-2.5 rounded-xl text-white text-sm font-bold shadow-xs transition-colors flex items-center justify-center gap-1.5 cursor-pointer ${
+                        isLearner
+                          ? "bg-blue-600 hover:bg-blue-700"
+                          : isEducator
+                          ? "bg-[#16805B] hover:bg-[#0D5C41]"
+                          : "bg-[#0B4F4B] hover:bg-[#073F3C]"
+                      }`}
                     >
-                      <button
-                        className={`w-full py-2.5 rounded-xl text-white text-sm font-bold shadow-xs transition-colors flex items-center justify-center gap-1.5 ${
-                          isLearner
-                            ? "bg-blue-600 hover:bg-blue-700"
-                            : isEducator
-                            ? "bg-[#16805B] hover:bg-[#0D5C41]"
-                            : "bg-[#0B4F4B] hover:bg-[#073F3C]"
-                        }`}
-                      >
-                        <span>
-                          {isEducator
-                            ? "Start Teaching"
-                            : isLearner
-                            ? "Start Learning"
-                            : "Get Started"}
-                        </span>
-                        <ArrowRight className="h-4 w-4" />
-                      </button>
+                      <span>
+                        {isEducator
+                          ? "Start Teaching"
+                          : isLearner
+                          ? "Start Learning"
+                          : "Get Started"}
+                      </span>
+                      <ArrowRight className="h-4 w-4" />
                     </Link>
                   </>
                 ) : (
@@ -1045,25 +1059,22 @@ export function FloatingNavbar({ variant }: FloatingNavbarProps = {}) {
                     <Link
                       href={getDashboardPath(userSession)}
                       onClick={() => setMobileOpen(false)}
+                      className={`w-full py-2.5 rounded-xl text-white text-sm font-bold shadow-xs transition-colors flex items-center justify-center gap-2 cursor-pointer ${
+                        userSession.role === "STUDENT"
+                          ? "bg-blue-600 hover:bg-blue-700"
+                          : userSession.role === "TEACHER"
+                          ? "bg-[#16805B] hover:bg-[#0D5C41]"
+                          : "bg-[#0B4F4B] hover:bg-[#073F3C]"
+                      }`}
                     >
-                      <button
-                        className={`w-full py-2.5 rounded-xl text-white text-sm font-bold shadow-xs transition-colors flex items-center justify-center gap-2 ${
-                          userSession.role === "STUDENT"
-                            ? "bg-blue-600 hover:bg-blue-700"
-                            : userSession.role === "TEACHER"
-                            ? "bg-[#16805B] hover:bg-[#0D5C41]"
-                            : "bg-[#0B4F4B] hover:bg-[#073F3C]"
-                        }`}
-                      >
-                        <LayoutDashboard className="h-4 w-4" />
-                        <span>{getDashboardLabel(userSession)}</span>
-                      </button>
+                      <LayoutDashboard className="h-4 w-4" />
+                      <span>{getDashboardLabel(userSession)}</span>
                     </Link>
 
                     <Link
                       href="/profile"
                       onClick={() => setMobileOpen(false)}
-                      className="w-full py-2 rounded-xl text-slate-700 text-xs font-semibold hover:bg-slate-50 flex items-center justify-center gap-2 border border-slate-200"
+                      className="w-full py-2 rounded-xl text-slate-700 text-xs font-semibold hover:bg-slate-50 flex items-center justify-center gap-2 border border-slate-200 cursor-pointer"
                     >
                       <User className="h-3.5 w-3.5 text-slate-500" />
                       <span>Account Profile</span>
@@ -1071,10 +1082,15 @@ export function FloatingNavbar({ variant }: FloatingNavbarProps = {}) {
 
                     <button
                       onClick={handleLogout}
-                      className="w-full py-2 rounded-xl text-rose-600 text-xs font-semibold hover:bg-rose-50 flex items-center justify-center gap-2 border border-rose-100"
+                      disabled={isLoggingOut}
+                      className="w-full py-2 rounded-xl text-rose-600 text-xs font-semibold hover:bg-rose-50 flex items-center justify-center gap-2 border border-rose-100 cursor-pointer disabled:opacity-60 disabled:cursor-not-allowed"
                     >
-                      <LogOut className="h-3.5 w-3.5 text-rose-500" />
-                      <span>Sign Out</span>
+                      {isLoggingOut ? (
+                        <Loader2 className="h-3.5 w-3.5 animate-spin text-rose-500" />
+                      ) : (
+                        <LogOut className="h-3.5 w-3.5 text-rose-500" />
+                      )}
+                      <span>{isLoggingOut ? "Signing out..." : "Sign Out"}</span>
                     </button>
                   </>
                 )}
