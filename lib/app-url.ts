@@ -54,6 +54,15 @@ export function getMainDomain(): string {
 }
 
 /**
+ * Resolves the primary homepage URL (https://educonnects.co.in/).
+ * Automatically guarantees a trailing slash.
+ */
+export function getHomeUrl(): string {
+  const domain = getMainDomain();
+  return domain.endsWith("/") ? domain : `${domain}/`;
+}
+
+/**
  * Resolves the Learner/Student subdomain URL (e.g. https://learners.educonnects.co.in).
  */
 export function getStudentDomain(): string {

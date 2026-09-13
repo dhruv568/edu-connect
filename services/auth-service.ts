@@ -833,13 +833,14 @@ export class AuthService {
         throw new Error("Invalid email or password.");
       }
     } else {
-      // If admin entered password, verify it
-      if (input.password) {
-        const isMatch = await verifyPassword(input.password, user.passwordHash);
-        if (!isMatch) {
-          await logAuditEvent(user.id, "LOGIN_FAILED", { email: user.email });
-          throw new Error("Invalid email or password.");
-        }
+      // Admin accounts ALWAYS require password validation
+      if (!input.password) {
+        throw new Error("Password is required for admin authentication.");
+      }
+      const isMatch = await verifyPassword(input.password, user.passwordHash);
+      if (!isMatch) {
+        await logAuditEvent(user.id, "LOGIN_FAILED", { email: user.email });
+        throw new Error("Invalid email or password.");
       }
 
       // Check resend cooldown for admin login requests to prevent spamming OTP generation

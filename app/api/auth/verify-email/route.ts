@@ -34,7 +34,9 @@ export async function POST(request: NextRequest) {
       }
     }
 
-    return apiSuccess(result, result.message);
+    const response = apiSuccess(result, result.message);
+    response.cookies.delete("admin_pending_otp");
+    return response;
   } catch (error: any) {
     if (error.name === "ZodError") {
       return apiBadRequest(error.errors[0]?.message || "Invalid OTP code format.");

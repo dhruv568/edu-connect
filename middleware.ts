@@ -212,6 +212,23 @@ export function middleware(request: NextRequest) {
   // If no session cookie present
   if (!cookie?.value) {
     if (isPublicPath) {
+      // If admin has already verified password and is waiting for OTP verification:
+      // Opening /admin/login returns them to the OTP verification step rather than restarting unless ?restart=true
+      const pendingAdminOtp = request.cookies.get("admin_pending_otp");
+      if (pathname === "/admin/login") {
+        if (request.nextUrl.searchParams.get("restart")) {
+          const res = NextResponse.next();
+          res.cookies.delete("admin_pending_otp");
+          return res;
+        }
+        if (pendingAdminOtp?.value) {
+          const adminEmail = decodeURIComponent(pendingAdminOtp.value);
+          return NextResponse.redirect(
+            new URL(`/verify-email?email=${encodeURIComponent(adminEmail)}&redirectTo=/admin`, request.url)
+          );
+        }
+      }
+
       const rewrite = getSubdomainRewrite();
       return rewrite || NextResponse.next();
     }

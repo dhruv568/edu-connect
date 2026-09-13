@@ -35,6 +35,7 @@ import { useToast } from "@/components/ui/toast";
 import { NotificationPopover } from "@/components/layout/notification-popover";
 import { PermissionProvider } from "@/components/shared/permission-guard";
 import { DashboardFooter } from "@/components/layout/dashboard-footer";
+import { BackToHomeButton } from "@/components/ui/back-to-home-button";
 
 export interface DashboardLayoutProps {
   role: UserRole;
@@ -334,7 +335,8 @@ export function DashboardLayout({ role, userName, userEmail, children }: Dashboa
           })}
         </nav>
 
-        <div className="p-4 border-t border-[#1B6863]/30">
+        <div className="p-4 border-t border-[#1B6863]/30 space-y-1.5">
+          <BackToHomeButton variant="sidebar" />
           <button
             type="button"
             onClick={(e) => handleLogout(e)}
@@ -354,15 +356,15 @@ export function DashboardLayout({ role, userName, userEmail, children }: Dashboa
       {/* Main Container */}
       <div className="flex-1 flex flex-col min-w-0">
         {/* Topbar */}
-        <header className="h-16 bg-white border-b border-[#DCE5E4] px-6 flex items-center justify-between sticky top-0 z-20">
-          <div className="flex items-center gap-4">
+        <header className="h-16 bg-white border-b border-[#DCE5E4] px-4 sm:px-6 flex items-center justify-between sticky top-0 z-20">
+          <div className="flex items-center gap-3 sm:gap-4">
             <button
               onClick={() => setSidebarOpen(!sidebarOpen)}
               className="lg:hidden p-2 rounded-xl text-[#102A2A] hover:bg-[#F5F7F8]"
             >
               <Menu className="h-6 w-6" />
             </button>
-            <div className="relative hidden sm:block w-64">
+            <div className="relative hidden sm:block w-48 md:w-64">
               <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-[#5D7373]" />
               <input
                 type="text"
@@ -372,10 +374,13 @@ export function DashboardLayout({ role, userName, userEmail, children }: Dashboa
             </div>
           </div>
 
-          <div className="flex items-center gap-4">
+          <div className="flex items-center gap-2 sm:gap-4">
+            {/* Back to Home Button */}
+            <BackToHomeButton variant="default" />
+
             <NotificationPopover />
 
-            <div className="flex items-center gap-3 pl-4 border-l border-[#DCE5E4]">
+            <div className="flex items-center gap-3 pl-2 sm:pl-4 border-l border-[#DCE5E4]">
               {avatarUrl ? (
                 <img
                   src={avatarUrl}

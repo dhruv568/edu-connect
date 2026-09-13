@@ -46,3 +46,10 @@ export function maskEmail(email: string): string {
   }
   return `${name.substring(0, 2)}***@${domain}`;
 }
+
+/**
+ * Returns OTP resend cooldown in seconds.
+ */
+export function getResendCooldownSeconds(): number {
+  return Number(process.env.OTP_RESEND_COOLDOWN_SECONDS) || 60;
+}

@@ -26,6 +26,7 @@ import {
   MessageSquare,
 } from "lucide-react";
 import { BackButton } from "@/components/ui/back-button";
+import { BackToHomeButton } from "@/components/ui/back-to-home-button";
 
 export default function LmsClassroomPlayerPage() {
   const params = useParams();
@@ -263,7 +264,9 @@ export default function LmsClassroomPlayerPage() {
           </h1>
         </div>
 
-        <div className="flex items-center gap-4">
+        <div className="flex items-center gap-3 sm:gap-4">
+          <BackToHomeButton variant="dark" />
+
           {/* Progress Pill */}
           <div className="hidden sm:flex items-center gap-3">
             <span className="text-xs font-bold text-slate-300">

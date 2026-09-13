@@ -48,16 +48,39 @@ export default function AdminLoginPage() {
             const role = json.data.user.role;
             if (role === "ADMIN") {
               window.location.replace("/admin");
+              return;
             } else if (role === "STAFF") {
               window.location.replace("/staff/dashboard");
+              return;
             } else if (isEducatorRole(role)) {
               window.location.replace("/teacher/dashboard");
+              return;
             } else if (isLearnerRole(role)) {
               window.location.replace("/student/dashboard");
+              return;
             } else {
               window.location.replace("/admin");
+              return;
             }
           }
+        }
+      } catch {}
+
+      // If admin has only entered password and is waiting for OTP verification:
+      // Return them to the OTP verification step rather than creating another attempt.
+      try {
+        const searchParams = new URLSearchParams(window.location.search);
+        if (searchParams.get("restart") === "true") {
+          document.cookie = "admin_pending_otp=; path=/; max-age=0;";
+          return;
+        }
+
+        const cookies = typeof document !== "undefined" ? document.cookie.split(";").map((c) => c.trim()) : [];
+        const pendingOtpCookie = cookies.find((c) => c.startsWith("admin_pending_otp="));
+        if (pendingOtpCookie) {
+          const pendingEmail = decodeURIComponent(pendingOtpCookie.split("=")[1] || "educonnets.com@gmail.com");
+          window.location.replace(`/verify-email?email=${encodeURIComponent(pendingEmail)}&redirectTo=/admin`);
+          return;
         }
       } catch {}
     };
@@ -74,13 +97,17 @@ export default function AdminLoginPage() {
 
   const handleAdminLogin = async (e: React.FormEvent) => {
     e.preventDefault();
+    if (!password) {
+      showToast("Password Required", "Please enter your admin password.", "error");
+      return;
+    }
     setLoading(true);
 
     try {
       const res = await fetch("/api/auth/login", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ email: email.trim(), ...(password ? { password } : {}) }),
+        body: JSON.stringify({ email: email.trim(), password }),
       });
 
       const data = await res.json();
@@ -96,8 +123,8 @@ export default function AdminLoginPage() {
         return;
       }
 
-      showToast("Admin Authenticated!", "Welcome to System Governance.", "success");
-      window.location.replace("/admin");
+      // Admin MUST NEVER be granted dashboard access without completing OTP verification
+      throw new Error("Mandatory two-factor OTP verification is required to complete Admin login.");
     } catch (err: any) {
       showToast("Authorization Error", err.message, "error");
     } finally {
@@ -241,19 +268,17 @@ export default function AdminLoginPage() {
                 </div>
 
                 <div className="space-y-1.5">
-                  <div className="flex items-center justify-between">
-                    <label className="block text-xs font-bold uppercase tracking-wider text-slate-300">
-                      Admin Password
-                    </label>
-                    <span className="text-[10px] text-slate-400 font-medium">(Optional)</span>
-                  </div>
+                  <label className="block text-xs font-bold uppercase tracking-wider text-slate-300">
+                    Admin Password
+                  </label>
                   <div className="relative">
                     <Lock className="absolute left-3.5 top-1/2 -translate-y-1/2 h-4 w-4 text-blue-400" />
                     <input
                       type={showPassword ? "text" : "password"}
-                      placeholder="•••••••• (optional)"
+                      placeholder="••••••••"
                       value={password}
                       onChange={(e) => setPassword(e.target.value)}
+                      required
                       style={{ color: "#ffffff", WebkitTextFillColor: "#ffffff" }}
                       className="w-full pl-10 pr-10 py-2.5 bg-slate-800 text-white placeholder:text-slate-400 text-sm rounded-xl border border-slate-600 focus:outline-none focus:border-blue-400 focus:ring-2 focus:ring-blue-500/30 font-medium transition-all dark-input-crisp"
                     />

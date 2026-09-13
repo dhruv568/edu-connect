@@ -5,6 +5,7 @@ import Link from "next/link";
 import { Badge } from "@/components/ui/badge";
 import { ConnectionQuality, SessionStatus } from "@/types/classroom";
 import { Wifi, WifiOff, Clock, UserCheck, Shield } from "lucide-react";
+import { BackToHomeButton } from "@/components/ui/back-to-home-button";
 
 interface ClassroomHeaderProps {
   title: string;
@@ -136,6 +137,7 @@ export function ClassroomHeader({
         )}
 
         <div className="hidden lg:block">{renderConnectionBadge()}</div>
+        <BackToHomeButton variant="dark" />
       </div>
     </header>
   );

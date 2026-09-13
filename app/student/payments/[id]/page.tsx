@@ -6,6 +6,7 @@ import Link from "next/link";
 import { ArrowLeft, Printer, ShieldCheck, CheckCircle2, AlertCircle, RefreshCw, Sparkles } from "lucide-react";
 import { formatCurrency } from "@/lib/currency";
 import { BackButton } from "@/components/ui/back-button";
+import { BackToHomeButton } from "@/components/ui/back-to-home-button";
 
 export default function StudentPaymentReceiptPage() {
   const params = useParams();
@@ -91,11 +92,14 @@ export default function StudentPaymentReceiptPage() {
     <div className="min-h-screen bg-slate-950 text-slate-100 p-6 md:p-10 flex flex-col items-center">
       <div className="w-full max-w-xl space-y-6">
         <div className="flex justify-between items-center print:hidden">
-          <BackButton
-            fallbackUrl="/student/payments"
-            label="Back to Purchases"
-            variant="dark"
-          />
+          <div className="flex items-center gap-2.5">
+            <BackButton
+              fallbackUrl="/student/payments"
+              label="Back to Purchases"
+              variant="dark"
+            />
+            <BackToHomeButton variant="dark" />
+          </div>
 
           <button
             onClick={handlePrint}

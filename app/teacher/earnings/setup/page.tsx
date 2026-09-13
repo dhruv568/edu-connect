@@ -4,6 +4,7 @@ import React, { useState, useEffect } from "react";
 import Link from "next/link";
 import { ArrowLeft, ShieldCheck, CheckCircle2, CreditCard, Sparkles, ExternalLink } from "lucide-react";
 import { BackButton } from "@/components/ui/back-button";
+import { BackToHomeButton } from "@/components/ui/back-to-home-button";
 
 export default function TeacherPayoutSetupPage() {
   const [account, setAccount] = useState<any>(null);
@@ -53,11 +54,14 @@ export default function TeacherPayoutSetupPage() {
   return (
     <div className="min-h-screen bg-slate-950 text-slate-100 p-6 md:p-10 flex flex-col items-center">
       <div className="w-full max-w-xl space-y-6">
-        <BackButton
-          fallbackUrl="/teacher/earnings"
-          label="Back to Earnings"
-          variant="dark"
-        />
+        <div className="flex items-center justify-between">
+          <BackButton
+            fallbackUrl="/teacher/earnings"
+            label="Back to Earnings"
+            variant="dark"
+          />
+          <BackToHomeButton variant="dark" />
+        </div>
 
         <div className="bg-slate-900/80 border border-slate-800/90 rounded-3xl p-8 backdrop-blur-xl shadow-2xl space-y-6">
           <div className="text-center space-y-2">
