@@ -49,7 +49,7 @@ export default function AdminTeachersPage() {
   };
 
   return (
-    <DashboardLayout role="ADMIN" userName="System Administrator" userEmail="educonnets.com@gmail.com">
+    <DashboardLayout role="ADMIN" userName="System Administrator" userEmail="educonnects.com@gmail.com">
       <div className="space-y-6 pb-16">
         <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
           <div>

@@ -800,7 +800,7 @@ export class AuthService {
 
   /**
    * Authenticates user credentials and dispatches mandatory OTP verification code.
-   * For ADMIN account (educonnets.com@gmail.com): verifies admin role and dispatches dynamic OTP via Resend.
+   * For ADMIN account (educonnects.com@gmail.com): verifies admin role and dispatches dynamic OTP via Resend.
    * Session cookie is NOT created until OTP is verified.
    */
   static async loginUser(input: LoginInput) {

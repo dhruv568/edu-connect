@@ -11,6 +11,8 @@ async function main() {
   let existingAdmin = await prisma.user.findFirst({
     where: {
       OR: [
+        { email: "educonnects.com@gmail.com" },
+        // Legacy fallback: locate existing unmigrated admin account to update in-place without duplication
         { email: "educonnets.com@gmail.com" },
         { email: "admin@educonnects.com" },
         { email: "admin@educonnect.com" },
@@ -80,7 +82,7 @@ async function main() {
     admin = await prisma.user.update({
       where: { id: existingAdmin.id },
       data: {
-        email: "educonnets.com@gmail.com",
+        email: "educonnects.com@gmail.com",
         role: "ADMIN",
         emailVerified: true,
       },
@@ -100,7 +102,7 @@ async function main() {
   } else {
     admin = await prisma.user.create({
       data: {
-        email: "educonnets.com@gmail.com",
+        email: "educonnects.com@gmail.com",
         passwordHash: defaultPasswordHash,
         role: "ADMIN",
         emailVerified: true,

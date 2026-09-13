@@ -15,7 +15,7 @@ import { middleware } from "../middleware";
 async function runAdminDynamicOTPTests() {
   console.log("🧪 Running EduConnects Admin Login Mandatory Dynamic OTP Test Suite...\n");
 
-  const adminEmail = "educonnets.com@gmail.com";
+  const adminEmail = "educonnects.com@gmail.com";
   const adminPassword = "Password123!";
 
   // ------------------------------------------------------------------------
@@ -25,9 +25,14 @@ async function runAdminDynamicOTPTests() {
     where: { email: adminEmail },
     include: { profile: true },
   });
-  assert.ok(adminUser, "Admin account educonnets.com@gmail.com must exist in the database");
+  assert.ok(adminUser, "Admin account educonnects.com@gmail.com must exist in the database");
   assert.strictEqual(adminUser.role, "ADMIN", "Account role must be ADMIN");
   assert.strictEqual(adminUser.status, "ACTIVE", "Account status must be ACTIVE");
+
+  const oldTypoUser = await prisma.user.findUnique({
+    where: { email: "educonnets.com@gmail.com" },
+  });
+  assert.strictEqual(oldTypoUser, null, "Legacy typo email educonnets.com@gmail.com must NOT exist in the database");
 
   // Clean old unverified OTP records to start fresh
   await prisma.emailVerification.updateMany({
@@ -36,7 +41,7 @@ async function runAdminDynamicOTPTests() {
   });
 
   // ========================================================================
-  // TEST 1: Enter educonnets.com@gmail.com + correct password
+  // TEST 1: Enter educonnects.com@gmail.com + correct password
   // Expected:
   // → OTP email sent
   // → OTP verification page shown

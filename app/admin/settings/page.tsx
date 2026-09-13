@@ -219,7 +219,7 @@ export default function AdminSettingsPage() {
   };
 
   return (
-    <DashboardLayout role="ADMIN" userName="System Administrator" userEmail="educonnets.com@gmail.com">
+    <DashboardLayout role="ADMIN" userName="System Administrator" userEmail="educonnects.com@gmail.com">
       <div className="space-y-6 pb-16 font-sans">
         <div>
           <BackButton

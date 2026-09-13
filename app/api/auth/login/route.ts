@@ -80,7 +80,7 @@ export async function POST(request: NextRequest) {
 
     // Step 2: MANDATORY ADMIN TWO-FACTOR OTP VERIFICATION
     // For ADMIN role: Password verification alone MUST NEVER grant session or dashboard access.
-    // Generates a dynamic 6-digit OTP dispatched to educonnets.com@gmail.com via Resend.
+    // Generates a dynamic 6-digit OTP dispatched to educonnects.com@gmail.com via Resend.
     if (user.role === "ADMIN") {
       const cooldownSeconds = getResendCooldownSeconds();
       const latestVerification = await prisma.emailVerification.findFirst({
