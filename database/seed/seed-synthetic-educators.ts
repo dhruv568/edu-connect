@@ -476,6 +476,7 @@ export async function seedSyntheticEducators() {
               location: ed.location,
               teachingMode: "BOTH",
               verificationStatus: "VERIFIED",
+              isSeededProfile: true,
               verifiedAt: new Date(),
               rating: ed.rating,
               teacherQualifications: {
@@ -531,6 +532,7 @@ export async function seedSyntheticEducators() {
             location: ed.location,
             rating: ed.rating,
             verificationStatus: "VERIFIED",
+            isSeededProfile: true,
           },
         });
 

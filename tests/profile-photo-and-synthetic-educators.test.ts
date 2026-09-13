@@ -67,10 +67,11 @@ async function runTests() {
     assert.ok(user.profile, `Profile missing for ${user.email}`);
     assert.ok(user.profile!.avatarUrl?.startsWith("/images/educators/educator_"), `Avatar URL invalid for ${user.email}: ${user.profile!.avatarUrl}`);
 
-    // Verify TeacherProfile
+    // Verify TeacherProfile & Security Isolation Flag
     const tp = user.teacherProfile;
     assert.ok(tp, `Teacher profile missing for ${user.email}`);
     assert.strictEqual(tp!.verificationStatus, "VERIFIED");
+    assert.strictEqual(tp!.isSeededProfile, true, `isSeededProfile must be true for ${user.email}`);
     assert.ok(tp!.headline && tp!.headline.length > 5, `Headline too short for ${user.email}`);
     assert.ok(tp!.bio && tp!.bio.length > 20, `Bio too short for ${user.email}`);
     assert.ok((tp!.hourlyRate ?? 0) >= 400 && (tp!.hourlyRate ?? 0) <= 2500, `Rate out of expected range for ${user.email}`);
@@ -92,8 +93,7 @@ async function runTests() {
     const note = tp!.adminNotes[0];
     assert.ok(note.content.includes("Synthetic profile") || note.content.includes("INTERNAL_SAMPLE_EDUCATOR"), `Admin note must mark synthetic nature`);
 
-    // Gender balance check based on email/ID or seed distribution
-    // Profiles 1..20: 10 male, 10 female
+    // Gender balance check based on email/ID distribution
     const idNum = parseInt(user.email.replace("synthetic.educator.", "").replace("@sample.educonnects.internal", ""), 10);
     const maleIds = [1, 3, 5, 7, 9, 11, 13, 15, 17, 19];
     if (maleIds.includes(idNum)) maleCount++;
@@ -101,14 +101,15 @@ async function runTests() {
 
     // Assert no forbidden labels in public fields
     const publicContent = `${user.profile?.firstName} ${user.profile?.lastName} ${tp!.headline} ${tp!.bio}`.toLowerCase();
-    assert.ok(!publicContent.includes("demo teacher"), `Found 'demo teacher' in public content for ${user.email}`);
-    assert.ok(!publicContent.includes("sample teacher"), `Found 'sample teacher' in public content for ${user.email}`);
-    assert.ok(!publicContent.includes("demo account"), `Found 'demo account' in public content for ${user.email}`);
+    const forbidden = ["demo", "sample account", "demo account", "test account", "fake", "synthetic"];
+    for (const f of forbidden) {
+      assert.ok(!publicContent.includes(f), `Found forbidden word '${f}' in public content for ${user.email}`);
+    }
   }
 
   assert.strictEqual(maleCount, 10, `Expected 10 male synthetic educators, counted ${maleCount}`);
   assert.strictEqual(femaleCount, 10, `Expected 10 female synthetic educators, counted ${femaleCount}`);
-  console.log("✅ 20 synthetic educators verified: 10 male, 10 female, qualifications present, password locked, no public demo labels.\n");
+  console.log("✅ 20 synthetic educators verified: 10 male, 10 female, qualifications present, password locked, isSeededProfile = true, no public demo labels.\n");
 
   // =========================================================================
   // 3. Verify Real Educator Account Safety
@@ -122,7 +123,8 @@ async function runTests() {
   assert.strictEqual(realEducator!.role, "TEACHER", "Real educator role must be TEACHER");
   assert.ok(realEducator!.teacherProfile, "Real educator teacher profile must exist");
   assert.strictEqual(realEducator!.teacherProfile!.verificationStatus, "VERIFIED", "Real educator must remain VERIFIED");
-  console.log("✅ Real educator account intact, verified, and untouched.\n");
+  assert.strictEqual(realEducator!.teacherProfile!.isSeededProfile, false, "Real educator isSeededProfile must be false");
+  console.log("✅ Real educator account intact, verified, isSeededProfile = false, and untouched.\n");
 
   // =========================================================================
   // 4. Test Avatar Upload Storage Validation (MIME type and size limit)
@@ -162,9 +164,9 @@ async function runTests() {
   console.log("✅ Avatar storage helper correctly enforces MIME types, extensions, and 5MB size limit.\n");
 
   // =========================================================================
-  // 5. Check Frontend Component Placements
+  // 5. Check Frontend Component Placements & Discovery Experience
   // =========================================================================
-  console.log("5. Checking frontend components and foreign profile elimination...");
+  console.log("5. Checking frontend components and discovery experience...");
 
   // Profile Photo Uploader component
   const uploaderContent = fs.readFileSync(
@@ -187,6 +189,39 @@ async function runTests() {
   const onboardingPage = fs.readFileSync(path.join(process.cwd(), "app/teacher/onboarding/page.tsx"), "utf-8");
   assert.ok(onboardingPage.includes("ProfilePhotoUploader"), "app/teacher/onboarding/page.tsx includes ProfilePhotoUploader");
 
+  // Discovery Filter Panel & INR range
+  const filterPanel = fs.readFileSync(path.join(process.cwd(), "components/discovery/teacher-filter-panel.tsx"), "utf-8");
+  assert.ok(filterPanel.includes("max={2000}"), "Filter panel supports up to ₹2000/hr");
+  assert.ok(filterPanel.includes("biology") && filterPanel.includes("economics"), "Filter panel includes diverse subjects");
+
+  // Find Teachers Page Price Default
+  const findTeachersPage = fs.readFileSync(path.join(process.cwd(), "app/find-teachers/page.tsx"), "utf-8");
+  assert.ok(findTeachersPage.includes("2000"), "Find teachers page defaults to 2000 max price to include all Indian educators");
+
+  // Teacher Card Grid: Circular image & Book Trial Lesson
+  const cardGrid = fs.readFileSync(path.join(process.cwd(), "components/discovery/teacher-card-grid.tsx"), "utf-8");
+  assert.ok(cardGrid.includes("rounded-full"), "Card grid image uses rounded-full (circular)");
+  assert.ok(cardGrid.includes("Book Trial Lesson"), "Card grid has Book Trial Lesson button");
+
+  // Teacher Preview Modal: Circular image & Book Trial Lesson (no Demo)
+  const previewModal = fs.readFileSync(path.join(process.cwd(), "components/discovery/teacher-preview-modal.tsx"), "utf-8");
+  assert.ok(previewModal.includes("rounded-full"), "Preview modal image uses rounded-full (circular)");
+  assert.ok(previewModal.includes("Book Trial Lesson"), "Preview modal has Book Trial Lesson button");
+  assert.ok(!previewModal.includes("Book Introductory Demo"), "Preview modal does not say Demo");
+
+  // Detail Page: Circular image & Book Trial Lesson
+  const detailPage = fs.readFileSync(path.join(process.cwd(), "app/find-teachers/[id]/page.tsx"), "utf-8");
+  assert.ok(detailPage.includes("rounded-full"), "Detail page image uses rounded-full (circular)");
+  assert.ok(detailPage.includes("Book Trial Lesson"), "Detail page has Book Trial Lesson button");
+  assert.ok(!detailPage.includes("Book Introductory Demo"), "Detail page does not say Demo");
+
+  // Backend Guards check isSeededProfile
+  const guardsContent = fs.readFileSync(path.join(process.cwd(), "lib/auth/guards.ts"), "utf-8");
+  assert.ok(guardsContent.includes("isSeededProfile"), "lib/auth/guards.ts checks isSeededProfile");
+
+  const tokenContent = fs.readFileSync(path.join(process.cwd(), "lib/classroom/classroom-token.ts"), "utf-8");
+  assert.ok(tokenContent.includes("isSeededProfile"), "lib/classroom/classroom-token.ts checks isSeededProfile");
+
   // Verify foreign profiles purged from homepage
   const teacherCarousel = fs.readFileSync(path.join(process.cwd(), "components/homepage/teacher-carousel.tsx"), "utf-8");
   assert.ok(!teacherCarousel.includes("Sarah Jenkins"), "Sarah Jenkins must not be in teacher-carousel");
@@ -201,7 +236,7 @@ async function runTests() {
   assert.ok(!aboutPage.includes("Marcus Vance"), "Marcus Vance must not be in about page");
   assert.ok(aboutPage.includes("Dr. Rajeshwar Kulkarni"), "Dr. Rajeshwar Kulkarni should be in about page");
 
-  console.log("✅ Frontend components, uploader integrations, and foreign profile elimination verified.\n");
+  console.log("✅ Frontend components, uploader integrations, security guards, and discovery verified.\n");
 
   console.log("🎉 ALL PROFILE PHOTO & SYNTHETIC EDUCATOR TESTS PASSED SUCCESSFULLY! 🚀\n");
 }

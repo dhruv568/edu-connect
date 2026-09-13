@@ -54,7 +54,7 @@ export function TeacherCardGrid({ teachers, loading = false, onOpenAuth }: Teach
                 <img
                   src={t.avatarUrl}
                   alt={t.name}
-                  className="w-14 h-14 rounded-2xl object-cover ring-2 ring-emerald-600/20 group-hover:ring-emerald-500 transition-all shrink-0 aspect-square shadow-xs"
+                  className="w-14 h-14 rounded-full object-cover ring-2 ring-emerald-600/20 group-hover:ring-emerald-500 transition-all shrink-0 aspect-square shadow-xs"
                   onError={(e) => {
                     (e.target as HTMLImageElement).src = "/images/educators/educator_01.jpg";
                   }}
@@ -93,9 +93,9 @@ export function TeacherCardGrid({ teachers, loading = false, onOpenAuth }: Teach
               </div>
             </div>
 
-            <div className="pt-4 border-t border-slate-100 mt-4">
-              <GlassButton variant="secondary" size="sm" className="w-full" rightIcon={<ArrowRight className="h-3.5 w-3.5" />}>
-                View Educator Profile
+            <div className="pt-4 border-t border-slate-100 mt-4 flex items-center gap-2">
+              <GlassButton variant="primary" size="sm" className="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold" rightIcon={<ArrowRight className="h-3.5 w-3.5" />}>
+                Book Trial Lesson
               </GlassButton>
             </div>
           </GlassCard>

@@ -87,7 +87,7 @@ export function ExploreEducatorsSection() {
                     <img
                       src={t.avatarUrl}
                       alt={t.name}
-                      className="w-14 h-14 rounded-2xl object-cover ring-2 ring-[#0F5C5A]/20 shadow-sm shrink-0"
+                      className="w-14 h-14 rounded-full object-cover ring-2 ring-[#0F5C5A]/20 shadow-sm shrink-0 aspect-square"
                     />
                     <div>
                       <div className="flex items-center gap-1.5">

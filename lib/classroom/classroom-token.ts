@@ -55,6 +55,13 @@ export async function verifyRoomAccess(
     });
 
     if (slot && slot.status !== "CANCELLED") {
+      if (slot.teacher?.isSeededProfile) {
+        return {
+          authorized: false,
+          reason: "Seeded public profiles cannot host live classroom sessions.",
+        };
+      }
+
       const isSlotTeacherVerified =
         slot.teacher?.verificationStatus === "VERIFIED" ||
         slot.teacher?.verificationStatus === "APPROVED";
@@ -106,6 +113,14 @@ export async function verifyRoomAccess(
   // 2. Check Teacher Ownership
   const isTeacher = liveSession.teacher.userId === session.id;
   if (isTeacher) {
+    if (liveSession.teacher?.isSeededProfile) {
+      return {
+        authorized: false,
+        reason: "Seeded public profiles cannot enter or host live sessions.",
+        liveSession,
+      };
+    }
+
     const isTeacherVerified =
       liveSession.teacher?.verificationStatus === "VERIFIED" ||
       liveSession.teacher?.verificationStatus === "APPROVED";

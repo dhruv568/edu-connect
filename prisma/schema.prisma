@@ -81,6 +81,7 @@ model TeacherProfile {
   languages          String?  @default("English")
   teachingMode       String?  @default("ONLINE") // ONLINE | OFFLINE | BOTH
   verificationStatus String   @default("PENDING") // PENDING | VERIFIED | REJECTED | SUSPENDED
+  isSeededProfile    Boolean  @default(false)
   rating             Float    @default(5.0)
 
   submittedAt        DateTime?

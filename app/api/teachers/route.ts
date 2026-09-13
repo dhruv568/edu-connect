@@ -23,6 +23,8 @@ export async function GET(request: NextRequest) {
           user: {
             emailVerified: true,
             NOT: [
+              { email: "teacher@educonnect.com" },
+              { email: "teacher@educonnects.com" },
               { email: { startsWith: "teacher.lms." } },
               { email: { startsWith: "teacher.mod9." } },
               { email: { startsWith: "teacher.cf." } },

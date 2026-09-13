@@ -56,6 +56,10 @@ export async function requireVerifiedEducator(): Promise<UserSession & { userId:
     throw new Error("NOT_FOUND: Educator profile record not found.");
   }
 
+  if (teacherProfile.isSeededProfile) {
+    throw new Error("FORBIDDEN: Seeded public profile cannot access educator dashboard or privileges.");
+  }
+
   const isVerified =
     teacherProfile.verificationStatus === "VERIFIED" ||
     teacherProfile.verificationStatus === "APPROVED";

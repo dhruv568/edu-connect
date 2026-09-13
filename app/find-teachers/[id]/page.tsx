@@ -55,7 +55,7 @@ export default function PublicTeacherProfilePage() {
               <img
                 src={teacher.avatarUrl}
                 alt={teacher.name}
-                className="w-28 h-28 rounded-3xl object-cover ring-4 ring-emerald-500/20 shadow-md aspect-square shrink-0"
+                className="w-28 h-28 rounded-full object-cover ring-4 ring-emerald-500/20 shadow-md aspect-square shrink-0"
                 onError={(e) => {
                   (e.target as HTMLImageElement).src = "/images/educators/educator_01.jpg";
                 }}
@@ -110,7 +110,7 @@ export default function PublicTeacherProfilePage() {
                 <div className="text-2xl font-black text-slate-900">{formatCurrency(teacher.hourlyRate)}</div>
               </div>
               <GlassButton variant="primary" size="lg" onClick={() => setAuthModalOpen(true)}>
-                Book Introductory Demo Session
+                Book Trial Lesson
               </GlassButton>
             </div>
           </GlassCard>

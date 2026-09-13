@@ -26,7 +26,11 @@ export function TeacherFilterPanel({ filters, onChange, onReset }: TeacherFilter
     { value: "physics", label: "Physics" },
     { value: "chemistry", label: "Chemistry" },
     { value: "computer science", label: "Computer Science" },
+    { value: "biology", label: "Biology" },
     { value: "english", label: "English" },
+    { value: "economics", label: "Economics" },
+    { value: "accountancy", label: "Accountancy" },
+    { value: "statistics", label: "Statistics" },
   ];
 
   return (
@@ -67,9 +71,9 @@ export function TeacherFilterPanel({ filters, onChange, onReset }: TeacherFilter
         </div>
         <input
           type="range"
-          min={20}
-          max={100}
-          step={5}
+          min={300}
+          max={2000}
+          step={50}
           value={filters.priceMax}
           onChange={(e) => onChange({ ...filters, priceMax: Number(e.target.value) })}
           className="w-full accent-blue-600 cursor-pointer"

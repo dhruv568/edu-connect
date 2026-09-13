@@ -41,7 +41,7 @@ export function TeacherPreviewModal({ teacher, isOpen, onClose, onOpenAuth }: Te
             <img
               src={teacher.avatarUrl}
               alt={teacher.name}
-              className="w-20 h-20 rounded-2xl object-cover ring-2 ring-emerald-600/20 aspect-square shrink-0 shadow-sm"
+              className="w-20 h-20 rounded-full object-cover ring-2 ring-emerald-600/20 aspect-square shrink-0 shadow-sm"
               onError={(e) => {
                 (e.target as HTMLImageElement).src = "/images/educators/educator_01.jpg";
               }}
@@ -108,7 +108,7 @@ export function TeacherPreviewModal({ teacher, isOpen, onClose, onOpenAuth }: Te
                 }}
                 rightIcon={<ArrowRight className="h-4 w-4" />}
               >
-                Book Introductory Demo
+                Book Trial Lesson
               </GlassButton>
             </div>
           </div>
