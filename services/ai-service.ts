@@ -541,7 +541,7 @@ export async function processAiChat(options: AiChatOptions): Promise<AiChatResul
         const completionParams: any = {
           model: configuredModel,
           messages: promptMessages,
-          max_completion_tokens: 750,
+          max_completion_tokens: 700,
           ...(!isReasoningModel ? { temperature: 0.7 } : {}),
         };
 
@@ -679,7 +679,7 @@ export async function streamAiChat(
     const streamParams: any = {
       model: configuredModel,
       messages: promptMessages,
-      max_completion_tokens: 750,
+      max_completion_tokens: 700,
       stream: true,
       ...(!isReasoningModel ? { temperature: 0.7 } : {}),
     };
