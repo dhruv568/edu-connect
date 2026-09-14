@@ -38,6 +38,7 @@ import { PermissionProvider } from "@/components/shared/permission-guard";
 import { DashboardFooter } from "@/components/layout/dashboard-footer";
 import { BackToHomeButton } from "@/components/ui/back-to-home-button";
 import { AdminSearchDialog } from "@/components/layout/admin-search-dialog";
+import { Logo } from "@/components/brand/logo";
 
 export interface DashboardLayoutProps {
   role: UserRole;
@@ -424,13 +425,18 @@ export function DashboardLayout({ role, userName, userEmail, children }: Dashboa
           <div className="p-5 border-b border-[#1B6863]/30 flex items-center justify-between">
             <Link
               href={isAdminOrStaff ? "/admin" : isEducatorRole(role) ? "/teacher/dashboard" : "/student/dashboard"}
-              className="flex items-center gap-3 group"
+              className="flex items-center gap-3 group min-w-0"
             >
-              <div className="p-2 rounded-xl bg-[#0B4F4B] text-white shadow-md border border-[#F2C14E]/30 group-hover:border-[#F2C14E] transition-colors">
-                <GraduationCap className="h-6 w-6 text-[#F2C14E]" />
-              </div>
-              <div>
-                <h1 className="text-base font-black text-white tracking-tight">EDUCONNECTS</h1>
+              <Logo
+                variant="mark"
+                size="md"
+                href={false}
+                priority
+              />
+              <div className="min-w-0">
+                <h1 className="text-sm font-black text-white tracking-tight">
+                  EDU<span className={isAdminOrStaff ? "text-[#F2C14E]" : isEducatorRole(role) ? "text-emerald-400" : "text-blue-400"}>CONNECTS</span>
+                </h1>
                 <Badge variant={roleColors[role] || "student"} size="sm">
                   {currentRoleTitle}
                 </Badge>

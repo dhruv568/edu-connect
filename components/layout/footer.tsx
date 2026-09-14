@@ -2,6 +2,7 @@ import React from "react";
 import Link from "next/link";
 import { GraduationCap, Heart, Shield, MessageSquare } from "lucide-react";
 import { OFFICIAL_COMPANY_INFO } from "@/lib/company";
+import { Logo } from "@/components/brand/logo";
 
 export function Footer() {
   return (
@@ -10,14 +11,13 @@ export function Footer() {
         <div className="grid grid-cols-1 md:grid-cols-5 gap-10 pb-12 border-b border-slate-800">
           {/* Brand Col */}
           <div className="space-y-4 md:col-span-2">
-            <Link href="/" className="flex items-center gap-2.5">
-              <div className="p-2 rounded-xl bg-blue-600 text-white">
-                <GraduationCap className="h-5 w-5" />
-              </div>
-              <span className="text-lg font-extrabold text-white tracking-tight">
-                {OFFICIAL_COMPANY_INFO.brandName}
-              </span>
-            </Link>
+            <Logo
+              variant="compact"
+              size="md"
+              theme="dark"
+              href="/"
+              showTagline={false}
+            />
             <p className="text-xs text-blue-400 font-bold uppercase tracking-wider">
               {OFFICIAL_COMPANY_INFO.tagline}
             </p>

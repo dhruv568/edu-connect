@@ -40,6 +40,7 @@ import {
 } from "@/lib/app-url";
 import { NotificationPopover } from "@/components/layout/notification-popover";
 import { useToast } from "@/components/ui/toast";
+import { Logo } from "@/components/brand/logo";
 
 export interface FloatingNavbarProps {
   variant?: "default" | "student" | "teacher";
@@ -302,46 +303,22 @@ export function FloatingNavbar({ variant }: FloatingNavbarProps = {}) {
           {/* 1. BRAND LOGO & CONTEXT BADGE */}
           {/* ========================================================================= */}
           <div className="flex items-center gap-2 sm:gap-3 shrink-0">
-            <Link
+            <Logo
+              variant="compact"
+              size="md"
+              roleContext={isLearner ? "student" : isEducator ? "teacher" : "default"}
               href={isLearner ? "/student" : isEducator ? "/teacher" : getMainDomain() + "/"}
-              className="flex items-center gap-2.5 group shrink-0"
+              showTagline={true}
+              tagline={
+                isLearner
+                  ? "Learner Gateway"
+                  : isEducator
+                  ? "Educator Network"
+                  : "Learn • Grow • Belong"
+              }
               onClick={() => setMobileOpen(false)}
-            >
-              <div
-                className={`w-9 h-9 sm:w-10 sm:h-10 rounded-xl flex items-center justify-center shadow-xs transition-transform group-hover:scale-105 shrink-0 ${
-                  isLearner
-                    ? "bg-gradient-to-br from-blue-600 to-indigo-700 text-white shadow-blue-500/20"
-                    : isEducator
-                    ? "bg-gradient-to-br from-[#16805B] to-[#0D5C41] text-white shadow-emerald-600/20"
-                    : "bg-gradient-to-br from-[#0B4F4B] to-[#073F3C] text-[#F2C14E] shadow-teal-900/20"
-                }`}
-              >
-                <GraduationCap className="h-5 w-5 sm:h-5.5 sm:w-5.5" />
-              </div>
-              <div className="flex flex-col">
-                <span className="text-base sm:text-lg font-black text-slate-900 tracking-tight leading-none">
-                  EDU
-                  <span
-                    className={
-                      isLearner
-                        ? "text-blue-600"
-                        : isEducator
-                        ? "text-[#16805B]"
-                        : "text-[#0B4F4B]"
-                    }
-                  >
-                    CONNECTS
-                  </span>
-                </span>
-                <span className="text-[10px] font-semibold text-slate-500 tracking-wide mt-0.5 hidden sm:block">
-                  {isLearner
-                    ? "Learner Gateway"
-                    : isEducator
-                    ? "Educator Network"
-                    : "Learn • Grow • Belong"}
-                </span>
-              </div>
-            </Link>
+              priority
+            />
 
             {/* Context Tag */}
             {isLearner && (

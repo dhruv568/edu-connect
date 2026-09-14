@@ -12,6 +12,7 @@ import { Input } from "@/components/ui/input";
 import { useToast } from "@/components/ui/toast";
 import { BookOpen, CheckCircle2, ArrowRight, Video, Sparkles, Award } from "lucide-react";
 import { BackButton } from "@/components/ui/back-button";
+import { Logo } from "@/components/brand/logo";
 
 export default function StudentRegisterPage() {
   const [firstName, setFirstName] = useState("");
@@ -129,8 +130,10 @@ export default function StudentRegisterPage() {
               variant="default"
             />
 
-            <div className="text-center lg:text-left space-y-1">
-              <GlassBadge variant="emerald">STUDENT ONBOARDING</GlassBadge>
+            <div className="text-center lg:text-left space-y-2">
+              <div className="flex justify-center lg:justify-start">
+                <Logo variant="compact" size="md" roleContext="student" href="/" priority />
+              </div>
               <h2 className="text-2xl sm:text-3xl font-black text-slate-900">
                 Create Student Account
               </h2>

@@ -6,6 +6,7 @@ import Link from "next/link";
 import { LogOut, ArrowRight, Home, Sparkles, Heart, Quote, CheckCircle2 } from "lucide-react";
 import { OFFICIAL_COMPANY_INFO } from "@/lib/company";
 import { getEducatorDomain } from "@/lib/app-url";
+import { Logo } from "@/components/brand/logo";
 
 export default function EducatorLogoutPage() {
   // Ensure session is completely cleared when landing on this page
@@ -22,16 +23,8 @@ export default function EducatorLogoutPage() {
       <header className="w-full border-b border-[#1B6863]/40 bg-[#073F3C]/60 backdrop-blur-md sticky top-0 z-30">
         <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 h-16 sm:h-20 flex items-center justify-between">
           <Link href="/" className="flex items-center gap-3 group">
-            <div className="w-10 h-10 rounded-xl overflow-hidden shadow-md border border-[#F2C14E]/30 bg-white flex items-center justify-center">
-              <Image
-                src="/images/logo.jpeg"
-                alt="EduConnects Logo"
-                width={40}
-                height={40}
-                className="object-cover w-full h-full group-hover:scale-105 transition-transform"
-                priority
-              />
-            </div>
+            {/* Official brand asset: /images/logo.jpeg rendered cleanly via Logo component */}
+            <Logo variant="mark" size="md" href={false} priority />
             <div>
               <span className="text-lg sm:text-xl font-black text-white tracking-tight">
                 EDUCONNECTS

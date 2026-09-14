@@ -6,6 +6,7 @@ import { Badge } from "@/components/ui/badge";
 import { ConnectionQuality, SessionStatus } from "@/types/classroom";
 import { Wifi, WifiOff, Clock, UserCheck, Shield } from "lucide-react";
 import { BackToHomeButton } from "@/components/ui/back-to-home-button";
+import { Logo } from "@/components/brand/logo";
 
 interface ClassroomHeaderProps {
   title: string;
@@ -95,12 +96,14 @@ export function ClassroomHeader({
     <header className="h-16 bg-slate-950/90 border-b border-slate-800 px-4 md:px-6 flex items-center justify-between gap-4 backdrop-blur-md sticky top-0 z-30">
       {/* Brand & Class Title */}
       <div className="flex items-center gap-4 min-w-0">
-        <Link href="/" className="flex items-center gap-2 text-white font-black text-lg tracking-tight shrink-0">
-          <div className="w-8 h-8 rounded-xl bg-gradient-to-tr from-blue-600 to-indigo-600 flex items-center justify-center text-white shadow-md shadow-blue-500/20">
-            <Shield className="h-4 w-4" />
-          </div>
-          <span className="hidden sm:inline">EduConnects</span>
-        </Link>
+        <Logo
+          variant="compact"
+          size="sm"
+          theme="dark"
+          href="/"
+          showTagline={false}
+          priority
+        />
 
         <div className="h-6 w-px bg-slate-800 hidden sm:block shrink-0" />
 

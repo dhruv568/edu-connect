@@ -5,6 +5,7 @@ import Link from "next/link";
 import { GraduationCap, Menu, X, Bell } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import { getMainDomain, getLiveDomain } from "@/lib/app-url";
+import { Logo } from "@/components/brand/logo";
 
 export interface LiveHeaderProps {
   onRegisterClick?: () => void;
@@ -33,14 +34,12 @@ export function LiveHeader({ onRegisterClick }: LiveHeaderProps) {
       >
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex items-center justify-between">
           {/* Logo */}
-          <a href={getMainDomain() + "/"} className="flex items-center gap-2.5 group">
-            <div className="p-2.5 rounded-2xl bg-[#7A0000] text-white shadow-md group-hover:scale-105 transition-transform border border-[#FFD700]/30">
-              <GraduationCap className="h-6 w-6" />
-            </div>
-            <span className="text-xl font-extrabold text-[#3B0202] tracking-tight">
-              EDU<span className="text-[#7A0000]">CONNECTS</span>
-            </span>
-          </a>
+          <Logo
+            variant="compact"
+            size="md"
+            href={getMainDomain() + "/"}
+            priority
+          />
 
           {/* Desktop Right Nav & Button */}
           <div className="hidden md:flex items-center gap-8">

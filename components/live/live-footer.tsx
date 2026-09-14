@@ -4,6 +4,7 @@ import React from "react";
 import Link from "next/link";
 import { GraduationCap, Heart } from "lucide-react";
 import { getMainDomain, getLiveDomain } from "@/lib/app-url";
+import { Logo } from "@/components/brand/logo";
 
 export function LiveFooter() {
   return (
@@ -12,14 +13,13 @@ export function LiveFooter() {
         <div className="grid grid-cols-1 md:grid-cols-4 gap-10 pb-12 border-b border-[#630707]/60">
           {/* Brand Col */}
           <div className="space-y-4 md:col-span-2">
-            <a href={getMainDomain() + "/"} className="flex items-center gap-2.5">
-              <div className="p-2.5 rounded-2xl bg-[#7A0000] text-[#FFD700] border border-[#FFD700]/40 shadow-md">
-                <GraduationCap className="h-6 w-6" />
-              </div>
-              <span className="text-xl font-extrabold text-white tracking-tight">
-                EDU<span className="text-[#FFD700]">CONNECTS</span>
-              </span>
-            </a>
+            <Logo
+              variant="compact"
+              size="lg"
+              theme="dark"
+              href={getMainDomain() + "/"}
+              showTagline={false}
+            />
 
             <p className="text-sm font-extrabold text-[#FFD700] uppercase tracking-wider">
               EduConnects • Learn | Grow | Belong

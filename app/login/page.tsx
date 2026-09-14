@@ -11,6 +11,7 @@ import { GlassButton } from "@/components/glass/glass-button";
 import { Input } from "@/components/ui/input";
 import { useToast } from "@/components/ui/toast";
 import { isEducatorRole, isLearnerRole } from "@/lib/auth/roles";
+import { Logo } from "@/components/brand/logo";
 import { LogIn, Mail, Lock, ArrowRight, Sparkles } from "lucide-react";
 
 export default function LoginPage() {
@@ -156,8 +157,10 @@ export default function LoginPage() {
 
           {/* Right Column: Form */}
           <div className="lg:col-span-6 max-w-md mx-auto w-full space-y-6">
-            <div className="text-center lg:text-left space-y-1">
-              <GlassBadge variant="blue" className="lg:hidden">EDUCONNECTS AUTHENTICATION</GlassBadge>
+            <div className="text-center lg:text-left space-y-2">
+              <div className="flex justify-center lg:justify-start">
+                <Logo variant="compact" size="md" href="/" priority />
+              </div>
               <h2 className="text-2xl sm:text-3xl font-black text-slate-900">Sign In to EduConnects</h2>
               <p className="text-xs text-slate-500">Access your Teacher or Student Dashboard</p>
             </div>

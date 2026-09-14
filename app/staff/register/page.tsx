@@ -7,6 +7,7 @@ import { Mail, Lock, ShieldCheck, ArrowRight, CheckCircle2, AlertCircle, Refresh
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { BackButton } from "@/components/ui/back-button";
+import { Logo } from "@/components/brand/logo";
 
 export default function StaffRegisterPage() {
   const router = useRouter();
@@ -140,6 +141,9 @@ export default function StaffRegisterPage() {
 
         {/* Brand Header */}
         <div className="text-center space-y-2">
+          <div className="flex justify-center mb-3">
+            <Logo variant="compact" size="md" theme="dark" href="/" priority />
+          </div>
           <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-blue-500/10 text-blue-400 text-xs font-semibold border border-blue-500/20">
             <ShieldCheck className="h-4 w-4" /> EduConnects Staff Portal
           </div>

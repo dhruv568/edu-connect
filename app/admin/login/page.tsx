@@ -10,6 +10,7 @@ import { GlassButton } from "@/components/glass/glass-button";
 import { Input } from "@/components/ui/input";
 import { useToast } from "@/components/ui/toast";
 import { isEducatorRole, isLearnerRole } from "@/lib/auth/roles";
+import { Logo } from "@/components/brand/logo";
 import {
   ShieldCheck,
   Lock,
@@ -238,8 +239,18 @@ export default function AdminLoginPage() {
               glowColor="rgba(59, 130, 246, 0.25)"
               className="p-6 sm:p-8 border border-slate-700/80 shadow-2xl bg-slate-900/90 backdrop-blur-2xl space-y-6"
             >
-              <div className="space-y-1.5 pb-2 border-b border-slate-800">
-                <div className="flex items-center gap-2">
+              <div className="space-y-3 pb-3 border-b border-slate-800">
+                <Logo
+                  variant="compact"
+                  size="md"
+                  theme="dark"
+                  roleContext="admin"
+                  href="/"
+                  showTagline={true}
+                  tagline="Administration Console"
+                  priority
+                />
+                <div className="flex items-center gap-2 pt-1">
                   <div className="p-2 rounded-xl bg-gradient-to-tr from-blue-600 to-indigo-600 text-white shadow-md">
                     <KeyRound className="h-4 w-4" />
                   </div>

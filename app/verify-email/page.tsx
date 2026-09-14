@@ -8,6 +8,7 @@ import { Button } from "@/components/ui/button";
 import { useToast } from "@/components/ui/toast";
 import { maskEmail } from "@/lib/auth/tokens";
 import { BackButton } from "@/components/ui/back-button";
+import { Logo } from "@/components/brand/logo";
 
 function VerifyEmailForm() {
   const searchParams = useSearchParams();
@@ -168,6 +169,9 @@ function VerifyEmailForm() {
         animate={{ opacity: 1, y: 0 }}
         className="w-full max-w-md bg-white rounded-3xl p-8 shadow-xl border border-slate-200/80 text-center relative z-10 space-y-6"
       >
+        <div className="flex justify-center">
+          <Logo variant="compact" size="md" href="/" priority />
+        </div>
         {verified ? (
           <div className="space-y-4 py-4">
             <div className="w-16 h-16 bg-emerald-100 text-emerald-600 rounded-full flex items-center justify-center mx-auto animate-bounce">

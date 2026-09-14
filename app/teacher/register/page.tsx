@@ -20,6 +20,7 @@ import {
   CheckCircle2,
 } from "lucide-react";
 import { BackButton } from "@/components/ui/back-button";
+import { Logo } from "@/components/brand/logo";
 
 export default function TeacherRegisterPage() {
   const [step, setStep] = useState<1 | 2>(1);
@@ -138,7 +139,10 @@ export default function TeacherRegisterPage() {
               variant="default"
             />
 
-            <div className="text-center lg:text-left space-y-1">
+            <div className="text-center lg:text-left space-y-2">
+              <div className="flex justify-center lg:justify-start">
+                <Logo variant="compact" size="md" roleContext="teacher" href="/" priority />
+              </div>
               <div className="flex items-center justify-between">
                 <GlassBadge variant="indigo">STEP {step} OF 2 • EDUCATOR PORTAL</GlassBadge>
                 <div className="flex items-center gap-1.5">

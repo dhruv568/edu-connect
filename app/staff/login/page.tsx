@@ -7,6 +7,7 @@ import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { useToast } from "@/components/ui/toast";
+import { Logo } from "@/components/brand/logo";
 import {
   ShieldCheck,
   Mail,
@@ -116,6 +117,9 @@ export default function StaffLoginPage() {
     <div className="min-h-screen bg-gradient-to-br from-slate-900 via-slate-800 to-indigo-950 flex flex-col justify-center items-center p-4">
       {/* Header */}
       <div className="mb-8 text-center">
+        <div className="flex justify-center mb-4">
+          <Logo variant="compact" size="lg" theme="dark" href="/" priority />
+        </div>
         <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-blue-500/10 border border-blue-400/20 text-blue-300 text-xs font-bold uppercase tracking-wider mb-2">
           <Building className="h-3.5 w-3.5" /> EduConnects Staff Portal
         </div>

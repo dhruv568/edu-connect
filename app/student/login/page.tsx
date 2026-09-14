@@ -11,6 +11,7 @@ import { GlassButton } from "@/components/glass/glass-button";
 import { Input } from "@/components/ui/input";
 import { useToast } from "@/components/ui/toast";
 import { isEducatorRole, isLearnerRole } from "@/lib/auth/roles";
+import { Logo } from "@/components/brand/logo";
 import {
   Mail,
   Lock,
@@ -179,10 +180,10 @@ export default function StudentLoginPage() {
 
           {/* Right Column: Student Login Form */}
           <div className="lg:col-span-6 max-w-md mx-auto w-full space-y-6">
-            <div className="text-center lg:text-left space-y-1">
-              <GlassBadge variant="emerald" className="lg:hidden">
-                STUDENT AUTHENTICATION
-              </GlassBadge>
+            <div className="text-center lg:text-left space-y-2">
+              <div className="flex justify-center lg:justify-start">
+                <Logo variant="compact" size="md" roleContext="student" href="/" priority />
+              </div>
               <h2 className="text-2xl sm:text-3xl font-black text-slate-900">
                 Student Sign In
               </h2>

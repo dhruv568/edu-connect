@@ -5,6 +5,7 @@ import Link from "next/link";
 import { GraduationCap, Heart, Shield } from "lucide-react";
 import { OFFICIAL_COMPANY_INFO } from "@/lib/company";
 import { getLiveDomain } from "@/lib/app-url";
+import { Logo } from "@/components/brand/logo";
 
 export interface PremiumFooterProps {
   showCta?: boolean;
@@ -21,14 +22,13 @@ export function PremiumFooter({ showCta = false }: PremiumFooterProps = {}) {
         <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-5 gap-8 sm:gap-10 pb-12 border-b border-[#1B6863]/40">
           {/* Brand Column */}
           <div className="space-y-4 md:col-span-2">
-            <Link href="/" className="flex items-center gap-2.5">
-              <div className="p-2 rounded-xl bg-[#0F5C5A] text-[#F2C14E] border border-[#F2C14E]/30">
-                <GraduationCap className="h-6 w-6" />
-              </div>
-              <span className="text-xl font-black text-white tracking-tight">
-                {OFFICIAL_COMPANY_INFO.brandName}
-              </span>
-            </Link>
+            <Logo
+              variant="compact"
+              size="lg"
+              theme="dark"
+              href="/"
+              showTagline={false}
+            />
             <p className="text-xs text-[#F2C14E] font-bold uppercase tracking-wider">
               Learn • Grow • Belong
             </p>
