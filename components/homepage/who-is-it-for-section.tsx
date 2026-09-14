@@ -25,38 +25,50 @@ export function WhoIsItForSection() {
         {/* Two Cards Grid */}
         <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
           {/* Card 1 — For Learners */}
-          <div className="p-8 sm:p-10 rounded-3xl bg-[#F5F7F8] border border-[#DCE5E4] hover:border-[#0F5C5A]/40 transition-all flex flex-col justify-between space-y-8 relative overflow-hidden group shadow-sm hover:shadow-xl">
+          <div className="p-7 sm:p-9 rounded-3xl bg-[#F5F7F8] border border-[#DCE5E4] hover:border-[#0F5C5A]/40 transition-all flex flex-col justify-between space-y-6 relative overflow-hidden group shadow-sm hover:shadow-xl">
             <div className="absolute top-0 right-0 w-36 h-36 bg-[#0F5C5A]/5 rounded-bl-full pointer-events-none group-hover:scale-110 transition-transform" />
 
-            <div className="space-y-5 relative z-10">
-              <div className="p-3.5 rounded-2xl bg-[#0F5C5A] text-white w-fit shadow-md">
-                <GraduationCap className="h-7 w-7" />
+            <div className="space-y-4 relative z-10">
+              {/* Supporting Image: Learner Growth */}
+              <div className="h-44 sm:h-48 w-full rounded-2xl overflow-hidden bg-[#E6F0EF] border border-[#DCE5E4] relative">
+                <img
+                  src="/images/learner-hero.jpeg"
+                  alt="EduConnects Learner Growth"
+                  className="w-full h-full object-cover object-top group-hover:scale-102 transition-transform duration-500"
+                />
               </div>
-              <div>
-                <span className="text-xs font-black text-[#0F5C5A] uppercase tracking-wider">
-                  FOR LEARNERS
-                </span>
-                <h3 className="text-2xl sm:text-3xl font-black text-[#102A2A] mt-1">
-                  Find. Learn. Grow.
-                </h3>
+
+              <div className="flex items-center gap-3">
+                <div className="p-2.5 rounded-xl bg-[#0F5C5A] text-white shadow-sm">
+                  <GraduationCap className="h-5 w-5" />
+                </div>
+                <div>
+                  <span className="text-xs font-black text-[#0F5C5A] uppercase tracking-wider">
+                    FOR LEARNERS
+                  </span>
+                  <h3 className="text-xl sm:text-2xl font-black text-[#102A2A]">
+                    Find. Learn. Grow.
+                  </h3>
+                </div>
               </div>
-              <p className="text-sm text-[#5D7373] leading-relaxed">
+
+              <p className="text-xs sm:text-sm text-[#5D7373] leading-relaxed">
                 Find educators, courses and learning experiences that fit your goals. Connect directly for 1-on-1 sessions, structured video courses, or live interactive batches.
               </p>
 
               {/* Feature Points */}
-              <div className="space-y-2 pt-2 text-xs font-semibold text-[#102A2A]">
+              <div className="space-y-2 pt-1 text-xs font-semibold text-[#102A2A]">
                 <div className="flex items-center gap-2">
                   <span className="h-1.5 w-1.5 rounded-full bg-[#0F5C5A]" />
                   <span>Discover verified tutors across academic & professional subjects</span>
                 </div>
                 <div className="flex items-center gap-2">
                   <span className="h-1.5 w-1.5 rounded-full bg-[#0F5C5A]" />
-                  <span>Enroll in self-paced video courses or attend live classes</span>
+                  <span>Enroll in self-paced video courses or attend interactive classes</span>
                 </div>
                 <div className="flex items-center gap-2">
                   <span className="h-1.5 w-1.5 rounded-full bg-[#0F5C5A]" />
-                  <span>Flexible schedules matched to your learning speed</span>
+                  <span>Flexible schedules matched to your personal learning speed</span>
                 </div>
               </div>
             </div>
@@ -65,7 +77,7 @@ export function WhoIsItForSection() {
               <Link href="/find-teachers">
                 <GlassButton
                   variant="primary"
-                  className="bg-[#0F5C5A] hover:bg-[#083F3D] text-white font-extrabold px-6 rounded-full"
+                  className="bg-[#0F5C5A] hover:bg-[#083F3D] active:bg-[#052C2A] text-white font-extrabold px-6 rounded-full transition-colors"
                   rightIcon={<ArrowRight className="h-4 w-4" />}
                 >
                   Find an Educator →
@@ -75,38 +87,50 @@ export function WhoIsItForSection() {
           </div>
 
           {/* Card 2 — For Educators */}
-          <div className="p-8 sm:p-10 rounded-3xl bg-[#FBF7EE] border border-[#F2C14E]/40 hover:border-[#F2C14E] transition-all flex flex-col justify-between space-y-8 relative overflow-hidden group shadow-sm hover:shadow-xl">
+          <div className="p-7 sm:p-9 rounded-3xl bg-[#FBF7EE] border border-[#F2C14E]/40 hover:border-[#F2C14E] transition-all flex flex-col justify-between space-y-6 relative overflow-hidden group shadow-sm hover:shadow-xl">
             <div className="absolute top-0 right-0 w-36 h-36 bg-[#F2C14E]/15 rounded-bl-full pointer-events-none group-hover:scale-110 transition-transform" />
 
-            <div className="space-y-5 relative z-10">
-              <div className="p-3.5 rounded-2xl bg-[#1B6863] text-white w-fit shadow-md">
-                <Users className="h-7 w-7" />
+            <div className="space-y-4 relative z-10">
+              {/* Supporting Image: Educator Teaching */}
+              <div className="h-44 sm:h-48 w-full rounded-2xl overflow-hidden bg-[#E6F0EF] border border-[#DCE5E4] relative">
+                <img
+                  src="/images/educators/meenakshi-sundaram.jpg"
+                  alt="EduConnects Verified Educator"
+                  className="w-full h-full object-cover object-top group-hover:scale-102 transition-transform duration-500"
+                />
               </div>
-              <div>
-                <span className="text-xs font-black text-[#1B6863] uppercase tracking-wider">
-                  FOR EDUCATORS
-                </span>
-                <h3 className="text-2xl sm:text-3xl font-black text-[#102A2A] mt-1">
-                  Teach. Connect. Grow.
-                </h3>
+
+              <div className="flex items-center gap-3">
+                <div className="p-2.5 rounded-xl bg-[#0F5C5A] text-white shadow-sm">
+                  <Users className="h-5 w-5" />
+                </div>
+                <div>
+                  <span className="text-xs font-black text-[#0F5C5A] uppercase tracking-wider">
+                    FOR EDUCATORS
+                  </span>
+                  <h3 className="text-xl sm:text-2xl font-black text-[#102A2A]">
+                    Teach. Connect. Grow.
+                  </h3>
+                </div>
               </div>
-              <p className="text-sm text-[#5D7373] leading-relaxed">
+
+              <p className="text-xs sm:text-sm text-[#5D7373] leading-relaxed">
                 Share your expertise, create courses and reach learners through EduConnects. Build your teaching brand, set your rates, and host live sessions effortlessly.
               </p>
 
               {/* Feature Points */}
-              <div className="space-y-2 pt-2 text-xs font-semibold text-[#102A2A]">
+              <div className="space-y-2 pt-1 text-xs font-semibold text-[#102A2A]">
                 <div className="flex items-center gap-2">
-                  <span className="h-1.5 w-1.5 rounded-full bg-[#1B6863]" />
-                  <span>Build verified educator credentials & display student reviews</span>
+                  <span className="h-1.5 w-1.5 rounded-full bg-[#0F5C5A]" />
+                  <span>Build verified educator credentials & display authentic reviews</span>
                 </div>
                 <div className="flex items-center gap-2">
-                  <span className="h-1.5 w-1.5 rounded-full bg-[#1B6863]" />
-                  <span>Publish recorded course modules with automated video processing</span>
+                  <span className="h-1.5 w-1.5 rounded-full bg-[#0F5C5A]" />
+                  <span>Publish recorded course modules with automated video hosting</span>
                 </div>
                 <div className="flex items-center gap-2">
-                  <span className="h-1.5 w-1.5 rounded-full bg-[#1B6863]" />
-                  <span>Set your own hourly rate & receive direct payouts</span>
+                  <span className="h-1.5 w-1.5 rounded-full bg-[#0F5C5A]" />
+                  <span>Set your own hourly rate & receive direct bank payouts</span>
                 </div>
               </div>
             </div>
@@ -114,8 +138,8 @@ export function WhoIsItForSection() {
             <div className="relative z-10 pt-4 border-t border-[#F2C14E]/30">
               <Link href="/teacher">
                 <GlassButton
-                  variant="secondary"
-                  className="bg-[#1B6863] hover:bg-[#0F5C5A] text-white font-extrabold px-6 rounded-full"
+                  variant="primary"
+                  className="bg-[#0F5C5A] hover:bg-[#083F3D] active:bg-[#052C2A] text-white font-extrabold px-6 rounded-full transition-colors"
                   rightIcon={<ArrowRight className="h-4 w-4" />}
                 >
                   Become an Educator →

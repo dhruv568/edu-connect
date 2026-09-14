@@ -23,8 +23,8 @@ export function BecomeEducatorSection() {
           <div className="grid grid-cols-1 lg:grid-cols-12 gap-10 items-center relative z-10">
             {/* Left Copy */}
             <div className="lg:col-span-7 space-y-6 text-center lg:text-left">
-              <span className="text-xs font-black text-[#F2C14E] uppercase tracking-widest px-3.5 py-1.5 rounded-full bg-white/10 border border-white/20">
-                TEACH ON EDUCONNECTS
+              <span className="text-xs font-black text-teal-200 uppercase tracking-widest px-3.5 py-1.5 rounded-full bg-white/10 border border-white/20">
+                TEACH ON EduConnects
               </span>
 
               <h2 className="text-3xl sm:text-4xl lg:text-5xl font-black tracking-tight leading-tight">
@@ -39,7 +39,7 @@ export function BecomeEducatorSection() {
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 pt-2 text-xs sm:text-sm font-bold text-white max-w-lg mx-auto lg:mx-0 text-left">
                 {educatorFeatures.map((feat, idx) => (
                   <div key={idx} className="flex items-center gap-2">
-                    <CheckCircle2 className="h-4.5 w-4.5 text-[#F2C14E] shrink-0" />
+                    <CheckCircle2 className="h-4.5 w-4.5 text-[#2A8C84] shrink-0" />
                     <span>{feat}</span>
                   </div>
                 ))}
@@ -49,9 +49,9 @@ export function BecomeEducatorSection() {
               <div className="pt-4 flex justify-center lg:justify-start">
                 <Link href="/teacher">
                   <GlassButton
-                    variant="secondary"
+                    variant="primary"
                     size="lg"
-                    className="bg-[#F2C14E] hover:bg-[#E0B03C] text-[#102A2A] font-extrabold px-8 py-3.5 rounded-full shadow-xl text-sm"
+                    className="bg-[#083F3D] hover:bg-[#052C2A] active:bg-[#052C2A] text-white border border-[#2A8C84]/40 font-extrabold px-8 py-3.5 rounded-full shadow-xl text-sm transition-all"
                     rightIcon={<ArrowRight className="h-4.5 w-4.5" />}
                   >
                     Become an Educator →

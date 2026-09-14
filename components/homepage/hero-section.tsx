@@ -14,6 +14,7 @@ import {
   ShieldCheck,
 } from "lucide-react";
 import { GlassButton } from "@/components/glass/glass-button";
+import { HeroBackgroundSlideshow } from "@/components/homepage/hero-background-slideshow";
 
 export function HeroSection() {
   const router = useRouter();
@@ -31,12 +32,9 @@ export function HeroSection() {
   };
 
   return (
-    <section className="relative pt-28 sm:pt-36 lg:pt-40 pb-20 lg:pb-28 bg-gradient-to-b from-[#FBF7EE] via-[#F5F7F8] to-white border-b border-[#DCE5E4] overflow-hidden font-sans">
-      {/* Background Soft Glow Orbs */}
-      <div className="absolute top-10 left-1/2 -translate-x-1/2 w-full max-w-7xl h-96 pointer-events-none -z-10">
-        <div className="absolute top-10 left-10 w-96 h-96 bg-[#0F5C5A]/5 rounded-full blur-3xl" />
-        <div className="absolute top-20 right-10 w-96 h-96 bg-[#F2C14E]/10 rounded-full blur-3xl" />
-      </div>
+    <section className="relative pt-28 sm:pt-36 lg:pt-40 pb-20 lg:pb-28 border-b border-[#DCE5E4] overflow-hidden font-sans">
+      {/* Background Slideshow & Overlays */}
+      <HeroBackgroundSlideshow />
 
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-12 lg:gap-8 items-center">
@@ -65,7 +63,7 @@ export function HeroSection() {
                 <GlassButton
                   variant="primary"
                   size="lg"
-                  className="w-full sm:w-auto bg-[#0F5C5A] hover:bg-[#083F3D] text-white shadow-lg text-sm font-extrabold px-7 py-3 rounded-full"
+                  className="w-full sm:w-auto bg-[#0F5C5A] hover:bg-[#083F3D] active:bg-[#052C2A] text-white shadow-lg text-sm font-extrabold px-7 py-3 rounded-full transition-colors"
                   rightIcon={<ArrowRight className="h-4 w-4" />}
                 >
                   Find an Educator
@@ -76,7 +74,7 @@ export function HeroSection() {
                 <GlassButton
                   variant="secondary"
                   size="lg"
-                  className="w-full sm:w-auto bg-white hover:bg-[#F5F7F8] text-[#102A2A] border border-[#DCE5E4] text-sm font-bold px-6 py-3 rounded-full"
+                  className="w-full sm:w-auto bg-white hover:bg-[#F2FAF8] text-[#102A2A] hover:text-[#083F3D] border border-[#DCE5E4] hover:border-[#0F5C5A] text-sm font-bold px-6 py-3 rounded-full transition-colors"
                 >
                   Become an Educator
                 </GlassButton>
@@ -157,7 +155,7 @@ export function HeroSection() {
                     <button
                       type="submit"
                       aria-label="Search"
-                      className="w-full h-[42px] rounded-xl bg-[#0F5C5A] hover:bg-[#083F3D] text-white flex items-center justify-center font-bold transition-colors shadow-sm"
+                      className="w-full h-[42px] rounded-xl bg-[#0F5C5A] hover:bg-[#083F3D] active:bg-[#052C2A] text-white flex items-center justify-center font-bold transition-colors shadow-sm"
                     >
                       <ArrowRight className="h-4 w-4" />
                     </button>

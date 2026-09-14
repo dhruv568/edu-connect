@@ -27,9 +27,9 @@ export function FinalCtaSection() {
         <div className="pt-4 flex flex-col sm:flex-row items-center justify-center gap-4">
           <Link href="/find-teachers" className="w-full sm:w-auto">
             <GlassButton
-              variant="secondary"
+              variant="primary"
               size="lg"
-              className="w-full sm:w-auto bg-[#F2C14E] hover:bg-[#E0B03C] text-[#102A2A] font-extrabold px-8 py-3.5 rounded-full shadow-xl text-sm"
+              className="w-full sm:w-auto bg-[#083F3D] hover:bg-[#052C2A] active:bg-[#052C2A] text-white border border-[#2A8C84]/40 font-extrabold px-8 py-3.5 rounded-full shadow-xl text-sm transition-all"
               rightIcon={<ArrowRight className="h-4.5 w-4.5" />}
             >
               Find an Educator →
@@ -40,7 +40,7 @@ export function FinalCtaSection() {
             <GlassButton
               variant="secondary"
               size="lg"
-              className="w-full sm:w-auto bg-white/10 hover:bg-white/20 text-white border border-white/20 font-bold px-7 py-3.5 rounded-full text-sm"
+              className="w-full sm:w-auto bg-white/10 hover:bg-[#083F3D] active:bg-[#052C2A] text-white border border-white/20 font-bold px-7 py-3.5 rounded-full text-sm transition-all"
               leftIcon={<BookOpen className="h-4.5 w-4.5" />}
             >
               Explore Courses

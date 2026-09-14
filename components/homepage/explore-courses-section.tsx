@@ -63,7 +63,7 @@ export function ExploreCoursesSection() {
           <Link href="/courses">
             <GlassButton
               variant="primary"
-              className="bg-[#0F5C5A] hover:bg-[#083F3D] text-white font-extrabold px-6 rounded-full"
+              className="bg-[#0F5C5A] hover:bg-[#083F3D] active:bg-[#052C2A] text-white font-extrabold px-6 rounded-full transition-all"
               rightIcon={<ArrowRight className="h-4 w-4" />}
             >
               Explore All Courses →
@@ -124,7 +124,7 @@ export function ExploreCoursesSection() {
                 </div>
 
                 <Link href={`/courses/${c.slug || c.id}`}>
-                  <GlassButton variant="secondary" className="w-full justify-center text-xs font-bold bg-white">
+                  <GlassButton variant="secondary" className="w-full justify-center text-xs font-bold bg-white hover:bg-[#083F3D] hover:text-white active:bg-[#052C2A] transition-all">
                     View Course Details
                   </GlassButton>
                 </Link>
@@ -143,7 +143,7 @@ export function ExploreCoursesSection() {
             </p>
             <div className="pt-2">
               <Link href="/find-teachers">
-                <GlassButton variant="primary" className="bg-[#0F5C5A] text-white text-xs font-extrabold">
+                <GlassButton variant="primary" className="bg-[#0F5C5A] hover:bg-[#083F3D] active:bg-[#052C2A] text-white text-xs font-extrabold transition-all">
                   Find Live Educators →
                 </GlassButton>
               </Link>

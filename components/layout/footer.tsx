@@ -72,7 +72,8 @@ export function Footer() {
               <li><Link href="/contact" className="hover:text-white transition-colors">Contact Us</Link></li>
               <li><Link href="/terms-and-conditions" className="hover:text-white transition-colors">Terms & Conditions</Link></li>
               <li><Link href="/privacy-policy" className="hover:text-white transition-colors">Privacy Policy</Link></li>
-              <li><Link href="/refund-policy" className="hover:text-white transition-colors">Refund Policy</Link></li>
+              <li><Link href="/refund-policy" className="hover:text-white transition-colors">Cancellation & Refund</Link></li>
+              <li><Link href="/shipping-policy" className="hover:text-white transition-colors">Shipping Policy</Link></li>
             </ul>
             <div className="flex items-center gap-2 text-xs text-emerald-400 bg-slate-800/80 p-2.5 rounded-xl border border-slate-700">
               <MessageSquare className="h-4 w-4 shrink-0" />
@@ -82,10 +83,18 @@ export function Footer() {
         </div>
 
         <div className="pt-8 flex flex-col md:flex-row items-center justify-between gap-4 text-xs text-slate-500">
-          <p>&copy; {new Date().getFullYear()} {OFFICIAL_COMPANY_INFO.legalName}. All rights reserved.</p>
-          <div className="flex items-center gap-1">
-            <span>Powered by {OFFICIAL_COMPANY_INFO.brandName}</span>
-            <Heart className="h-3.5 w-3.5 text-red-500 fill-red-500 ml-1" />
+          <p>&copy; 2026 EduConnects. All rights reserved.</p>
+          <div className="flex items-center gap-1.5">
+            <span>Powered by</span>
+            <a
+              href="https://automation.myprofunnels.com/"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="text-[#2A8C84] hover:text-white hover:underline transition-colors font-bold inline-flex items-center gap-1"
+            >
+              MyProFunnels
+              <span role="img" aria-label="love">❤️</span>
+            </a>
           </div>
         </div>
       </div>

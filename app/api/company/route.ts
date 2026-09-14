@@ -7,7 +7,9 @@ export const dynamic = "force-dynamic";
 export async function GET() {
   try {
     const configs = await prisma.platformConfig.findMany({
-      where: { key: { startsWith: "company_" } },
+      where: {
+        OR: [{ key: { startsWith: "company_" } }, { key: { startsWith: "social_" } }],
+      },
     });
 
     const settingsMap: Record<string, string> = {};
@@ -32,6 +34,12 @@ export async function GET() {
       refundPeriod: settingsMap.company_refund_period || OFFICIAL_COMPANY_INFO.refundPeriod,
       pricingRange: settingsMap.company_pricing_range || OFFICIAL_COMPANY_INFO.pricingRange,
       currency: settingsMap.company_currency || OFFICIAL_COMPANY_INFO.currency,
+      socials: {
+        youtube: settingsMap.social_youtube_url !== undefined ? settingsMap.social_youtube_url : OFFICIAL_COMPANY_INFO.socials.youtube,
+        facebook: settingsMap.social_facebook_url !== undefined ? settingsMap.social_facebook_url : OFFICIAL_COMPANY_INFO.socials.facebook,
+        instagram: settingsMap.social_instagram_url !== undefined ? settingsMap.social_instagram_url : OFFICIAL_COMPANY_INFO.socials.instagram,
+        linkedin: settingsMap.social_linkedin_url !== undefined ? settingsMap.social_linkedin_url : OFFICIAL_COMPANY_INFO.socials.linkedin,
+      },
     };
 
     return NextResponse.json({

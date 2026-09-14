@@ -41,6 +41,30 @@ export function HowItWorksSection() {
           </p>
         </div>
 
+        {/* Supporting Learning & Connection Showcase */}
+        <div className="max-w-4xl mx-auto rounded-3xl overflow-hidden border border-[#DCE5E4] shadow-sm bg-[#F5F7F8] relative">
+          <div className="grid grid-cols-1 sm:grid-cols-12 items-center">
+            <div className="sm:col-span-5 h-44 sm:h-52 relative overflow-hidden bg-[#E6F0EF]">
+              <img
+                src="https://images.unsplash.com/photo-1516321318423-f06f85e504b3?w=800&auto=format&fit=crop&q=80"
+                alt="EduConnects seamless connection between learners and educators"
+                className="w-full h-full object-cover object-center"
+              />
+            </div>
+            <div className="sm:col-span-7 p-6 sm:p-8 space-y-2 text-left">
+              <span className="text-[11px] font-extrabold uppercase tracking-wider text-[#0F5C5A] bg-[#E6F0EF] px-2.5 py-1 rounded-full">
+                Direct Connection
+              </span>
+              <h3 className="text-base sm:text-lg font-black text-[#102A2A]">
+                Frictionless learning from day one
+              </h3>
+              <p className="text-xs sm:text-sm text-[#5D7373] leading-relaxed">
+                Connect directly with verified educators, schedule trial sessions, or jump straight into self-paced curricula without complex enrollment hurdles.
+              </p>
+            </div>
+          </div>
+        </div>
+
         {/* 3 Step Cards Grid */}
         <div className="grid grid-cols-1 md:grid-cols-3 gap-8 relative">
           {steps.map((s, idx) => {

@@ -27,11 +27,12 @@ export interface CompanyInfo {
     instagram: string;
     facebook: string;
     youtube: string;
+    linkedin?: string;
   };
 }
 
 export const OFFICIAL_COMPANY_INFO: CompanyInfo = {
-  brandName: "EduConnect",
+  brandName: "EduConnects",
   legalName: "Shrivastava ProFunnels Ventures Pvt Ltd",
   cin: "U85499UP2024PTC212061",
   pan: "ABOCS6783J",
@@ -56,6 +57,7 @@ export const OFFICIAL_COMPANY_INFO: CompanyInfo = {
     instagram: "myprofunnels",
     facebook: "My Pro Funnels",
     youtube: "myprofunnels",
+    linkedin: "",
   },
 };
 

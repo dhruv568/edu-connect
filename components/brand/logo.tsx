@@ -177,7 +177,7 @@ export function Logo({
           <span
             className={`${preset.textSize} font-black tracking-tight leading-none ${getPrimaryTextColor()}`}
           >
-            EDU<span className={getAccentTextColor()}>CONNECTS</span>
+            Edu<span className={getAccentTextColor()}>Connects</span>
           </span>
           {showTagline && (
             <span

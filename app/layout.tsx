@@ -11,7 +11,7 @@ const inter = Inter({ subsets: ["latin"] });
 export const metadata: Metadata = {
   metadataBase: new URL(process.env.NEXT_PUBLIC_MAIN_DOMAIN || "https://educonnects.co.in"),
   title: "EduConnects — Learn Better. Teach Smarter.",
-  description: "Next-generation education platform connecting teachers and students with flexible learning models.",
+  description: "Next-generation education platform connecting educators and learners with flexible learning models.",
   alternates: {
     canonical: "https://educonnects.co.in/",
   },

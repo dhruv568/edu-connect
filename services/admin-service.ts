@@ -944,6 +944,10 @@ export class AdminService {
       refundPeriod: settings.company_refund_period || "Within 24 Hours, subject to applicable terms and conditions.",
       pricingRange: settings.company_pricing_range || "₹99 to ₹2.99 Lakh",
       currency: settings.company_currency || "INR",
+      youtubeUrl: settings.social_youtube_url || "",
+      facebookUrl: settings.social_facebook_url || "",
+      instagramUrl: settings.social_instagram_url || "",
+      linkedinUrl: settings.social_linkedin_url || "",
     };
   }
 

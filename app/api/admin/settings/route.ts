@@ -20,6 +20,28 @@ export async function PUT(request: NextRequest) {
     const { userId } = await requirePermission("settings.manage");
     const body = await request.json();
 
+    const socialKeys = [
+      "social_youtube_url",
+      "social_facebook_url",
+      "social_instagram_url",
+      "social_linkedin_url",
+    ];
+
+    for (const key of socialKeys) {
+      if (body[key] !== undefined && typeof body[key] === "string" && body[key].trim() !== "") {
+        try {
+          const parsed = new URL(body[key].trim());
+          if (parsed.protocol !== "http:" && parsed.protocol !== "https:") {
+            throw new Error();
+          }
+        } catch {
+          return handleApiError(
+            new Error(`VALIDATION_ERROR: ${key} must be a valid URL starting with http:// or https://`)
+          );
+        }
+      }
+    }
+
     const updatedSettings = await AdminService.updatePlatformSettings(userId, body);
     return apiSuccess({ message: "Platform settings updated successfully.", settings: updatedSettings });
   } catch (error: any) {

@@ -87,7 +87,7 @@ export function BrandVisionSection() {
                 <GlassButton
                   variant="primary"
                   size="md"
-                  className="w-full sm:w-auto bg-[#0F5C5A] hover:bg-[#083F3D] text-white shadow-md text-sm font-extrabold px-6 py-2.5 rounded-full"
+                  className="w-full sm:w-auto bg-[#0F5C5A] hover:bg-[#083F3D] active:bg-[#052C2A] text-white shadow-md text-sm font-extrabold px-6 py-2.5 rounded-full transition-all"
                   rightIcon={<ArrowRight className="h-4 w-4" />}
                 >
                   Explore Educators
@@ -98,7 +98,7 @@ export function BrandVisionSection() {
                 <GlassButton
                   variant="secondary"
                   size="md"
-                  className="w-full sm:w-auto bg-white hover:bg-[#F5F7F8] text-[#102A2A] border border-[#DCE5E4] text-sm font-bold px-6 py-2.5 rounded-full"
+                  className="w-full sm:w-auto bg-white hover:bg-[#083F3D] hover:text-white active:bg-[#052C2A] text-[#102A2A] border border-[#DCE5E4] text-sm font-bold px-6 py-2.5 rounded-full transition-all"
                 >
                   Become an Educator
                 </GlassButton>

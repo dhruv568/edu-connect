@@ -4,12 +4,12 @@ import React, { useState, useEffect } from "react";
 import { DashboardLayout } from "@/components/layout/dashboard-layout";
 import { Card } from "@/components/ui/card";
 import { GlassButton } from "@/components/glass/glass-button";
-import { Settings, Percent, Layers, Shield, Save, Loader2, Plus, Check, Building2, Phone, FileText } from "lucide-react";
+import { Settings, Percent, Layers, Shield, Save, Loader2, Plus, Check, Building2, Phone, FileText, Share2 } from "lucide-react";
 import { BackButton } from "@/components/ui/back-button";
 import { OFFICIAL_COMPANY_INFO } from "@/lib/company";
 
 export default function AdminSettingsPage() {
-  const [activeTab, setActiveTab] = useState<"general" | "company" | "commission" | "categories">("general");
+  const [activeTab, setActiveTab] = useState<"general" | "company" | "social" | "commission" | "categories">("general");
 
   // General Settings State
   const [generalSettings, setGeneralSettings] = useState({
@@ -39,6 +39,16 @@ export default function AdminSettingsPage() {
     pricingRange: OFFICIAL_COMPANY_INFO.pricingRange,
   });
   const [savingCompany, setSavingCompany] = useState(false);
+
+  // Social Media Links State
+  const [socialSettings, setSocialSettings] = useState({
+    youtubeUrl: OFFICIAL_COMPANY_INFO.socials.youtube,
+    facebookUrl: OFFICIAL_COMPANY_INFO.socials.facebook,
+    instagramUrl: OFFICIAL_COMPANY_INFO.socials.instagram,
+    linkedinUrl: OFFICIAL_COMPANY_INFO.socials.linkedin,
+  });
+  const [savingSocial, setSavingSocial] = useState(false);
+  const [socialError, setSocialError] = useState("");
 
   // Commission Settings State
   const [commissionRate, setCommissionRate] = useState(15.0);
@@ -84,6 +94,13 @@ export default function AdminSettingsPage() {
           whatsappNumber: json.data.whatsappNumber || OFFICIAL_COMPANY_INFO.whatsappNumber,
           refundPeriod: json.data.refundPeriod || OFFICIAL_COMPANY_INFO.refundPeriod,
           pricingRange: json.data.pricingRange || OFFICIAL_COMPANY_INFO.pricingRange,
+        });
+
+        setSocialSettings({
+          youtubeUrl: json.data.youtubeUrl !== undefined ? json.data.youtubeUrl : OFFICIAL_COMPANY_INFO.socials.youtube,
+          facebookUrl: json.data.facebookUrl !== undefined ? json.data.facebookUrl : OFFICIAL_COMPANY_INFO.socials.facebook,
+          instagramUrl: json.data.instagramUrl !== undefined ? json.data.instagramUrl : OFFICIAL_COMPANY_INFO.socials.instagram,
+          linkedinUrl: json.data.linkedinUrl !== undefined ? json.data.linkedinUrl : OFFICIAL_COMPANY_INFO.socials.linkedin,
         });
       }
     } catch (err) {
@@ -162,6 +179,43 @@ export default function AdminSettingsPage() {
       console.error("Failed to save company settings:", err);
     } finally {
       setSavingCompany(false);
+    }
+  };
+
+  const saveSocialSettings = async () => {
+    setSocialError("");
+    const urlPattern = /^https?:\/\/.+/i;
+    for (const [platform, url] of Object.entries(socialSettings)) {
+      const val = typeof url === "string" ? url.trim() : "";
+      if (val !== "" && !urlPattern.test(val)) {
+        setSocialError(`Please enter a valid URL starting with http:// or https:// for ${platform}.`);
+        return;
+      }
+    }
+
+    setSavingSocial(true);
+    try {
+      const res = await fetch("/api/admin/settings", {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          social_youtube_url: (socialSettings.youtubeUrl || "").trim(),
+          social_facebook_url: (socialSettings.facebookUrl || "").trim(),
+          social_instagram_url: (socialSettings.instagramUrl || "").trim(),
+          social_linkedin_url: (socialSettings.linkedinUrl || "").trim(),
+        }),
+      });
+      const data = await res.json();
+      if (res.ok) {
+        alert("Social media settings updated successfully!");
+      } else {
+        setSocialError(data?.error?.message || "Failed to update social media links.");
+      }
+    } catch (err: any) {
+      console.error("Failed to save social settings:", err);
+      setSocialError(err?.message || "An unexpected error occurred.");
+    } finally {
+      setSavingSocial(false);
     }
   };
 
@@ -260,6 +314,18 @@ export default function AdminSettingsPage() {
           >
             <Building2 className="h-4 w-4" />
             Company Profile
+          </button>
+
+          <button
+            onClick={() => setActiveTab("social")}
+            className={`flex items-center gap-2 px-4 py-2 rounded-2xl text-xs font-black transition-all ${
+              activeTab === "social"
+                ? "bg-blue-600 text-white shadow-md shadow-blue-500/20"
+                : "text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800"
+            }`}
+          >
+            <Share2 className="h-4 w-4" />
+            Social Media Links
           </button>
 
           <button
@@ -503,6 +569,82 @@ export default function AdminSettingsPage() {
                 leftIcon={<Save className="h-4 w-4" />}
               >
                 Save Company Profile
+              </GlassButton>
+            </div>
+          </Card>
+        )}
+
+        {/* Tab: Social Media Links */}
+        {activeTab === "social" && (
+          <Card className="p-6 border-slate-200 dark:border-slate-800 space-y-6 max-w-3xl">
+            <div className="border-b border-slate-100 dark:border-slate-800 pb-3">
+              <h3 className="text-lg font-black text-slate-900 dark:text-slate-100">Social Media URLs</h3>
+              <p className="text-xs text-slate-500">
+                Configure official social media profile URLs. Empty fields will be automatically hidden from the public website footer.
+              </p>
+            </div>
+
+            {socialError && (
+              <div className="p-3 text-xs bg-red-50 dark:bg-red-950/40 text-red-600 dark:text-red-400 border border-red-200 dark:border-red-900 rounded-xl font-bold">
+                {socialError}
+              </div>
+            )}
+
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 text-xs">
+              <div>
+                <label className="font-bold text-slate-700 dark:text-slate-300 block mb-1">YouTube URL</label>
+                <input
+                  type="url"
+                  placeholder="https://youtube.com/@educonnects"
+                  value={socialSettings.youtubeUrl}
+                  onChange={(e) => setSocialSettings({ ...socialSettings, youtubeUrl: e.target.value })}
+                  className="w-full h-10 px-3 bg-slate-100 dark:bg-slate-800 border-none rounded-xl font-semibold outline-none focus:ring-2 focus:ring-blue-500"
+                />
+              </div>
+
+              <div>
+                <label className="font-bold text-slate-700 dark:text-slate-300 block mb-1">Facebook URL</label>
+                <input
+                  type="url"
+                  placeholder="https://facebook.com/educonnects"
+                  value={socialSettings.facebookUrl}
+                  onChange={(e) => setSocialSettings({ ...socialSettings, facebookUrl: e.target.value })}
+                  className="w-full h-10 px-3 bg-slate-100 dark:bg-slate-800 border-none rounded-xl font-semibold outline-none focus:ring-2 focus:ring-blue-500"
+                />
+              </div>
+
+              <div>
+                <label className="font-bold text-slate-700 dark:text-slate-300 block mb-1">Instagram URL</label>
+                <input
+                  type="url"
+                  placeholder="https://instagram.com/educonnects"
+                  value={socialSettings.instagramUrl}
+                  onChange={(e) => setSocialSettings({ ...socialSettings, instagramUrl: e.target.value })}
+                  className="w-full h-10 px-3 bg-slate-100 dark:bg-slate-800 border-none rounded-xl font-semibold outline-none focus:ring-2 focus:ring-blue-500"
+                />
+              </div>
+
+              <div>
+                <label className="font-bold text-slate-700 dark:text-slate-300 block mb-1">LinkedIn URL</label>
+                <input
+                  type="url"
+                  placeholder="https://linkedin.com/company/educonnects"
+                  value={socialSettings.linkedinUrl}
+                  onChange={(e) => setSocialSettings({ ...socialSettings, linkedinUrl: e.target.value })}
+                  className="w-full h-10 px-3 bg-slate-100 dark:bg-slate-800 border-none rounded-xl font-semibold outline-none focus:ring-2 focus:ring-blue-500"
+                />
+              </div>
+            </div>
+
+            <div className="pt-4 border-t border-slate-100 dark:border-slate-800">
+              <GlassButton
+                variant="primary"
+                size="sm"
+                disabled={savingSocial}
+                onClick={saveSocialSettings}
+                leftIcon={<Save className="h-4 w-4" />}
+              >
+                Save Social Media Links
               </GlassButton>
             </div>
           </Card>

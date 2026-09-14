@@ -7,7 +7,7 @@ import { OFFICIAL_COMPANY_INFO } from "@/lib/company";
 import { ShieldCheck, RefreshCw, AlertCircle, Clock } from "lucide-react";
 
 export const metadata = {
-  title: "Refund & Cancellation Policy — MyProFunnels Ventures",
+  title: "Refund & Cancellation Policy — EduConnects",
   description: "Official Refund & Cancellation Policy for digital products, live classes, subscriptions, and services.",
 };
 

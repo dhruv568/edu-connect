@@ -405,119 +405,58 @@ export function FloatingNavbar({ variant }: FloatingNavbarProps = {}) {
             ) : (
               /* MAIN PLATFORM NAVIGATION */
               <>
-                {/* Explore Dropdown */}
-                <div className="relative" ref={dropdownRef}>
-                  <button
-                    onClick={() => setExploreDropdownOpen(!exploreDropdownOpen)}
-                    onMouseEnter={() => setExploreDropdownOpen(true)}
-                    className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg hover:text-[#0B4F4B] hover:bg-slate-100/70 transition-colors whitespace-nowrap focus:outline-none"
-                    aria-expanded={exploreDropdownOpen}
-                  >
-                    <span>Explore</span>
-                    <ChevronDown
-                      className={`h-3.5 w-3.5 text-slate-500 transition-transform duration-200 ${
-                        exploreDropdownOpen ? "rotate-180 text-[#0B4F4B]" : ""
-                      }`}
-                    />
-                  </button>
-
-                  <AnimatePresence>
-                    {exploreDropdownOpen && (
-                      <motion.div
-                        initial={{ opacity: 0, y: 6, scale: 0.98 }}
-                        animate={{ opacity: 1, y: 0, scale: 1 }}
-                        exit={{ opacity: 0, y: 6, scale: 0.98 }}
-                        transition={{ duration: 0.15 }}
-                        onMouseLeave={() => setExploreDropdownOpen(false)}
-                        className="absolute top-full left-0 mt-1 w-72 bg-white rounded-2xl border border-slate-200 shadow-xl p-2.5 space-y-1 z-50"
-                      >
-                        <Link
-                          href="/find-teachers"
-                          onClick={() => setExploreDropdownOpen(false)}
-                          className="flex items-start gap-3 p-2.5 rounded-xl hover:bg-slate-50 transition-colors group"
-                        >
-                          <div className="p-2 rounded-lg bg-teal-50 text-[#0B4F4B] group-hover:bg-[#0B4F4B] group-hover:text-white transition-colors shrink-0">
-                            <Users className="h-4 w-4" />
-                          </div>
-                          <div>
-                            <div className="text-xs font-bold text-slate-900 group-hover:text-[#0B4F4B] transition-colors">
-                              Find an Educator
-                            </div>
-                            <div className="text-[11px] text-slate-500 font-normal mt-0.5">
-                              Search certified tutors by subject and mode.
-                            </div>
-                          </div>
-                        </Link>
-
-                        <Link
-                          href="/courses"
-                          onClick={() => setExploreDropdownOpen(false)}
-                          className="flex items-start gap-3 p-2.5 rounded-xl hover:bg-slate-50 transition-colors group"
-                        >
-                          <div className="p-2 rounded-lg bg-amber-50 text-[#B8860B] group-hover:bg-[#F2C14E] group-hover:text-slate-900 transition-colors shrink-0">
-                            <BookOpen className="h-4 w-4" />
-                          </div>
-                          <div>
-                            <div className="text-xs font-bold text-slate-900 group-hover:text-[#0B4F4B] transition-colors">
-                              Explore Courses
-                            </div>
-                            <div className="text-[11px] text-slate-500 font-normal mt-0.5">
-                              Browse structured video courses.
-                            </div>
-                          </div>
-                        </Link>
-
-                        <Link
-                          href="/courses"
-                          onClick={() => setExploreDropdownOpen(false)}
-                          className="flex items-start gap-3 p-2.5 rounded-xl hover:bg-slate-50 transition-colors group"
-                        >
-                          <div className="p-2 rounded-lg bg-slate-100 text-slate-600 group-hover:bg-[#0B4F4B] group-hover:text-white transition-colors shrink-0">
-                            <Grid className="h-4 w-4" />
-                          </div>
-                          <div>
-                            <div className="text-xs font-bold text-slate-900 group-hover:text-[#0B4F4B] transition-colors">
-                              Browse Subjects
-                            </div>
-                            <div className="text-[11px] text-slate-500 font-normal mt-0.5">
-                              Academic, test-prep, and technical subjects.
-                            </div>
-                          </div>
-                        </Link>
-                      </motion.div>
-                    )}
-                  </AnimatePresence>
-                </div>
-
                 <Link
-                  href="/student"
-                  className="px-3 py-1.5 rounded-lg hover:text-[#0B4F4B] hover:bg-slate-100/70 transition-colors whitespace-nowrap"
+                  href="/"
+                  className={`px-3 py-1.5 rounded-lg transition-colors whitespace-nowrap ${
+                    pathname === "/"
+                      ? "text-[#0F5C5A] font-bold bg-[#F2FAF8]"
+                      : "text-slate-700 hover:text-[#083F3D] hover:bg-[#F2FAF8]"
+                  }`}
+                >
+                  Home
+                </Link>
+                <Link
+                  href="/about"
+                  className={`px-3 py-1.5 rounded-lg transition-colors whitespace-nowrap ${
+                    pathname === "/about"
+                      ? "text-[#0F5C5A] font-bold bg-[#F2FAF8]"
+                      : "text-slate-700 hover:text-[#083F3D] hover:bg-[#F2FAF8]"
+                  }`}
+                >
+                  About Us
+                </Link>
+                <a
+                  href="https://learners.educonnects.co.in"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="px-3 py-1.5 rounded-lg text-slate-700 hover:text-[#083F3D] hover:bg-[#F2FAF8] transition-colors whitespace-nowrap"
                 >
                   For Learners
-                </Link>
-                <Link
-                  href="/teacher"
-                  className="px-3 py-1.5 rounded-lg hover:text-[#0B4F4B] hover:bg-slate-100/70 transition-colors whitespace-nowrap text-[#1B6863] font-bold"
+                </a>
+                <a
+                  href="https://educators.educonnects.co.in"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="px-3 py-1.5 rounded-lg text-slate-700 hover:text-[#083F3D] hover:bg-[#F2FAF8] transition-colors whitespace-nowrap"
                 >
                   For Educators
+                </a>
+                <Link
+                  href="/#success-stories"
+                  className="px-3 py-1.5 rounded-lg text-slate-700 hover:text-[#083F3D] hover:bg-[#F2FAF8] transition-colors whitespace-nowrap"
+                >
+                  Success Stories
                 </Link>
-                <a
-                  href="#how-it-works"
-                  onClick={handleHowItWorksClick}
-                  className="px-3 py-1.5 rounded-lg hover:text-[#0B4F4B] hover:bg-slate-100/70 transition-colors whitespace-nowrap"
+                <Link
+                  href="/contact"
+                  className={`px-3 py-1.5 rounded-lg transition-colors whitespace-nowrap ${
+                    pathname === "/contact"
+                      ? "text-[#0F5C5A] font-bold bg-[#F2FAF8]"
+                      : "text-slate-700 hover:text-[#083F3D] hover:bg-[#F2FAF8]"
+                  }`}
                 >
-                  How It Works
-                </a>
-                <a
-                  href={getLiveDomain()}
-                  className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg hover:text-[#0B4F4B] hover:bg-slate-100/70 transition-colors whitespace-nowrap group"
-                >
-                  <span className="relative flex h-2 w-2">
-                    <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-red-400 opacity-75" />
-                    <span className="relative inline-flex rounded-full h-2 w-2 bg-red-500" />
-                  </span>
-                  <span className="font-bold text-red-600 group-hover:text-red-700">Live</span>
-                </a>
+                  Contact Us
+                </Link>
               </>
             )}
           </nav>
@@ -559,7 +498,7 @@ export function FloatingNavbar({ variant }: FloatingNavbarProps = {}) {
                       ? "/student/login"
                       : "/login"
                   }
-                  className="text-xs sm:text-sm font-bold text-slate-700 hover:text-slate-950 px-3.5 py-2 rounded-xl hover:bg-slate-100 transition-colors whitespace-nowrap"
+                  className="text-xs sm:text-sm font-bold text-slate-700 hover:text-[#083F3D] px-3.5 py-2 rounded-xl hover:bg-[#F2FAF8] transition-colors whitespace-nowrap"
                 >
                   Login
                 </Link>
@@ -576,7 +515,7 @@ export function FloatingNavbar({ variant }: FloatingNavbarProps = {}) {
                       ? "bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 shadow-blue-500/20"
                       : isEducator
                       ? "bg-gradient-to-r from-[#16805B] to-[#0D5C41] hover:from-[#12684A] hover:to-[#0A4732] shadow-emerald-700/20"
-                      : "bg-gradient-to-r from-[#0B4F4B] to-[#073F3C] hover:from-[#083F3D] hover:to-[#042423] shadow-teal-900/20"
+                      : "bg-[#0F5C5A] hover:bg-[#083F3D] active:bg-[#052C2A] shadow-teal-900/20"
                   }`}
                 >
                   <span>
@@ -970,52 +909,65 @@ export function FloatingNavbar({ variant }: FloatingNavbarProps = {}) {
                 ) : (
                   <>
                     <Link
-                      href="/find-teachers"
+                      href="/"
                       onClick={() => setMobileOpen(false)}
-                      className="flex items-center gap-2.5 py-2 px-3 rounded-xl hover:bg-slate-50"
+                      className={`py-2.5 px-3.5 rounded-xl transition-colors ${
+                        pathname === "/"
+                          ? "bg-[#F2FAF8] text-[#0F5C5A] font-bold"
+                          : "text-slate-800 hover:bg-[#F2FAF8] hover:text-[#0F5C5A]"
+                      }`}
                     >
-                      <Users className="h-4 w-4 text-[#0B4F4B]" />
-                      Find an Educator
+                      Home
                     </Link>
                     <Link
-                      href="/courses"
+                      href="/about"
                       onClick={() => setMobileOpen(false)}
-                      className="flex items-center gap-2.5 py-2 px-3 rounded-xl hover:bg-slate-50"
+                      className={`py-2.5 px-3.5 rounded-xl transition-colors ${
+                        pathname === "/about"
+                          ? "bg-[#F2FAF8] text-[#0F5C5A] font-bold"
+                          : "text-slate-800 hover:bg-[#F2FAF8] hover:text-[#0F5C5A]"
+                      }`}
                     >
-                      <BookOpen className="h-4 w-4 text-amber-600" />
-                      Explore Courses
-                    </Link>
-                    <Link
-                      href="/student"
-                      onClick={() => setMobileOpen(false)}
-                      className="py-2 px-3 hover:bg-slate-50 rounded-xl"
-                    >
-                      For Learners
-                    </Link>
-                    <Link
-                      href="/teacher"
-                      onClick={() => setMobileOpen(false)}
-                      className="py-2 px-3 hover:bg-slate-50 rounded-xl text-emerald-700 font-bold"
-                    >
-                      For Educators
+                      About Us
                     </Link>
                     <a
-                      href="#how-it-works"
-                      onClick={handleHowItWorksClick}
-                      className="py-2 px-3 hover:bg-slate-50 rounded-xl"
+                      href="https://learners.educonnects.co.in"
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      onClick={() => setMobileOpen(false)}
+                      className="py-2.5 px-3.5 rounded-xl text-slate-800 hover:bg-[#F2FAF8] hover:text-[#0F5C5A] transition-colors flex items-center justify-between"
                     >
-                      How It Works
+                      <span>For Learners</span>
+                      <span className="text-[10px] uppercase font-bold text-slate-400 bg-slate-100 px-2 py-0.5 rounded-md">↗ New Tab</span>
                     </a>
                     <a
-                      href={getLiveDomain()}
+                      href="https://educators.educonnects.co.in"
+                      target="_blank"
+                      rel="noopener noreferrer"
                       onClick={() => setMobileOpen(false)}
-                      className="py-2 px-3 hover:bg-slate-50 rounded-xl flex items-center justify-between text-red-600 font-bold"
+                      className="py-2.5 px-3.5 rounded-xl text-slate-800 hover:bg-[#F2FAF8] hover:text-[#0F5C5A] transition-colors flex items-center justify-between"
                     >
-                      <span>Live Events</span>
-                      <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-bold bg-red-100 text-red-600">
-                        🔴 Live
-                      </span>
+                      <span>For Educators</span>
+                      <span className="text-[10px] uppercase font-bold text-slate-400 bg-slate-100 px-2 py-0.5 rounded-md">↗ New Tab</span>
                     </a>
+                    <Link
+                      href="/#success-stories"
+                      onClick={() => setMobileOpen(false)}
+                      className="py-2.5 px-3.5 rounded-xl text-slate-800 hover:bg-[#F2FAF8] hover:text-[#0F5C5A] transition-colors"
+                    >
+                      Success Stories
+                    </Link>
+                    <Link
+                      href="/contact"
+                      onClick={() => setMobileOpen(false)}
+                      className={`py-2.5 px-3.5 rounded-xl transition-colors ${
+                        pathname === "/contact"
+                          ? "bg-[#F2FAF8] text-[#0F5C5A] font-bold"
+                          : "text-slate-800 hover:bg-[#F2FAF8] hover:text-[#0F5C5A]"
+                      }`}
+                    >
+                      Contact Us
+                    </Link>
                   </>
                 )}
               </nav>
@@ -1051,7 +1003,7 @@ export function FloatingNavbar({ variant }: FloatingNavbarProps = {}) {
                           ? "bg-blue-600 hover:bg-blue-700"
                           : isEducator
                           ? "bg-[#16805B] hover:bg-[#0D5C41]"
-                          : "bg-[#0B4F4B] hover:bg-[#073F3C]"
+                          : "bg-[#0F5C5A] hover:bg-[#083F3D] active:bg-[#052C2A]"
                       }`}
                     >
                       <span>
