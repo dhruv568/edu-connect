@@ -541,6 +541,7 @@ export async function processAiChat(options: AiChatOptions): Promise<AiChatResul
         const completionParams: any = {
           model: configuredModel,
           messages: promptMessages,
+          // Explicitly configure max_completion_tokens for OpenAI model support
           max_completion_tokens: 700,
           ...(!isReasoningModel ? { temperature: 0.7 } : {}),
         };
@@ -679,6 +680,7 @@ export async function streamAiChat(
     const streamParams: any = {
       model: configuredModel,
       messages: promptMessages,
+      // Explicitly configure max_completion_tokens for OpenAI model support
       max_completion_tokens: 700,
       stream: true,
       ...(!isReasoningModel ? { temperature: 0.7 } : {}),
