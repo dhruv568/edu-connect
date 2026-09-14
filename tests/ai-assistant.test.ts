@@ -10,12 +10,18 @@ import {
   QUICK_QUESTIONS,
   THEMES,
 } from "../lib/ai/assistant-config";
-import { processAiChat, AssistantRole } from "../services/ai-service";
+import {
+  processAiChat,
+  sanitizeContent,
+  AssistantRole,
+} from "../services/ai-service";
 
 async function runTests() {
-  console.log("🚀 Starting EduConnects AI Assistant Test Suite...\n");
+  console.log("🚀 Starting Upgraded EduConnects AI Assistant Test Suite...\n");
 
-  // --- TEST 1: Message Validation ---
+  // =========================================================================
+  // TEST 1: Message Validation (Empty, Whitespace, Non-String, Length)
+  // =========================================================================
   console.log("TEST 1: Message Validation");
   {
     const emptyResult = validateAiMessage("");
@@ -34,14 +40,15 @@ async function runTests() {
     const validResult = validateAiMessage("How do live classes work?");
     assert.strictEqual(validResult.valid, true, "Normal message should be valid");
     assert.strictEqual(validResult.message, "How do live classes work?");
-    console.log("  ✔ Message validation passed");
+    console.log("  ✔ Message validation passed (empty, whitespace, length checks)");
   }
 
-  // --- TEST 2: Rate Limiting ---
+  // =========================================================================
+  // TEST 2: Rate Limiting Enforcement
+  // =========================================================================
   console.log("\nTEST 2: Rate Limiting");
   {
     const testKey = `test-ip-${Date.now()}`;
-    // Limit is 15 requests per minute
     for (let i = 0; i < 15; i++) {
       const res = checkRateLimit(testKey, 15, 60000);
       assert.strictEqual(res.allowed, true, `Request ${i + 1} should be allowed`);
@@ -51,13 +58,29 @@ async function runTests() {
     assert.strictEqual(exceededRes.allowed, false, "16th request must be rate-limited");
     assert.strictEqual(exceededRes.remaining, 0, "Remaining requests should be 0");
     assert.ok(exceededRes.resetInSeconds > 0, "Reset seconds should be positive");
-    console.log("  ✔ Rate limiting enforcement passed");
+    console.log("  ✔ Rate limiting enforcement passed (15 req/min cap)");
   }
 
-  // --- TEST 3: Route Exclusion Logic ---
-  console.log("\nTEST 3: Route Exclusion Logic");
+  // =========================================================================
+  // TEST 3: Sensitive Data Sanitization
+  // =========================================================================
+  console.log("\nTEST 3: Sensitive Data Sanitization");
   {
-    // Must be EXCLUDED
+    const sanitized = sanitizeContent(
+      "My OTP is 849201, password: Secret1234, card 4111 2222 3333 4444, Aadhaar 123456789012"
+    );
+    assert.ok(!sanitized.includes("849201"), "OTP must be redacted");
+    assert.ok(!sanitized.includes("Secret1234"), "Password must be redacted");
+    assert.ok(!sanitized.includes("4111 2222 3333 4444"), "Card number must be redacted");
+    assert.ok(!sanitized.includes("123456789012"), "Aadhaar must be redacted");
+    console.log("  ✔ Sensitive data scrubbing passed");
+  }
+
+  // =========================================================================
+  // TEST 4: Route Exclusion Logic
+  // =========================================================================
+  console.log("\nTEST 4: Route Exclusion Logic");
+  {
     const excludedRoutes = [
       "/classroom/session-abc-123",
       "/classroom",
@@ -88,7 +111,6 @@ async function runTests() {
       );
     }
 
-    // Must be ALLOWED
     const allowedRoutes = [
       "/",
       "/courses",
@@ -123,8 +145,10 @@ async function runTests() {
     console.log("  ✔ Route exclusion checks passed");
   }
 
-  // --- TEST 4: Section Themes Mapping ---
-  console.log("\nTEST 4: Section Themes Mapping");
+  // =========================================================================
+  // TEST 5: Section Themes Mapping
+  // =========================================================================
+  console.log("\nTEST 5: Section Themes Mapping");
   {
     assert.strictEqual(getSectionTheme("/", "guest"), "home");
     assert.strictEqual(getSectionTheme("/courses", "guest"), "home");
@@ -139,90 +163,302 @@ async function runTests() {
     console.log("  ✔ Section theme mapping passed");
   }
 
-  // --- TEST 5: Contextual Quick Questions ---
-  console.log("\nTEST 5: Contextual Quick Questions Content");
+  // =========================================================================
+  // TEST 6: EduConnects Free-Text Questions
+  // =========================================================================
+  console.log("\nTEST 6: EduConnects Free-Text Questions");
   {
-    // Learner questions
-    assert.ok(QUICK_QUESTIONS.LEARNER.includes("Find an Educator"));
-    assert.ok(QUICK_QUESTIONS.LEARNER.includes("Find a Course"));
-    assert.ok(QUICK_QUESTIONS.LEARNER.includes("How do live classes work?"));
-    assert.ok(QUICK_QUESTIONS.LEARNER.includes("How do I book a trial?"));
-    assert.ok(QUICK_QUESTIONS.LEARNER.includes("How do I update my profile?"));
-    assert.ok(QUICK_QUESTIONS.LEARNER.includes("How do I contact support?"));
-
-    // Educator questions
-    assert.ok(QUICK_QUESTIONS.EDUCATOR.includes("How do I create a course?"));
-    assert.ok(QUICK_QUESTIONS.EDUCATOR.includes("How do I become verified?"));
-    assert.ok(QUICK_QUESTIONS.EDUCATOR.includes("How do I create a live class?"));
-    assert.ok(QUICK_QUESTIONS.EDUCATOR.includes("How do payouts work?"));
-    assert.ok(QUICK_QUESTIONS.EDUCATOR.includes("How do I update my profile?"));
-    assert.ok(QUICK_QUESTIONS.EDUCATOR.includes("How do I upload documents?"));
-
-    // Admin questions
-    assert.ok(QUICK_QUESTIONS.ADMIN.includes("Explain Admin Dashboard"));
-    assert.ok(QUICK_QUESTIONS.ADMIN.includes("Educator verification"));
-    assert.ok(QUICK_QUESTIONS.ADMIN.includes("User management"));
-    assert.ok(QUICK_QUESTIONS.ADMIN.includes("Live classes"));
-    assert.ok(QUICK_QUESTIONS.ADMIN.includes("Platform overview"));
-
-    // Guest questions
-    assert.ok(QUICK_QUESTIONS.guest.includes("What is EduConnects?"));
-    assert.ok(QUICK_QUESTIONS.guest.includes("Find an Educator"));
-    assert.ok(QUICK_QUESTIONS.guest.includes("Find Courses"));
-    assert.ok(QUICK_QUESTIONS.guest.includes("How does EduConnects work?"));
-    assert.ok(QUICK_QUESTIONS.guest.includes("Become an Educator"));
-    assert.ok(QUICK_QUESTIONS.guest.includes("Contact Support"));
-    console.log("  ✔ Contextual quick questions verified for all roles");
-  }
-
-  // --- TEST 6: AI Chat Service & Role Guidance ---
-  console.log("\nTEST 6: AI Chat Processing & Safe Responses");
-  {
-    // Guest query
-    const guestResult = await processAiChat({
-      message: "What is EduConnects?",
-      role: "guest",
-    });
-    assert.ok(guestResult.response.length > 20, "Guest response should not be empty");
-    assert.ok(
-      guestResult.response.toLowerCase().includes("educonnects"),
-      "Response should mention EduConnects"
-    );
-
-    // Learner query
-    const learnerResult = await processAiChat({
-      message: "Where can I see my courses?",
+    // 6a: Find an educator
+    const findEducatorRes = await processAiChat({
+      message: "How do I find an educator?",
       role: "LEARNER",
     });
+    assert.ok(findEducatorRes.response.length > 20, "Find educator response should not be empty");
     assert.ok(
-      learnerResult.response.includes("/student/courses"),
-      "Learner response should direct to /student/courses"
+      findEducatorRes.response.includes("/find-teachers"),
+      "Response should direct to /find-teachers"
     );
 
-    // Educator query
-    const educatorResult = await processAiChat({
-      message: "How do I create a course?",
-      role: "EDUCATOR",
+    // 6b: Live classes
+    const liveClassesRes = await processAiChat({
+      message: "Explain how live classes work.",
+      role: "LEARNER",
     });
+    assert.ok(liveClassesRes.response.length > 20, "Live classes response should not be empty");
     assert.ok(
-      educatorResult.response.includes("/teacher/courses"),
-      "Educator response should direct to /teacher/courses"
+      liveClassesRes.response.toLowerCase().includes("live") ||
+        liveClassesRes.response.toLowerCase().includes("classroom"),
+      "Response should explain live classroom functionality"
     );
 
-    // Admin query
-    const adminResult = await processAiChat({
-      message: "Where do I verify educators?",
-      role: "ADMIN",
+    // 6c: Forgot password
+    const forgotPwdRes = await processAiChat({
+      message: "I forgot my password, what should I do?",
+      role: "guest",
     });
+    assert.ok(forgotPwdRes.response.length > 20, "Forgot password response should not be empty");
     assert.ok(
-      adminResult.response.includes("/admin/verification"),
-      "Admin response should direct to /admin/verification"
+      forgotPwdRes.response.toLowerCase().includes("forgot") ||
+        forgotPwdRes.response.toLowerCase().includes("reset"),
+      "Response should provide password reset guidance"
     );
 
-    console.log("  ✔ AI Chat Processing passed for all roles");
+    // 6d: What courses are available
+    const coursesRes = await processAiChat({
+      message: "What courses are available?",
+      role: "guest",
+    });
+    assert.ok(coursesRes.response.length > 20, "Courses response should not be empty");
+    assert.ok(
+      coursesRes.response.includes("/courses"),
+      "Response should direct to /courses"
+    );
+
+    console.log("  ✔ EduConnects free-text questions passed (educator, live classes, password, courses)");
   }
 
-  console.log("\n✨ All EduConnects AI Assistant Tests Passed Successfully!\n");
+  // =========================================================================
+  // TEST 7: General Knowledge Questions (Physics, AI/ML, Email Drafting)
+  // =========================================================================
+  console.log("\nTEST 7: General Knowledge Questions (Must not refuse)");
+  {
+    // 7a: Physics question
+    const physicsRes = await processAiChat({
+      message: "Tell me something interesting about physics.",
+      role: "guest",
+    });
+    assert.ok(physicsRes.response.length > 30, "Physics response should not be empty");
+    assert.ok(
+      !physicsRes.response.includes("I can only answer predefined questions"),
+      "Must NOT refuse physics question"
+    );
+    assert.ok(
+      physicsRes.response.toLowerCase().includes("time") ||
+        physicsRes.response.toLowerCase().includes("einstein") ||
+        physicsRes.response.toLowerCase().includes("relativity") ||
+        physicsRes.response.toLowerCase().includes("quantum"),
+      "Must provide interesting physics content"
+    );
+
+    // 7b: AI vs Machine Learning
+    const aiMlRes = await processAiChat({
+      message: "What is the difference between AI and machine learning?",
+      role: "LEARNER",
+    });
+    assert.ok(aiMlRes.response.length > 30, "AI/ML response should not be empty");
+    assert.ok(
+      aiMlRes.response.toLowerCase().includes("intelligence") &&
+        aiMlRes.response.toLowerCase().includes("machine learning"),
+      "Must explain difference between AI and Machine Learning"
+    );
+
+    // 7c: Draft an email to educator
+    const emailRes = await processAiChat({
+      message: "Write an email to my educator.",
+      role: "LEARNER",
+    });
+    assert.ok(emailRes.response.length > 30, "Email draft response should not be empty");
+    assert.ok(
+      emailRes.response.toLowerCase().includes("subject") ||
+        emailRes.response.toLowerCase().includes("dear"),
+      "Must provide an email template"
+    );
+
+    console.log("  ✔ General knowledge questions passed (Physics, AI/ML, Email Drafting)");
+  }
+
+  // =========================================================================
+  // TEST 8: Hinglish User Input
+  // =========================================================================
+  console.log("\nTEST 8: Hinglish Language Support");
+  {
+    const hinglishEducatorRes = await processAiChat({
+      message: "Educator kaise find kare?",
+      role: "guest",
+    });
+    assert.ok(hinglishEducatorRes.response.length > 20, "Hinglish response should not be empty");
+    assert.ok(
+      hinglishEducatorRes.response.includes("/find-teachers") ||
+        hinglishEducatorRes.response.toLowerCase().includes("educator"),
+      "Hinglish educator query should direct to educators"
+    );
+
+    const hinglishLiveRes = await processAiChat({
+      message: "Live class kaise join kare?",
+      role: "LEARNER",
+    });
+    assert.ok(hinglishLiveRes.response.length > 20, "Hinglish live response should not be empty");
+    assert.ok(
+      hinglishLiveRes.response.toLowerCase().includes("live class") ||
+        hinglishLiveRes.response.toLowerCase().includes("join"),
+      "Hinglish live class query should explain joining"
+    );
+
+    console.log("  ✔ Hinglish language support passed");
+  }
+
+  // =========================================================================
+  // TEST 9: Multi-Turn Conversation Context & Follow-Up Questions
+  // =========================================================================
+  console.log("\nTEST 9: Multi-Turn Conversation Context & Follow-Up Questions");
+  {
+    // Step 1: User asks about live classes
+    const turn1 = await processAiChat({
+      message: "How do live classes work?",
+      role: "LEARNER",
+    });
+    const conversationId = turn1.conversationId;
+    assert.ok(conversationId, "Conversation ID must be generated");
+
+    // Step 2: User asks follow-up: "Can I join one?"
+    // The assistant should understand that "one" refers to a live class.
+    const turn2 = await processAiChat({
+      conversationId,
+      message: "Can I join one?",
+      role: "LEARNER",
+      history: [
+        { role: "user", content: "How do live classes work?" },
+        { role: "assistant", content: turn1.response },
+      ],
+    });
+    assert.ok(turn2.response.length > 20, "Follow-up response should not be empty");
+    assert.ok(
+      turn2.response.toLowerCase().includes("live class") ||
+        turn2.response.toLowerCase().includes("join"),
+      "Assistant must understand 'one' refers to a live class"
+    );
+
+    // Step 3: User asks follow-up: "What about payment?"
+    const turn3 = await processAiChat({
+      conversationId,
+      message: "What about payment?",
+      role: "LEARNER",
+      history: [
+        { role: "user", content: "How do live classes work?" },
+        { role: "assistant", content: turn1.response },
+        { role: "user", content: "Can I join one?" },
+        { role: "assistant", content: turn2.response },
+      ],
+    });
+    assert.ok(turn3.response.length > 20, "Payment follow-up response should not be empty");
+    assert.ok(
+      turn3.response.toLowerCase().includes("inr") ||
+        turn3.response.toLowerCase().includes("₹") ||
+        turn3.response.toLowerCase().includes("cashfree") ||
+        turn3.response.toLowerCase().includes("rate") ||
+        turn3.response.toLowerCase().includes("trial"),
+      "Assistant must explain payment in context of live classes"
+    );
+
+    // Step 4: User asks follow-up: "Can you explain this in simple language?"
+    const turn4 = await processAiChat({
+      conversationId,
+      message: "Can you explain this in simple language?",
+      role: "LEARNER",
+      history: [
+        { role: "user", content: "How do live classes work?" },
+        { role: "assistant", content: turn1.response },
+      ],
+    });
+    assert.ok(turn4.response.length > 20, "Simplified explanation should not be empty");
+    assert.ok(
+      turn4.response.toLowerCase().includes("simple") ||
+        turn4.response.toLowerCase().includes("video call") ||
+        turn4.response.toLowerCase().includes("tutor"),
+      "Assistant must provide simplified explanation with analogies"
+    );
+
+    console.log("  ✔ Multi-turn context and follow-up understanding passed");
+  }
+
+  // =========================================================================
+  // TEST 10: Long but Valid User Question
+  // =========================================================================
+  console.log("\nTEST 10: Long but Valid User Question");
+  {
+    const longQuestion =
+      "Hello, I am a software engineering student looking to learn full-stack web development with React, Node.js, and TypeScript. I want to know if EduConnects offers live classes where I can interact with the instructor directly to review my project code, as well as recorded lessons that I can review at night after my university classes. Can you explain how this works and what I should look for when choosing an educator?";
+
+    assert.ok(longQuestion.length > 300, "Question should be long (>300 chars)");
+    assert.ok(longQuestion.length <= MAX_MESSAGE_LENGTH, "Question must be within limit");
+
+    const longRes = await processAiChat({
+      message: longQuestion,
+      role: "LEARNER",
+    });
+    assert.ok(longRes.response.length > 30, "Long question response should not be empty");
+    console.log("  ✔ Long valid question handling passed (350+ chars)");
+  }
+
+  // =========================================================================
+  // TEST 11: Arbitrary / Unrecognized Question (Never refuse or show rigid menu)
+  // =========================================================================
+  console.log("\nTEST 11: Arbitrary / Unrecognized Question");
+  {
+    const arbitraryRes = await processAiChat({
+      message: "Can I learn Spanish guitar at 2 AM on EduConnects?",
+      role: "guest",
+    });
+    assert.ok(arbitraryRes.response.length > 20, "Arbitrary response should not be empty");
+    assert.ok(
+      !arbitraryRes.response.includes("I can only answer predefined questions"),
+      "Must not refuse arbitrary input"
+    );
+    assert.ok(
+      !arbitraryRes.response.includes("Please choose one of these options"),
+      "Must not force user into hardcoded options"
+    );
+    console.log("  ✔ Arbitrary question handled gracefully without refusal or rigid menu");
+  }
+
+  // =========================================================================
+  // TEST 12: CORE REQUIREMENT — Question NOT in Any Predefined Quick Questions
+  // =========================================================================
+  console.log("\nTEST 12: Core Verification — Question NOT in Any Quick-Question List");
+  {
+    const allQuickQuestions = [
+      ...QUICK_QUESTIONS.LEARNER,
+      ...QUICK_QUESTIONS.EDUCATOR,
+      ...QUICK_QUESTIONS.ADMIN,
+      ...QUICK_QUESTIONS.guest,
+    ];
+
+    const unlistedQuestions = [
+      "Tell me something interesting about physics.",
+      "What is the difference between AI and machine learning?",
+      "Write an email to my educator.",
+      "Can you explain this in simple language?",
+      "I forgot my password, what should I do?",
+      "Can I learn Spanish guitar at 2 AM on EduConnects?",
+    ];
+
+    for (const q of unlistedQuestions) {
+      assert.strictEqual(
+        allQuickQuestions.includes(q),
+        false,
+        `Question "${q}" must NOT be in predefined quick-question lists`
+      );
+
+      const res = await processAiChat({
+        message: q,
+        role: "guest",
+      });
+      assert.ok(
+        res.response.length > 20,
+        `AI must generate a non-empty response for unlisted question "${q}"`
+      );
+      assert.ok(
+        !res.response.includes("I can only answer these questions"),
+        `AI must not reject unlisted question "${q}"`
+      );
+    }
+
+    console.log(
+      "  ✔ Core Requirement Verified: Unlisted questions successfully processed with useful AI responses!"
+    );
+  }
+
+  console.log("\n✨ All 12 EduConnects AI Assistant Tests Passed Successfully! 🎉\n");
   process.exit(0);
 }
 

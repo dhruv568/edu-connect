@@ -70,7 +70,7 @@ export async function POST(req: NextRequest) {
 
     // 3. Parse and validate request body
     const body = await req.json().catch(() => ({}));
-    const { message, conversationId, stream } = body;
+    const { message, conversationId, history, stream } = body;
 
     const validation = validateAiMessage(message);
     if (!validation.valid || !validation.message) {
@@ -81,6 +81,7 @@ export async function POST(req: NextRequest) {
     }
 
     const validatedMessage = validation.message;
+    const validatedHistory = Array.isArray(history) ? history : undefined;
 
     // 4. Handle Streaming Response if requested
     if (stream) {
@@ -88,10 +89,11 @@ export async function POST(req: NextRequest) {
       const customReadable = new ReadableStream({
         async start(controller) {
           try {
-            await streamAiChat(
+            const streamResult = await streamAiChat(
               {
                 message: validatedMessage,
                 conversationId: typeof conversationId === "string" ? conversationId : undefined,
+                history: validatedHistory,
                 userId,
                 role,
                 userName,
@@ -102,6 +104,13 @@ export async function POST(req: NextRequest) {
                   encoder.encode(`data: ${JSON.stringify({ chunk })}\n\n`)
                 );
               }
+            );
+
+            // Transmit conversationId metadata so client can retain multi-turn context
+            controller.enqueue(
+              encoder.encode(
+                `data: ${JSON.stringify({ conversationId: streamResult.conversationId })}\n\n`
+              )
             );
             controller.enqueue(encoder.encode(`data: [DONE]\n\n`));
             controller.close();
@@ -133,6 +142,7 @@ export async function POST(req: NextRequest) {
     const result = await processAiChat({
       message: validatedMessage,
       conversationId: typeof conversationId === "string" ? conversationId : undefined,
+      history: validatedHistory,
       userId,
       role,
       userName,

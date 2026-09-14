@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { getSession } from "@/lib/auth/session";
 import { prisma } from "@/lib/prisma";
-import { AssistantRole } from "@/services/ai-service";
+import { AssistantRole, getStoredConversation } from "@/services/ai-service";
 
 export async function GET(req: NextRequest) {
   try {
@@ -19,18 +19,33 @@ export async function GET(req: NextRequest) {
     let messages: { id: string; role: string; content: string; createdAt: Date }[] = [];
 
     if (conversationId) {
-      const conv = await prisma.aiConversation.findUnique({
-        where: { id: conversationId },
-        include: {
-          messages: {
-            orderBy: { createdAt: "asc" },
-            take: 30,
-          },
-        },
-      });
-
-      if (conv) {
-        messages = conv.messages;
+      const stored = getStoredConversation(conversationId);
+      if (stored && stored.messages) {
+        messages = stored.messages.map((m, idx) => ({
+          id: `msg-${idx}`,
+          role: m.role,
+          content: m.content,
+          createdAt: new Date(),
+        }));
+      } else {
+        try {
+          if ((prisma as any).aiConversation?.findUnique) {
+            const conv = await (prisma as any).aiConversation.findUnique({
+              where: { id: conversationId },
+              include: {
+                messages: {
+                  orderBy: { createdAt: "asc" },
+                  take: 30,
+                },
+              },
+            });
+            if (conv) {
+              messages = conv.messages;
+            }
+          }
+        } catch {
+          // Graceful fallback
+        }
       }
     }
 

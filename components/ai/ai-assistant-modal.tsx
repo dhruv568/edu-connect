@@ -108,19 +108,25 @@ export const AIAssistantModal: React.FC<AIAssistantModalProps> = ({
       timestamp: new Date().toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" }),
     };
 
+    // Prepare history payload from existing messages to preserve multi-turn context
+    const currentHistory = messages
+      .filter((m) => !m.isError && m.id !== "welcome" && m.id !== "welcome-new" && m.id !== "cleared")
+      .map((m) => ({ role: m.role, content: m.content }));
+
     setMessages((prev) => [...prev, userMsg]);
     setIsLoading(true);
 
     const assistantTempId = `assistant-${Date.now()}`;
 
     try {
-      // Try streaming response first
+      // Send the user's natural question along with prior session context
       const response = await fetch("/api/ai/chat", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           message: text,
           conversationId: conversationId || undefined,
+          history: currentHistory,
           stream: true,
         }),
       });
@@ -171,6 +177,9 @@ export const AIAssistantModal: React.FC<AIAssistantModalProps> = ({
               }
               try {
                 const parsed = JSON.parse(dataPayload);
+                if (parsed.conversationId && !conversationId) {
+                  setConversationId(parsed.conversationId);
+                }
                 if (parsed.chunk) {
                   streamAccumulated += parsed.chunk;
                   setMessages((prev) =>
@@ -475,7 +484,7 @@ export const AIAssistantModal: React.FC<AIAssistantModalProps> = ({
               onKeyDown={handleKeyDown}
               rows={1}
               maxLength={1000}
-              placeholder="Ask a question about EduConnects..."
+              placeholder="Type any question, topic, or ask for guidance..."
               className="w-full resize-none bg-transparent px-3.5 py-2.5 text-sm text-slate-800 placeholder-slate-400 focus:outline-none max-h-32"
             />
           </div>

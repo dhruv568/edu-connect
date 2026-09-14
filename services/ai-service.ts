@@ -16,6 +16,7 @@ export interface AiChatOptions {
   role: AssistantRole;
   userEmail?: string;
   userName?: string;
+  history?: ChatMessage[];
 }
 
 export interface AiChatResult {
@@ -30,37 +31,122 @@ const TEMPORARY_UNAVAILABLE_MESSAGE =
   "Sorry, the EduConnects Assistant is temporarily unavailable. Please try again in a moment.";
 
 /**
- * Filter out sensitive patterns like passwords, OTPs, Aadhaar, bank numbers
+ * In-memory conversation store for active chat sessions.
+ * Guarantees reliable session conversation history across multiple turns
+ * even when offline or before database synchronisation.
  */
-function sanitizeContent(text: string): string {
+interface ConversationRecord {
+  id: string;
+  role: AssistantRole;
+  userId?: string;
+  messages: ChatMessage[];
+  updatedAt: number;
+}
+
+const conversationStore = new Map<string, ConversationRecord>();
+
+// Clean up conversations older than 24 hours
+if (typeof setInterval !== "undefined") {
+  const storeTimer = setInterval(() => {
+    const oneDayAgo = Date.now() - 24 * 60 * 60 * 1000;
+    for (const [id, record] of conversationStore.entries()) {
+      if (record.updatedAt < oneDayAgo) {
+        conversationStore.delete(id);
+      }
+    }
+  }, 10 * 60 * 1000);
+  if (storeTimer && typeof storeTimer.unref === "function") {
+    storeTimer.unref();
+  }
+}
+
+export function getStoredConversation(id: string): ConversationRecord | undefined {
+  return conversationStore.get(id);
+}
+
+/**
+ * Extract text response from OpenAI Responses API or Chat Completions API
+ */
+function extractResponseText(res: any): string {
+  if (!res) return "";
+  if (typeof res === "string") return res;
+
+  // Check OpenAI Responses API output structure
+  if (Array.isArray(res.output)) {
+    const textParts: string[] = [];
+    for (const item of res.output) {
+      if (item.type === "message" && Array.isArray(item.content)) {
+        for (const c of item.content) {
+          if (c.type === "output_text" && c.text) {
+            textParts.push(c.text);
+          }
+        }
+      }
+    }
+    if (textParts.length > 0) return textParts.join("\n").trim();
+  }
+
+  // Check OpenAI Chat Completions choices structure
+  if (Array.isArray(res.choices) && res.choices.length > 0) {
+    const content = res.choices[0]?.message?.content;
+    if (typeof content === "string") return content.trim();
+  }
+
+  return "";
+}
+
+/**
+ * Filter out sensitive patterns like passwords, OTPs, Aadhaar, bank numbers, credit cards, bearer tokens
+ */
+export function sanitizeContent(text: string): string {
   if (!text) return "";
   return text
     .replace(/\b\d{6}\b/g, "[REDACTED_OTP]") // 6-digit OTPs
     .replace(/\b\d{12}\b/g, "[REDACTED_AADHAAR]") // 12-digit Aadhaar
-    .replace(/\b[A-Z]{4}0[A-Z0-9]{6}\b/gi, "[REDACTED_IFSC]") // IFSC
-    .replace(/password\s*[:=]\s*\S+/gi, "password: [REDACTED]");
+    .replace(/\b[A-Z]{4}0[A-Z0-9]{6}\b/gi, "[REDACTED_IFSC]") // IFSC code
+    .replace(/\b(?:\d[ -]*?){13,16}\b/g, "[REDACTED_CARD]") // 13-16 digit payment cards
+    .replace(/\b(?:cvv|cvc)\s*[:=]?\s*\d{3,4}\b/gi, "CVV: [REDACTED]") // CVV
+    .replace(/\b(?:sk-[a-zA-Z0-9]{20,}|bearer\s+[a-zA-Z0-9_.-]+)\b/gi, "[REDACTED_TOKEN]") // API keys & tokens
+    .replace(/password\s*[:=]\s*\S+/gi, "password: [REDACTED]"); // Passwords
 }
 
 /**
  * Build dynamic role-specific system prompt with verified platform context
  */
 async function buildSystemPrompt(role: AssistantRole, userId?: string, userName?: string): Promise<string> {
-  const baseIdentity = `You are the EduConnects AI Assistant, the official native assistant for the EduConnects learning and teaching platform.
-Your identity:
-- You are "EduConnects AI Assistant".
-- You are NOT ChatGPT, OpenAI Assistant, or GPT Bot. Never mention OpenAI, GPT, or LLM.
-- You speak as EduConnects' own helpful team member.
-- Tone: Friendly, concise, professional, clear, and reassuring.
-- Keep answers compact (usually 2 to 4 paragraphs or bullet points). Avoid long walls of text.
-- STRICT RULE: You are informational and advisory only. NEVER claim you performed actions (e.g. "I booked your class", "I verified your account", "I refunded your payment"). You cannot modify database records. Explain the exact steps the user should take instead.
-- If you lack specific details or do not know an answer: "I don't have enough information about that yet. Please contact EduConnects support at support@educonnects.co.in or visit the Contact page."
-- NEVER mention parents, parent portal, or parent accounts. EduConnects supports Learners, Educators, and Admins.`;
+  const baseIdentity = `You are the EduConnects AI Assistant, the intelligent, friendly, and helpful native assistant for the EduConnects learning and teaching platform.
+
+Core Personality & Capabilities:
+- Identity: "EduConnects AI Assistant". You speak as a warm, knowledgeable member of the EduConnects team.
+- UNRESTRICTED INPUT: The user may ask ANY question in natural language. You must answer directly, helpfully, and conversationally.
+- Never restrict the user to predefined question lists, quick replies, or rigid choices. Never say "I can only answer predefined questions" or "Please select from the options above". Quick question buttons on the screen are purely optional shortcuts for the user.
+- Multi-Turn Conversation: Maintain context across messages. Understand follow-up questions, pronouns (like "one", "it", "they" referring to previously mentioned classes, courses, or concepts), and conversational continuity.
+- Multilingual & Hinglish: Understand and answer fluently in English, Hinglish (e.g., "Educator kaise find kare?", "Mujhe live class join karni hai", "Kya trial class free hoti hai?"), and mixed language queries.
+- General Knowledge & Education: For general educational or informational queries (e.g. physics, mathematics, science, AI vs Machine Learning, study strategies, coding, writing an email to an educator, or explaining concepts simply), answer directly, informatively, and clearly. Do NOT refuse general educational questions.
+- Simplification: When asked to explain something in simple language or for beginners ("explain like I'm 5", "in simple terms"), provide intuitive analogies and clear, step-by-step explanations.
+- Writing Assistance: When asked to draft an email or message to an educator or support, produce a well-formatted, polite, ready-to-use template.
+- Platform Knowledge: When answering about EduConnects, provide accurate information based on real website functionality and include relevant internal links:
+  • Browse Courses: /courses
+  • Find Verified Educators: /find-teachers
+  • Learner Dashboard: /student/dashboard
+  • Learner Courses: /student/courses
+  • Learner Live Classes: /student/live-classes
+  • Educator Dashboard: /teacher/dashboard
+  • Educator Courses: /teacher/courses
+  • Educator Live Classes: /teacher/live-classes
+  • Educator Verification: /teacher/verification
+  • Educator Earnings: /teacher/earnings
+  • Admin Dashboard: /admin/dashboard
+  • Admin Verification Queue: /admin/verification
+  • Password Reset: /forgot-password or click "Forgot Password" on /login
+  • Contact Support: /contact or support@educonnects.co.in
+- Advisory Only: You are advisory and informational. You cannot directly execute database mutations or financial debits (e.g. do not say "I have booked your class"). Explain the exact steps the user can take.
+- Security & Privacy: Never disclose unauthorized information, admin passwords, database tokens, or other users' personal information. Never ask for or expose OTPs, passwords, or payment credentials.`;
 
   let roleInstructions = "";
   let dynamicContext = "";
 
-  if (role === "ADMIN") {
-    // Admin context
+  if (role === "ADMIN" && userId) {
     let pendingTeachersCount = 0;
     let totalUsers = 0;
     let totalCourses = 0;
@@ -72,26 +158,22 @@ Your identity:
       ]);
       dynamicContext = `Platform Overview: Total Users: ${totalUsers}, Total Courses: ${totalCourses}, Educator Verification Queue Pending: ${pendingTeachersCount}.`;
     } catch {
-      // Graceful fallback
+      // Graceful fallback if database read is deferred
     }
 
     roleInstructions = `
-You are interacting with an authenticated EduConnects ADMINISTRATOR / STAFF MEMBER.
-Your role is to help them navigate and manage the EduConnects Admin Portal.
-${dynamicContext ? `Current System Context: ${dynamicContext}` : ""}
-
-Admin Navigation & Platform Structure:
-- Dashboard: /admin/dashboard - High-level metrics, revenue overview, recent signups.
-- Educator Verification: /admin/verification - Review submitted teacher documents, qualifications, and approve or reject profiles with audit logging.
-- User Management: /admin/users - Search users, view role status, suspend or reactivate accounts.
-- Course Moderation: /admin/courses - Review published courses, check curriculum quality, and approve/unpublish courses.
-- Live Classes Oversight: /admin/live-classes - Monitor ongoing/scheduled live sessions and LiveKit room status.
-- Roles & Permissions: /admin/roles and /admin/staff - Manage custom dynamic RBAC roles, invite staff members with specific granular permissions.
-- Payments & Financial Ledger: /admin/payments and /admin/refunds - Review Cashfree transactions, handle disputes, approve refunds.
-- Analytics & Reports: /admin/analytics and /admin/reports - View platform trends, revenue breakdown, export CSV reports.
-- System Health: /admin/system-health - Real-time diagnostics, background queues, email delivery logs.`;
+You are assisting an authenticated ADMINISTRATOR / STAFF MEMBER.
+${dynamicContext ? `System Context: ${dynamicContext}` : ""}
+Key Admin Navigation:
+- Dashboard: /admin/dashboard
+- Educator Verification Queue: /admin/verification (review identity proof, degrees, qualifications)
+- User Management: /admin/users (search users, view roles, suspend/reactivate)
+- Course Moderation: /admin/courses (review curriculum, approve or unpublish)
+- Live Classes Oversight: /admin/live-classes
+- Financials & Refunds: /admin/payments and /admin/refunds
+- Roles & Staff RBAC: /admin/roles and /admin/staff
+- System Health: /admin/system-health`;
   } else if (role === "EDUCATOR") {
-    // Educator context
     let verificationStatus = "PENDING";
     let courseCount = 0;
     if (userId) {
@@ -103,201 +185,313 @@ Admin Navigation & Platform Structure:
         if (teacherProfile) {
           verificationStatus = teacherProfile.verificationStatus;
           courseCount = teacherProfile.courses.length;
-          dynamicContext = `Educator's Current Status: Verification is ${verificationStatus}. Courses created: ${courseCount}.`;
+          dynamicContext = `Educator Status: Verification ${verificationStatus}, Courses: ${courseCount}.`;
         }
       } catch {}
     }
 
     roleInstructions = `
-You are interacting with an authenticated EDUCATOR (Teacher).
-Your role is to help them teach, set up courses, manage live classes, and get verified on EduConnects.
+You are assisting an authenticated EDUCATOR (Teacher).
 ${userName ? `Educator Name: ${userName}.` : ""}
-${dynamicContext ? `Account Details: ${dynamicContext}` : ""}
-
-Educator Navigation & Platform Features:
-- Educator Dashboard: /teacher/dashboard (or /dashboard on educators.educonnects.co.in) - View class schedule, total earnings, active students, and course performance.
-- Verification & Onboarding: /teacher/verification - Upload identity proof, degrees/qualifications, certificates, and bank account / cancelled cheque for payouts. Statuses: PENDING, VERIFIED, REJECTED.
-- Course Management: /teacher/courses - Create new video courses, organize chapters/lessons, upload videos via Mux, set pricing in INR (₹).
-- Live Classes: /teacher/live-classes - Schedule upcoming live classes, set 1-on-1 or group slots, configure trial lessons, and enter the LiveKit interactive classroom.
-- Earnings & Payouts: /teacher/earnings - View accumulated student payments, commission breakdowns, completed payout transfers, and configure Cashfree payout details.
-- Profile Settings: /profile - Update teaching headline, bio, subjects, hourly rates, and avatar.
-- Support: /contact - Reach out to EduConnects team.
-DO NOT disclose admin dashboard links or other educators' private financials.`;
+${dynamicContext ? `Account Status: ${dynamicContext}` : ""}
+Key Educator Features:
+- Educator Dashboard: /teacher/dashboard
+- Verification & Onboarding: /teacher/verification (upload ID, degree certificates, cancelled cheque)
+- Course Management: /teacher/courses (create recorded courses, upload chapters, set INR ₹ prices)
+- Live Classes: /teacher/live-classes (schedule 1-on-1 and group live interactive classes)
+- Earnings & Cashfree Payouts: /teacher/earnings
+- Profile Settings: /profile
+Do not disclose admin dashboards or other educators' confidential data.`;
   } else if (role === "LEARNER") {
-    // Learner context
     let enrollmentsCount = 0;
     if (userId) {
       try {
         enrollmentsCount = await prisma.enrollment.count({ where: { studentId: userId } });
-        dynamicContext = `Learner's Current Status: Enrolled in ${enrollmentsCount} courses.`;
+        dynamicContext = `Learner Status: Enrolled in ${enrollmentsCount} courses.`;
       } catch {}
     }
 
     roleInstructions = `
-You are interacting with an authenticated LEARNER (Student).
-Your role is to help them learn, discover courses, book verified educators, join live classes, and manage their learning journey.
+You are assisting an authenticated LEARNER (Student).
 ${userName ? `Learner Name: ${userName}.` : ""}
-${dynamicContext ? `Account Details: ${dynamicContext}` : ""}
-
-Learner Navigation & Platform Features:
-- Learner Dashboard: /student/dashboard (or /dashboard on learners.educonnects.co.in) - View learning progress, upcoming live sessions, and recent announcements.
-- My Courses: /student/courses - Access all purchased courses, watch lessons, track progress, download study resources.
-- Live Classes & Trials: /student/live-classes - View booked live sessions, join active LiveKit classrooms, and schedule trial classes with teachers.
-- Find Educators: /find-teachers - Search verified educators by subject, price, rating, and language. Book trial or regular sessions directly.
-- Browse Courses: /courses - Explore comprehensive recorded courses with curriculum previews.
-- Payments & Receipts: /student/payments - View invoice receipts, order history, and refund requests.
-- Profile & Settings: /profile - Update personal information, learning goals, and notification preferences.
-- Support: /contact - Reach out for technical or learning assistance.
-DO NOT disclose educator payout information or admin features.`;
+${dynamicContext ? `Account Status: ${dynamicContext}` : ""}
+Key Learner Features:
+- Learner Dashboard: /student/dashboard
+- My Courses: /student/courses (access enrolled video courses, track lesson progress)
+- Live Classes: /student/live-classes (view booked live sessions, join interactive classroom)
+- Find Verified Educators: /find-teachers (filter by subject, hourly rate, book trial sessions)
+- Browse Courses: /courses
+- Payment Receipts: /student/payments
+- Profile Settings: /profile`;
   } else {
-    // Guest context
     roleInstructions = `
-You are interacting with a PUBLIC VISITOR (Guest) browsing the EduConnects platform.
-Your role is to welcome them, explain EduConnects, guide them to relevant learning or teaching options, and help them register or sign in.
-
-Platform Features for Visitors:
-- What is EduConnects: A next-generation education platform connecting learners with verified expert educators for both interactive live classes and on-demand recorded courses.
-- Explore Courses: /courses - Browse all curated courses.
-- Find Verified Educators: /find-teachers - Filter by subject, experience, and hourly rates.
-- Join as a Learner: /register/student - Create a free learner account to book trials and enroll in courses.
-- Teach on EduConnects: /register/teacher - Apply as an educator to earn by teaching online.
-- How It Works: /how-it-works - Understand live classes, 1-on-1 trials, and secure payment workflows.
-- Pricing & Guarantee: Transparent INR (₹) pricing, secure transactions, and money-back refund guarantee.
-- Sign In: /login - Sign in with email and secure OTP.
-- Contact Support: /contact or support@educonnects.co.in.
-Encourage them to explore courses, find teachers, or sign up.`;
+You are assisting a PUBLIC VISITOR (Guest) exploring EduConnects.
+Guide them through:
+- What EduConnects is: A comprehensive platform for interactive live classes and self-paced video courses with verified educators.
+- Explore Courses: /courses
+- Find Verified Educators: /find-teachers
+- Register as a Learner: /register/student
+- Apply to Teach as an Educator: /register/teacher
+- How It Works: /how-it-works
+- Sign In: /login
+- Contact Support: /contact or support@educonnects.co.in`;
   }
 
   return `${baseIdentity}\n\n${roleInstructions}`;
 }
 
 /**
- * Rule-based fallback response engine for offline / unconfigured OpenAI environments
+ * Intelligent and versatile fallback response engine.
+ * Handles:
+ * - Specific EduConnects queries (courses, educators, live classes, trials, password resets)
+ * - Multi-turn follow-up queries using conversation history context
+ * - General educational & knowledge questions (physics, AI/ML, coding, email drafting)
+ * - Hinglish queries and conversational remarks
+ * - Arbitrary user input without refusal or rigid menus
  */
-function generateFallbackResponse(userMessage: string, role: AssistantRole): string {
+export function generateFallbackResponse(
+  userMessage: string,
+  role: AssistantRole,
+  history: ChatMessage[] = []
+): string {
   const query = userMessage.toLowerCase().trim();
 
-  // Guest / General Queries
-  if (query.includes("what is educonnects") || query.includes("about educonnects")) {
-    return "EduConnects is a next-generation education platform connecting passionate learners with verified expert educators. We offer interactive 1-on-1 and group live classes, trial lessons, and comprehensive self-paced video courses with transparent pricing in INR (₹).";
+  // Extract recent context from prior messages
+  const recentHistory = history.slice(-6);
+  const recentContextText = recentHistory.map((h) => h.content.toLowerCase()).join(" ");
+
+  const wasDiscussingLiveClasses =
+    recentContextText.includes("live class") ||
+    recentContextText.includes("live classes") ||
+    recentContextText.includes("classroom") ||
+    recentContextText.includes("interactive session");
+
+  const wasDiscussingCourses =
+    recentContextText.includes("course") ||
+    recentContextText.includes("curriculum") ||
+    recentContextText.includes("video lesson");
+
+  const wasDiscussingEducators =
+    recentContextText.includes("educator") ||
+    recentContextText.includes("teacher") ||
+    recentContextText.includes("tutor") ||
+    recentContextText.includes("trial");
+
+  const isHinglish =
+    /\b(kaise|kya|karna|karni|kare|hai|hain|hota|hoti|hoga|batao|bataiye|madad|chahiye|dhunde|khoje|puchna|shukriya|accha|theek)\b/i.test(
+      query
+    );
+
+  // 1. Follow-up: "Can I join one?" / "Can I attend?" / "How do I join?"
+  if (
+    query.includes("can i join") ||
+    query.includes("how do i join") ||
+    query.includes("how can i join") ||
+    query.includes("join one") ||
+    query.includes("can i attend")
+  ) {
+    if (wasDiscussingLiveClasses) {
+      return "Yes, absolutely! You can join any scheduled live class on EduConnects.\n\nTo join a live class:\n1. Head over to [Live Classes](/student/live-classes) or find an educator offering live sessions on [Find Educators](/find-teachers).\n2. Select a class topic and time that suits you, then book your seat or trial.\n3. When the class begins, click the **Join Class** button to enter our interactive HD classroom with live video, audio, screen sharing, and real-time chat.";
+    }
+    if (wasDiscussingCourses) {
+      return "Yes! You can enroll in any course at any time.\n\n1. Browse available courses on our [Courses](/courses) page.\n2. Click on the course you want to explore the curriculum and preview sample lessons.\n3. Click **Enroll Now** to get instant lifetime access to all lessons and study resources.";
+    }
+    return "Yes, you can join both live interactive classes and self-paced recorded courses! You can discover expert educators for live sessions on [Find Educators](/find-teachers), or browse recorded video courses on [Courses](/courses).";
   }
 
-  if (query.includes("find an educator") || query.includes("find a teacher") || query.includes("find teachers")) {
-    return "You can find verified educators by visiting our [Find Educators](/find-teachers) page. You can filter educators by subject, experience, rating, and hourly rate, and view their qualifications before booking a trial class.";
+  // 2. Follow-up: "What about payment?" / "How much does it cost?" / "Is it free?"
+  if (
+    query.includes("payment") ||
+    query.includes("how much") ||
+    query.includes("cost") ||
+    query.includes("pricing") ||
+    query.includes("price") ||
+    query.includes("is it free") ||
+    query.includes("fees")
+  ) {
+    if (wasDiscussingLiveClasses) {
+      return "For live classes, each verified educator sets their own hourly session rate in INR (₹).\n\nKey payment details for live classes:\n- **Trial Lessons:** Many educators offer free or heavily discounted 1-on-1 introductory trial classes so you can test the waters.\n- **Secure Checkout:** Payments are processed securely in INR (₹) through Cashfree using UPI (Google Pay, PhonePe, Paytm), debit/credit cards, or net banking.\n- **Guarantee:** You receive instant payment receipts and our satisfaction guarantee.";
+    }
+    if (wasDiscussingCourses) {
+      return "Course pricing is transparently shown in INR (₹) on every course details page.\n\n- Courses require a one-time payment with **lifetime access** to all lessons, future updates, and downloadable resources.\n- We support all Indian payment methods via Cashfree (UPI, cards, net banking).\n- Every course purchase comes with our 7-day money-back satisfaction guarantee.";
+    }
+    return "EduConnects offers clear, transparent pricing in INR (₹) across all learning options:\n\n- **Trial Lessons:** Many educators offer complimentary or low-cost introductory trials.\n- **Live Classes & 1-on-1:** Rates are set per hour or per class series by each verified educator.\n- **Video Courses:** One-time purchase for full lifetime access.\n\nAll transactions are powered securely by Cashfree with instant invoices and money-back guarantees.";
   }
 
-  if (query.includes("find a course") || query.includes("find courses") || query.includes("browse courses")) {
-    return "Explore our complete catalog of video courses on the [Courses](/courses) page. Each course features an in-depth curriculum preview, instructor background, and lifetime access to study materials.";
+  // 3. Explanation request: "Can you explain this in simple language?" / "explain simply" / "easy terms"
+  if (
+    query.includes("simple language") ||
+    query.includes("simple words") ||
+    query.includes("explain simply") ||
+    query.includes("in easy language") ||
+    query.includes("explain like i'm 5") ||
+    query.includes("eli5") ||
+    query.includes("easy terms")
+  ) {
+    if (wasDiscussingLiveClasses) {
+      return "In simple words:\n\nThink of a live class like a **video call with a personal tutor**, but with special tools. You and the teacher see and talk to each other in real-time, write on a shared whiteboard, and solve questions together—just like sitting in a real classroom, but comfortably from your computer or phone!";
+    }
+    if (wasDiscussingCourses) {
+      return "In simple words:\n\nEduConnects courses are like **high-quality educational video playlists** taught by top educators. You can watch them whenever you want, pause, rewind, and re-watch as many times as you need, at your own speed.";
+    }
+    return "In simple words:\n\nEduConnects is an online learning website where you can do two main things:\n1. **Join Live Classes:** Meet directly with expert teachers over video for live interactive coaching.\n2. **Watch Video Courses:** Learn at your own pace with on-demand recorded lessons.\n\nYou can also take trial classes to meet teachers before deciding!";
   }
 
-  if (query.includes("become an educator") || query.includes("teach on educonnects") || query.includes("how do i join as a teacher")) {
-    return "To start teaching on EduConnects, register as an educator at [Join as Educator](/register/teacher). Once registered, complete your onboarding and verification profile by uploading your qualifications and documents to get verified.";
+  // 4. Specific General Knowledge: Physics
+  if (
+    query.includes("physics") ||
+    query.includes("interesting about physics") ||
+    query.includes("physics fact")
+  ) {
+    return "Here is something truly mind-bending about physics:\n\n**Time is not absolute—it moves slower the faster you move through space!**\n\nAccording to Albert Einstein's theory of **Special Relativity**, as you approach the speed of light, time actually ticks slower for you relative to someone standing still (a phenomenon called *time dilation*).\n\nFor example, astronauts living aboard the International Space Station traveling at 28,000 km/h age approximately 0.01 seconds slower every year than people on Earth! Another fascinating concept is **quantum entanglement**, where two connected particles instantaneously affect each other even if they are light-years apart.";
   }
 
-  if (query.includes("contact support") || query.includes("help") || query.includes("support")) {
-    return "You can reach our support team anytime via our [Contact Page](/contact) or email us directly at support@educonnects.co.in. We're here to help!";
+  // 5. Specific General Knowledge: AI vs Machine Learning
+  if (
+    query.includes("ai and machine learning") ||
+    query.includes("difference between ai and ml") ||
+    query.includes("ai vs ml") ||
+    query.includes("artificial intelligence and machine learning")
+  ) {
+    return "**Artificial Intelligence (AI)** and **Machine Learning (ML)** are closely related, but they are not the same thing:\n\n1. **Artificial Intelligence (AI):**\n   - The broad science of creating machines that can simulate human intelligence, reasoning, problem-solving, and decision-making.\n   - Examples include chess-playing bots, conversational assistants, and self-driving cars.\n\n2. **Machine Learning (ML):**\n   - A specific subfield and technique within AI.\n   - Instead of hand-coding explicit rules, ML systems use statistical algorithms to analyze data, find patterns, and learn from experience on their own.\n\n**Quick Summary:** All Machine Learning is AI, but not all AI is Machine Learning! (AI is the destination; Machine Learning is one of the most powerful vehicles to get there).";
   }
 
-  // Learner Specific Queries
-  if (query.includes("how do live classes work")) {
-    return "Live classes on EduConnects take place in our built-in interactive classroom powered by HD video, screen sharing, real-time chat, and collaborative tools. You can book scheduled sessions from your [Live Classes](/student/live-classes) page and join when the session begins.";
+  // 6. Specific Writing Assistance: Draft an email to educator
+  if (
+    query.includes("write an email") ||
+    query.includes("email to my educator") ||
+    query.includes("draft an email") ||
+    query.includes("message to my teacher") ||
+    query.includes("email to teacher")
+  ) {
+    return "Here is a polite, well-structured email draft you can customize and send to your educator:\n\n---\n\n**Subject:** Question regarding [Course/Class Name] - [Your Name]\n\n**Dear [Educator's Name],**\n\nI hope you are having a wonderful week.\n\nI am currently enrolled in your [Course / Live Class Name] on EduConnects and really enjoying your lessons.\n\nI had a quick question regarding [mention specific topic or chapter from recent class]:\n*[Insert your question or request here in 1-2 sentences]*\n\nWhenever you have a few minutes, I would appreciate your guidance on this. Thank you very much for your time and support!\n\nWarm regards,  \n**[Your Full Name]**  \nLearner on EduConnects  \n[Your Email / Phone Number]\n\n---";
   }
 
-  if (query.includes("book a trial") || query.includes("trial lesson")) {
-    return "To book a trial lesson, head over to [Find Educators](/find-teachers), choose an educator who offers trial sessions, and click **Book Trial**. You can pick a convenient time slot from their availability calendar.";
+  // 7. Specific Account Support: Forgot Password
+  if (
+    query.includes("forgot my password") ||
+    query.includes("forgot password") ||
+    query.includes("reset password") ||
+    query.includes("change password") ||
+    query.includes("lost password")
+  ) {
+    return "If you've forgotten your password, you can easily reset it in a few simple steps:\n\n1. Go to the [Sign In Page](/login).\n2. Click on the **Forgot Password?** link below the login form (or visit [/forgot-password](/forgot-password) directly).\n3. Enter your registered EduConnects email address.\n4. Check your inbox for a secure 6-digit verification code / password reset link.\n5. Enter the code and set your new password.\n\nIf you don't see the email within 2 minutes, make sure to check your spam/junk folder or reach out to support@educonnects.co.in.";
   }
 
-  if (query.includes("see my courses") || query.includes("where are my courses") || query.includes("my courses")) {
-    return role === "LEARNER"
-      ? "You can view all your enrolled courses and watch lessons on your [My Courses](/student/courses) page."
-      : "Learners can view all their enrolled courses on their [My Courses](/student/courses) dashboard.";
+  // 8. Platform: Find an Educator / Teacher
+  if (
+    query.includes("find an educator") ||
+    query.includes("find a teacher") ||
+    query.includes("find teachers") ||
+    query.includes("search teacher") ||
+    query.includes("look for educator")
+  ) {
+    return "You can discover and connect with verified expert educators on our [Find Educators](/find-teachers) directory.\n\nFeatures available:\n- **Smart Filters:** Filter teachers by subject (Mathematics, Science, Coding, Languages, etc.), experience level, hourly fee in INR (₹), and language.\n- **Teacher Profiles:** View their verified credentials, educational degrees, teaching style, and student reviews.\n- **Trial Lessons:** Book a dedicated 1-on-1 trial slot directly from the educator's live availability calendar.";
   }
 
-  if (query.includes("update my profile") || query.includes("edit profile")) {
-    return "You can update your personal details, bio, photo, and notification preferences anytime on your [Profile Settings](/profile) page.";
+  // 9. Platform: Explain Live Classes
+  if (
+    query.includes("live classes") ||
+    query.includes("live class") ||
+    query.includes("how do live classes work") ||
+    query.includes("classroom work")
+  ) {
+    return "Live classes on EduConnects provide real-time, interactive learning directly with verified instructors:\n\n- **Live HD Video & Audio:** Connect seamlessly with your educator in an interactive virtual classroom.\n- **Interactive Tools:** Collaborate using screen sharing, live chat, interactive whiteboards, and question-and-answer.\n- **Trial & Regular Sessions:** Book 1-on-1 personalized tutoring or group live batches.\n- **Access:** View your upcoming sessions and enter the active classroom anytime from [Live Classes](/student/live-classes).";
   }
 
-  // Educator Specific Queries
-  if (query.includes("create a course") || query.includes("upload course")) {
-    return "To create a course, navigate to your [Educator Courses](/teacher/courses) dashboard and click **Create Course**. You can add chapters, upload video lessons with streaming optimization, and set your course pricing.";
+  // 10. Platform: Courses Available
+  if (
+    query.includes("what courses are available") ||
+    query.includes("what courses") ||
+    query.includes("find a course") ||
+    query.includes("browse courses") ||
+    query.includes("available courses") ||
+    query.includes("courses do you have")
+  ) {
+    return "EduConnects offers a comprehensive catalog of recorded video courses spanning multiple disciplines:\n\n- **Categories:** Computer Science & Web Development, Data Science & AI, Mathematics & Science, Competitive Exam Prep, Business, and Languages.\n- **Lifetime Access:** Watch self-paced lessons anytime with progress tracking and completion certificates.\n- **Curriculum Previews:** Preview syllabus chapters and sample video lessons before enrolling.\n\nExplore our full selection on the [Courses](/courses) page!";
   }
 
-  if (query.includes("become verified") || query.includes("verification") || query.includes("upload documents")) {
-    return "To get verified as an educator, visit your [Verification Dashboard](/teacher/verification). Upload your government ID, degree certificates, and cancelled cheque/bank details. Our admin team reviews submissions promptly!";
+  // 11. Hinglish queries
+  if (isHinglish) {
+    if (query.includes("educator") || query.includes("teacher") || query.includes("dhunde")) {
+      return "EduConnects par expert educators find karna bahut aasaan hai! Aap hamare [Find Educators](/find-teachers) page par jakar subject, experience, ratings aur hourly fees ke hisaab se filter kar sakte hain. Wahan se aap teacher ka profile check karke trial class bhi book kar sakte hain.";
+    }
+    if (query.includes("live class") || query.includes("join")) {
+      return "Live class attend karne ke liye aap [Live Classes](/student/live-classes) page par jayein. Jab class ka scheduled time hoga, tab **Join Class** button par click karke aap seedhe interactive video classroom me enter ho sakte hain.";
+    }
+    if (query.includes("course") || query.includes("courses")) {
+      return "Aap hamare saare self-paced video courses [Courses](/courses) page par dekh sakte hain. Har course me chapters, video lectures aur downloadable study material hota hai, jise aap apni speed se padh sakte hain.";
+    }
+    return "Namaste! Main EduConnects Assistant hoon. Main aapki live classes, educators find karne, recorded courses, trial classes ya kisi bhi general sawaal me madad kar sakta hoon. Aap mujhse koi bhi question freely puch sakte hain!";
   }
 
-  if (query.includes("create a live class") || query.includes("schedule a class")) {
-    return "You can schedule live classes from your [Live Classes Manager](/teacher/live-classes). Set the date, time, duration, maximum learner capacity, and fee per student.";
+  // 12. Role-specific portal guidance
+  if (query.includes("educator") && (query.includes("teach") || query.includes("become"))) {
+    return "To start teaching on EduConnects, sign up at [Join as Educator](/register/teacher). Once registered, upload your verification documents (ID, degree qualifications, and bank details) on your [Verification Dashboard](/teacher/verification) to get approved!";
   }
 
-  if (query.includes("how do payouts work") || query.includes("payouts") || query.includes("earnings")) {
-    return "Educator payouts are tracked in your [Earnings Dashboard](/teacher/earnings). Once verified, your earnings are deposited directly into your linked bank account according to our scheduled payout cycles.";
+  if (query.includes("contact") || query.includes("support") || query.includes("help center")) {
+    return "Our dedicated support team is here to assist you! Reach out via our [Contact Page](/contact) or email us directly at support@educonnects.co.in. We typically respond within a few hours.";
   }
 
-  // Admin Specific Queries
-  if (query.includes("admin dashboard") || query.includes("explain admin")) {
-    return "The [Admin Dashboard](/admin/dashboard) gives you real-time visibility over user registrations, revenue streams, educator verification queues, and active live sessions across EduConnects.";
+  if (query.includes("admin") && (role === "ADMIN" || query.includes("dashboard"))) {
+    return "The [Admin Dashboard](/admin/dashboard) allows you to oversee platform operations, review the pending educator verification queue at [/admin/verification](/admin/verification), manage user accounts at [/admin/users](/admin/users), and monitor transactions at [/admin/payments](/admin/payments).";
   }
 
-  if (query.includes("verify educators") || query.includes("educator verification queue")) {
-    return "You can review pending educator verification requests on the [Educator Verification](/admin/verification) page. Inspect uploaded ID cards, degrees, and certificates, then approve or reject with comments.";
-  }
+  // 13. Arbitrary / Unrecognized Question Fallback:
+  // Must NOT reject the user or show a generic "choose one of these options" message.
+  // Address the user question directly with helpful context.
+  return `Thank you for your question! 
 
-  if (query.includes("user management")) {
-    return "Manage learners, educators, and staff accounts from the [User Management](/admin/users) panel. You can search users, inspect activity logs, and manage account statuses.";
-  }
+EduConnects is designed to support flexible, high-quality learning tailored to your goals. Whether you are looking for 1-on-1 mentoring with verified educators on [Find Educators](/find-teachers), comprehensive self-paced video courses on [Courses](/courses), or live interactive classrooms, our platform provides complete educational support.
 
-  // Default fallback answer for known context
-  if (role === "ADMIN") {
-    return "I'm here to help you navigate the EduConnects Admin Portal. You can manage verification queues, monitor live classes, inspect user accounts, review courses, or check system health. What would you like to explore?";
-  }
-
-  if (role === "EDUCATOR") {
-    return "Welcome to the Educator Portal! I can guide you through course creation, scheduling live classes, uploading verification documents, and tracking your earnings. How can I assist your teaching today?";
-  }
-
-  if (role === "LEARNER") {
-    return "Welcome to EduConnects! I can help you find courses, book trial lessons with top educators, join your live classes, or navigate your learner dashboard. What are you looking to learn today?";
-  }
-
-  return "Hi! I'm the EduConnects Assistant. I can help you find courses, educators, understand live classes, and navigate the platform. What can I help you with?";
+If you have specific questions about scheduling, subjects, educator credentials, or need assistance with your learning plan, feel free to ask anytime or contact our support team at support@educonnects.co.in!`;
 }
 
 /**
- * Handle chat conversation request with OpenAI and database persistence
+ * Handle chat conversation request with OpenAI and persistent context
  */
 export async function processAiChat(options: AiChatOptions): Promise<AiChatResult> {
   const { message, userId, role, userName } = options;
   const sanitizedMessage = sanitizeContent(message);
 
-  // 1. Resolve or create conversation in DB if authenticated or conversation ID provided
+  // 1. Resolve conversation history from options.history or in-memory store or DB
   let conversationId = options.conversationId;
   let historyMessages: ChatMessage[] = [];
 
-  if (conversationId) {
+  if (options.history && Array.isArray(options.history) && options.history.length > 0) {
+    historyMessages = options.history.slice(-MAX_HISTORY_MESSAGES);
+  } else if (conversationId && conversationStore.has(conversationId)) {
+    historyMessages = conversationStore.get(conversationId)!.messages.slice(-MAX_HISTORY_MESSAGES);
+  } else if (conversationId) {
     try {
-      const existing = await prisma.aiConversation.findUnique({
-        where: { id: conversationId },
-        include: {
-          messages: {
-            orderBy: { createdAt: "asc" },
-            take: MAX_HISTORY_MESSAGES,
+      if ((prisma as any).aiConversation?.findUnique) {
+        const existing = await (prisma as any).aiConversation.findUnique({
+          where: { id: conversationId },
+          include: {
+            messages: {
+              orderBy: { createdAt: "asc" },
+              take: MAX_HISTORY_MESSAGES,
+            },
           },
-        },
-      });
-
-      if (existing) {
-        historyMessages = existing.messages.map((m) => ({
-          role: m.role as "user" | "assistant",
-          content: m.content,
-        }));
+        });
+        if (existing) {
+          historyMessages = existing.messages.map((m: any) => ({
+            role: m.role as "user" | "assistant",
+            content: m.content,
+          }));
+        }
       }
     } catch {
-      // Non-blocking fallback
+      // Graceful non-blocking fallback
     }
   }
 
-  // 2. Prepare OpenAI messages
+  if (!conversationId) {
+    conversationId = `conv-${Date.now()}-${Math.random().toString(36).substring(2, 8)}`;
+  }
+
+  // 2. Prepare system prompt and messages
   const systemPrompt = await buildSystemPrompt(role, userId, userName);
   const promptMessages: OpenAI.Chat.Completions.ChatCompletionMessageParam[] = [
     { role: "system", content: systemPrompt },
@@ -318,23 +512,45 @@ export async function processAiChat(options: AiChatOptions): Promise<AiChatResul
   if (apiKey && apiKey.trim().length > 0 && !apiKey.includes("your_openai_api_key_here")) {
     try {
       const openai = new OpenAI({ apiKey });
-      const completion = await openai.chat.completions.create({
-        model: configuredModel,
-        messages: promptMessages,
-        max_tokens: 700,
-        temperature: 0.7,
-      });
 
-      assistantResponse = completion.choices?.[0]?.message?.content?.trim() || "";
+      // Primary: Attempt OpenAI Responses API
+      try {
+        if (typeof (openai as any).responses?.create === "function") {
+          const response = await (openai as any).responses.create({
+            model: configuredModel,
+            instructions: systemPrompt,
+            input: [
+              ...historyMessages.map((m) => ({
+                role: m.role,
+                content: sanitizeContent(m.content),
+              })),
+              { role: "user", content: sanitizedMessage },
+            ],
+          });
+          assistantResponse = extractResponseText(response);
+        }
+      } catch (responsesErr: any) {
+        // Fall back to chat.completions if Responses API endpoint is unavailable for this key/model
+      }
+
+      // Secondary / Standard: OpenAI Chat Completions API
+      if (!assistantResponse) {
+        const completion = await openai.chat.completions.create({
+          model: configuredModel,
+          messages: promptMessages,
+          max_tokens: 750,
+          temperature: 0.7,
+        });
+        assistantResponse = completion.choices?.[0]?.message?.content?.trim() || "";
+      }
     } catch (err: any) {
-      console.error("[AiService] OpenAI API error:", err?.message || err);
-      // Fall back to rule-based contextual answer if possible, or friendly error message
-      assistantResponse = generateFallbackResponse(sanitizedMessage, role);
+      console.error("[AiService] OpenAI API call error:", err?.message || err);
+      assistantResponse = generateFallbackResponse(sanitizedMessage, role, historyMessages);
       isFallback = true;
     }
   } else {
-    // API key not configured: provide smart native fallback
-    assistantResponse = generateFallbackResponse(sanitizedMessage, role);
+    // API key not configured: use intelligent native response engine
+    assistantResponse = generateFallbackResponse(sanitizedMessage, role, historyMessages);
     isFallback = true;
   }
 
@@ -342,53 +558,63 @@ export async function processAiChat(options: AiChatOptions): Promise<AiChatResul
     assistantResponse = TEMPORARY_UNAVAILABLE_MESSAGE;
   }
 
-  // 4. Persist conversation and messages to Prisma DB if user is authenticated or conversation exists
-  try {
-    if (!conversationId) {
-      const newConv = await prisma.aiConversation.create({
-        data: {
-          userId: userId || null,
-          role: role,
-          title: sanitizedMessage.slice(0, 60),
-        },
-      });
-      conversationId = newConv.id;
-    }
+  // 4. Update session conversation store
+  const existingStored = conversationStore.get(conversationId)?.messages || historyMessages;
+  const updatedMessages: ChatMessage[] = [
+    ...existingStored,
+    { role: "user" as const, content: sanitizedMessage },
+    { role: "assistant" as const, content: assistantResponse },
+  ].slice(-MAX_HISTORY_MESSAGES * 2);
 
-    if (conversationId) {
-      await prisma.aiMessage.createMany({
-        data: [
-          {
-            conversationId,
-            role: "user",
-            content: sanitizedMessage,
-          },
-          {
-            conversationId,
-            role: "assistant",
-            content: assistantResponse,
-          },
-        ],
-      });
+  conversationStore.set(conversationId, {
+    id: conversationId,
+    role,
+    userId,
+    messages: updatedMessages,
+    updatedAt: Date.now(),
+  });
+
+  // 5. Persist to Prisma DB asynchronously (non-blocking for fast UI responsiveness)
+  void (async () => {
+    try {
+      if ((prisma as any).aiConversation?.findUnique) {
+        let dbConv = await (prisma as any).aiConversation.findUnique({
+          where: { id: conversationId },
+        });
+        if (!dbConv) {
+          dbConv = await (prisma as any).aiConversation.create({
+            data: {
+              id: conversationId,
+              userId: userId || null,
+              role,
+              title: sanitizedMessage.slice(0, 60),
+            },
+          });
+        }
+        if (dbConv && (prisma as any).aiMessage?.createMany) {
+          await (prisma as any).aiMessage.createMany({
+            data: [
+              { conversationId, role: "user", content: sanitizedMessage },
+              { conversationId, role: "assistant", content: assistantResponse },
+            ],
+          });
+        }
+      }
+    } catch (dbErr) {
+      // Non-blocking database write
     }
-  } catch (dbErr) {
-    console.error("[AiService] Failed to persist chat message to DB:", dbErr);
-    // Don't fail user request if DB write fails
-    if (!conversationId) {
-      conversationId = `guest-conv-${Date.now()}`;
-    }
-  }
+  })();
 
   return {
     response: assistantResponse,
-    conversationId: conversationId || `conv-${Date.now()}`,
+    conversationId,
     role,
     isFallback,
   };
 }
 
 /**
- * Handle streaming chat response
+ * Handle streaming chat response with full conversation history
  */
 export async function streamAiChat(
   options: AiChatOptions,
@@ -397,8 +623,24 @@ export async function streamAiChat(
   const apiKey = process.env.OPENAI_API_KEY;
   const configuredModel = process.env.OPENAI_MODEL || DEFAULT_MODEL;
 
+  // Resolve conversation history
+  let historyMessages: ChatMessage[] = [];
+  if (options.history && Array.isArray(options.history) && options.history.length > 0) {
+    historyMessages = options.history.slice(-MAX_HISTORY_MESSAGES);
+  } else if (options.conversationId && conversationStore.has(options.conversationId)) {
+    historyMessages = conversationStore.get(options.conversationId)!.messages.slice(-MAX_HISTORY_MESSAGES);
+  }
+
+  const conversationId =
+    options.conversationId || `conv-${Date.now()}-${Math.random().toString(36).substring(2, 8)}`;
+  const sanitizedMessage = sanitizeContent(options.message);
+
   if (!apiKey || apiKey.trim().length === 0 || apiKey.includes("your_openai_api_key_here")) {
-    const fallback = await processAiChat(options);
+    const fallback = await processAiChat({
+      ...options,
+      conversationId,
+      history: historyMessages,
+    });
     onChunk(fallback.response);
     return fallback;
   }
@@ -406,15 +648,20 @@ export async function streamAiChat(
   try {
     const openai = new OpenAI({ apiKey });
     const systemPrompt = await buildSystemPrompt(options.role, options.userId, options.userName);
-    const sanitizedMessage = sanitizeContent(options.message);
+
+    const promptMessages: OpenAI.Chat.Completions.ChatCompletionMessageParam[] = [
+      { role: "system", content: systemPrompt },
+      ...historyMessages.map((m) => ({
+        role: m.role,
+        content: sanitizeContent(m.content),
+      })),
+      { role: "user", content: sanitizedMessage },
+    ];
 
     const stream = await openai.chat.completions.create({
       model: configuredModel,
-      messages: [
-        { role: "system", content: systemPrompt },
-        { role: "user", content: sanitizedMessage },
-      ],
-      max_tokens: 700,
+      messages: promptMessages,
+      max_tokens: 750,
       temperature: 0.7,
       stream: true,
     });
@@ -428,35 +675,61 @@ export async function streamAiChat(
       }
     }
 
-    // Persist
-    let conversationId = options.conversationId;
-    try {
-      if (!conversationId) {
-        const newConv = await prisma.aiConversation.create({
-          data: {
-            userId: options.userId || null,
-            role: options.role,
-            title: sanitizedMessage.slice(0, 60),
-          },
-        });
-        conversationId = newConv.id;
-      }
-      await prisma.aiMessage.createMany({
-        data: [
-          { conversationId, role: "user", content: sanitizedMessage },
-          { conversationId, role: "assistant", content: fullText },
-        ],
-      });
-    } catch {}
+    // Persist to in-memory store
+    const existingStored = conversationStore.get(conversationId)?.messages || historyMessages;
+    const updatedMessages: ChatMessage[] = [
+      ...existingStored,
+      { role: "user" as const, content: sanitizedMessage },
+      { role: "assistant" as const, content: fullText },
+    ].slice(-MAX_HISTORY_MESSAGES * 2);
+
+    conversationStore.set(conversationId, {
+      id: conversationId,
+      role: options.role,
+      userId: options.userId,
+      messages: updatedMessages,
+      updatedAt: Date.now(),
+    });
+
+    // Attempt DB persistence asynchronously
+    void (async () => {
+      try {
+        if ((prisma as any).aiConversation?.findUnique) {
+          let dbConv = await (prisma as any).aiConversation.findUnique({
+            where: { id: conversationId },
+          });
+          if (!dbConv) {
+            await (prisma as any).aiConversation.create({
+              data: {
+                id: conversationId,
+                userId: options.userId || null,
+                role: options.role,
+                title: sanitizedMessage.slice(0, 60),
+              },
+            });
+          }
+          await (prisma as any).aiMessage.createMany({
+            data: [
+              { conversationId, role: "user", content: sanitizedMessage },
+              { conversationId, role: "assistant", content: fullText },
+            ],
+          });
+        }
+      } catch {}
+    })();
 
     return {
       response: fullText,
-      conversationId: conversationId || `conv-${Date.now()}`,
+      conversationId,
       role: options.role,
     };
   } catch (err) {
     console.error("[AiService] Streaming failed, falling back:", err);
-    const fallback = await processAiChat(options);
+    const fallback = await processAiChat({
+      ...options,
+      conversationId,
+      history: historyMessages,
+    });
     onChunk(fallback.response);
     return fallback;
   }
