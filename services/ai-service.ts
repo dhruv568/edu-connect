@@ -535,13 +535,28 @@ export async function processAiChat(options: AiChatOptions): Promise<AiChatResul
 
       // Secondary / Standard: OpenAI Chat Completions API
       if (!assistantResponse) {
-        const completion = await openai.chat.completions.create({
+        const isReasoningModel =
+          configuredModel.startsWith("o1") || configuredModel.startsWith("o3");
+
+        const completionParams: any = {
           model: configuredModel,
           messages: promptMessages,
-          max_tokens: 750,
-          temperature: 0.7,
-        });
-        assistantResponse = completion.choices?.[0]?.message?.content?.trim() || "";
+          max_completion_tokens: 750,
+          ...(!isReasoningModel ? { temperature: 0.7 } : {}),
+        };
+
+        try {
+          const completion = await openai.chat.completions.create(completionParams);
+          assistantResponse = completion.choices?.[0]?.message?.content?.trim() || "";
+        } catch (compErr: any) {
+          if (compErr?.message?.includes("temperature")) {
+            delete completionParams.temperature;
+            const retryCompletion = await openai.chat.completions.create(completionParams);
+            assistantResponse = retryCompletion.choices?.[0]?.message?.content?.trim() || "";
+          } else {
+            throw compErr;
+          }
+        }
       }
     } catch (err: any) {
       console.error("[AiService] OpenAI API call error:", err?.message || err);
@@ -658,13 +673,28 @@ export async function streamAiChat(
       { role: "user", content: sanitizedMessage },
     ];
 
-    const stream = await openai.chat.completions.create({
+    const isReasoningModel =
+      configuredModel.startsWith("o1") || configuredModel.startsWith("o3");
+
+    const streamParams: any = {
       model: configuredModel,
       messages: promptMessages,
-      max_tokens: 750,
-      temperature: 0.7,
+      max_completion_tokens: 750,
       stream: true,
-    });
+      ...(!isReasoningModel ? { temperature: 0.7 } : {}),
+    };
+
+    let stream: any;
+    try {
+      stream = await openai.chat.completions.create(streamParams);
+    } catch (streamInitErr: any) {
+      if (streamInitErr?.message?.includes("temperature")) {
+        delete streamParams.temperature;
+        stream = await openai.chat.completions.create(streamParams);
+      } else {
+        throw streamInitErr;
+      }
+    }
 
     let fullText = "";
     for await (const chunk of stream) {
