@@ -1,13 +1,24 @@
 "use client";
 
 import React, { useState, useEffect } from "react";
+import Link from "next/link";
 import { DashboardLayout } from "@/components/layout/dashboard-layout";
+import { AdminBreadcrumb } from "@/components/ui/admin-breadcrumb";
 import { Card } from "@/components/ui/card";
 import { StatusBadge } from "@/components/ui/status-badge";
 import { GlassButton } from "@/components/glass/glass-button";
-import { Search, Filter, ChevronLeft, ChevronRight, Loader2, Flag, CheckCircle2, XCircle, Eye, X } from "lucide-react";
-import { useToast } from "@/components/ui/toast";
-import { BackButton } from "@/components/ui/back-button";
+import {
+  Filter,
+  ChevronLeft,
+  ChevronRight,
+  Loader2,
+  AlertOctagon,
+  CheckCircle2,
+  XCircle,
+  Eye,
+  X,
+  BookOpen,
+} from "lucide-react";
 
 export default function AdminReportsPage() {
   const [reports, setReports] = useState<any[]>([]);
@@ -22,6 +33,14 @@ export default function AdminReportsPage() {
   const [selectedReport, setSelectedReport] = useState<any | null>(null);
   const [actionTakenNote, setActionTakenNote] = useState("");
   const [submitting, setSubmitting] = useState(false);
+
+  const statusTabs = [
+    { label: "All Reports", value: "ALL" },
+    { label: "Open / Unreviewed", value: "OPEN", badge: "Action" },
+    { label: "Under Review", value: "UNDER_REVIEW" },
+    { label: "Resolved", value: "RESOLVED" },
+    { label: "Dismissed", value: "REJECTED" },
+  ];
 
   useEffect(() => {
     fetchReports();
@@ -79,24 +98,66 @@ export default function AdminReportsPage() {
   return (
     <DashboardLayout role="ADMIN" userName="System Administrator" userEmail="educonnects.com@gmail.com">
       <div className="space-y-6 pb-16">
+        {/* Breadcrumb & Header */}
         <div>
-          <BackButton
-            fallbackUrl="/admin"
-            label="Back to Dashboard"
-            variant="default"
+          <AdminBreadcrumb
+            items={[{ label: "Content" }, { label: "Content & User Reports" }]}
             className="mb-3"
           />
-          <h1 className="text-2xl lg:text-3xl font-black text-slate-900 dark:text-slate-100 tracking-tight">
-            Content & User Report Moderation
-          </h1>
-          <p className="text-xs lg:text-sm text-slate-500 mt-1">
-            Review community reports for users, courses, reviews, live classes, and inappropriate content.
-          </p>
+          <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
+            <div>
+              <div className="flex items-center gap-3">
+                <h1 className="text-2xl lg:text-3xl font-black text-slate-900 tracking-tight">
+                  Content & User Reports
+                </h1>
+                <span className="px-2.5 py-0.5 text-xs font-bold rounded-full bg-rose-100 text-rose-800 border border-rose-200 uppercase">
+                  {totalCount} Reports
+                </span>
+              </div>
+              <p className="text-xs lg:text-sm text-slate-500 mt-1">
+                Investigate reported content, abusive conduct, inappropriate courses, and platform compliance violations.
+              </p>
+            </div>
+
+            <Link href="/admin/courses">
+              <button className="px-3.5 py-2 rounded-xl bg-purple-50 hover:bg-purple-100 text-purple-800 border border-purple-200 text-xs font-bold transition-colors cursor-pointer shadow-2xs">
+                Course Moderation Catalog
+              </button>
+            </Link>
+          </div>
+        </div>
+
+        {/* Status Filter Tabs */}
+        <div className="flex items-center gap-2 border-b border-slate-200 overflow-x-auto pb-2">
+          {statusTabs.map((tab) => {
+            const isActive = statusFilter === tab.value;
+            return (
+              <button
+                key={tab.value}
+                onClick={() => {
+                  setStatusFilter(tab.value);
+                  setPage(1);
+                }}
+                className={`px-4 py-2 rounded-xl text-xs font-bold transition-all whitespace-nowrap flex items-center gap-2 cursor-pointer ${
+                  isActive
+                    ? "bg-[#0B4F4B] text-white shadow-sm"
+                    : "bg-white text-slate-600 border border-slate-200 hover:bg-slate-50"
+                }`}
+              >
+                <span>{tab.label}</span>
+                {tab.badge && (
+                  <span className="px-1.5 py-0.2 rounded-full text-[9px] font-black bg-rose-500 text-white">
+                    {tab.badge}
+                  </span>
+                )}
+              </button>
+            );
+          })}
         </div>
 
         {/* Filter Toolbar */}
-        <Card className="p-4 border-slate-200 dark:border-slate-800 flex flex-col md:flex-row items-center justify-between gap-4">
-          <div className="flex flex-wrap items-center gap-3 w-full md:w-auto">
+        <Card className="p-4 border-slate-200 flex flex-col sm:flex-row items-center justify-between gap-4">
+          <div className="flex flex-wrap items-center gap-3 w-full sm:w-auto">
             <div className="flex items-center gap-2">
               <Filter className="h-4 w-4 text-slate-400" />
               <select
@@ -105,7 +166,7 @@ export default function AdminReportsPage() {
                   setStatusFilter(e.target.value);
                   setPage(1);
                 }}
-                className="h-10 px-3 bg-slate-100 dark:bg-slate-800 border-none rounded-2xl text-xs font-bold text-slate-700 dark:text-slate-200 outline-none"
+                className="h-10 px-3 bg-slate-100 border-none rounded-2xl text-xs font-bold text-slate-700 outline-none"
               >
                 <option value="ALL">ALL STATUSES</option>
                 <option value="OPEN">OPEN / UNREVIEWED</option>
@@ -121,11 +182,11 @@ export default function AdminReportsPage() {
                 setTargetFilter(e.target.value);
                 setPage(1);
               }}
-              className="h-10 px-3 bg-slate-100 dark:bg-slate-800 border-none rounded-2xl text-xs font-bold text-slate-700 dark:text-slate-200 outline-none"
+              className="h-10 px-3 bg-slate-100 border-none rounded-2xl text-xs font-bold text-slate-700 outline-none"
             >
               <option value="ALL">ALL TARGET TYPES</option>
               <option value="USER">USER</option>
-              <option value="TEACHER">TEACHER</option>
+              <option value="TEACHER">EDUCATOR</option>
               <option value="COURSE">COURSE</option>
               <option value="REVIEW">REVIEW</option>
               <option value="LIVE_CLASS">LIVE CLASS</option>
@@ -135,10 +196,10 @@ export default function AdminReportsPage() {
         </Card>
 
         {/* Reports Table */}
-        <Card className="p-0 border-slate-200 dark:border-slate-800 overflow-hidden shadow-xs">
+        <Card className="p-0 border-slate-200 overflow-hidden shadow-xs">
           <div className="overflow-x-auto">
             <table className="w-full text-left text-xs">
-              <thead className="bg-slate-100 dark:bg-slate-800/80 text-slate-600 dark:text-slate-300 font-extrabold uppercase border-b border-slate-200 dark:border-slate-800">
+              <thead className="bg-slate-100 text-slate-600 font-extrabold uppercase border-b border-slate-200">
                 <tr>
                   <th className="p-4">Report Target</th>
                   <th className="p-4">Reporter</th>
@@ -148,11 +209,11 @@ export default function AdminReportsPage() {
                   <th className="p-4 text-right">Actions</th>
                 </tr>
               </thead>
-              <tbody className="divide-y divide-slate-100 dark:divide-slate-800">
+              <tbody className="divide-y divide-slate-100">
                 {loading ? (
                   <tr>
                     <td colSpan={6} className="p-8 text-center text-slate-500">
-                      <Loader2 className="h-6 w-6 text-blue-600 animate-spin mx-auto mb-2" />
+                      <Loader2 className="h-6 w-6 text-[#0B4F4B] animate-spin mx-auto mb-2" />
                       Loading moderation reports...
                     </td>
                   </tr>
@@ -164,30 +225,31 @@ export default function AdminReportsPage() {
                   </tr>
                 ) : (
                   reports.map((rep) => (
-                    <tr key={rep.id} className="hover:bg-slate-50/80 dark:hover:bg-slate-800/40 transition-colors">
+                    <tr key={rep.id} className="hover:bg-slate-50/80 transition-colors">
                       <td className="p-4">
                         <div className="flex items-center gap-2">
-                          <span className="px-2 py-0.5 rounded-md font-mono text-[10px] font-extrabold bg-slate-200 dark:bg-slate-700 text-slate-800 dark:text-slate-200">
-                            {rep.targetType}
+                          <span className="px-2 py-0.5 rounded-md font-mono text-[10px] font-extrabold bg-slate-200 text-slate-800">
+                            {rep.targetType === "TEACHER" ? "EDUCATOR" : rep.targetType}
                           </span>
-                          <span className="font-extrabold text-slate-900 dark:text-slate-100">{rep.targetId.substring(0, 8)}...</span>
+                          <span className="font-mono text-slate-600 text-[11px]">{rep.targetId.substring(0, 8)}...</span>
                         </div>
                       </td>
-                      <td className="p-4 font-bold text-slate-700 dark:text-slate-300">{rep.reporterName}</td>
-                      <td className="p-4 font-semibold text-slate-800 dark:text-slate-200">{rep.reason}</td>
+                      <td className="p-4 font-bold text-slate-800">{rep.reporterName}</td>
+                      <td className="p-4 font-semibold text-slate-800">{rep.reason}</td>
                       <td className="p-4">
                         <StatusBadge status={rep.status} size="sm" />
                       </td>
-                      <td className="p-4 text-slate-500 font-medium">{new Date(rep.createdAt).toLocaleDateString()}</td>
+                      <td className="p-4 text-slate-500 font-medium">
+                        {new Date(rep.createdAt).toLocaleDateString("en-IN")}
+                      </td>
                       <td className="p-4 text-right">
-                        <GlassButton
-                          variant="primary"
-                          size="sm"
+                        <button
                           onClick={() => setSelectedReport(rep)}
-                          leftIcon={<Eye className="h-3.5 w-3.5" />}
+                          className="px-3 py-1.5 rounded-xl bg-rose-50 hover:bg-rose-100 text-rose-800 text-xs font-bold inline-flex items-center gap-1 border border-rose-200 transition-colors cursor-pointer"
                         >
-                          Moderate
-                        </GlassButton>
+                          <Eye className="h-3.5 w-3.5" />
+                          <span>Investigate</span>
+                        </button>
                       </td>
                     </tr>
                   ))
@@ -197,22 +259,23 @@ export default function AdminReportsPage() {
           </div>
 
           {/* Pagination Footer */}
-          <div className="p-4 border-t border-slate-100 dark:border-slate-800 flex items-center justify-between text-xs text-slate-500">
+          <div className="p-4 border-t border-slate-100 flex items-center justify-between text-xs text-slate-500">
             <div>
-              Showing Page <span className="font-bold text-slate-900 dark:text-slate-100">{page}</span> of <span className="font-bold text-slate-900 dark:text-slate-100">{totalPages}</span> ({totalCount} total reports)
+              Showing Page <span className="font-bold text-slate-900">{page}</span> of{" "}
+              <span className="font-bold text-slate-900">{totalPages}</span> ({totalCount} total reports)
             </div>
             <div className="flex items-center gap-2">
               <button
                 disabled={page <= 1}
                 onClick={() => setPage((p) => Math.max(1, p - 1))}
-                className="p-2 rounded-xl border border-slate-200 dark:border-slate-700 text-slate-600 dark:text-slate-300 disabled:opacity-40 hover:bg-slate-100 dark:hover:bg-slate-800"
+                className="p-2 rounded-xl border border-slate-200 text-slate-600 disabled:opacity-40 hover:bg-slate-100 cursor-pointer"
               >
                 <ChevronLeft className="h-4 w-4" />
               </button>
               <button
                 disabled={page >= totalPages}
                 onClick={() => setPage((p) => Math.min(totalPages, p + 1))}
-                className="p-2 rounded-xl border border-slate-200 dark:border-slate-700 text-slate-600 dark:text-slate-300 disabled:opacity-40 hover:bg-slate-100 dark:hover:bg-slate-800"
+                className="p-2 rounded-xl border border-slate-200 text-slate-600 disabled:opacity-40 hover:bg-slate-100 cursor-pointer"
               >
                 <ChevronRight className="h-4 w-4" />
               </button>
@@ -222,73 +285,71 @@ export default function AdminReportsPage() {
 
         {/* Report Moderation Modal */}
         {selectedReport && (
-          <div className="fixed inset-0 z-50 bg-slate-900/60 backdrop-blur-xs flex items-center justify-center p-4">
-            <div className="bg-white dark:bg-slate-900 rounded-3xl max-w-lg w-full p-6 space-y-6 shadow-2xl border border-slate-200 dark:border-slate-800">
-              <div className="flex items-center justify-between border-b border-slate-100 dark:border-slate-800 pb-4">
-                <h3 className="text-lg font-black text-slate-900 dark:text-slate-100">Moderate Report</h3>
-                <button onClick={() => setSelectedReport(null)} className="p-1 text-slate-400 hover:text-slate-600">
+          <div className="fixed inset-0 z-50 bg-black/60 backdrop-blur-xs flex items-center justify-center p-4">
+            <div className="bg-white rounded-3xl max-w-xl w-full p-6 space-y-6 shadow-2xl border border-slate-200">
+              <div className="flex items-center justify-between border-b border-slate-100 pb-4">
+                <div className="flex items-center gap-2 text-rose-600">
+                  <AlertOctagon className="h-5 w-5" />
+                  <h3 className="text-lg font-black text-slate-900">Moderate Report</h3>
+                </div>
+                <button
+                  onClick={() => setSelectedReport(null)}
+                  className="p-2 text-slate-400 hover:text-slate-600 rounded-full hover:bg-slate-100 cursor-pointer"
+                >
                   <X className="h-5 w-5" />
                 </button>
               </div>
 
-              <div className="text-xs text-slate-600 dark:text-slate-300 space-y-3">
-                <div className="grid grid-cols-2 gap-3">
-                  <div>
-                    <span className="text-slate-400 block font-semibold">Target Type</span>
-                    <span className="font-extrabold text-slate-900 dark:text-slate-100">{selectedReport.targetType}</span>
-                  </div>
-                  <div>
-                    <span className="text-slate-400 block font-semibold">Target ID</span>
-                    <span className="font-mono text-slate-700 dark:text-slate-300">{selectedReport.targetId}</span>
-                  </div>
-                </div>
-
-                <div>
-                  <span className="text-slate-400 block font-semibold">Stated Reason</span>
-                  <div className="font-bold text-slate-900 dark:text-slate-100">{selectedReport.reason}</div>
+              <div className="space-y-3 text-xs">
+                <div className="p-3 bg-slate-50 rounded-xl space-y-1">
+                  <div><strong>Target:</strong> {selectedReport.targetType} (ID: {selectedReport.targetId})</div>
+                  <div><strong>Reporter:</strong> {selectedReport.reporterName}</div>
+                  <div><strong>Reason:</strong> {selectedReport.reason}</div>
+                  <div><strong>Reported:</strong> {new Date(selectedReport.createdAt).toLocaleString("en-IN")}</div>
                 </div>
 
                 {selectedReport.description && (
-                  <div>
-                    <span className="text-slate-400 block font-semibold">Detailed Description</span>
-                    <div className="p-3 bg-slate-50 dark:bg-slate-800 rounded-xl mt-1 border border-slate-100 dark:border-slate-700">
-                      {selectedReport.description}
-                    </div>
+                  <div className="p-3 bg-rose-50 border border-rose-100 rounded-xl text-slate-800">
+                    <strong>Reporter Notes:</strong> {selectedReport.description}
                   </div>
                 )}
+
+                <div className="space-y-1.5">
+                  <label className="font-bold text-slate-700">Administrative Action Note</label>
+                  <textarea
+                    value={actionTakenNote}
+                    onChange={(e) => setActionTakenNote(e.target.value)}
+                    placeholder="Enter details of compliance investigation, warning issued, or dismissal rationale..."
+                    className="w-full h-20 p-2.5 bg-slate-50 border border-slate-200 rounded-xl text-xs outline-none focus:ring-2 focus:ring-[#0B4F4B]"
+                  />
+                </div>
               </div>
 
-              <div className="space-y-2">
-                <label className="text-xs font-bold text-slate-700 dark:text-slate-300">Admin Action Note / Note Taken</label>
-                <input
-                  type="text"
-                  value={actionTakenNote}
-                  onChange={(e) => setActionTakenNote(e.target.value)}
-                  placeholder="Details of action taken by admin..."
-                  className="w-full h-10 px-3 bg-slate-100 dark:bg-slate-800 border-none rounded-xl text-xs outline-none focus:ring-2 focus:ring-blue-500"
-                />
-              </div>
-
-              <div className="flex items-center justify-end gap-3 pt-2">
-                <GlassButton
-                  variant="secondary"
-                  size="sm"
+              <div className="flex items-center justify-between gap-3 pt-2 border-t border-slate-100">
+                <button
                   disabled={submitting}
                   onClick={() => handleUpdateStatus("REJECTED")}
-                  leftIcon={<XCircle className="h-4 w-4" />}
+                  className="px-3.5 py-2 rounded-xl text-xs font-bold bg-slate-100 hover:bg-slate-200 text-slate-700 transition-colors cursor-pointer"
                 >
                   Dismiss Report
-                </GlassButton>
-                <GlassButton
-                  variant="secondary"
-                  className="text-emerald-400 border-emerald-500/30 hover:bg-emerald-500/20"
-                  size="sm"
-                  disabled={submitting}
-                  onClick={() => handleUpdateStatus("RESOLVED")}
-                  leftIcon={<CheckCircle2 className="h-4 w-4" />}
-                >
-                  Mark Resolved
-                </GlassButton>
+                </button>
+
+                <div className="flex items-center gap-2">
+                  <button
+                    disabled={submitting}
+                    onClick={() => handleUpdateStatus("UNDER_REVIEW")}
+                    className="px-3.5 py-2 rounded-xl text-xs font-bold bg-amber-500 hover:bg-amber-600 text-white transition-colors cursor-pointer"
+                  >
+                    Mark Under Review
+                  </button>
+                  <button
+                    disabled={submitting}
+                    onClick={() => handleUpdateStatus("RESOLVED")}
+                    className="px-3.5 py-2 rounded-xl text-xs font-bold bg-emerald-600 hover:bg-emerald-700 text-white transition-colors cursor-pointer"
+                  >
+                    Resolve & Close
+                  </button>
+                </div>
               </div>
             </div>
           </div>

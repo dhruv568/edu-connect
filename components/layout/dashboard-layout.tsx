@@ -16,7 +16,6 @@ import {
   Menu,
   X,
   ShieldCheck,
-  Award,
   FileCheck,
   UserCheck,
   GraduationCap as TeacherIcon,
@@ -27,6 +26,8 @@ import {
   Server,
   ShieldAlert,
   Loader2,
+  ChevronDown,
+  ChevronRight,
 } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { UserRole } from "@/types/auth";
@@ -36,6 +37,7 @@ import { NotificationPopover } from "@/components/layout/notification-popover";
 import { PermissionProvider } from "@/components/shared/permission-guard";
 import { DashboardFooter } from "@/components/layout/dashboard-footer";
 import { BackToHomeButton } from "@/components/ui/back-to-home-button";
+import { AdminSearchDialog } from "@/components/layout/admin-search-dialog";
 
 export interface DashboardLayoutProps {
   role: UserRole;
@@ -44,8 +46,20 @@ export interface DashboardLayoutProps {
   children: React.ReactNode;
 }
 
+export interface AdminNavSection {
+  id: string;
+  title: string;
+  items: {
+    label: string;
+    icon: any;
+    href: string;
+    badgeKey?: "pendingVerifications" | "draftCourses" | "openReports" | "pendingRefunds";
+  }[];
+}
+
 export function DashboardLayout({ role, userName, userEmail, children }: DashboardLayoutProps) {
   const [sidebarOpen, setSidebarOpen] = useState(false);
+  const [searchOpen, setSearchOpen] = useState(false);
   const router = useRouter();
   const pathname = usePathname();
   const { showToast } = useToast();
@@ -64,6 +78,15 @@ export function DashboardLayout({ role, userName, userEmail, children }: Dashboa
   const [avatarUrl, setAvatarUrl] = useState<string | null>(null);
   const [dynamicNav, setDynamicNav] = useState<any[] | null>(null);
   const [isLoggingOut, setIsLoggingOut] = useState(false);
+  const [collapsedSections, setCollapsedSections] = useState<Record<string, boolean>>({});
+
+  // Real badge counts fetched from dashboard metrics API
+  const [badgeCounts, setBadgeCounts] = useState<{
+    pendingVerifications?: number;
+    draftCourses?: number;
+    openReports?: number;
+    pendingRefunds?: number;
+  }>({});
 
   useEffect(() => {
     if (userName && userName !== "User" && userName !== "Loading...") {
@@ -96,7 +119,6 @@ export function DashboardLayout({ role, userName, userEmail, children }: Dashboa
         const json = await res.json();
         if (json?.data?.user) {
           const u = json.data.user;
-          // Protect against role mismatch: redirect user to their actual dashboard
           if (isEducatorRole(role) && !isEducatorRole(u.role)) {
             window.location.replace(getDashboardPathForRole(u.role));
             return;
@@ -138,7 +160,24 @@ export function DashboardLayout({ role, userName, userEmail, children }: Dashboa
 
     verifyAndLoadAuth();
 
-    // Defense against browser back button (bfcache restoration)
+    // Fetch live badge counts for admin navigation
+    if (isAdminRole(role) || role === "STAFF") {
+      fetch("/api/admin/dashboard")
+        .then((r) => (r.ok ? r.json() : null))
+        .then((json) => {
+          if (json?.data?.metrics) {
+            const m = json.data.metrics;
+            setBadgeCounts({
+              pendingVerifications: m.pendingVerifications || 0,
+              draftCourses: Math.max(0, (m.totalCourses || 0) - (m.publishedCourses || 0)),
+              openReports: m.openReports || 0,
+              pendingRefunds: m.pendingRefunds || 0,
+            });
+          }
+        })
+        .catch(() => {});
+    }
+
     const handlePageShow = (e: PageTransitionEvent) => {
       if (e.persisted) {
         verifyAndLoadAuth();
@@ -147,6 +186,25 @@ export function DashboardLayout({ role, userName, userEmail, children }: Dashboa
     window.addEventListener("pageshow", handlePageShow);
     return () => window.removeEventListener("pageshow", handlePageShow);
   }, [userName, userEmail, role]);
+
+  // Keyboard shortcut for search palette (Ctrl+K or Cmd+K)
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === "k") {
+        e.preventDefault();
+        setSearchOpen((prev) => !prev);
+      }
+    };
+    window.addEventListener("keydown", handleKeyDown);
+    return () => window.removeEventListener("keydown", handleKeyDown);
+  }, []);
+
+  const toggleSection = (id: string) => {
+    setCollapsedSections((prev) => ({
+      ...prev,
+      [id]: !prev[id],
+    }));
+  };
 
   const roleColors: Record<string, "admin" | "teacher" | "student"> = {
     ADMIN: "admin",
@@ -176,27 +234,94 @@ export function DashboardLayout({ role, userName, userEmail, children }: Dashboa
     Settings,
   };
 
+  // Structured grouped admin navigation sections
+  const adminNavSections: AdminNavSection[] = [
+    {
+      id: "overview",
+      title: "OVERVIEW",
+      items: [
+        { label: "Dashboard", icon: LayoutDashboard, href: "/admin" },
+      ],
+    },
+    {
+      id: "people",
+      title: "PEOPLE",
+      items: [
+        { label: "User Governance", icon: Users, href: "/admin/users" },
+        { label: "Educator Roster", icon: TeacherIcon, href: "/admin/teachers" },
+        {
+          label: "Educator Verifications",
+          icon: ShieldCheck,
+          href: "/admin/verification",
+          badgeKey: "pendingVerifications",
+        },
+        { label: "Staff Management", icon: UserCheck, href: "/admin/staff" },
+        { label: "Role Management", icon: ShieldAlert, href: "/admin/roles" },
+      ],
+    },
+    {
+      id: "content",
+      title: "CONTENT",
+      items: [
+        {
+          label: "Course Moderation",
+          icon: BookOpen,
+          href: "/admin/courses",
+          badgeKey: "draftCourses",
+        },
+        {
+          label: "Content & User Reports",
+          icon: AlertOctagon,
+          href: "/admin/reports",
+          badgeKey: "openReports",
+        },
+      ],
+    },
+    {
+      id: "live",
+      title: "LIVE",
+      items: [
+        { label: "Live Classes", icon: Video, href: "/admin/live-classes" },
+      ],
+    },
+    {
+      id: "finance",
+      title: "FINANCE",
+      items: [
+        { label: "Financial Ledger & Payouts", icon: IndianRupee, href: "/admin/payments" },
+        {
+          label: "Refund Management",
+          icon: FileCheck,
+          href: "/admin/refunds",
+          badgeKey: "pendingRefunds",
+        },
+      ],
+    },
+    {
+      id: "insights",
+      title: "INSIGHTS",
+      items: [
+        { label: "Platform Analytics", icon: BarChart2, href: "/admin/analytics" },
+      ],
+    },
+    {
+      id: "security_ops",
+      title: "SECURITY & OPERATIONS",
+      items: [
+        { label: "Audit & Security Logs", icon: Activity, href: "/admin/activity" },
+        { label: "System Health", icon: Server, href: "/admin/system-health" },
+      ],
+    },
+    {
+      id: "settings",
+      title: "SETTINGS",
+      items: [
+        { label: "Platform Settings", icon: Settings, href: "/admin/settings" },
+      ],
+    },
+  ];
+
   const staticNavItems = {
-    ADMIN: [
-      { label: "Overview Dashboard", icon: LayoutDashboard, href: "/admin" },
-      { label: "User Governance", icon: Users, href: "/admin/users" },
-      { label: "Educator Verifications", icon: ShieldCheck, href: "/admin/verification" },
-      { label: "Educator Roster", icon: TeacherIcon, href: "/admin/teachers" },
-      { label: "Course Moderation", icon: BookOpen, href: "/admin/courses" },
-      { label: "Live Classes", icon: Video, href: "/admin/live-classes" },
-      { label: "Payment Ledger", icon: FileCheck, href: "/admin/payments" },
-      { label: "Refund Management", icon: FileCheck, href: "/admin/refunds" },
-      { label: "Report Moderation", icon: ShieldCheck, href: "/admin/reports" },
-      { label: "Platform Analytics", icon: BarChart2, href: "/admin/analytics" },
-      { label: "Activity Audit Logs", icon: FileCheck, href: "/admin/activity" },
-      { label: "Role Management", icon: ShieldAlert, href: "/admin/roles" },
-      { label: "Staff Management", icon: UserCheck, href: "/admin/staff" },
-      { label: "Platform Settings", icon: Settings, href: "/admin/settings" },
-      { label: "System Health", icon: Settings, href: "/admin/system-health" },
-    ],
-    STAFF: [
-      { label: "Staff Dashboard", icon: LayoutDashboard, href: "/staff/dashboard" },
-    ],
     TEACHER: [
       { label: "Educator Dashboard", icon: LayoutDashboard, href: "/teacher/dashboard" },
       { label: "Profile Onboarding", icon: FileCheck, href: "/teacher/onboarding" },
@@ -211,18 +336,6 @@ export function DashboardLayout({ role, userName, userEmail, children }: Dashboa
       { label: "Enrolled Courses", icon: BookOpen, href: "/student/courses" },
     ],
   };
-
-  // Compile active navigation
-  let activeNav: Array<{ label: string; icon: any; href: string }> = [];
-  if ((role === "ADMIN" || role === "STAFF") && dynamicNav) {
-    activeNav = dynamicNav.map((item) => ({
-      label: item.label,
-      icon: iconMap[item.icon] || LayoutDashboard,
-      href: role === "STAFF" && item.href === "/admin" ? "/staff/dashboard" : item.href,
-    }));
-  } else {
-    activeNav = (isEducatorRole(role) ? staticNavItems.TEACHER : isLearnerRole(role) ? staticNavItems.STUDENT : (staticNavItems as any)[role]) || [];
-  }
 
   const handleLogout = async (e?: React.MouseEvent) => {
     if (e) {
@@ -273,144 +386,283 @@ export function DashboardLayout({ role, userName, userEmail, children }: Dashboa
     }
   };
 
+  const isAdminOrStaff = isAdminRole(role) || role === "STAFF";
+
+  // Filter admin sections if dynamicNav is defined for staff
+  const allowedHrefs = dynamicNav ? new Set(dynamicNav.map((i) => i.href)) : null;
+  const filteredAdminSections = adminNavSections
+    .map((sec) => {
+      if (!allowedHrefs || role === "ADMIN") return sec;
+      const items = sec.items.filter((item) => {
+        if (item.href === "/admin") return allowedHrefs.has("/admin") || allowedHrefs.has("/staff/dashboard");
+        return allowedHrefs.has(item.href);
+      });
+      return { ...sec, items };
+    })
+    .filter((sec) => sec.items.length > 0);
+
   return (
     <PermissionProvider>
       <div className="min-h-screen flex bg-[#F5F7F8]">
-      {/* Mobile Backdrop & Sidebar */}
-      {sidebarOpen && (
-        <div
-          className="fixed inset-0 bg-[#102A2A]/80 z-40 lg:hidden backdrop-blur-xs"
-          onClick={() => setSidebarOpen(false)}
-        />
-      )}
+        {/* Mobile Backdrop & Sidebar */}
+        {sidebarOpen && (
+          <div
+            className="fixed inset-0 bg-[#102A2A]/80 z-40 lg:hidden backdrop-blur-xs transition-opacity"
+            onClick={() => setSidebarOpen(false)}
+            aria-hidden="true"
+          />
+        )}
 
-      {/* Desktop & Mobile Sidebar */}
-      <aside
-        className={`fixed lg:static inset-y-0 left-0 z-50 flex flex-col w-64 bg-[#073F3C] text-teal-100 border-r border-[#1B6863]/30 shrink-0 transition-transform duration-300 ${
-          sidebarOpen ? "translate-x-0" : "-translate-x-full lg:translate-x-0"
-        }`}
-      >
-        <div className="p-6 border-b border-[#1B6863]/30 flex items-center justify-between">
-          <div className="flex items-center gap-3">
-            <div className="p-2 rounded-xl bg-[#0B4F4B] text-white shadow-md border border-[#F2C14E]/30">
-              <GraduationCap className="h-6 w-6 text-[#F2C14E]" />
-            </div>
-            <div>
-              <h1 className="text-lg font-black text-white tracking-tight">EDUCONNECTS</h1>
-              <Badge variant={roleColors[role] || "student"} size="sm">
-                {currentRoleTitle}
-              </Badge>
-            </div>
-          </div>
-          <button onClick={() => setSidebarOpen(false)} className="lg:hidden text-teal-200 hover:text-white">
-            <X className="h-5 w-5" />
-          </button>
-        </div>
-
-        <nav className="flex-1 p-4 space-y-1 overflow-y-auto">
-          {activeNav.map((item, idx) => {
-            const isActive =
-              pathname === item.href ||
-              (item.href !== "/admin" &&
-                item.href !== "/staff/dashboard" &&
-                item.href !== "/teacher/dashboard" &&
-                item.href !== "/student/dashboard" &&
-                pathname.startsWith(item.href));
-            const IconComponent = item.icon || LayoutDashboard;
-            return (
-              <Link
-                key={idx}
-                href={item.href}
-                onClick={() => setSidebarOpen(false)}
-                className={`flex items-center gap-3 px-3.5 py-2.5 rounded-xl text-sm font-semibold transition-colors ${
-                  isActive
-                    ? "bg-[#0B4F4B] text-white shadow-md border border-[#F2C14E]/30"
-                    : "text-teal-100/80 hover:bg-[#1B6863]/40 hover:text-white"
-                }`}
-              >
-                <IconComponent className={`h-4 w-4 ${isActive ? "text-[#F2C14E]" : "text-teal-200/70"}`} />
-                <span>{item.label}</span>
-              </Link>
-            );
-          })}
-        </nav>
-
-        <div className="p-4 border-t border-[#1B6863]/30 space-y-1.5">
-          <BackToHomeButton variant="sidebar" />
-          <button
-            type="button"
-            onClick={(e) => handleLogout(e)}
-            disabled={isLoggingOut}
-            className="flex items-center gap-3 w-full px-3.5 py-2.5 rounded-xl text-sm font-semibold text-rose-300 hover:bg-rose-500/15 transition-colors disabled:opacity-60 disabled:cursor-not-allowed cursor-pointer"
-          >
-            {isLoggingOut ? (
-              <Loader2 className="h-4 w-4 animate-spin text-rose-300" />
-            ) : (
-              <LogOut className="h-4 w-4" />
-            )}
-            <span>{isLoggingOut ? "Signing out..." : "Sign Out"}</span>
-          </button>
-        </div>
-      </aside>
-
-      {/* Main Container */}
-      <div className="flex-1 flex flex-col min-w-0">
-        {/* Topbar */}
-        <header className="h-16 bg-white border-b border-[#DCE5E4] px-4 sm:px-6 flex items-center justify-between sticky top-0 z-20">
-          <div className="flex items-center gap-3 sm:gap-4">
-            <button
-              onClick={() => setSidebarOpen(!sidebarOpen)}
-              className="lg:hidden p-2 rounded-xl text-[#102A2A] hover:bg-[#F5F7F8]"
+        {/* Desktop & Mobile Sidebar */}
+        <aside
+          className={`fixed lg:static inset-y-0 left-0 z-50 flex flex-col w-64 bg-[#073F3C] text-teal-100 border-r border-[#1B6863]/30 shrink-0 transition-transform duration-300 ease-in-out ${
+            sidebarOpen ? "translate-x-0" : "-translate-x-full lg:translate-x-0"
+          }`}
+          aria-label="Main Navigation"
+        >
+          {/* Logo Header */}
+          <div className="p-5 border-b border-[#1B6863]/30 flex items-center justify-between">
+            <Link
+              href={isAdminOrStaff ? "/admin" : isEducatorRole(role) ? "/teacher/dashboard" : "/student/dashboard"}
+              className="flex items-center gap-3 group"
             >
-              <Menu className="h-6 w-6" />
+              <div className="p-2 rounded-xl bg-[#0B4F4B] text-white shadow-md border border-[#F2C14E]/30 group-hover:border-[#F2C14E] transition-colors">
+                <GraduationCap className="h-6 w-6 text-[#F2C14E]" />
+              </div>
+              <div>
+                <h1 className="text-base font-black text-white tracking-tight">EDUCONNECTS</h1>
+                <Badge variant={roleColors[role] || "student"} size="sm">
+                  {currentRoleTitle}
+                </Badge>
+              </div>
+            </Link>
+            <button
+              onClick={() => setSidebarOpen(false)}
+              className="lg:hidden text-teal-200 hover:text-white p-1 rounded-lg"
+              aria-label="Close navigation"
+            >
+              <X className="h-5 w-5" />
             </button>
-            <div className="relative hidden sm:block w-48 md:w-64">
-              <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-[#5D7373]" />
-              <input
-                type="text"
-                placeholder="Search portal..."
-                className="w-full h-9 pl-9 pr-4 bg-[#F5F7F8] border border-[#DCE5E4] rounded-xl text-xs text-[#102A2A] focus:border-[#0B4F4B] outline-none"
-              />
-            </div>
           </div>
 
-          <div className="flex items-center gap-2 sm:gap-4">
-            {/* Back to Home Button */}
-            <BackToHomeButton variant="default" />
+          {/* Grouped Navigation Links */}
+          <nav className="flex-1 p-3 space-y-4 overflow-y-auto scrollbar-thin">
+            {isAdminOrStaff ? (
+              // Grouped Admin / Staff Navigation
+              filteredAdminSections.map((section) => {
+                const isOverview = section.id === "overview";
+                const isCollapsed = Boolean(collapsedSections[section.id]);
+                const containsActiveChild = section.items.some(
+                  (item) =>
+                    pathname === item.href ||
+                    (item.href !== "/admin" && pathname.startsWith(item.href))
+                );
 
-            <NotificationPopover />
+                return (
+                  <div key={section.id} className="space-y-1">
+                    {/* Section Header (Except OVERVIEW which is always visible) */}
+                    {!isOverview && (
+                      <button
+                        type="button"
+                        onClick={() => toggleSection(section.id)}
+                        className="w-full flex items-center justify-between px-3 py-1.5 text-[11px] font-extrabold text-teal-200/70 hover:text-white tracking-wider uppercase transition-colors"
+                      >
+                        <span>{section.title}</span>
+                        {isCollapsed ? (
+                          <ChevronRight className="h-3.5 w-3.5 text-teal-300/60" />
+                        ) : (
+                          <ChevronDown className="h-3.5 w-3.5 text-teal-300/60" />
+                        )}
+                      </button>
+                    )}
 
-            <div className="flex items-center gap-3 pl-2 sm:pl-4 border-l border-[#DCE5E4]">
-              {avatarUrl ? (
-                <img
-                  src={avatarUrl}
-                  alt={currentUserName || "User"}
-                  className="w-9 h-9 rounded-full object-cover shadow-sm ring-1 ring-[#DCE5E4]"
-                />
+                    {/* Section Items */}
+                    {(!isCollapsed || containsActiveChild) && (
+                      <div className="space-y-1">
+                        {section.items.map((item, idx) => {
+                          const isActive =
+                            pathname === item.href ||
+                            (item.href !== "/admin" && pathname.startsWith(item.href));
+                          const IconComponent = item.icon || LayoutDashboard;
+                          const count = item.badgeKey ? badgeCounts[item.badgeKey] : undefined;
+
+                          return (
+                            <Link
+                              key={idx}
+                              href={item.href}
+                              onClick={() => setSidebarOpen(false)}
+                              className={`flex items-center gap-2.5 px-3 py-2 rounded-xl text-xs font-semibold transition-all ${
+                                isActive
+                                  ? "bg-[#0B4F4B] text-white shadow-md border border-[#F2C14E]/30 font-bold"
+                                  : "text-teal-100/80 hover:bg-[#1B6863]/40 hover:text-white"
+                              }`}
+                            >
+                              <IconComponent
+                                className={`h-4 w-4 shrink-0 ${
+                                  isActive ? "text-[#F2C14E]" : "text-teal-200/70"
+                                }`}
+                              />
+                              <span className="truncate">{item.label}</span>
+                              {count !== undefined && count > 0 && (
+                                <span className="ml-auto px-1.5 py-0.2 rounded-full text-[10px] font-black bg-[#F2C14E] text-[#073F3C] shadow-2xs shrink-0">
+                                  {count}
+                                </span>
+                              )}
+                            </Link>
+                          );
+                        })}
+                      </div>
+                    )}
+                  </div>
+                );
+              })
+            ) : (
+              // Teacher / Student Navigation
+              <div className="space-y-1">
+                {(isEducatorRole(role)
+                  ? staticNavItems.TEACHER
+                  : staticNavItems.STUDENT
+                ).map((item, idx) => {
+                  const isActive =
+                    pathname === item.href ||
+                    (item.href !== "/teacher/dashboard" &&
+                      item.href !== "/student/dashboard" &&
+                      pathname.startsWith(item.href));
+                  const IconComponent = item.icon || LayoutDashboard;
+                  return (
+                    <Link
+                      key={idx}
+                      href={item.href}
+                      onClick={() => setSidebarOpen(false)}
+                      className={`flex items-center gap-3 px-3.5 py-2.5 rounded-xl text-xs font-semibold transition-colors ${
+                        isActive
+                          ? "bg-[#0B4F4B] text-white shadow-md border border-[#F2C14E]/30"
+                          : "text-teal-100/80 hover:bg-[#1B6863]/40 hover:text-white"
+                      }`}
+                    >
+                      <IconComponent
+                        className={`h-4 w-4 ${isActive ? "text-[#F2C14E]" : "text-teal-200/70"}`}
+                      />
+                      <span>{item.label}</span>
+                    </Link>
+                  );
+                })}
+              </div>
+            )}
+          </nav>
+
+          {/* Sidebar Footer */}
+          <div className="p-3 border-t border-[#1B6863]/30 space-y-1.5">
+            <BackToHomeButton variant="sidebar" />
+            <button
+              type="button"
+              onClick={(e) => handleLogout(e)}
+              disabled={isLoggingOut}
+              className="flex items-center gap-3 w-full px-3 py-2 rounded-xl text-xs font-semibold text-rose-300 hover:bg-rose-500/15 transition-colors disabled:opacity-60 disabled:cursor-not-allowed cursor-pointer"
+            >
+              {isLoggingOut ? (
+                <Loader2 className="h-4 w-4 animate-spin text-rose-300" />
               ) : (
-                <div className="w-9 h-9 rounded-full bg-[#0B4F4B] text-white font-bold flex items-center justify-center text-sm shadow-sm uppercase">
-                  {currentUserName ? currentUserName.trim().charAt(0) : "U"}
+                <LogOut className="h-4 w-4" />
+              )}
+              <span>{isLoggingOut ? "Signing out..." : "Sign Out"}</span>
+            </button>
+          </div>
+        </aside>
+
+        {/* Main Workspace Container */}
+        <div className="flex-1 flex flex-col min-w-0">
+          {/* Topbar Header */}
+          <header className="h-16 bg-white border-b border-[#DCE5E4] px-4 sm:px-6 flex items-center justify-between sticky top-0 z-20 shadow-2xs">
+            <div className="flex items-center gap-3 sm:gap-4">
+              <button
+                onClick={() => setSidebarOpen(!sidebarOpen)}
+                className="lg:hidden p-2 rounded-xl text-[#102A2A] hover:bg-[#F5F7F8]"
+                aria-label="Toggle navigation menu"
+              >
+                <Menu className="h-6 w-6" />
+              </button>
+
+              {/* Quick Admin Action Search Trigger */}
+              {isAdminOrStaff ? (
+                <>
+                  <button
+                    type="button"
+                    onClick={() => setSearchOpen(true)}
+                    className="relative hidden sm:flex items-center w-56 md:w-72 h-9 pl-9 pr-3 bg-[#F5F7F8] hover:bg-[#EDF2F2] border border-[#DCE5E4] rounded-xl text-xs text-[#5D7373] text-left transition-colors cursor-pointer"
+                    title="Search portal (Ctrl+K)"
+                  >
+                    <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-[#5D7373]" />
+                    <span className="truncate">Search admin portal...</span>
+                    <kbd className="ml-auto text-[10px] font-mono bg-white border border-[#DCE5E4] px-1.5 py-0.5 rounded text-[#5D7373] shrink-0">
+                      Ctrl+K
+                    </kbd>
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => setSearchOpen(true)}
+                    className="sm:hidden p-2 rounded-xl text-[#102A2A] hover:bg-[#F5F7F8]"
+                    title="Search portal"
+                    aria-label="Search portal"
+                  >
+                    <Search className="h-5 w-5" />
+                  </button>
+                </>
+              ) : (
+                <div className="relative hidden sm:block w-48 md:w-64">
+                  <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-[#5D7373]" />
+                  <input
+                    type="text"
+                    placeholder="Search portal..."
+                    className="w-full h-9 pl-9 pr-4 bg-[#F5F7F8] border border-[#DCE5E4] rounded-xl text-xs text-[#102A2A] focus:border-[#0B4F4B] outline-none"
+                  />
                 </div>
               )}
-              <div className="hidden md:block text-left">
-                <div className="text-xs font-bold text-[#102A2A]">
-                  {currentUserName || "User"}
-                </div>
-                {currentUserEmail && (
-                  <div className="text-[10px] text-[#5D7373] truncate max-w-[160px]">
-                    {currentUserEmail}
+            </div>
+
+            <div className="flex items-center gap-2 sm:gap-4">
+              {/* Back to Home Button */}
+              <BackToHomeButton variant="default" />
+
+              <NotificationPopover />
+
+              {/* Admin Profile Area */}
+              <div className="flex items-center gap-3 pl-2 sm:pl-4 border-l border-[#DCE5E4]">
+                {avatarUrl ? (
+                  <img
+                    src={avatarUrl}
+                    alt={currentUserName || "User"}
+                    className="w-9 h-9 rounded-full object-cover shadow-xs ring-1 ring-[#DCE5E4]"
+                  />
+                ) : (
+                  <div className="w-9 h-9 rounded-full bg-[#0B4F4B] text-[#F2C14E] font-extrabold flex items-center justify-center text-xs shadow-xs uppercase border border-[#F2C14E]/30">
+                    {currentUserName ? currentUserName.trim().charAt(0) : "A"}
                   </div>
                 )}
+                <div className="hidden md:block text-left">
+                  <div className="text-xs font-bold text-[#102A2A]">
+                    {currentUserName || "Administrator"}
+                  </div>
+                  {currentUserEmail && (
+                    <div className="text-[10px] text-[#5D7373] truncate max-w-[160px]">
+                      {currentUserEmail}
+                    </div>
+                  )}
+                </div>
               </div>
             </div>
-          </div>
-        </header>
+          </header>
 
-        {/* Dashboard Main Content */}
-        <main className="flex-1 p-6 lg:p-8 max-w-7xl w-full mx-auto">{children}</main>
-        <DashboardFooter />
+          {/* Main Workspace */}
+          <main className="flex-1 p-4 sm:p-6 lg:p-8 max-w-7xl w-full mx-auto">{children}</main>
+          <DashboardFooter />
+        </div>
+
+        {/* Global Admin Search Palette */}
+        {isAdminOrStaff && (
+          <AdminSearchDialog isOpen={searchOpen} onClose={() => setSearchOpen(false)} />
+        )}
       </div>
-    </div>
     </PermissionProvider>
   );
 }

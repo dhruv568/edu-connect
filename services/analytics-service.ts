@@ -624,6 +624,8 @@ export class AnalyticsService {
     const totalCourses = await prisma.course.count();
     const publishedCourses = await prisma.course.count({ where: { status: "PUBLISHED" } });
     const totalLiveClasses = await prisma.liveClassSlot.count();
+    const openReports = await prisma.report.count({ where: { status: "OPEN" } });
+    const pendingRefunds = await prisma.refund.count({ where: { status: "REFUND_REQUESTED" } });
 
     // Financial Metrics from Module 08 Database
     const capturedTransactionsAgg = await prisma.paymentTransaction.aggregate({
@@ -671,6 +673,8 @@ export class AnalyticsService {
         totalCourses,
         publishedCourses,
         totalLiveClasses,
+        openReports,
+        pendingRefunds,
       },
       financials: {
         grossRevenueRupees,
