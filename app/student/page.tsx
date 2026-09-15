@@ -8,7 +8,7 @@ import photo2 from "@/photo2.jpeg";
 import photo3 from "@/photo3.jpeg";
 import { FloatingNavbar } from "@/components/homepage/floating-navbar";
 import { PremiumFooter } from "@/components/homepage/premium-footer";
-import { HeroBackgroundSlideshow } from "@/components/homepage/hero-background-slideshow";
+import { LearnerHeroSlideshow } from "@/components/homepage/learner-hero-slideshow";
 import { GlassCard } from "@/components/glass/glass-card";
 import { GlassBadge } from "@/components/glass/glass-badge";
 import { GlassButton } from "@/components/glass/glass-button";
@@ -378,7 +378,7 @@ export default function StudentLandingPage() {
         {/* 1. HERO SECTION */}
         {/* ========================================================================= */}
         <section className="relative pt-32 sm:pt-36 lg:pt-44 pb-20 lg:pb-28 overflow-hidden bg-gradient-to-b from-blue-50/70 via-slate-50 to-white">
-          <HeroBackgroundSlideshow />
+          <LearnerHeroSlideshow />
           {/* Subtle Background Elements */}
           <div className="absolute top-20 left-1/2 -translate-x-1/2 w-full max-w-7xl h-[500px] pointer-events-none -z-10">
             <div className="absolute top-10 left-10 w-96 h-96 bg-blue-500/15 rounded-full blur-3xl" />
@@ -448,7 +448,7 @@ export default function StudentLandingPage() {
                     </Link>
                   )}
 
-                  <Link href="#courses" className="w-full sm:w-auto">
+                  <Link href="/courses" className="w-full sm:w-auto">
                     <GlassButton variant="secondary" size="lg" className="w-full sm:w-auto text-sm" leftIcon={<BookOpen className="h-4 w-4 text-slate-600" />}>
                       Browse Courses
                     </GlassButton>
@@ -988,10 +988,10 @@ export default function StudentLandingPage() {
 
             {/* Comparison Table */}
             <div className="overflow-x-auto rounded-3xl border border-slate-200 shadow-xl bg-white">
-              <div className="min-w-[640px]">
-                <div className="grid grid-cols-12 bg-slate-100/90 border-b border-slate-200 text-xs font-black uppercase tracking-wider text-slate-700 py-4 px-6 sm:px-8">
+              <div className="min-w-[720px]">
+                <div className="grid grid-cols-12 bg-slate-100/90 border-b border-slate-200 text-xs font-black uppercase tracking-wider text-slate-700 py-5 px-6 sm:px-10">
                   <div className="col-span-4">Category</div>
-                  <div className="col-span-4 text-slate-500">Traditional Coaching</div>
+                  <div className="col-span-4 text-slate-700 font-medium">Traditional Coaching</div>
                   <div className="col-span-4 text-[#3157D5] font-extrabold flex items-center gap-1">
                     <span>EduConnects</span>
                   </div>
@@ -1001,18 +1001,18 @@ export default function StudentLandingPage() {
                   {comparisonPoints.map((item, idx) => (
                     <div
                       key={idx}
-                      className={`grid grid-cols-12 py-5 px-6 sm:px-8 items-center text-xs sm:text-sm ${
+                      className={`grid grid-cols-12 py-6 px-6 sm:px-10 items-center text-xs sm:text-sm ${
                         idx % 2 === 0 ? "bg-white" : "bg-slate-50/40"
                       }`}
                     >
                       <div className="col-span-4 font-bold text-slate-900 pr-4">
                         {item.feature}
                       </div>
-                      <div className="col-span-4 text-slate-500 pr-4 flex items-start gap-2">
-                        <X className="h-4 w-4 text-rose-400 shrink-0 mt-0.5" />
-                        <span className="text-xs sm:text-sm leading-relaxed">{item.traditional}</span>
+                      <div className="col-span-4 text-slate-700 font-medium pr-4 flex items-start gap-2.5">
+                        <X className="h-4 w-4 text-rose-500 shrink-0 mt-0.5" />
+                        <span className="text-xs sm:text-sm leading-relaxed text-slate-700 font-medium">{item.traditional}</span>
                       </div>
-                      <div className="col-span-4 font-semibold text-slate-900 flex items-start gap-2 bg-blue-50/40 -my-5 py-5 px-4 rounded-xl border-l border-blue-200/60">
+                      <div className="col-span-4 font-semibold text-slate-900 flex items-start gap-2.5 bg-blue-50/50 -my-6 py-6 px-5 rounded-xl border-l border-blue-200/60">
                         <Check className="h-4 w-4 text-emerald-600 shrink-0 mt-0.5 stroke-[3]" />
                         <span className="text-xs sm:text-sm leading-relaxed text-blue-950 font-bold">
                           {item.educonnects}
@@ -1124,13 +1124,12 @@ export default function StudentLandingPage() {
               </div>
 
               <div className="lg:col-span-5 flex justify-center">
-                <div className="relative rounded-3xl overflow-hidden shadow-2xl border-4 border-white/20 max-w-md w-full aspect-[4/3]">
+                <div className="relative rounded-3xl overflow-hidden shadow-2xl border-4 border-white/20 max-w-md w-full bg-white/10 p-2 sm:p-3 flex items-center justify-center">
                   <img
                     src="/images/learner-hero.jpeg"
                     alt="Learner thriving on EduConnects"
-                    className="w-full h-full object-cover object-center"
+                    className="w-full h-auto max-h-[380px] object-contain rounded-2xl"
                   />
-                  <div className="absolute inset-0 bg-gradient-to-t from-black/40 via-transparent to-transparent pointer-events-none" />
                 </div>
               </div>
             </div>

@@ -295,7 +295,9 @@ export function FloatingNavbar({ variant }: FloatingNavbarProps = {}) {
     <>
       <header
         className={`fixed top-0 left-0 right-0 z-50 transition-all duration-300 ${
-          isMainWebsite
+          isLearner
+            ? "bg-[#243B9B] border-b border-[#3157D5]/40 shadow-sm py-2.5 sm:py-3.5"
+            : isMainWebsite
             ? scrolled
               ? "bg-[#083F3D] border-b border-[#1B6863]/40 shadow-sm py-2 sm:py-2.5"
               : "bg-[#083F3D] border-b border-[#1B6863]/25 py-2.5 sm:py-3.5"
@@ -313,13 +315,11 @@ export function FloatingNavbar({ variant }: FloatingNavbarProps = {}) {
               variant="compact"
               size="md"
               roleContext={isLearner ? "student" : isEducator ? "teacher" : "default"}
-              theme={isMainWebsite ? "dark" : "auto"}
+              theme={isMainWebsite || isLearner ? "dark" : "auto"}
               href={isLearner ? "/student" : isEducator ? "/teacher" : getMainDomain() + "/"}
-              showTagline={true}
+              showTagline={!isLearner}
               tagline={
-                isLearner
-                  ? "Learner Gateway"
-                  : isEducator
+                isEducator
                   ? "Educator Network"
                   : "Learn • Grow • Belong"
               }
@@ -338,7 +338,7 @@ export function FloatingNavbar({ variant }: FloatingNavbarProps = {}) {
           {/* ========================================================================= */}
           {/* 2. CENTER PRIMARY NAVIGATION */}
           {/* ========================================================================= */}
-          <nav className={`hidden lg:flex items-center gap-1 xl:gap-2 text-sm font-semibold ${isMainWebsite ? "text-white" : "text-slate-700"}`}>
+          <nav className={`hidden lg:flex items-center gap-1 xl:gap-2 text-sm font-semibold ${isLearner ? "text-white" : isMainWebsite ? "text-white" : "text-slate-700"}`}>
             {isEducator ? (
               /* EDUCATOR SPECIFIC NAVIGATION */
               <>
@@ -377,25 +377,37 @@ export function FloatingNavbar({ variant }: FloatingNavbarProps = {}) {
               <>
                 <Link
                   href="/find-teachers"
-                  className="px-3.5 py-1.5 rounded-lg hover:text-blue-600 hover:bg-blue-50/70 transition-colors whitespace-nowrap"
+                  className={`px-3.5 py-1.5 rounded-lg transition-colors whitespace-nowrap ${
+                    pathname === "/find-teachers"
+                      ? "bg-[#3157D5] text-white font-bold shadow-xs"
+                      : "text-blue-100 hover:text-white hover:bg-[#3157D5]/50"
+                  }`}
                 >
                   Find Educators
                 </Link>
                 <Link
                   href="/courses"
-                  className="px-3.5 py-1.5 rounded-lg hover:text-blue-600 hover:bg-blue-50/70 transition-colors whitespace-nowrap"
+                  className={`px-3.5 py-1.5 rounded-lg transition-colors whitespace-nowrap ${
+                    pathname === "/courses"
+                      ? "bg-[#3157D5] text-white font-bold shadow-xs"
+                      : "text-blue-100 hover:text-white hover:bg-[#3157D5]/50"
+                  }`}
                 >
                   Explore Courses
                 </Link>
                 <Link
                   href="/exam"
-                  className="px-3.5 py-1.5 rounded-lg hover:text-blue-600 hover:bg-blue-50/70 transition-colors whitespace-nowrap font-bold text-blue-600"
+                  className={`px-3.5 py-1.5 rounded-lg transition-colors whitespace-nowrap ${
+                    pathname === "/exam"
+                      ? "bg-[#3157D5] text-white font-bold shadow-xs"
+                      : "text-blue-100 hover:text-white hover:bg-[#3157D5]/50"
+                  }`}
                 >
                   Take a Free Exam
                 </Link>
                 <Link
                   href="/student#benefits"
-                  className="px-3.5 py-1.5 rounded-lg hover:text-blue-600 hover:bg-blue-50/70 transition-colors whitespace-nowrap"
+                  className="px-3.5 py-1.5 rounded-lg text-blue-100 hover:text-white hover:bg-[#3157D5]/50 transition-colors whitespace-nowrap"
                 >
                   Why EduConnects?
                 </Link>
@@ -471,7 +483,7 @@ export function FloatingNavbar({ variant }: FloatingNavbarProps = {}) {
                 <div className="flex items-center gap-3">
                   <Link
                     href={getLearnerSubdomainUrl("/student/dashboard")}
-                    className="h-9 px-4 rounded-xl text-xs sm:text-sm font-bold text-white bg-[#3157D5] hover:bg-[#243B9B] shadow-xs hover:shadow-md transition-all flex items-center gap-2 active:scale-95 cursor-pointer"
+                    className="h-9 px-4 rounded-xl text-xs sm:text-sm font-bold text-white bg-[#3157D5] hover:bg-[#1E3185] shadow-xs hover:shadow-md transition-all flex items-center gap-2 active:scale-95 cursor-pointer"
                   >
                     <LayoutDashboard className="h-4 w-4 text-blue-100" />
                     <span>Learner Dashboard</span>
@@ -479,7 +491,7 @@ export function FloatingNavbar({ variant }: FloatingNavbarProps = {}) {
                   <button
                     onClick={handleLogout}
                     disabled={isLoggingOut}
-                    className="text-xs sm:text-sm font-bold text-slate-600 hover:text-rose-600 px-3 py-2 rounded-xl hover:bg-rose-50 transition-colors cursor-pointer"
+                    className="text-xs sm:text-sm font-bold text-blue-100 hover:text-white px-3 py-2 rounded-xl hover:bg-white/10 transition-colors cursor-pointer"
                   >
                     Logout
                   </button>
@@ -487,7 +499,7 @@ export function FloatingNavbar({ variant }: FloatingNavbarProps = {}) {
               ) : (
                 <Link
                   href="/student/login"
-                  className="text-xs sm:text-sm font-bold text-slate-700 hover:text-[#3157D5] px-4 py-2 rounded-xl hover:bg-blue-50 transition-colors whitespace-nowrap"
+                  className="text-xs sm:text-sm font-bold text-white bg-[#3157D5] hover:bg-[#1E3185] px-4 py-2 rounded-xl transition-colors whitespace-nowrap shadow-xs"
                 >
                   Login
                 </Link>
@@ -761,7 +773,9 @@ export function FloatingNavbar({ variant }: FloatingNavbarProps = {}) {
           <button
             onClick={() => setMobileOpen(!mobileOpen)}
             className={`lg:hidden p-2 rounded-xl border transition-colors ${
-              isMainWebsite
+              isLearner
+                ? "bg-[#3157D5] border-[#4268EA] text-white hover:bg-[#1E3185]"
+                : isMainWebsite
                 ? "bg-[#0F5C5A] border-[#1B6863] text-white hover:bg-[#16805B]"
                 : "bg-slate-50 border-slate-200 text-slate-800 hover:bg-slate-100"
             }`}
@@ -792,14 +806,20 @@ export function FloatingNavbar({ variant }: FloatingNavbarProps = {}) {
               exit={{ opacity: 0, y: -20 }}
               transition={{ duration: 0.2 }}
               className={`relative top-16 mx-3 sm:mx-6 rounded-3xl shadow-2xl p-5 space-y-4 max-h-[calc(100vh-5rem)] overflow-y-auto ${
-                isMainWebsite
+                isLearner
+                  ? "bg-[#243B9B] border border-[#3157D5]/60 text-white"
+                  : isMainWebsite
                   ? "bg-[#083F3D] border border-[#1B6863]/60 text-white"
                   : "bg-white border border-slate-200"
               }`}
             >
               {/* Authenticated User Card in Mobile Drawer (PORTAL ONLY) */}
               {(isEducator || isLearner) && userSession && (
-                <div className="p-3.5 rounded-2xl bg-slate-50 border border-slate-100 flex items-center justify-between">
+                <div className={`p-3.5 rounded-2xl flex items-center justify-between ${
+                  isLearner
+                    ? "bg-[#1E3185] border border-blue-400/30 text-white"
+                    : "bg-slate-50 border border-slate-100"
+                }`}>
                   <div className="flex items-center gap-3">
                     <div
                       className={`w-10 h-10 rounded-xl text-white font-black text-sm flex items-center justify-center ${
@@ -813,10 +833,10 @@ export function FloatingNavbar({ variant }: FloatingNavbarProps = {}) {
                       {getUserInitials(userSession)}
                     </div>
                     <div>
-                      <div className="text-xs font-extrabold text-slate-900">
+                      <div className={`text-xs font-extrabold ${isLearner ? "text-white" : "text-slate-900"}`}>
                         {getUserDisplayName(userSession)}
                       </div>
-                      <div className="text-[11px] text-slate-500 truncate max-w-[160px]">
+                      <div className={`text-[11px] truncate max-w-[160px] ${isLearner ? "text-blue-200" : "text-slate-500"}`}>
                         {userSession.email}
                       </div>
                     </div>
@@ -840,7 +860,7 @@ export function FloatingNavbar({ variant }: FloatingNavbarProps = {}) {
               )}
 
               {/* Navigation Links */}
-              <nav className={`flex flex-col space-y-1 font-semibold text-sm ${isMainWebsite ? "text-white" : "text-slate-800"}`}>
+              <nav className={`flex flex-col space-y-1 font-semibold text-sm ${isLearner ? "text-white" : isMainWebsite ? "text-white" : "text-slate-800"}`}>
                 {isEducator ? (
                   <>
                     <Link
@@ -880,28 +900,40 @@ export function FloatingNavbar({ variant }: FloatingNavbarProps = {}) {
                     <Link
                       href="/find-teachers"
                       onClick={() => setMobileOpen(false)}
-                      className="py-2.5 px-3.5 hover:bg-blue-50 hover:text-blue-700 rounded-xl font-semibold"
+                      className={`py-2.5 px-3.5 rounded-xl font-semibold transition-colors ${
+                        pathname === "/find-teachers"
+                          ? "bg-[#3157D5] text-white font-bold"
+                          : "text-blue-100 hover:bg-[#3157D5]/50 hover:text-white"
+                      }`}
                     >
                       Find Educators
                     </Link>
                     <Link
                       href="/courses"
                       onClick={() => setMobileOpen(false)}
-                      className="py-2.5 px-3.5 hover:bg-blue-50 hover:text-blue-700 rounded-xl font-semibold"
+                      className={`py-2.5 px-3.5 rounded-xl font-semibold transition-colors ${
+                        pathname === "/courses"
+                          ? "bg-[#3157D5] text-white font-bold"
+                          : "text-blue-100 hover:bg-[#3157D5]/50 hover:text-white"
+                      }`}
                     >
                       Explore Courses
                     </Link>
                     <Link
                       href="/exam"
                       onClick={() => setMobileOpen(false)}
-                      className="py-2.5 px-3.5 hover:bg-blue-50 hover:text-blue-700 rounded-xl font-bold text-blue-600"
+                      className={`py-2.5 px-3.5 rounded-xl font-semibold transition-colors ${
+                        pathname === "/exam"
+                          ? "bg-[#3157D5] text-white font-bold"
+                          : "text-blue-100 hover:bg-[#3157D5]/50 hover:text-white"
+                      }`}
                     >
                       Take a Free Exam
                     </Link>
                     <Link
                       href="/student#benefits"
                       onClick={() => setMobileOpen(false)}
-                      className="py-2.5 px-3.5 hover:bg-blue-50 hover:text-blue-700 rounded-xl font-semibold"
+                      className="py-2.5 px-3.5 rounded-xl font-semibold text-blue-100 hover:bg-[#3157D5]/50 hover:text-white transition-colors"
                     >
                       Why EduConnects?
                     </Link>
@@ -974,13 +1006,13 @@ export function FloatingNavbar({ variant }: FloatingNavbarProps = {}) {
 
               {/* Mobile Auth Actions */}
               {isLearner ? (
-                <div className="pt-3 border-t border-slate-100 flex flex-col gap-2">
+                <div className="pt-3 border-t border-blue-400/20 flex flex-col gap-2">
                   {userSession && isLearnerRole(userSession.role) ? (
                     <>
                       <Link
                         href={getLearnerSubdomainUrl("/student/dashboard")}
                         onClick={() => setMobileOpen(false)}
-                        className="w-full py-2.5 rounded-xl bg-[#3157D5] hover:bg-[#243B9B] text-white text-sm font-bold shadow-xs transition-colors flex items-center justify-center gap-2 cursor-pointer"
+                        className="w-full py-2.5 rounded-xl bg-[#3157D5] hover:bg-[#1E3185] text-white text-sm font-bold shadow-xs transition-colors flex items-center justify-center gap-2 cursor-pointer"
                       >
                         <LayoutDashboard className="h-4 w-4" />
                         <span>Learner Dashboard</span>
@@ -992,7 +1024,7 @@ export function FloatingNavbar({ variant }: FloatingNavbarProps = {}) {
                           handleLogout(e);
                         }}
                         disabled={isLoggingOut}
-                        className="w-full py-2 rounded-xl text-slate-600 hover:text-rose-600 text-xs font-bold text-center cursor-pointer"
+                        className="w-full py-2 rounded-xl text-blue-200 hover:text-white text-xs font-bold text-center cursor-pointer"
                       >
                         Logout
                       </button>
@@ -1001,7 +1033,7 @@ export function FloatingNavbar({ variant }: FloatingNavbarProps = {}) {
                     <Link
                       href="/student/login"
                       onClick={() => setMobileOpen(false)}
-                      className="w-full py-2.5 rounded-xl border border-slate-200 text-slate-800 text-sm font-bold hover:bg-slate-50 transition-colors text-center cursor-pointer block"
+                      className="w-full py-2.5 rounded-xl bg-[#3157D5] hover:bg-[#1E3185] text-white text-sm font-bold transition-colors text-center cursor-pointer block shadow-xs"
                     >
                       Login
                     </Link>

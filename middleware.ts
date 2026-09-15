@@ -94,6 +94,7 @@ export function middleware(request: NextRequest) {
         pathname.startsWith("/privacy") ||
         pathname.startsWith("/refund") ||
         pathname.startsWith("/verify-") ||
+        pathname === "/courses" ||
         pathname.startsWith("/courses/") ||
         pathname.startsWith("/exam") ||
         pathname.startsWith("/find-teachers");
@@ -102,9 +103,6 @@ export function middleware(request: NextRequest) {
         // Explicit friendly shortcut mappings
         if (pathname === "/dashboard" || pathname.startsWith("/dashboard/")) {
           return NextResponse.rewrite(new URL(`/student${pathname}`, request.url));
-        }
-        if (pathname === "/courses") {
-          return NextResponse.rewrite(new URL("/student/courses", request.url));
         }
         if (pathname === "/live-classes" || pathname.startsWith("/live-classes/")) {
           return NextResponse.rewrite(new URL(`/student${pathname}`, request.url));
