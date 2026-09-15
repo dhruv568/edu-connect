@@ -4,10 +4,21 @@ import { NextRequest } from "next/server";
 import { RegisterSchema } from "@/schemas/auth-schemas";
 import { AuthService } from "@/services/auth-service";
 import { apiSuccess, apiBadRequest, apiError } from "@/lib/api-response";
+import { verifyCaptchaSolution } from "@/lib/auth/captcha";
 
 export async function POST(request: NextRequest) {
   try {
     const body = await request.json();
+
+    // Verify CAPTCHA for Learner registration
+    if (!body.role || body.role === "STUDENT") {
+      const { captchaToken, captchaAnswer } = body;
+      const captchaResult = verifyCaptchaSolution(captchaToken, captchaAnswer);
+      if (!captchaResult.valid) {
+        return apiBadRequest(captchaResult.error || "Security verification failed. Please complete the CAPTCHA.");
+      }
+    }
+
     const validatedData = RegisterSchema.parse(body);
 
     const user = await AuthService.registerUser(validatedData);

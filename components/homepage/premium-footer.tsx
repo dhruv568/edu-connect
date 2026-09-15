@@ -2,6 +2,7 @@
 
 import React, { useEffect, useState } from "react";
 import Link from "next/link";
+import { usePathname } from "next/navigation";
 import {
   Users,
   BookOpen,
@@ -30,7 +31,19 @@ export interface PremiumFooterProps {
 }
 
 export function PremiumFooter({ showCta = false }: PremiumFooterProps = {}) {
+  const pathname = usePathname();
   const [socials, setSocials] = useState(OFFICIAL_COMPANY_INFO.socials);
+
+  const isLearner =
+    pathname === "/student" ||
+    pathname?.startsWith("/student/") ||
+    pathname === "/exam" ||
+    pathname?.startsWith("/exam/") ||
+    (typeof window !== "undefined" &&
+      (window.location.hostname.startsWith("learners.") ||
+        window.location.hostname.startsWith("learner.") ||
+        window.location.hostname.startsWith("students.") ||
+        window.location.hostname.startsWith("student.")));
 
   useEffect(() => {
     let isMounted = true;
@@ -163,52 +176,89 @@ export function PremiumFooter({ showCta = false }: PremiumFooterProps = {}) {
             </ul>
           </div>
 
-          {/* Column 2: Portals & Programs (md:col-span-3) */}
+          {/* Column 2: Portals & Programs (or Learning Resources on Learner site) */}
           <div className="md:col-span-3">
             <h4 className="text-xs font-extrabold text-white uppercase tracking-wider mb-4 border-b border-[#2A8C84]/40 pb-2.5">
-              Portals & Programs
+              {isLearner ? "Learning Resources" : "Portals & Programs"}
             </h4>
             <ul className="space-y-3.5 text-xs sm:text-[13px] font-medium">
-              <li>
-                <a
-                  href="https://learners.educonnects.co.in"
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="text-teal-100 hover:text-white hover:translate-x-0.5 transition-all flex items-center gap-2.5"
-                >
-                  <GraduationCap className="h-3.5 w-3.5 text-[#2A8C84] shrink-0" />
-                  <span>For Learners (Portal ↗)</span>
-                </a>
-              </li>
-              <li>
-                <a
-                  href="https://educators.educonnects.co.in"
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="text-teal-100 hover:text-white hover:translate-x-0.5 transition-all flex items-center gap-2.5"
-                >
-                  <Sparkles className="h-3.5 w-3.5 text-[#2A8C84] shrink-0" />
-                  <span>For Educators (Portal ↗)</span>
-                </a>
-              </li>
-              <li>
-                <Link href="/services" className="text-teal-100 hover:text-white hover:translate-x-0.5 transition-all flex items-center gap-2.5">
-                  <Layers className="h-3.5 w-3.5 text-[#2A8C84] shrink-0" />
-                  <span>Products & Services</span>
-                </Link>
-              </li>
-              <li>
-                <Link href="/pricing" className="text-teal-100 hover:text-white hover:translate-x-0.5 transition-all flex items-center gap-2.5">
-                  <CreditCard className="h-3.5 w-3.5 text-[#2A8C84] shrink-0" />
-                  <span>Pricing Plans</span>
-                </Link>
-              </li>
-              <li>
-                <Link href="/how-it-works" className="text-teal-100 hover:text-white hover:translate-x-0.5 transition-all flex items-center gap-2.5">
-                  <Compass className="h-3.5 w-3.5 text-[#2A8C84] shrink-0" />
-                  <span>How It Works</span>
-                </Link>
-              </li>
+              {isLearner ? (
+                <>
+                  <li>
+                    <Link href="/find-teachers" className="text-teal-100 hover:text-white hover:translate-x-0.5 transition-all flex items-center gap-2.5">
+                      <Users className="h-3.5 w-3.5 text-[#2A8C84] shrink-0" />
+                      <span>Find Verified Educators</span>
+                    </Link>
+                  </li>
+                  <li>
+                    <Link href="/courses" className="text-teal-100 hover:text-white hover:translate-x-0.5 transition-all flex items-center gap-2.5">
+                      <BookOpen className="h-3.5 w-3.5 text-[#2A8C84] shrink-0" />
+                      <span>Explore Courses</span>
+                    </Link>
+                  </li>
+                  <li>
+                    <Link href="/exam" className="text-teal-100 hover:text-white hover:translate-x-0.5 transition-all flex items-center gap-2.5">
+                      <Award className="h-3.5 w-3.5 text-[#2A8C84] shrink-0" />
+                      <span>Take a Free Exam</span>
+                    </Link>
+                  </li>
+                  <li>
+                    <Link href="/how-it-works" className="text-teal-100 hover:text-white hover:translate-x-0.5 transition-all flex items-center gap-2.5">
+                      <Compass className="h-3.5 w-3.5 text-[#2A8C84] shrink-0" />
+                      <span>How Learning Works</span>
+                    </Link>
+                  </li>
+                  <li>
+                    <Link href="/pricing" className="text-teal-100 hover:text-white hover:translate-x-0.5 transition-all flex items-center gap-2.5">
+                      <CreditCard className="h-3.5 w-3.5 text-[#2A8C84] shrink-0" />
+                      <span>Pricing & Guarantee</span>
+                    </Link>
+                  </li>
+                </>
+              ) : (
+                <>
+                  <li>
+                    <a
+                      href="https://learners.educonnects.co.in"
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="text-teal-100 hover:text-white hover:translate-x-0.5 transition-all flex items-center gap-2.5"
+                    >
+                      <GraduationCap className="h-3.5 w-3.5 text-[#2A8C84] shrink-0" />
+                      <span>For Learners (Portal ↗)</span>
+                    </a>
+                  </li>
+                  <li>
+                    <a
+                      href="https://educators.educonnects.co.in"
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="text-teal-100 hover:text-white hover:translate-x-0.5 transition-all flex items-center gap-2.5"
+                    >
+                      <Sparkles className="h-3.5 w-3.5 text-[#2A8C84] shrink-0" />
+                      <span>For Educators (Portal ↗)</span>
+                    </a>
+                  </li>
+                  <li>
+                    <Link href="/services" className="text-teal-100 hover:text-white hover:translate-x-0.5 transition-all flex items-center gap-2.5">
+                      <Layers className="h-3.5 w-3.5 text-[#2A8C84] shrink-0" />
+                      <span>Products & Services</span>
+                    </Link>
+                  </li>
+                  <li>
+                    <Link href="/pricing" className="text-teal-100 hover:text-white hover:translate-x-0.5 transition-all flex items-center gap-2.5">
+                      <CreditCard className="h-3.5 w-3.5 text-[#2A8C84] shrink-0" />
+                      <span>Pricing Plans</span>
+                    </Link>
+                  </li>
+                  <li>
+                    <Link href="/how-it-works" className="text-teal-100 hover:text-white hover:translate-x-0.5 transition-all flex items-center gap-2.5">
+                      <Compass className="h-3.5 w-3.5 text-[#2A8C84] shrink-0" />
+                      <span>How It Works</span>
+                    </Link>
+                  </li>
+                </>
+              )}
             </ul>
           </div>
 

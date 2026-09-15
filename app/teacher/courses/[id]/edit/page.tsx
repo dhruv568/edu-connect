@@ -937,7 +937,7 @@ export default function TeacherCourseEditorPage() {
                 <div className="p-4 rounded-xl bg-slate-950 border border-slate-800 flex items-center justify-between">
                   <div className="space-y-0.5">
                     <div className="text-xs font-bold text-slate-200">Certificate of Completion</div>
-                    <div className="text-[11px] text-slate-500">Auto-issue verified EduConnect certificate upon 100% completion</div>
+                    <div className="text-[11px] text-slate-500">Auto-issue verified EduConnects certificate upon 100% completion</div>
                   </div>
                   <input
                     type="checkbox"

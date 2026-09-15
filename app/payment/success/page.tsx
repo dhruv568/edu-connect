@@ -16,6 +16,14 @@ function PaymentSuccessContent() {
   const [payment, setPayment] = useState<any>(null);
   const [loading, setLoading] = useState(true);
   const [verifyError, setVerifyError] = useState<string | null>(null);
+  const [currentUser, setCurrentUser] = useState<any>(null);
+
+  useEffect(() => {
+    fetch("/api/auth/me")
+      .then((r) => r.json())
+      .then((d) => setCurrentUser(d?.data?.user || null))
+      .catch(() => setCurrentUser(null));
+  }, []);
 
   useEffect(() => {
     async function fetchStatus() {
@@ -116,12 +124,28 @@ function PaymentSuccessContent() {
           </div>
         ) : null}
 
+        {!currentUser && !loading && (
+          <div className="p-4 rounded-2xl bg-blue-950/60 border border-blue-500/30 text-left space-y-2 backdrop-blur-xl">
+            <p className="text-sm font-bold text-blue-200">Next Step: Register Your Learner Account</p>
+            <p className="text-xs text-slate-300 leading-relaxed">
+              To start streaming your enrolled course lessons and access live sessions, complete your free registration with CAPTCHA.
+            </p>
+            <Link
+              href="/student/register"
+              className="inline-flex items-center gap-2 mt-2 px-4 py-2 bg-[#3157D5] hover:bg-[#243B9B] text-white text-xs font-bold rounded-xl shadow-md shadow-[#3157D5]/20 transition-all"
+            >
+              Complete Registration with CAPTCHA <ArrowRight className="w-3.5 h-3.5" />
+            </Link>
+          </div>
+        )}
+
         <div className="flex flex-col gap-3 pt-2">
           <Link
-            href="/student/courses"
-            className="w-full py-4 bg-gradient-to-r from-blue-600 via-indigo-600 to-purple-600 hover:from-blue-500 hover:to-purple-500 text-white font-bold rounded-2xl shadow-lg shadow-blue-500/25 flex items-center justify-center gap-2 text-base transition-all"
+            href={currentUser ? "/student/courses" : "/student/login"}
+            className="w-full py-4 bg-gradient-to-r from-[#3157D5] via-blue-600 to-indigo-600 hover:opacity-95 text-white font-bold rounded-2xl shadow-lg shadow-blue-500/25 flex items-center justify-center gap-2 text-base transition-all"
           >
-            Start Learning <ArrowRight className="w-5 h-5" />
+            {currentUser ? "Access My Enrolled Course" : "Sign In to Access Course"}{" "}
+            <ArrowRight className="w-5 h-5" />
           </Link>
 
           {transactionId && (

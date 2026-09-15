@@ -206,35 +206,6 @@ export default function LoginPage() {
                   Sign In
                 </GlassButton>
               </form>
-
-              {/* Quick Demo Credentials Assistant */}
-              <div className="pt-4 border-t border-slate-100 text-xs space-y-2">
-                <span className="font-bold text-slate-700 uppercase tracking-wider text-[10px]">
-                  Quick Dev Logins (Password: Password123!):
-                </span>
-                <div className="flex flex-wrap gap-1.5 text-[10px]">
-                  <button
-                    type="button"
-                    onClick={() => {
-                      setEmail("teacher@educonnects.com");
-                      setPassword("Password123!");
-                    }}
-                    className="px-2.5 py-1.5 bg-indigo-50 text-indigo-700 rounded-lg font-bold border border-indigo-100 hover:bg-indigo-100 transition-colors"
-                  >
-                    Educator Demo
-                  </button>
-                  <button
-                    type="button"
-                    onClick={() => {
-                      setEmail("student@educonnects.com");
-                      setPassword("Password123!");
-                    }}
-                    className="px-2.5 py-1.5 bg-emerald-50 text-emerald-700 rounded-lg font-bold border border-emerald-100 hover:bg-emerald-100 transition-colors"
-                  >
-                    Learner Demo
-                  </button>
-                </div>
-              </div>
             </GlassCard>
           </div>
         </div>

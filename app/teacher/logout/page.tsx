@@ -125,7 +125,7 @@ export default function EducatorLogoutPage() {
               </div>
               <div>
                 <h4 className="text-sm font-black text-white tracking-tight">Inspiring Nationwide Learners</h4>
-                <p className="text-xs text-emerald-300 font-semibold">EduConnect Learning Community</p>
+                <p className="text-xs text-emerald-300 font-semibold">EduConnects Learning Community</p>
                 <p className="text-[11px] text-teal-200/60 font-medium">Live 1-on-1, Group Classes & LMS</p>
               </div>
             </div>

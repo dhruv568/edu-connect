@@ -237,26 +237,6 @@ export default function TeacherLoginPage() {
                 </GlassButton>
               </form>
 
-              {/* Quick Teacher Demo Account */}
-              <div className="pt-4 border-t border-slate-100 text-xs space-y-2">
-                <span className="font-bold text-slate-700 uppercase tracking-wider text-[10px]">
-                  Quick Teacher Demo:
-                </span>
-                <div>
-                  <button
-                    type="button"
-                    onClick={() => {
-                      setEmail("teacher@educonnects.com");
-                      setPassword("Password123!");
-                    }}
-                    className="w-full px-3 py-2 bg-indigo-50 text-indigo-700 rounded-xl font-bold border border-indigo-100 hover:bg-indigo-100 transition-colors text-xs flex items-center justify-between"
-                  >
-                    <span>Use Demo Educator Account</span>
-                    <span className="text-[10px] text-indigo-600">teacher@educonnects.com</span>
-                  </button>
-                </div>
-              </div>
-
               {/* Cross Role Links */}
               <div className="pt-2 text-center text-xs text-slate-500 border-t border-slate-100">
                 Are you a learner?{" "}

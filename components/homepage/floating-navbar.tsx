@@ -328,11 +328,6 @@ export function FloatingNavbar({ variant }: FloatingNavbarProps = {}) {
             />
 
             {/* Context Tag */}
-            {isLearner && (
-              <span className="hidden md:inline-flex items-center px-2.5 py-0.5 rounded-full text-[10px] font-black uppercase tracking-wider bg-blue-50 text-blue-700 border border-blue-200">
-                Learner
-              </span>
-            )}
             {isEducator && (
               <span className="hidden md:inline-flex items-center px-2.5 py-0.5 rounded-full text-[10px] font-black uppercase tracking-wider bg-emerald-50 text-emerald-700 border border-emerald-200">
                 Educator
@@ -382,32 +377,28 @@ export function FloatingNavbar({ variant }: FloatingNavbarProps = {}) {
               <>
                 <Link
                   href="/find-teachers"
-                  className="px-3 py-1.5 rounded-lg hover:text-blue-600 hover:bg-blue-50/70 transition-colors whitespace-nowrap"
+                  className="px-3.5 py-1.5 rounded-lg hover:text-blue-600 hover:bg-blue-50/70 transition-colors whitespace-nowrap"
                 >
                   Find Educators
                 </Link>
                 <Link
                   href="/courses"
-                  className="px-3 py-1.5 rounded-lg hover:text-blue-600 hover:bg-blue-50/70 transition-colors whitespace-nowrap"
+                  className="px-3.5 py-1.5 rounded-lg hover:text-blue-600 hover:bg-blue-50/70 transition-colors whitespace-nowrap"
                 >
                   Explore Courses
                 </Link>
                 <Link
-                  href="/student#benefits"
-                  className="px-3 py-1.5 rounded-lg hover:text-blue-600 hover:bg-blue-50/70 transition-colors whitespace-nowrap"
+                  href="/exam"
+                  className="px-3.5 py-1.5 rounded-lg hover:text-blue-600 hover:bg-blue-50/70 transition-colors whitespace-nowrap font-bold text-blue-600"
                 >
-                  Why EduConnects
+                  Take a Free Exam
                 </Link>
-                <a
-                  href={getLiveDomain()}
-                  className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg hover:text-blue-600 hover:bg-blue-50/70 transition-colors whitespace-nowrap group"
+                <Link
+                  href="/student#benefits"
+                  className="px-3.5 py-1.5 rounded-lg hover:text-blue-600 hover:bg-blue-50/70 transition-colors whitespace-nowrap"
                 >
-                  <span className="relative flex h-2 w-2">
-                    <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-red-400 opacity-75" />
-                    <span className="relative inline-flex rounded-full h-2 w-2 bg-red-500" />
-                  </span>
-                  <span className="font-bold text-red-600 group-hover:text-red-700">Live</span>
-                </a>
+                  Why EduConnects?
+                </Link>
               </>
             ) : (
               /* MAIN PLATFORM NAVIGATION */
@@ -471,68 +462,63 @@ export function FloatingNavbar({ variant }: FloatingNavbarProps = {}) {
           {/* ========================================================================= */}
           {/* 3. RIGHT: ROLE-AWARE ACTION CLUSTER (PORTAL ONLY) */}
           {/* ========================================================================= */}
-          {(isEducator || isLearner) && (
+          {isLearner ? (
+            /* ========================================================================= */
+            /* 3A. LEARNER RIGHT ACTION CLUSTER (INDEPENDENT, CLEAN, STRICT ORDER) */
+            /* ========================================================================= */
+            <div className="hidden lg:flex items-center gap-3 shrink-0">
+              {userSession && isLearnerRole(userSession.role) ? (
+                <div className="flex items-center gap-3">
+                  <Link
+                    href={getLearnerSubdomainUrl("/student/dashboard")}
+                    className="h-9 px-4 rounded-xl text-xs sm:text-sm font-bold text-white bg-[#3157D5] hover:bg-[#243B9B] shadow-xs hover:shadow-md transition-all flex items-center gap-2 active:scale-95 cursor-pointer"
+                  >
+                    <LayoutDashboard className="h-4 w-4 text-blue-100" />
+                    <span>Learner Dashboard</span>
+                  </Link>
+                  <button
+                    onClick={handleLogout}
+                    disabled={isLoggingOut}
+                    className="text-xs sm:text-sm font-bold text-slate-600 hover:text-rose-600 px-3 py-2 rounded-xl hover:bg-rose-50 transition-colors cursor-pointer"
+                  >
+                    Logout
+                  </button>
+                </div>
+              ) : (
+                <Link
+                  href="/student/login"
+                  className="text-xs sm:text-sm font-bold text-slate-700 hover:text-[#3157D5] px-4 py-2 rounded-xl hover:bg-blue-50 transition-colors whitespace-nowrap"
+                >
+                  Login
+                </Link>
+              )}
+            </div>
+          ) : isEducator && (
             <div className="hidden lg:flex items-center gap-3 shrink-0">
             {/* Context Switcher Link */}
-            {isEducator ? (
-              <Link
-                href="/student"
-                className="hidden xl:inline-flex items-center gap-1 text-xs font-semibold text-slate-600 hover:text-emerald-700 px-3 py-1.5 rounded-xl border border-slate-200 hover:border-emerald-200 bg-slate-50/80 hover:bg-emerald-50/50 transition-all whitespace-nowrap shadow-2xs"
-              >
-                Learner Portal →
-              </Link>
-            ) : isLearner ? (
-              <Link
-                href="/teacher"
-                className="hidden xl:inline-flex items-center gap-1 text-xs font-semibold text-slate-600 hover:text-blue-700 px-3 py-1.5 rounded-xl border border-slate-200 hover:border-blue-200 bg-slate-50/80 hover:bg-blue-50/50 transition-all whitespace-nowrap shadow-2xs"
-              >
-                Teach on EduConnects →
-              </Link>
-            ) : null}
+            <Link
+              href="/student"
+              className="hidden xl:inline-flex items-center gap-1 text-xs font-semibold text-slate-600 hover:text-emerald-700 px-3 py-1.5 rounded-xl border border-slate-200 hover:border-emerald-200 bg-slate-50/80 hover:bg-emerald-50/50 transition-all whitespace-nowrap shadow-2xs"
+            >
+              Learner Portal →
+            </Link>
 
-            {/* Separator if switcher shown */}
-            {(isEducator || isLearner) && (
-              <div className="hidden xl:block h-4 w-px bg-slate-200" />
-            )}
+            <div className="hidden xl:block h-4 w-px bg-slate-200" />
 
             {/* STATE 1: Unauthenticated Visitor */}
             {!userSession ? (
               <div className="flex items-center gap-2 sm:gap-3">
                 <Link
-                  href={
-                    isEducator
-                      ? "/teacher/login"
-                      : isLearner
-                      ? "/student/login"
-                      : "/login"
-                  }
+                  href="/teacher/login"
                   className="text-xs sm:text-sm font-bold text-slate-700 hover:text-[#083F3D] px-3.5 py-2 rounded-xl hover:bg-[#F2FAF8] transition-colors whitespace-nowrap"
                 >
                   Login
                 </Link>
                 <Link
-                  href={
-                    isEducator
-                      ? "/teacher/register"
-                      : isLearner
-                      ? "/student/register"
-                      : "/register"
-                  }
-                  className={`h-9 px-4 sm:px-5 rounded-xl text-xs sm:text-sm font-bold text-white shadow-xs hover:shadow-md transition-all whitespace-nowrap flex items-center gap-1.5 cursor-pointer active:scale-95 ${
-                    isLearner
-                      ? "bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 shadow-blue-500/20"
-                      : isEducator
-                      ? "bg-gradient-to-r from-[#16805B] to-[#0D5C41] hover:from-[#12684A] hover:to-[#0A4732] shadow-emerald-700/20"
-                      : "bg-[#0F5C5A] hover:bg-[#083F3D] active:bg-[#052C2A] shadow-teal-900/20"
-                  }`}
+                  href="/teacher/register"
+                  className="h-9 px-4 sm:px-5 rounded-xl text-xs sm:text-sm font-bold text-white shadow-xs hover:shadow-md transition-all whitespace-nowrap flex items-center gap-1.5 cursor-pointer active:scale-95 bg-gradient-to-r from-[#16805B] to-[#0D5C41] hover:from-[#12684A] hover:to-[#0A4732] shadow-emerald-700/20"
                 >
-                  <span>
-                    {isEducator
-                      ? "Start Teaching"
-                      : isLearner
-                      ? "Start Learning"
-                      : "Get Started"}
-                  </span>
+                  <span>Start Teaching</span>
                   <ArrowRight className="h-3.5 w-3.5" />
                 </Link>
               </div>
@@ -894,34 +880,31 @@ export function FloatingNavbar({ variant }: FloatingNavbarProps = {}) {
                     <Link
                       href="/find-teachers"
                       onClick={() => setMobileOpen(false)}
-                      className="py-2 px-3 hover:bg-blue-50 hover:text-blue-700 rounded-xl"
+                      className="py-2.5 px-3.5 hover:bg-blue-50 hover:text-blue-700 rounded-xl font-semibold"
                     >
                       Find Educators
                     </Link>
                     <Link
                       href="/courses"
                       onClick={() => setMobileOpen(false)}
-                      className="py-2 px-3 hover:bg-blue-50 hover:text-blue-700 rounded-xl"
+                      className="py-2.5 px-3.5 hover:bg-blue-50 hover:text-blue-700 rounded-xl font-semibold"
                     >
                       Explore Courses
                     </Link>
                     <Link
+                      href="/exam"
+                      onClick={() => setMobileOpen(false)}
+                      className="py-2.5 px-3.5 hover:bg-blue-50 hover:text-blue-700 rounded-xl font-bold text-blue-600"
+                    >
+                      Take a Free Exam
+                    </Link>
+                    <Link
                       href="/student#benefits"
                       onClick={() => setMobileOpen(false)}
-                      className="py-2 px-3 hover:bg-blue-50 hover:text-blue-700 rounded-xl"
+                      className="py-2.5 px-3.5 hover:bg-blue-50 hover:text-blue-700 rounded-xl font-semibold"
                     >
-                      Why EduConnects
+                      Why EduConnects?
                     </Link>
-                    <a
-                      href={getLiveDomain()}
-                      onClick={() => setMobileOpen(false)}
-                      className="py-2 px-3 hover:bg-blue-50 rounded-xl flex items-center justify-between text-red-600 font-bold"
-                    >
-                      <span>Live Events</span>
-                      <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-bold bg-red-100 text-red-600">
-                        🔴 Live
-                      </span>
-                    </a>
                   </>
                 ) : (
                   <>
@@ -989,76 +972,70 @@ export function FloatingNavbar({ variant }: FloatingNavbarProps = {}) {
                 )}
               </nav>
 
-              {/* Mobile Auth Actions (PORTAL ONLY) */}
-              {(isEducator || isLearner) && (
+              {/* Mobile Auth Actions */}
+              {isLearner ? (
+                <div className="pt-3 border-t border-slate-100 flex flex-col gap-2">
+                  {userSession && isLearnerRole(userSession.role) ? (
+                    <>
+                      <Link
+                        href={getLearnerSubdomainUrl("/student/dashboard")}
+                        onClick={() => setMobileOpen(false)}
+                        className="w-full py-2.5 rounded-xl bg-[#3157D5] hover:bg-[#243B9B] text-white text-sm font-bold shadow-xs transition-colors flex items-center justify-center gap-2 cursor-pointer"
+                      >
+                        <LayoutDashboard className="h-4 w-4" />
+                        <span>Learner Dashboard</span>
+                      </Link>
+                      <button
+                        type="button"
+                        onClick={(e) => {
+                          setMobileOpen(false);
+                          handleLogout(e);
+                        }}
+                        disabled={isLoggingOut}
+                        className="w-full py-2 rounded-xl text-slate-600 hover:text-rose-600 text-xs font-bold text-center cursor-pointer"
+                      >
+                        Logout
+                      </button>
+                    </>
+                  ) : (
+                    <Link
+                      href="/student/login"
+                      onClick={() => setMobileOpen(false)}
+                      className="w-full py-2.5 rounded-xl border border-slate-200 text-slate-800 text-sm font-bold hover:bg-slate-50 transition-colors text-center cursor-pointer block"
+                    >
+                      Login
+                    </Link>
+                  )}
+                </div>
+              ) : isEducator && (
                 <div className="pt-3 border-t border-slate-100 flex flex-col gap-2">
                   {!userSession ? (
                     <>
                       <Link
-                        href={
-                          isEducator
-                            ? "/teacher/login"
-                            : isLearner
-                            ? "/student/login"
-                            : "/login"
-                        }
+                        href="/teacher/login"
                         onClick={() => setMobileOpen(false)}
                         className="w-full py-2.5 rounded-xl border border-slate-200 text-slate-800 text-sm font-bold hover:bg-slate-50 transition-colors text-center cursor-pointer block"
                       >
                         Login
                       </Link>
                       <Link
-                        href={
-                          isEducator
-                            ? "/teacher/register"
-                            : isLearner
-                            ? "/student/register"
-                            : "/register"
-                        }
+                        href="/teacher/register"
                         onClick={() => setMobileOpen(false)}
-                        className={`w-full py-2.5 rounded-xl text-white text-sm font-bold shadow-xs transition-colors flex items-center justify-center gap-1.5 cursor-pointer ${
-                          isLearner
-                            ? "bg-blue-600 hover:bg-blue-700"
-                            : isEducator
-                            ? "bg-[#16805B] hover:bg-[#0D5C41]"
-                            : "bg-[#0F5C5A] hover:bg-[#083F3D] active:bg-[#052C2A]"
-                        }`}
+                        className="w-full py-2.5 rounded-xl text-white text-sm font-bold shadow-xs transition-colors flex items-center justify-center gap-1.5 cursor-pointer bg-[#16805B] hover:bg-[#0D5C41]"
                       >
-                        <span>
-                          {isEducator
-                            ? "Start Teaching"
-                            : isLearner
-                            ? "Start Learning"
-                            : "Get Started"}
-                        </span>
+                        <span>Start Teaching</span>
                         <ArrowRight className="h-4 w-4" />
                       </Link>
                     </>
                   ) : (
                     <>
-                      {/* Role-Specific Portal Button in Mobile */}
                       <Link
                         href={getDashboardPath(userSession)}
                         onClick={() => setMobileOpen(false)}
-                        className={`w-full py-2.5 rounded-xl text-white text-sm font-bold shadow-xs transition-colors flex items-center justify-center gap-2 cursor-pointer ${
-                          isLearnerRole(userSession.role)
-                            ? "bg-blue-600 hover:bg-blue-700"
-                            : isEducatorRole(userSession.role)
-                            ? "bg-[#16805B] hover:bg-[#0D5C41]"
-                            : "bg-[#0B4F4B] hover:bg-[#073F3C]"
-                        }`}
+                        className="w-full py-2.5 rounded-xl text-white text-sm font-bold shadow-xs transition-colors flex items-center justify-center gap-2 cursor-pointer bg-[#16805B] hover:bg-[#0D5C41]"
                       >
                         <LayoutDashboard className="h-4 w-4" />
                         <span>{getDashboardLabel(userSession)}</span>
-                      </Link>
-
-                      <Link
-                        href="/profile"
-                        onClick={() => setMobileOpen(false)}
-                        className="w-full py-2 rounded-xl text-slate-700 text-xs font-semibold hover:bg-slate-50 flex items-center justify-center gap-2 border border-slate-200 cursor-pointer"
-                      >
-                        <User className="h-3.5 w-3.5 text-slate-500" />
-                        <span>Account Profile</span>
                       </Link>
 
                       <button

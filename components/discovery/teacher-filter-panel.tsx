@@ -84,18 +84,22 @@ export function TeacherFilterPanel({ filters, onChange, onReset }: TeacherFilter
       <div className="space-y-2">
         <label className="block text-xs font-bold text-slate-700 uppercase tracking-wider">Minimum Rating</label>
         <div className="flex gap-2">
-          {[4.0, 4.5, 4.8].map((r) => (
+          {[
+            { value: 4.0, label: "4+" },
+            { value: 4.5, label: "4.5+" },
+            { value: 5.0, label: "5" },
+          ].map((item) => (
             <button
-              key={r}
+              key={item.value}
               type="button"
-              onClick={() => onChange({ ...filters, ratingMin: filters.ratingMin === r ? 0 : r })}
+              onClick={() => onChange({ ...filters, ratingMin: filters.ratingMin === item.value ? 0 : item.value })}
               className={`flex-1 py-1.5 text-xs font-bold rounded-xl border transition-all ${
-                filters.ratingMin === r
+                filters.ratingMin === item.value
                   ? "bg-blue-600 text-white border-blue-600 shadow-sm"
                   : "bg-white text-slate-700 border-slate-200 hover:border-slate-300"
               }`}
             >
-              ★ {r}+
+              ★ {item.label}
             </button>
           ))}
         </div>

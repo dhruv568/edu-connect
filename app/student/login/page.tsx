@@ -120,36 +120,36 @@ export default function StudentLoginPage() {
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-12 items-center w-full">
           {/* Left Column: Student Highlights & Social Proof */}
           <div className="lg:col-span-6 space-y-6 hidden lg:block">
-            <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-emerald-500/10 border border-emerald-500/20 text-emerald-700 text-xs font-bold uppercase tracking-wider">
-              <BookOpen className="h-3.5 w-3.5 text-emerald-600" />
-              <span>Student Learning Portal</span>
+            <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-[#3157D5]/10 border border-[#3157D5]/20 text-[#3157D5] text-xs font-bold uppercase tracking-wider">
+              <BookOpen className="h-3.5 w-3.5 text-[#3157D5]" />
+              <span>Learner Portal</span>
             </div>
 
             <div className="space-y-3">
               <h1 className="text-4xl font-black text-slate-900 tracking-tight leading-tight">
                 Resume Your <br />
-                <span className="bg-gradient-to-r from-emerald-600 via-teal-600 to-blue-600 bg-clip-text text-transparent">
+                <span className="bg-gradient-to-r from-[#3157D5] via-blue-600 to-indigo-600 bg-clip-text text-transparent">
                   Learning Journey
                 </span>
               </h1>
               <p className="text-sm text-slate-600 leading-relaxed">
-                Access your enrolled live classes, 1-on-1 demo sessions, self-paced video curricula, and earned certificates.
+                Access your enrolled live classes, 1-on-1 sessions, self-paced video curricula, and verified certificates.
               </p>
             </div>
 
             {/* Feature Bullets */}
             <div className="space-y-3 pt-2">
               <div className="flex items-center gap-3 text-xs font-semibold text-slate-700">
-                <div className="p-2 rounded-xl bg-emerald-100 text-emerald-700">
+                <div className="p-2 rounded-xl bg-blue-100 text-[#3157D5]">
                   <Video className="h-4 w-4" />
                 </div>
                 <span>Live interactive classrooms with whiteboard & live code sandbox</span>
               </div>
               <div className="flex items-center gap-3 text-xs font-semibold text-slate-700">
-                <div className="p-2 rounded-xl bg-blue-100 text-blue-700">
+                <div className="p-2 rounded-xl bg-indigo-100 text-indigo-700">
                   <CheckCircle2 className="h-4 w-4" />
                 </div>
-                <span>Direct 1-on-1 messaging & trial bookings with top verified tutors</span>
+                <span>Direct 1-on-1 messaging & trial bookings with top verified educators</span>
               </div>
               <div className="flex items-center gap-3 text-xs font-semibold text-slate-700">
                 <div className="p-2 rounded-xl bg-amber-100 text-amber-700">
@@ -163,9 +163,9 @@ export default function StudentLoginPage() {
             <div className="p-4 rounded-2xl bg-white border border-slate-200/90 shadow-sm space-y-2">
               <div className="flex items-center gap-3">
                 <img
-                  src="https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=100&auto=format&fit=crop&q=80"
-                  alt="Student"
-                  className="w-9 h-9 rounded-full object-cover ring-2 ring-emerald-500/30"
+                  src="/images/educators/educator_04.jpg"
+                  alt="Learner"
+                  className="w-9 h-9 rounded-full object-cover ring-2 ring-[#3157D5]/30"
                 />
                 <div>
                   <div className="text-xs font-bold text-slate-900">Ananya Verma</div>
@@ -178,33 +178,33 @@ export default function StudentLoginPage() {
             </div>
           </div>
 
-          {/* Right Column: Student Login Form */}
+          {/* Right Column: Learner Login Form */}
           <div className="lg:col-span-6 max-w-md mx-auto w-full space-y-6">
             <div className="text-center lg:text-left space-y-2">
               <div className="flex justify-center lg:justify-start">
                 <Logo variant="compact" size="md" roleContext="student" href="/" priority />
               </div>
               <h2 className="text-2xl sm:text-3xl font-black text-slate-900">
-                Student Sign In
+                Learner Sign In
               </h2>
               <p className="text-xs text-slate-500">
-                Enter your student credentials to access your dashboard
+                Enter your credentials to access your EduConnects dashboard
               </p>
             </div>
 
             <GlassCard
-              glowColor="rgba(16, 185, 129, 0.15)"
+              glowColor="rgba(49, 87, 213, 0.15)"
               className="p-7 sm:p-8 border border-white/90 shadow-xl space-y-6"
             >
               <form onSubmit={handleLogin} className="space-y-4">
                 <Input
-                  label="Student Email Address"
+                  label="Learner Email Address"
                   type="email"
-                  placeholder="student@example.com"
+                  placeholder="learner@example.com"
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
                   required
-                  leftIcon={<Mail className="h-4 w-4 text-emerald-600" />}
+                  leftIcon={<Mail className="h-4 w-4 text-[#3157D5]" />}
                 />
 
                 <Input
@@ -214,14 +214,14 @@ export default function StudentLoginPage() {
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
                   required
-                  leftIcon={<Lock className="h-4 w-4 text-emerald-600" />}
+                  leftIcon={<Lock className="h-4 w-4 text-[#3157D5]" />}
                 />
 
                 <div className="flex items-center justify-between text-xs font-semibold">
-                  <Link href="/forgot-password" className="text-emerald-600 hover:underline">
+                  <Link href="/forgot-password" className="text-[#3157D5] hover:underline">
                     Forgot password?
                   </Link>
-                  <Link href="/student/register" className="text-slate-600 hover:text-emerald-700">
+                  <Link href="/student/register" className="text-slate-600 hover:text-[#3157D5]">
                     Need an account?
                   </Link>
                 </div>
@@ -229,41 +229,13 @@ export default function StudentLoginPage() {
                 <GlassButton
                   type="submit"
                   variant="primary"
-                  className="w-full mt-2 bg-emerald-600 hover:bg-emerald-700 border-emerald-500 shadow-emerald-600/20"
+                  className="w-full mt-2 bg-[#3157D5] hover:bg-[#243B9B] border-[#3157D5] shadow-[#3157D5]/20 text-white"
                   isLoading={loading}
                   rightIcon={<ArrowRight className="h-4 w-4" />}
                 >
                   Sign In as Learner
                 </GlassButton>
               </form>
-
-              {/* Quick Learner Demo Account */}
-              <div className="pt-4 border-t border-slate-100 text-xs space-y-2">
-                <span className="font-bold text-slate-700 uppercase tracking-wider text-[10px]">
-                  Quick Learner Demo:
-                </span>
-                <div>
-                  <button
-                    type="button"
-                    onClick={() => {
-                      setEmail("student@educonnects.com");
-                      setPassword("Password123!");
-                    }}
-                    className="w-full px-3 py-2 bg-emerald-50 text-emerald-700 rounded-xl font-bold border border-emerald-100 hover:bg-emerald-100 transition-colors text-xs flex items-center justify-between"
-                  >
-                    <span>Use Demo Learner Account</span>
-                    <span className="text-[10px] text-emerald-600">student@educonnects.com</span>
-                  </button>
-                </div>
-              </div>
-
-              {/* Cross Role Links */}
-              <div className="pt-2 text-center text-xs text-slate-500 border-t border-slate-100">
-                Are you an educator?{" "}
-                <Link href="/teacher/login" className="text-indigo-600 hover:underline font-bold">
-                  Sign in as Educator →
-                </Link>
-              </div>
             </GlassCard>
           </div>
         </div>

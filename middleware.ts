@@ -95,6 +95,7 @@ export function middleware(request: NextRequest) {
         pathname.startsWith("/refund") ||
         pathname.startsWith("/verify-") ||
         pathname.startsWith("/courses/") ||
+        pathname.startsWith("/exam") ||
         pathname.startsWith("/find-teachers");
 
       if (!isSharedOrExternal) {
@@ -197,6 +198,7 @@ export function middleware(request: NextRequest) {
     pathname.startsWith("/verify-otp") ||
     pathname.startsWith("/find-teachers") ||
     pathname.startsWith("/courses") ||
+    pathname.startsWith("/exam") ||
     pathname.startsWith("/pricing") ||
     pathname.startsWith("/how-it-works") ||
     pathname.startsWith("/about") ||

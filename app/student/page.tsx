@@ -8,6 +8,7 @@ import photo2 from "@/photo2.jpeg";
 import photo3 from "@/photo3.jpeg";
 import { FloatingNavbar } from "@/components/homepage/floating-navbar";
 import { PremiumFooter } from "@/components/homepage/premium-footer";
+import { HeroBackgroundSlideshow } from "@/components/homepage/hero-background-slideshow";
 import { GlassCard } from "@/components/glass/glass-card";
 import { GlassBadge } from "@/components/glass/glass-badge";
 import { GlassButton } from "@/components/glass/glass-button";
@@ -127,7 +128,7 @@ export default function StudentLandingPage() {
   const studentBenefits = [
     {
       icon: ShieldCheck,
-      title: "100% Verified Tutors",
+      title: "100% Verified Educators",
       desc: "Every educator undergoes strict identity, degree, and background verification before teaching.",
       badge: "Quality Guaranteed",
       color: "blue",
@@ -135,7 +136,7 @@ export default function StudentLandingPage() {
     {
       icon: Video,
       title: "Interactive Live Classes",
-      desc: "Join real-time video classrooms with digital whiteboard, live chat, and instant teacher feedback.",
+      desc: "Join real-time video classrooms with digital whiteboard, live chat, and instant educator feedback.",
       badge: "Real-Time WebRTC",
       color: "emerald",
     },
@@ -149,7 +150,7 @@ export default function StudentLandingPage() {
     {
       icon: Target,
       title: "1-on-1 Trial Sessions",
-      desc: "Book zero-commitment demo lessons with top tutors to find your ideal learning mentor.",
+      desc: "Book zero-commitment demo lessons with top educators to find your ideal learning mentor.",
       badge: "Risk-Free Trial",
       color: "indigo",
     },
@@ -173,7 +174,7 @@ export default function StudentLandingPage() {
     {
       name: "Aarav Mehta",
       role: "Class 12 CBSE Learner",
-      avatar: "https://images.unsplash.com/photo-1539571696357-5a69c17a67c6?w=150&auto=format&fit=crop&q=80",
+      avatar: "/images/educators/educator_01.jpg",
       rating: 5,
       subject: "Calculus & Linear Algebra",
       quote:
@@ -183,17 +184,17 @@ export default function StudentLandingPage() {
     {
       name: "Sneha Patel",
       role: "NEET Physics Learner",
-      avatar: "https://images.unsplash.com/photo-1517841905240-472988babdf9?w=150&auto=format&fit=crop&q=80",
+      avatar: "/images/educators/educator_02.jpg",
       rating: 5,
       subject: "Electrostatics & Optics",
       quote:
-        "Booking a 1-on-1 demo gave me the confidence to choose my tutor without committing upfront. My physics problem-solving speed improved tremendously.",
+        "Booking a 1-on-1 demo gave me the confidence to choose my educator without committing upfront. My physics problem-solving speed improved tremendously.",
       achievement: "NEET Physics: 168/180",
     },
     {
       name: "Rohan Verma",
       role: "Python & Data Science Learner",
-      avatar: "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=150&auto=format&fit=crop&q=80",
+      avatar: "/images/educators/educator_03.jpg",
       rating: 5,
       subject: "Python Programming & AI",
       quote:
@@ -204,34 +205,64 @@ export default function StudentLandingPage() {
 
   const faqs = [
     {
-      question: "How do I enroll in a course on EduConnects?",
+      question: "1. How do I find the best verified educator for my subject or exam?",
       answer:
-        "You can explore our course catalog, filter by subject or difficulty level, view the curriculum overview and preview lessons, and click 'Enroll Now'. Payments are securely handled via Cashfree UPI, Netbanking, or Debit/Credit Cards.",
+        "Browse our Find Educators directory where you can filter by subject (Mathematics, Physics, Chemistry, Biology, Computer Science, English), hourly rate, teaching experience, and verified ratings (4+, 4.5+, 5). Each educator profile shows qualifications, bio, and verified credentials.",
     },
     {
-      question: "How do live interactive classes work?",
+      question: "2. How do I explore and enroll in courses on EduConnects?",
       answer:
-        "Live classes take place directly inside your web browser using high-speed WebRTC video powered by LiveKit. You get a built-in shared digital whiteboard, live chat, screen sharing, and the ability to ask questions directly to your teacher in real time.",
+        "Visit the Explore Courses catalog to discover structured curriculums with detailed chapter syllabi, lesson previews, and instructor overviews. Select the course that matches your learning goals to initiate enrollment.",
     },
     {
-      question: "Can I watch recorded lessons and revisit past classes?",
+      question: "3. What is the Free AI Exam system and how do I take a free exam?",
       answer:
-        "Yes! Self-paced courses include lifetime on-demand access to all video lessons and downloadable study resources. You can pause, speed up, or resume wherever you left off on both desktop and mobile.",
+        "Click 'Take a Free Exam' in the top navigation to access our interactive diagnostic exam tool. Select any subject, difficulty level, and number of questions (5, 10, or 15). Powered by OpenAI gpt-4o-mini, you receive instant server-side grading, step-by-step explanations, and personalized course and educator recommendations.",
     },
     {
-      question: "How do I find and book the right teacher?",
+      question: "4. Are there any limits on how many courses I can enroll in at one time?",
       answer:
-        "Visit the 'Find Teachers' section to browse verified educator profiles, review their teaching experience, subjects, hourly rates, and verified credentials. You can schedule 1-on-1 trial demo slots or group sessions based on your availability.",
+        "Yes, to ensure focused learning and mastery, EduConnects limits learners to enrolling in one course at a time. Once you complete your enrolled course, you can easily graduate and enroll in your next chosen curriculum.",
     },
     {
-      question: "How does progress tracking work?",
+      question: "5. What payment methods are supported for course enrollments and bookings?",
       answer:
-        "Your Learner Dashboard automatically tracks your completed lessons, upcoming live classes, study hours, and daily learning streak so you always know what to study next.",
+        "All transactions are securely processed in Indian Rupees (INR) through Cashfree Payments. You can pay via UPI (Google Pay, PhonePe, Paytm, BHIM), Netbanking across all major Indian banks, and Debit/Credit Cards (Visa, Mastercard, RuPay).",
     },
     {
-      question: "What if I need help or have payment issues?",
+      question: "6. What happens after I complete my payment on EduConnects?",
       answer:
-        "EduConnects provides 24/7 learner support and transparent escrow payment protection. If a scheduled live class is cancelled by a teacher, automated refund processing ensures your funds are protected.",
+        "After payment, you will see a confirmation screen. If you do not yet have an account, you will be prompted to complete a quick registration with cryptographic CAPTCHA. Once registered and signed in, your course is immediately unlocked in your Learner Dashboard.",
+    },
+    {
+      question: "7. How do live interactive classes work?",
+      answer:
+        "Live classes run directly inside your web browser via EduConnects Classroom powered by WebRTC. You get high-definition audio/video, collaborative digital whiteboards, screen sharing, and real-time chat without downloading external applications like Zoom.",
+    },
+    {
+      question: "8. Can I book a 1-on-1 trial class with an educator before committing?",
+      answer:
+        "Yes! Many educators offer 1-on-1 trial slots or demo sessions so you can discuss your syllabus, evaluate teaching style, and set learning targets before booking extended sessions.",
+    },
+    {
+      question: "9. How are educator ratings and reviews calculated?",
+      answer:
+        "Only learners who have attended verified live classes or enrolled in an educator's course can leave ratings and feedback. Ratings range from 1 to 5 stars, and filters allow you to easily discover top-rated mentors with 4+, 4.5+, or 5-star ratings.",
+    },
+    {
+      question: "10. How does EduConnects verify educators on the platform?",
+      answer:
+        "Every educator undergoes a rigorous multi-step vetting process including government identity verification, academic degree authentication, subject knowledge assessment, and teaching methodology review before being approved to teach.",
+    },
+    {
+      question: "11. Can I track my learning progress, attendance, and certificates?",
+      answer:
+        "Yes! Your personal Learner Dashboard tracks your video lesson completion, study streaks, upcoming live classroom sessions, and downloadable completion certificates for completed courses.",
+    },
+    {
+      question: "12. How do I contact EduConnects Learner Support if I need help?",
+      answer:
+        "Our dedicated learner support team is available via email at support@educonnects.co.in and live support tickets. In the rare event a scheduled class is cancelled by an educator, our automated escrow protection ensures hassle-free refund processing.",
     },
   ];
 
@@ -240,7 +271,7 @@ export default function StudentLandingPage() {
       id: "t-1",
       name: "Dr. Rajesh Sharma",
       headline: "Senior Mathematics Faculty & IIT JEE Coach",
-      avatarUrl: "https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=150&auto=format&fit=crop&q=80",
+      avatarUrl: "/images/educators/educator_05.jpg",
       subjects: ["Calculus", "Algebra", "JEE Advanced"],
       experienceYears: 12,
       hourlyRate: 850,
@@ -250,7 +281,7 @@ export default function StudentLandingPage() {
       id: "t-2",
       name: "Priya Sundaram",
       headline: "NEET & Board Exam Physics Specialist",
-      avatarUrl: "https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?w=150&auto=format&fit=crop&q=80",
+      avatarUrl: "/images/educators/anuradha-sengupta.jpg",
       subjects: ["Physics", "Mechanics", "Electrostatics"],
       experienceYears: 9,
       hourlyRate: 750,
@@ -260,7 +291,7 @@ export default function StudentLandingPage() {
       id: "t-3",
       name: "Amit Joshi",
       headline: "Computer Science & Full-Stack Mentor",
-      avatarUrl: "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=150&auto=format&fit=crop&q=80",
+      avatarUrl: "/images/educators/educator_07.jpg",
       subjects: ["Python", "Algorithms", "Web Dev"],
       experienceYears: 8,
       hourlyRate: 900,
@@ -270,7 +301,7 @@ export default function StudentLandingPage() {
       id: "t-4",
       name: "Ananya Roy",
       headline: "Organic & Physical Chemistry Faculty",
-      avatarUrl: "https://images.unsplash.com/photo-1580489944761-15a19d654956?w=150&auto=format&fit=crop&q=80",
+      avatarUrl: "/images/educators/educator_08.jpg",
       subjects: ["Chemistry", "Organic Synthesis", "CBSE 12th"],
       experienceYears: 7,
       hourlyRate: 700,
@@ -287,8 +318,8 @@ export default function StudentLandingPage() {
     },
     {
       step: "02",
-      title: "Book a Trial or Enroll",
-      desc: "Schedule a risk-free 1-on-1 demo with your preferred mentor, or enroll in a comprehensive curriculum with instant access.",
+      title: "Book a Class",
+      desc: "Schedule a risk-free 1-on-1 demo with your preferred educator, or enroll in a comprehensive curriculum with instant access.",
       icon: Calendar,
     },
     {
@@ -347,6 +378,7 @@ export default function StudentLandingPage() {
         {/* 1. HERO SECTION */}
         {/* ========================================================================= */}
         <section className="relative pt-32 sm:pt-36 lg:pt-44 pb-20 lg:pb-28 overflow-hidden bg-gradient-to-b from-blue-50/70 via-slate-50 to-white">
+          <HeroBackgroundSlideshow />
           {/* Subtle Background Elements */}
           <div className="absolute top-20 left-1/2 -translate-x-1/2 w-full max-w-7xl h-[500px] pointer-events-none -z-10">
             <div className="absolute top-10 left-10 w-96 h-96 bg-blue-500/15 rounded-full blur-3xl" />
@@ -431,7 +463,7 @@ export default function StudentLandingPage() {
                   </div>
                   <div>
                     <div className="text-2xl lg:text-3xl font-black text-blue-600">850+</div>
-                    <div className="text-xs text-slate-500 font-medium">Verified Tutors</div>
+                    <div className="text-xs text-slate-500 font-medium">Verified Educators</div>
                   </div>
                   <div>
                     <div className="text-2xl lg:text-3xl font-black text-emerald-600">4.95 ★</div>
@@ -490,14 +522,14 @@ export default function StudentLandingPage() {
         {/* ========================================================================= */}
         {/* 2. WHY EDUCONNECTS FOR LEARNERS */}
         {/* ========================================================================= */}
-        <section id="benefits" className="py-20 bg-white border-y border-slate-200/80">
+        <section id="benefits" className="py-24 lg:py-32 bg-white border-y border-slate-200/80">
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 space-y-12">
             <div className="text-center max-w-3xl mx-auto space-y-3">
-              <GlassBadge variant="learner">DESIGNED FOR MAXIMUM LEARNER SUCCESS</GlassBadge>
+              <GlassBadge variant="learner">WHY EDUCONNECTS?</GlassBadge>
               <h2 className="text-3xl sm:text-4xl font-black text-slate-900 tracking-tight">
-                Everything You Need to Master Any Subject
+                Why Learn on EduConnects?
               </h2>
-              <p className="text-sm sm:text-base text-slate-600 leading-relaxed">
+              <p className="text-sm sm:text-base text-slate-600 leading-relaxed max-w-2xl mx-auto">
                 Whether you need 1-on-1 personalized guidance, group exam prep, or self-paced video lessons, EduConnects gives you the complete learning stack.
               </p>
             </div>
@@ -750,35 +782,32 @@ export default function StudentLandingPage() {
                       <div className="w-3 h-3 rounded-full bg-amber-500" />
                       <div className="w-3 h-3 rounded-full bg-emerald-500" />
                       <span className="text-[11px] font-mono font-bold text-slate-400 ml-2">
-                        LiveKit Classroom Room #LK-9402
+                        EduConnects Classroom
                       </span>
                     </div>
-                    <span className="text-[10px] font-bold bg-rose-600 text-white px-2 py-0.5 rounded uppercase tracking-wider">
-                      LIVE REC
+                    <span className="text-[10px] font-bold bg-emerald-600 text-white px-2.5 py-0.5 rounded uppercase tracking-wider flex items-center gap-1.5">
+                      <span className="w-1.5 h-1.5 rounded-full bg-white animate-pulse" />
+                      Live
                     </span>
                   </div>
 
                   <div className="p-5 space-y-4 text-white">
                     {/* Simulated Whiteboard Drawing Canvas */}
                     <div className="bg-slate-900 rounded-2xl p-4 border border-slate-800 space-y-3">
-                      <div className="flex items-center justify-between text-xs text-slate-400 font-semibold border-b border-slate-800 pb-2">
-                        <span>Interactive Shared Whiteboard</span>
-                        <span>Pen Tool Active ✏️</span>
-                      </div>
                       <div className="h-36 flex flex-col justify-center items-center text-center space-y-2 font-mono text-emerald-400 text-sm">
                         <div>f'(x) = lim(h→0) [f(x+h) - f(x)] / h</div>
                         <div className="text-xs text-blue-300">d/dx [sin(x)] = cos(x)</div>
-                        <div className="text-[11px] text-amber-300">Teacher has granted drawing permissions</div>
+                        <div className="text-[11px] text-amber-300">Educator has granted drawing permissions</div>
                       </div>
                     </div>
 
                     {/* Chat Bubble simulation */}
                     <div className="p-3 bg-slate-900/90 rounded-xl border border-slate-800 flex items-start gap-3 text-xs">
                       <div className="w-6 h-6 rounded-full bg-blue-600 text-white font-bold flex items-center justify-center text-[10px] shrink-0">
-                        P
+                        M
                       </div>
                       <div>
-                        <span className="font-bold text-slate-300">Priya (Learner):</span>
+                        <span className="font-bold text-slate-300">Manoj Gupta (Learner):</span>
                         <span className="text-slate-400 ml-2">"Understood! Can we solve question 4 from the problem set next?"</span>
                       </div>
                     </div>
@@ -831,7 +860,7 @@ export default function StudentLandingPage() {
                 <div className="pt-4">
                   <Link href="/find-teachers">
                     <GlassButton variant="learner" size="md" rightIcon={<ArrowRight className="h-4 w-4" />}>
-                      Find a Live Tutor Now
+                      Find an Educator Now
                     </GlassButton>
                   </Link>
                 </div>
@@ -843,14 +872,14 @@ export default function StudentLandingPage() {
         {/* ========================================================================= */}
         {/* 6. HOW IT WORKS (FOR LEARNERS) */}
         {/* ========================================================================= */}
-        <section id="how-it-works" className="py-20 lg:py-28 bg-white border-t border-slate-200">
+        <section id="how-it-works" className="py-24 lg:py-32 bg-white border-t border-slate-200">
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 space-y-16">
             <div className="text-center max-w-2xl mx-auto space-y-3">
               <GlassBadge variant="learner">SIMPLE 4-STEP LEARNER JOURNEY</GlassBadge>
               <h2 className="text-3xl sm:text-4xl font-black text-slate-900 tracking-tight">
                 How Learning on EduConnects Works
               </h2>
-              <p className="text-sm text-slate-600 leading-relaxed">
+              <p className="text-sm sm:text-base text-slate-600 leading-relaxed max-w-xl mx-auto">
                 From finding your ideal subject mentor to mastering complex topics, start learning in four straightforward steps.
               </p>
             </div>
@@ -950,47 +979,48 @@ export default function StudentLandingPage() {
             <div className="text-center max-w-3xl mx-auto space-y-3">
               <GlassBadge variant="learner">THE MODERN WAY TO LEARN</GlassBadge>
               <h2 className="text-3xl sm:text-4xl font-black text-slate-900 tracking-tight">
-                Why Learners Choose EduConnects over Traditional Coaching
+                Why Learners Choose EduConnects?
               </h2>
-              <p className="text-sm text-slate-600 leading-relaxed">
+              <p className="text-sm sm:text-base text-slate-600 leading-relaxed max-w-2xl mx-auto">
                 Compare the flexibility, verified mentor quality, and learner-first economics of EduConnects against rigid offline coaching centers.
               </p>
             </div>
 
             {/* Comparison Table */}
-            <div className="overflow-hidden rounded-3xl border border-slate-200 shadow-xl bg-white">
-              <div className="grid grid-cols-12 bg-slate-100/90 border-b border-slate-200 text-xs font-black uppercase tracking-wider text-slate-700 py-4 px-6">
-                <div className="col-span-4 sm:col-span-4">Category</div>
-                <div className="col-span-4 sm:col-span-4 text-slate-500">Traditional Coaching</div>
-                <div className="col-span-4 sm:col-span-4 text-blue-700 font-extrabold flex items-center gap-1">
-                  <span>EduConnects</span>
-                  <span className="text-[10px] bg-blue-100 text-blue-700 px-1.5 py-0.2 rounded font-bold">Recommended</span>
-                </div>
-              </div>
-
-              <div className="divide-y divide-slate-100">
-                {comparisonPoints.map((item, idx) => (
-                  <div
-                    key={idx}
-                    className={`grid grid-cols-12 py-4.5 px-6 items-center text-xs sm:text-sm ${
-                      idx % 2 === 0 ? "bg-white" : "bg-slate-50/40"
-                    }`}
-                  >
-                    <div className="col-span-4 sm:col-span-4 font-bold text-slate-900 pr-3">
-                      {item.feature}
-                    </div>
-                    <div className="col-span-4 sm:col-span-4 text-slate-500 pr-3 flex items-start gap-2">
-                      <X className="h-4 w-4 text-rose-400 shrink-0 mt-0.5" />
-                      <span className="text-xs leading-relaxed">{item.traditional}</span>
-                    </div>
-                    <div className="col-span-4 sm:col-span-4 font-semibold text-slate-900 flex items-start gap-2 bg-blue-50/40 -my-4.5 py-4.5 px-3 rounded-xl border-l border-blue-200/60">
-                      <Check className="h-4 w-4 text-emerald-600 shrink-0 mt-0.5 stroke-[3]" />
-                      <span className="text-xs leading-relaxed text-blue-950 font-bold">
-                        {item.educonnects}
-                      </span>
-                    </div>
+            <div className="overflow-x-auto rounded-3xl border border-slate-200 shadow-xl bg-white">
+              <div className="min-w-[640px]">
+                <div className="grid grid-cols-12 bg-slate-100/90 border-b border-slate-200 text-xs font-black uppercase tracking-wider text-slate-700 py-4 px-6 sm:px-8">
+                  <div className="col-span-4">Category</div>
+                  <div className="col-span-4 text-slate-500">Traditional Coaching</div>
+                  <div className="col-span-4 text-[#3157D5] font-extrabold flex items-center gap-1">
+                    <span>EduConnects</span>
                   </div>
-                ))}
+                </div>
+
+                <div className="divide-y divide-slate-100">
+                  {comparisonPoints.map((item, idx) => (
+                    <div
+                      key={idx}
+                      className={`grid grid-cols-12 py-5 px-6 sm:px-8 items-center text-xs sm:text-sm ${
+                        idx % 2 === 0 ? "bg-white" : "bg-slate-50/40"
+                      }`}
+                    >
+                      <div className="col-span-4 font-bold text-slate-900 pr-4">
+                        {item.feature}
+                      </div>
+                      <div className="col-span-4 text-slate-500 pr-4 flex items-start gap-2">
+                        <X className="h-4 w-4 text-rose-400 shrink-0 mt-0.5" />
+                        <span className="text-xs sm:text-sm leading-relaxed">{item.traditional}</span>
+                      </div>
+                      <div className="col-span-4 font-semibold text-slate-900 flex items-start gap-2 bg-blue-50/40 -my-5 py-5 px-4 rounded-xl border-l border-blue-200/60">
+                        <Check className="h-4 w-4 text-emerald-600 shrink-0 mt-0.5 stroke-[3]" />
+                        <span className="text-xs sm:text-sm leading-relaxed text-blue-950 font-bold">
+                          {item.educonnects}
+                        </span>
+                      </div>
+                    </div>
+                  ))}
+                </div>
               </div>
             </div>
           </div>
@@ -999,14 +1029,14 @@ export default function StudentLandingPage() {
         {/* ========================================================================= */}
         {/* 9. LEARNER FAQ ACCORDION */}
         {/* ========================================================================= */}
-        <section id="faq" className="py-20 lg:py-28 bg-slate-50 border-t border-slate-200">
+        <section id="faq" className="py-24 lg:py-32 bg-slate-50 border-t border-slate-200">
           <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 space-y-12">
             <div className="text-center space-y-3">
               <GlassBadge variant="learner">LEARNER FAQ</GlassBadge>
               <h2 className="text-3xl sm:text-4xl font-black text-slate-900 tracking-tight">
-                Frequently Asked Questions for Learners
+                Have Questions? Frequently Asked Questions for Learners
               </h2>
-              <p className="text-sm text-slate-600">
+              <p className="text-sm sm:text-base text-slate-600 max-w-2xl mx-auto">
                 Got questions about how learning on EduConnects works? We have answers.
               </p>
             </div>
@@ -1045,49 +1075,64 @@ export default function StudentLandingPage() {
         {/* ========================================================================= */}
         {/* 7. FINAL CALL TO ACTION */}
         {/* ========================================================================= */}
-        <section className="py-20 bg-gradient-to-r from-blue-700 via-blue-800 to-indigo-900 text-white relative overflow-hidden">
-          <div className="max-w-5xl mx-auto px-4 sm:px-6 text-center space-y-6 relative z-10">
-            <span className="px-3.5 py-1.5 rounded-full bg-white/10 backdrop-blur-md text-blue-200 text-xs font-bold uppercase tracking-wider border border-white/20">
-              Start Today with Zero Risk
-            </span>
+        <section className="py-24 lg:py-32 bg-gradient-to-r from-blue-700 via-blue-800 to-indigo-900 text-white relative overflow-hidden">
+          <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
+            <div className="grid grid-cols-1 lg:grid-cols-12 gap-12 items-center">
+              <div className="lg:col-span-7 text-center lg:text-left space-y-6">
+                <span className="px-3.5 py-1.5 rounded-full bg-white/10 backdrop-blur-md text-blue-200 text-xs font-bold uppercase tracking-wider border border-white/20 inline-block">
+                  Start Today with Zero Risk
+                </span>
 
-            <h2 className="text-3xl sm:text-5xl font-black tracking-tight leading-tight">
-              Start Your Learning Journey
-            </h2>
+                <h2 className="text-3xl sm:text-5xl font-black tracking-tight leading-tight">
+                  Start Your Learning Journey
+                </h2>
 
-            <p className="text-sm sm:text-base text-blue-100 max-w-xl mx-auto font-medium">
-              Join 15,000+ learners mastering difficult subjects, passing entrance exams, and building skills with verified mentors.
-            </p>
+                <p className="text-sm sm:text-base text-blue-100 max-w-xl mx-auto lg:mx-0 font-medium leading-relaxed">
+                  Join 15,000+ learners mastering difficult subjects, passing competitive entrance exams, and building practical skills with verified educators.
+                </p>
 
-            <div className="pt-4 flex flex-col sm:flex-row items-center justify-center gap-4">
-              <Link href="/student/register" className="w-full sm:w-auto">
-                <GlassButton
-                  variant="secondary"
-                  size="lg"
-                  className="w-full sm:w-auto bg-white text-slate-900 hover:bg-slate-100 font-black shadow-xl"
-                  rightIcon={<ArrowRight className="h-4 w-4" />}
-                >
-                  Join as a Learner
-                </GlassButton>
-              </Link>
+                <div className="pt-2 flex flex-col sm:flex-row items-center justify-center lg:justify-start gap-4">
+                  <Link href="/courses" className="w-full sm:w-auto">
+                    <GlassButton
+                      variant="secondary"
+                      size="lg"
+                      className="w-full sm:w-auto bg-white text-slate-900 hover:bg-slate-100 font-black shadow-xl"
+                      rightIcon={<ArrowRight className="h-4 w-4" />}
+                    >
+                      Explore Courses
+                    </GlassButton>
+                  </Link>
 
-              <Link href="/find-teachers" className="w-full sm:w-auto">
-                <GlassButton
-                  variant="ghost"
-                  size="lg"
-                  className="w-full sm:w-auto text-white border border-white/30 hover:bg-white/10"
-                >
-                  Explore Verified Teachers
-                </GlassButton>
-              </Link>
-            </div>
+                  <Link href="/find-teachers" className="w-full sm:w-auto">
+                    <GlassButton
+                      variant="ghost"
+                      size="lg"
+                      className="w-full sm:w-auto text-white border border-white/30 hover:bg-white/10"
+                    >
+                      Explore Verified Educators
+                    </GlassButton>
+                  </Link>
+                </div>
 
-            <div className="pt-6 flex items-center justify-center gap-6 text-xs text-blue-200">
-              <span>✓ Free learner registration</span>
-              <span>•</span>
-              <span>✓ Instant access to demo sessions</span>
-              <span>•</span>
-              <span>✓ Encrypted classrooms</span>
+                <div className="pt-4 flex flex-wrap items-center justify-center lg:justify-start gap-4 sm:gap-6 text-xs text-blue-200">
+                  <span>✓ Verified Educators</span>
+                  <span>•</span>
+                  <span>✓ Instant demo sessions</span>
+                  <span>•</span>
+                  <span>✓ Interactive classrooms</span>
+                </div>
+              </div>
+
+              <div className="lg:col-span-5 flex justify-center">
+                <div className="relative rounded-3xl overflow-hidden shadow-2xl border-4 border-white/20 max-w-md w-full aspect-[4/3]">
+                  <img
+                    src="/images/learner-hero.jpeg"
+                    alt="Learner thriving on EduConnects"
+                    className="w-full h-full object-cover object-center"
+                  />
+                  <div className="absolute inset-0 bg-gradient-to-t from-black/40 via-transparent to-transparent pointer-events-none" />
+                </div>
+              </div>
             </div>
           </div>
         </section>

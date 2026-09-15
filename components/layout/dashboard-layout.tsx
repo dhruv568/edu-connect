@@ -271,6 +271,11 @@ export function DashboardLayout({ role, userName, userEmail, children }: Dashboa
           badgeKey: "draftCourses",
         },
         {
+          label: "Subject Management",
+          icon: BookOpen,
+          href: "/admin/subjects",
+        },
+        {
           label: "Content & User Reports",
           icon: AlertOctagon,
           href: "/admin/reports",

@@ -266,18 +266,22 @@ export default function StudentFindTeachersPage() {
                   Minimum Rating
                 </label>
                 <div className="grid grid-cols-3 gap-2">
-                  {[4.0, 4.5, 4.8].map((r) => (
+                  {[
+                    { value: 4.0, label: "4+" },
+                    { value: 4.5, label: "4.5+" },
+                    { value: 5.0, label: "5" },
+                  ].map((item) => (
                     <button
-                      key={r}
+                      key={item.value}
                       type="button"
-                      onClick={() => setMinRating(minRating === r ? 0 : r)}
+                      onClick={() => setMinRating(minRating === item.value ? 0 : item.value)}
                       className={`py-2 text-xs font-bold rounded-xl border transition-all ${
-                        minRating === r
+                        minRating === item.value
                           ? "bg-blue-600 text-white border-blue-600 shadow-sm"
                           : "bg-slate-50 text-slate-700 border-slate-200 hover:border-slate-300"
                       }`}
                     >
-                      ★ {r}+
+                      ★ {item.label}
                     </button>
                   ))}
                 </div>

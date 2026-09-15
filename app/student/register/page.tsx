@@ -14,6 +14,8 @@ import { BookOpen, CheckCircle2, ArrowRight, Video, Sparkles, Award } from "luci
 import { BackButton } from "@/components/ui/back-button";
 import { Logo } from "@/components/brand/logo";
 
+import { RegistrationCaptcha } from "@/components/auth/registration-captcha";
+
 export default function StudentRegisterPage() {
   const [firstName, setFirstName] = useState("");
   const [lastName, setLastName] = useState("");
@@ -21,6 +23,9 @@ export default function StudentRegisterPage() {
   const [password, setPassword] = useState("");
   const [gradeLevel, setGradeLevel] = useState("Grade 10");
   const [selectedPreferences, setSelectedPreferences] = useState<string[]>(["Mathematics"]);
+  const [captchaToken, setCaptchaToken] = useState("");
+  const [captchaAnswer, setCaptchaAnswer] = useState("");
+  const [captchaError, setCaptchaError] = useState("");
   const [loading, setLoading] = useState(false);
 
   const router = useRouter();
@@ -46,6 +51,14 @@ export default function StudentRegisterPage() {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+
+    if (!captchaAnswer.trim()) {
+      setCaptchaError("Please complete the security verification challenge.");
+      showToast("Verification Required", "Please answer the security CAPTCHA.", "error");
+      return;
+    }
+
+    setCaptchaError("");
     setLoading(true);
 
     try {
@@ -60,11 +73,18 @@ export default function StudentRegisterPage() {
           role: "STUDENT",
           gradeLevel,
           interests: selectedPreferences.join(", "),
+          captchaToken,
+          captchaAnswer,
         }),
       });
 
       const data = await res.json();
-      if (!res.ok) throw new Error(data.error || "Student registration failed.");
+      if (!res.ok) {
+        if (data.error?.toLowerCase().includes("captcha") || data.error?.toLowerCase().includes("security")) {
+          setCaptchaError(data.error);
+        }
+        throw new Error(data.error || "Learner registration failed.");
+      }
 
       showToast("Account Created!", "6-digit verification code sent to your email.", "success", true);
       router.push(`/verify-email?email=${encodeURIComponent(email)}`);
@@ -135,29 +155,29 @@ export default function StudentRegisterPage() {
                 <Logo variant="compact" size="md" roleContext="student" href="/" priority />
               </div>
               <h2 className="text-2xl sm:text-3xl font-black text-slate-900">
-                Create Student Account
+                Create Learner Account
               </h2>
               <p className="text-xs text-slate-500">
-                Start discovering top tutors and learning without limits
+                Complete your account setup to access your enrolled courses
               </p>
             </div>
 
             <GlassCard
-              glowColor="rgba(16, 185, 129, 0.15)"
+              glowColor="rgba(49, 87, 213, 0.15)"
               className="p-7 sm:p-8 border border-white/90 shadow-xl space-y-5"
             >
               <form onSubmit={handleSubmit} className="space-y-4">
                 <div className="grid grid-cols-2 gap-3">
                   <Input
                     label="First Name"
-                    placeholder="Alex"
+                    placeholder="Aarav"
                     value={firstName}
                     onChange={(e) => setFirstName(e.target.value)}
                     required
                   />
                   <Input
                     label="Last Name"
-                    placeholder="Morgan"
+                    placeholder="Sharma"
                     value={lastName}
                     onChange={(e) => setLastName(e.target.value)}
                     required
@@ -167,7 +187,7 @@ export default function StudentRegisterPage() {
                 <Input
                   label="Email Address"
                   type="email"
-                  placeholder="alex@example.com"
+                  placeholder="aarav@example.com"
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
                   required
@@ -189,7 +209,7 @@ export default function StudentRegisterPage() {
                   <select
                     value={gradeLevel}
                     onChange={(e) => setGradeLevel(e.target.value)}
-                    className="w-full h-11 px-3 text-xs bg-white border border-slate-200 rounded-xl outline-none font-medium focus:ring-2 focus:ring-emerald-500/20"
+                    className="w-full h-11 px-3 text-xs bg-white border border-slate-200 rounded-xl outline-none font-medium focus:ring-2 focus:ring-blue-500/20"
                   >
                     {["Grade 6", "Grade 7", "Grade 8", "Grade 9", "Grade 10", "Grade 11", "Grade 12", "College Prep"].map(
                       (g) => (
@@ -215,7 +235,7 @@ export default function StudentRegisterPage() {
                           onClick={() => togglePreference(pref)}
                           className={`px-3 py-1.5 rounded-xl text-xs font-bold border transition-all ${
                             isSelected
-                              ? "bg-emerald-600 text-white border-emerald-600 shadow-sm"
+                              ? "bg-blue-600 text-white border-blue-600 shadow-sm"
                               : "bg-white text-slate-700 border-slate-200 hover:border-slate-300"
                           }`}
                         >
@@ -226,27 +246,32 @@ export default function StudentRegisterPage() {
                   </div>
                 </div>
 
+                {/* Registration Security CAPTCHA */}
+                <RegistrationCaptcha
+                  onVerifyChange={(tok, ans) => {
+                    setCaptchaToken(tok);
+                    setCaptchaAnswer(ans);
+                    if (ans.trim()) setCaptchaError("");
+                  }}
+                  error={captchaError}
+                />
+
                 <GlassButton
                   type="submit"
                   variant="primary"
-                  className="w-full mt-4 bg-emerald-600 hover:bg-emerald-700 border-emerald-500 shadow-emerald-600/20"
+                  className="w-full mt-4 bg-[#3157D5] hover:bg-[#243B9B] border-blue-600 shadow-blue-600/20 text-white font-bold"
                   isLoading={loading}
                   rightIcon={<CheckCircle2 className="h-4 w-4" />}
                 >
-                  Create Student Account
+                  Create Learner Account
                 </GlassButton>
               </form>
 
-              <div className="pt-4 border-t border-slate-100 flex flex-col sm:flex-row items-center justify-between gap-2 text-xs">
+              <div className="pt-4 border-t border-slate-100 flex items-center justify-center text-xs">
                 <div>
                   <span className="text-slate-500">Already have an account? </span>
-                  <Link href="/student/login" className="font-bold text-emerald-600 hover:underline">
+                  <Link href="/student/login" className="font-bold text-blue-600 hover:underline">
                     Sign In
-                  </Link>
-                </div>
-                <div>
-                  <Link href="/teacher/register" className="text-indigo-600 hover:underline font-bold">
-                    Join as Educator →
                   </Link>
                 </div>
               </div>
