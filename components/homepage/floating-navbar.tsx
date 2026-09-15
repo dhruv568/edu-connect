@@ -253,6 +253,8 @@ export function FloatingNavbar({ variant }: FloatingNavbarProps = {}) {
         window.location.hostname.startsWith("teachers.") ||
         window.location.hostname.startsWith("teacher.")));
 
+  const isMainWebsite = !isLearner && !isEducator;
+
   // Role-derived Portal Destinations & Labels (Strictly derived from server auth truth)
   const getDashboardPath = (session: UserSession) => {
     if (isEducatorRole(session.role)) return getEducatorSubdomainUrl("/teacher/dashboard");
@@ -293,9 +295,13 @@ export function FloatingNavbar({ variant }: FloatingNavbarProps = {}) {
     <>
       <header
         className={`fixed top-0 left-0 right-0 z-50 transition-all duration-300 ${
-          scrolled
-            ? "bg-white/95 backdrop-blur-md border-b border-slate-200/90 shadow-sm py-2 sm:py-2.5"
-            : "bg-white/90 backdrop-blur-xs border-b border-slate-200/60 py-2.5 sm:py-3.5"
+          isMainWebsite
+            ? scrolled
+              ? "bg-[#083F3D] border-b border-[#1B6863]/40 shadow-sm py-2 sm:py-2.5"
+              : "bg-[#083F3D] border-b border-[#1B6863]/25 py-2.5 sm:py-3.5"
+            : scrolled
+              ? "bg-white/95 backdrop-blur-md border-b border-slate-200/90 shadow-sm py-2 sm:py-2.5"
+              : "bg-white/90 backdrop-blur-xs border-b border-slate-200/60 py-2.5 sm:py-3.5"
         }`}
       >
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex items-center justify-between gap-3 sm:gap-4">
@@ -307,6 +313,7 @@ export function FloatingNavbar({ variant }: FloatingNavbarProps = {}) {
               variant="compact"
               size="md"
               roleContext={isLearner ? "student" : isEducator ? "teacher" : "default"}
+              theme={isMainWebsite ? "dark" : "auto"}
               href={isLearner ? "/student" : isEducator ? "/teacher" : getMainDomain() + "/"}
               showTagline={true}
               tagline={
@@ -336,7 +343,7 @@ export function FloatingNavbar({ variant }: FloatingNavbarProps = {}) {
           {/* ========================================================================= */}
           {/* 2. CENTER PRIMARY NAVIGATION */}
           {/* ========================================================================= */}
-          <nav className="hidden lg:flex items-center gap-1 xl:gap-2 text-sm font-semibold text-slate-700">
+          <nav className={`hidden lg:flex items-center gap-1 xl:gap-2 text-sm font-semibold ${isMainWebsite ? "text-white" : "text-slate-700"}`}>
             {isEducator ? (
               /* EDUCATOR SPECIFIC NAVIGATION */
               <>
@@ -409,8 +416,8 @@ export function FloatingNavbar({ variant }: FloatingNavbarProps = {}) {
                   href="/"
                   className={`px-3 py-1.5 rounded-lg transition-colors whitespace-nowrap ${
                     pathname === "/"
-                      ? "text-[#0F5C5A] font-bold bg-[#F2FAF8]"
-                      : "text-slate-700 hover:text-[#083F3D] hover:bg-[#F2FAF8]"
+                      ? "bg-[#0F5C5A] text-white font-bold shadow-xs"
+                      : "text-teal-100 hover:text-white hover:bg-[#0F5C5A]/60"
                   }`}
                 >
                   Home
@@ -419,8 +426,8 @@ export function FloatingNavbar({ variant }: FloatingNavbarProps = {}) {
                   href="/about"
                   className={`px-3 py-1.5 rounded-lg transition-colors whitespace-nowrap ${
                     pathname === "/about"
-                      ? "text-[#0F5C5A] font-bold bg-[#F2FAF8]"
-                      : "text-slate-700 hover:text-[#083F3D] hover:bg-[#F2FAF8]"
+                      ? "bg-[#0F5C5A] text-white font-bold shadow-xs"
+                      : "text-teal-100 hover:text-white hover:bg-[#0F5C5A]/60"
                   }`}
                 >
                   About Us
@@ -429,7 +436,7 @@ export function FloatingNavbar({ variant }: FloatingNavbarProps = {}) {
                   href="https://learners.educonnects.co.in"
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="px-3 py-1.5 rounded-lg text-slate-700 hover:text-[#083F3D] hover:bg-[#F2FAF8] transition-colors whitespace-nowrap"
+                  className="px-3 py-1.5 rounded-lg text-teal-100 hover:text-white hover:bg-[#0F5C5A]/60 transition-colors whitespace-nowrap"
                 >
                   For Learners
                 </a>
@@ -437,13 +444,13 @@ export function FloatingNavbar({ variant }: FloatingNavbarProps = {}) {
                   href="https://educators.educonnects.co.in"
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="px-3 py-1.5 rounded-lg text-slate-700 hover:text-[#083F3D] hover:bg-[#F2FAF8] transition-colors whitespace-nowrap"
+                  className="px-3 py-1.5 rounded-lg text-teal-100 hover:text-white hover:bg-[#0F5C5A]/60 transition-colors whitespace-nowrap"
                 >
                   For Educators
                 </a>
                 <Link
                   href="/#success-stories"
-                  className="px-3 py-1.5 rounded-lg text-slate-700 hover:text-[#083F3D] hover:bg-[#F2FAF8] transition-colors whitespace-nowrap"
+                  className="px-3 py-1.5 rounded-lg text-teal-100 hover:text-white hover:bg-[#0F5C5A]/60 transition-colors whitespace-nowrap"
                 >
                   Success Stories
                 </Link>
@@ -451,8 +458,8 @@ export function FloatingNavbar({ variant }: FloatingNavbarProps = {}) {
                   href="/contact"
                   className={`px-3 py-1.5 rounded-lg transition-colors whitespace-nowrap ${
                     pathname === "/contact"
-                      ? "text-[#0F5C5A] font-bold bg-[#F2FAF8]"
-                      : "text-slate-700 hover:text-[#083F3D] hover:bg-[#F2FAF8]"
+                      ? "bg-[#0F5C5A] text-white font-bold shadow-xs"
+                      : "text-teal-100 hover:text-white hover:bg-[#0F5C5A]/60"
                   }`}
                 >
                   Contact Us
@@ -767,7 +774,11 @@ export function FloatingNavbar({ variant }: FloatingNavbarProps = {}) {
           {/* ========================================================================= */}
           <button
             onClick={() => setMobileOpen(!mobileOpen)}
-            className="lg:hidden p-2 rounded-xl bg-slate-50 border border-slate-200 text-slate-800 hover:bg-slate-100 transition-colors"
+            className={`lg:hidden p-2 rounded-xl border transition-colors ${
+              isMainWebsite
+                ? "bg-[#0F5C5A] border-[#1B6863] text-white hover:bg-[#16805B]"
+                : "bg-slate-50 border-slate-200 text-slate-800 hover:bg-slate-100"
+            }`}
             aria-label="Toggle mobile menu"
           >
             {mobileOpen ? <X className="h-5 w-5" /> : <Menu className="h-5 w-5" />}
@@ -794,7 +805,11 @@ export function FloatingNavbar({ variant }: FloatingNavbarProps = {}) {
               animate={{ opacity: 1, y: 0 }}
               exit={{ opacity: 0, y: -20 }}
               transition={{ duration: 0.2 }}
-              className="relative top-16 mx-3 sm:mx-6 bg-white rounded-3xl border border-slate-200 shadow-2xl p-5 space-y-4 max-h-[calc(100vh-5rem)] overflow-y-auto"
+              className={`relative top-16 mx-3 sm:mx-6 rounded-3xl shadow-2xl p-5 space-y-4 max-h-[calc(100vh-5rem)] overflow-y-auto ${
+                isMainWebsite
+                  ? "bg-[#083F3D] border border-[#1B6863]/60 text-white"
+                  : "bg-white border border-slate-200"
+              }`}
             >
               {/* Authenticated User Card in Mobile Drawer (PORTAL ONLY) */}
               {(isEducator || isLearner) && userSession && (
@@ -839,7 +854,7 @@ export function FloatingNavbar({ variant }: FloatingNavbarProps = {}) {
               )}
 
               {/* Navigation Links */}
-              <nav className="flex flex-col space-y-1 font-semibold text-slate-800 text-sm">
+              <nav className={`flex flex-col space-y-1 font-semibold text-sm ${isMainWebsite ? "text-white" : "text-slate-800"}`}>
                 {isEducator ? (
                   <>
                     <Link
@@ -915,8 +930,8 @@ export function FloatingNavbar({ variant }: FloatingNavbarProps = {}) {
                       onClick={() => setMobileOpen(false)}
                       className={`py-2.5 px-3.5 rounded-xl transition-colors ${
                         pathname === "/"
-                          ? "bg-[#F2FAF8] text-[#0F5C5A] font-bold"
-                          : "text-slate-800 hover:bg-[#F2FAF8] hover:text-[#0F5C5A]"
+                          ? "bg-[#0F5C5A] text-white font-bold"
+                          : "text-teal-100 hover:bg-[#0F5C5A]/60 hover:text-white"
                       }`}
                     >
                       Home
@@ -926,8 +941,8 @@ export function FloatingNavbar({ variant }: FloatingNavbarProps = {}) {
                       onClick={() => setMobileOpen(false)}
                       className={`py-2.5 px-3.5 rounded-xl transition-colors ${
                         pathname === "/about"
-                          ? "bg-[#F2FAF8] text-[#0F5C5A] font-bold"
-                          : "text-slate-800 hover:bg-[#F2FAF8] hover:text-[#0F5C5A]"
+                          ? "bg-[#0F5C5A] text-white font-bold"
+                          : "text-teal-100 hover:bg-[#0F5C5A]/60 hover:text-white"
                       }`}
                     >
                       About Us
@@ -937,25 +952,25 @@ export function FloatingNavbar({ variant }: FloatingNavbarProps = {}) {
                       target="_blank"
                       rel="noopener noreferrer"
                       onClick={() => setMobileOpen(false)}
-                      className="py-2.5 px-3.5 rounded-xl text-slate-800 hover:bg-[#F2FAF8] hover:text-[#0F5C5A] transition-colors flex items-center justify-between"
+                      className="py-2.5 px-3.5 rounded-xl text-teal-100 hover:bg-[#0F5C5A]/60 hover:text-white transition-colors flex items-center justify-between"
                     >
                       <span>For Learners</span>
-                      <span className="text-[10px] uppercase font-bold text-slate-400 bg-slate-100 px-2 py-0.5 rounded-md">↗ New Tab</span>
+                      <span className="text-[10px] uppercase font-bold text-teal-200 bg-[#0F5C5A] px-2 py-0.5 rounded-md">↗ New Tab</span>
                     </a>
                     <a
                       href="https://educators.educonnects.co.in"
                       target="_blank"
                       rel="noopener noreferrer"
                       onClick={() => setMobileOpen(false)}
-                      className="py-2.5 px-3.5 rounded-xl text-slate-800 hover:bg-[#F2FAF8] hover:text-[#0F5C5A] transition-colors flex items-center justify-between"
+                      className="py-2.5 px-3.5 rounded-xl text-teal-100 hover:bg-[#0F5C5A]/60 hover:text-white transition-colors flex items-center justify-between"
                     >
                       <span>For Educators</span>
-                      <span className="text-[10px] uppercase font-bold text-slate-400 bg-slate-100 px-2 py-0.5 rounded-md">↗ New Tab</span>
+                      <span className="text-[10px] uppercase font-bold text-teal-200 bg-[#0F5C5A] px-2 py-0.5 rounded-md">↗ New Tab</span>
                     </a>
                     <Link
                       href="/#success-stories"
                       onClick={() => setMobileOpen(false)}
-                      className="py-2.5 px-3.5 rounded-xl text-slate-800 hover:bg-[#F2FAF8] hover:text-[#0F5C5A] transition-colors"
+                      className="py-2.5 px-3.5 rounded-xl text-teal-100 hover:bg-[#0F5C5A]/60 hover:text-white transition-colors"
                     >
                       Success Stories
                     </Link>
@@ -964,8 +979,8 @@ export function FloatingNavbar({ variant }: FloatingNavbarProps = {}) {
                       onClick={() => setMobileOpen(false)}
                       className={`py-2.5 px-3.5 rounded-xl transition-colors ${
                         pathname === "/contact"
-                          ? "bg-[#F2FAF8] text-[#0F5C5A] font-bold"
-                          : "text-slate-800 hover:bg-[#F2FAF8] hover:text-[#0F5C5A]"
+                          ? "bg-[#0F5C5A] text-white font-bold"
+                          : "text-teal-100 hover:bg-[#0F5C5A]/60 hover:text-white"
                       }`}
                     >
                       Contact Us
