@@ -67,7 +67,7 @@ export function HeroBackgroundSlideshow() {
           <div
             key={banner.url}
             className={`absolute inset-0 transition-opacity duration-1000 ease-in-out ${
-              isActive ? "opacity-20" : "opacity-0"
+              isActive ? "opacity-35" : "opacity-0"
             }`}
           >
             <img
@@ -80,9 +80,9 @@ export function HeroBackgroundSlideshow() {
         );
       })}
 
-      {/* 2. Soft, Premium Brand Overlays for Maximum Text Legibility */}
+      {/* 2. Soft, Premium Brand Overlays for Balanced Text Legibility */}
       {/* Base soft tint overlay */}
-      <div className="absolute inset-0 bg-gradient-to-b from-[#F2FAF8]/92 via-[#FBF7EE]/88 to-white/95 backdrop-blur-[1px]" />
+      <div className="absolute inset-0 bg-gradient-to-b from-[#F2FAF8]/78 via-[#FBF7EE]/72 to-white/82" />
 
       {/* Brand Teal glow overlay */}
       <div className="absolute -top-24 left-1/2 -translate-x-1/2 w-[800px] h-[450px] bg-[#0F5C5A]/5 rounded-full blur-3xl" />

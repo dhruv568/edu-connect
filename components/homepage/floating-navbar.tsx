@@ -462,9 +462,10 @@ export function FloatingNavbar({ variant }: FloatingNavbarProps = {}) {
           </nav>
 
           {/* ========================================================================= */}
-          {/* 3. RIGHT: ROLE-AWARE ACTION CLUSTER */}
+          {/* 3. RIGHT: ROLE-AWARE ACTION CLUSTER (PORTAL ONLY) */}
           {/* ========================================================================= */}
-          <div className="hidden lg:flex items-center gap-3 shrink-0">
+          {(isEducator || isLearner) && (
+            <div className="hidden lg:flex items-center gap-3 shrink-0">
             {/* Context Switcher Link */}
             {isEducator ? (
               <Link
@@ -759,6 +760,7 @@ export function FloatingNavbar({ variant }: FloatingNavbarProps = {}) {
               </div>
             )}
           </div>
+        )}
 
           {/* ========================================================================= */}
           {/* 4. MOBILE HAMBURGER BUTTON */}
@@ -794,8 +796,8 @@ export function FloatingNavbar({ variant }: FloatingNavbarProps = {}) {
               transition={{ duration: 0.2 }}
               className="relative top-16 mx-3 sm:mx-6 bg-white rounded-3xl border border-slate-200 shadow-2xl p-5 space-y-4 max-h-[calc(100vh-5rem)] overflow-y-auto"
             >
-              {/* Authenticated User Card in Mobile Drawer */}
-              {userSession && (
+              {/* Authenticated User Card in Mobile Drawer (PORTAL ONLY) */}
+              {(isEducator || isLearner) && userSession && (
                 <div className="p-3.5 rounded-2xl bg-slate-50 border border-slate-100 flex items-center justify-between">
                   <div className="flex items-center gap-3">
                     <div
@@ -972,93 +974,95 @@ export function FloatingNavbar({ variant }: FloatingNavbarProps = {}) {
                 )}
               </nav>
 
-              {/* Mobile Auth Actions */}
-              <div className="pt-3 border-t border-slate-100 flex flex-col gap-2">
-                {!userSession ? (
-                  <>
-                    <Link
-                      href={
-                        isEducator
-                          ? "/teacher/login"
-                          : isLearner
-                          ? "/student/login"
-                          : "/login"
-                      }
-                      onClick={() => setMobileOpen(false)}
-                      className="w-full py-2.5 rounded-xl border border-slate-200 text-slate-800 text-sm font-bold hover:bg-slate-50 transition-colors text-center cursor-pointer block"
-                    >
-                      Login
-                    </Link>
-                    <Link
-                      href={
-                        isEducator
-                          ? "/teacher/register"
-                          : isLearner
-                          ? "/student/register"
-                          : "/register"
-                      }
-                      onClick={() => setMobileOpen(false)}
-                      className={`w-full py-2.5 rounded-xl text-white text-sm font-bold shadow-xs transition-colors flex items-center justify-center gap-1.5 cursor-pointer ${
-                        isLearner
-                          ? "bg-blue-600 hover:bg-blue-700"
-                          : isEducator
-                          ? "bg-[#16805B] hover:bg-[#0D5C41]"
-                          : "bg-[#0F5C5A] hover:bg-[#083F3D] active:bg-[#052C2A]"
-                      }`}
-                    >
-                      <span>
-                        {isEducator
-                          ? "Start Teaching"
-                          : isLearner
-                          ? "Start Learning"
-                          : "Get Started"}
-                      </span>
-                      <ArrowRight className="h-4 w-4" />
-                    </Link>
-                  </>
-                ) : (
-                  <>
-                    {/* Role-Specific Portal Button in Mobile */}
-                    <Link
-                      href={getDashboardPath(userSession)}
-                      onClick={() => setMobileOpen(false)}
-                      className={`w-full py-2.5 rounded-xl text-white text-sm font-bold shadow-xs transition-colors flex items-center justify-center gap-2 cursor-pointer ${
-                        isLearnerRole(userSession.role)
-                          ? "bg-blue-600 hover:bg-blue-700"
-                          : isEducatorRole(userSession.role)
-                          ? "bg-[#16805B] hover:bg-[#0D5C41]"
-                          : "bg-[#0B4F4B] hover:bg-[#073F3C]"
-                      }`}
-                    >
-                      <LayoutDashboard className="h-4 w-4" />
-                      <span>{getDashboardLabel(userSession)}</span>
-                    </Link>
+              {/* Mobile Auth Actions (PORTAL ONLY) */}
+              {(isEducator || isLearner) && (
+                <div className="pt-3 border-t border-slate-100 flex flex-col gap-2">
+                  {!userSession ? (
+                    <>
+                      <Link
+                        href={
+                          isEducator
+                            ? "/teacher/login"
+                            : isLearner
+                            ? "/student/login"
+                            : "/login"
+                        }
+                        onClick={() => setMobileOpen(false)}
+                        className="w-full py-2.5 rounded-xl border border-slate-200 text-slate-800 text-sm font-bold hover:bg-slate-50 transition-colors text-center cursor-pointer block"
+                      >
+                        Login
+                      </Link>
+                      <Link
+                        href={
+                          isEducator
+                            ? "/teacher/register"
+                            : isLearner
+                            ? "/student/register"
+                            : "/register"
+                        }
+                        onClick={() => setMobileOpen(false)}
+                        className={`w-full py-2.5 rounded-xl text-white text-sm font-bold shadow-xs transition-colors flex items-center justify-center gap-1.5 cursor-pointer ${
+                          isLearner
+                            ? "bg-blue-600 hover:bg-blue-700"
+                            : isEducator
+                            ? "bg-[#16805B] hover:bg-[#0D5C41]"
+                            : "bg-[#0F5C5A] hover:bg-[#083F3D] active:bg-[#052C2A]"
+                        }`}
+                      >
+                        <span>
+                          {isEducator
+                            ? "Start Teaching"
+                            : isLearner
+                            ? "Start Learning"
+                            : "Get Started"}
+                        </span>
+                        <ArrowRight className="h-4 w-4" />
+                      </Link>
+                    </>
+                  ) : (
+                    <>
+                      {/* Role-Specific Portal Button in Mobile */}
+                      <Link
+                        href={getDashboardPath(userSession)}
+                        onClick={() => setMobileOpen(false)}
+                        className={`w-full py-2.5 rounded-xl text-white text-sm font-bold shadow-xs transition-colors flex items-center justify-center gap-2 cursor-pointer ${
+                          isLearnerRole(userSession.role)
+                            ? "bg-blue-600 hover:bg-blue-700"
+                            : isEducatorRole(userSession.role)
+                            ? "bg-[#16805B] hover:bg-[#0D5C41]"
+                            : "bg-[#0B4F4B] hover:bg-[#073F3C]"
+                        }`}
+                      >
+                        <LayoutDashboard className="h-4 w-4" />
+                        <span>{getDashboardLabel(userSession)}</span>
+                      </Link>
 
-                    <Link
-                      href="/profile"
-                      onClick={() => setMobileOpen(false)}
-                      className="w-full py-2 rounded-xl text-slate-700 text-xs font-semibold hover:bg-slate-50 flex items-center justify-center gap-2 border border-slate-200 cursor-pointer"
-                    >
-                      <User className="h-3.5 w-3.5 text-slate-500" />
-                      <span>Account Profile</span>
-                    </Link>
+                      <Link
+                        href="/profile"
+                        onClick={() => setMobileOpen(false)}
+                        className="w-full py-2 rounded-xl text-slate-700 text-xs font-semibold hover:bg-slate-50 flex items-center justify-center gap-2 border border-slate-200 cursor-pointer"
+                      >
+                        <User className="h-3.5 w-3.5 text-slate-500" />
+                        <span>Account Profile</span>
+                      </Link>
 
-                    <button
-                      type="button"
-                      onClick={(e) => handleLogout(e)}
-                      disabled={isLoggingOut}
-                      className="w-full py-2 rounded-xl text-rose-600 text-xs font-semibold hover:bg-rose-50 flex items-center justify-center gap-2 border border-rose-100 cursor-pointer disabled:opacity-60 disabled:cursor-not-allowed"
-                    >
-                      {isLoggingOut ? (
-                        <Loader2 className="h-3.5 w-3.5 animate-spin text-rose-500" />
-                      ) : (
-                        <LogOut className="h-3.5 w-3.5 text-rose-500" />
-                      )}
-                      <span>{isLoggingOut ? "Signing out..." : "Sign Out"}</span>
-                    </button>
-                  </>
-                )}
-              </div>
+                      <button
+                        type="button"
+                        onClick={(e) => handleLogout(e)}
+                        disabled={isLoggingOut}
+                        className="w-full py-2 rounded-xl text-rose-600 text-xs font-semibold hover:bg-rose-50 flex items-center justify-center gap-2 border border-rose-100 cursor-pointer disabled:opacity-60 disabled:cursor-not-allowed"
+                      >
+                        {isLoggingOut ? (
+                          <Loader2 className="h-3.5 w-3.5 animate-spin text-rose-500" />
+                        ) : (
+                          <LogOut className="h-3.5 w-3.5 text-rose-500" />
+                        )}
+                        <span>{isLoggingOut ? "Signing out..." : "Sign Out"}</span>
+                      </button>
+                    </>
+                  )}
+                </div>
+              )}
             </motion.div>
           </div>
         )}

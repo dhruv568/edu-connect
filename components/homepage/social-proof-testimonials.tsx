@@ -18,13 +18,10 @@ import {
   BookOpen,
 } from "lucide-react";
 import Link from "next/link";
-import { UserRole } from "@/types/auth";
 
-export interface SocialProofTestimonialsProps {
-  onOpenAuth?: (role: UserRole) => void;
-}
+export interface SocialProofTestimonialsProps {}
 
-export function SocialProofTestimonials({ onOpenAuth }: SocialProofTestimonialsProps = {}) {
+export function SocialProofTestimonials(_props: SocialProofTestimonialsProps = {}) {
   const [activeFilter, setActiveFilter] = useState<"ALL" | "DEMO" | "LIVE" | "LMS">("ALL");
 
   const testimonials = [
@@ -231,28 +228,16 @@ export function SocialProofTestimonials({ onOpenAuth }: SocialProofTestimonialsP
             <h3 className="text-lg sm:text-xl font-black">Experience the difference with personalized guidance.</h3>
             <p className="text-xs sm:text-sm text-teal-100/90">Connect with a verified educator, discuss your syllabus, and get a tailored learning roadmap.</p>
           </div>
-          {onOpenAuth ? (
+          <Link href="/find-teachers" className="shrink-0 w-full sm:w-auto">
             <GlassButton
-              variant="secondary"
+              variant="primary"
               size="md"
-              onClick={() => onOpenAuth("STUDENT")}
-              rightIcon={<ArrowRight className="h-4 w-4 text-[#102A2A]" />}
-              className="bg-[#F2C14E] hover:bg-[#E0B03C] text-[#102A2A] font-extrabold px-6 rounded-full shrink-0 shadow-md"
+              rightIcon={<ArrowRight className="h-4 w-4 text-white" />}
+              className="w-full sm:w-auto bg-[#083F3D] hover:bg-[#052C2A] active:bg-[#052C2A] text-white border border-[#2A8C84]/40 font-extrabold px-6 py-2.5 rounded-full shadow-md transition-all"
             >
               Find an Educator
             </GlassButton>
-          ) : (
-            <Link href="/find-teachers" className="shrink-0">
-              <GlassButton
-                variant="secondary"
-                size="md"
-                rightIcon={<ArrowRight className="h-4 w-4 text-[#102A2A]" />}
-                className="bg-[#F2C14E] hover:bg-[#E0B03C] text-[#102A2A] font-extrabold px-6 rounded-full shadow-md"
-              >
-                Find an Educator
-              </GlassButton>
-            </Link>
-          )}
+          </Link>
         </div>
       </div>
     </section>

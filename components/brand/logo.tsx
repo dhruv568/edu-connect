@@ -102,19 +102,16 @@ export function Logo({
     if (isDarkTheme) {
       if (roleContext === "student") return "text-blue-400";
       if (roleContext === "teacher") return "text-emerald-400";
-      if (roleContext === "admin") return "text-[#F2C14E]";
-      return "text-[#F2C14E]";
+      return "text-[#2A8C84]";
     }
     if (roleContext === "student") return "text-blue-600";
     if (roleContext === "teacher") return "text-[#16805B]";
-    if (roleContext === "admin") return "text-[#0B4F4B]";
-    return "text-[#0B4F4B]";
+    return "text-[#0F5C5A]";
   };
 
   const getTaglineTextColor = () => {
     if (isDarkTheme) {
-      if (roleContext === "admin") return "text-teal-200/80";
-      return "text-slate-300";
+      return "text-teal-200/80";
     }
     return "text-slate-500";
   };
