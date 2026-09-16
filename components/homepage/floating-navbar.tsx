@@ -247,6 +247,8 @@ export function FloatingNavbar({ variant }: FloatingNavbarProps = {}) {
     variant === "teacher" ||
     pathname === "/teacher" ||
     pathname?.startsWith("/teacher/") ||
+    pathname === "/register/teacher" ||
+    pathname?.startsWith("/register/teacher/") ||
     (typeof window !== "undefined" &&
       (window.location.hostname.startsWith("educators.") ||
         window.location.hostname.startsWith("educator.") ||
@@ -297,6 +299,8 @@ export function FloatingNavbar({ variant }: FloatingNavbarProps = {}) {
         className={`fixed top-0 left-0 right-0 z-50 transition-all duration-300 ${
           isLearner
             ? "bg-[#243B9B] border-b border-[#3157D5]/40 shadow-sm py-2.5 sm:py-3.5"
+            : isEducator
+            ? "bg-[#0D5C41] border-b border-[#16805B]/40 shadow-sm py-2.5 sm:py-3.5"
             : isMainWebsite
             ? scrolled
               ? "bg-[#083F3D] border-b border-[#1B6863]/40 shadow-sm py-2 sm:py-2.5"
@@ -315,9 +319,9 @@ export function FloatingNavbar({ variant }: FloatingNavbarProps = {}) {
               variant="compact"
               size="md"
               roleContext={isLearner ? "student" : isEducator ? "teacher" : "default"}
-              theme={isMainWebsite || isLearner ? "dark" : "auto"}
+              theme={isMainWebsite || isLearner || isEducator ? "dark" : "auto"}
               href={isLearner ? "/student" : isEducator ? "/teacher" : getMainDomain() + "/"}
-              showTagline={!isLearner}
+              showTagline={!isLearner && !isEducator}
               tagline={
                 isEducator
                   ? "Educator Network"
@@ -329,7 +333,7 @@ export function FloatingNavbar({ variant }: FloatingNavbarProps = {}) {
 
             {/* Context Tag */}
             {isEducator && (
-              <span className="hidden md:inline-flex items-center px-2.5 py-0.5 rounded-full text-[10px] font-black uppercase tracking-wider bg-emerald-50 text-emerald-700 border border-emerald-200">
+              <span className="hidden md:inline-flex items-center px-2.5 py-0.5 rounded-full text-[10px] font-black uppercase tracking-wider bg-[#16805B]/80 text-emerald-100 border border-[#35A979]/40">
                 Educator
               </span>
             )}
@@ -338,39 +342,58 @@ export function FloatingNavbar({ variant }: FloatingNavbarProps = {}) {
           {/* ========================================================================= */}
           {/* 2. CENTER PRIMARY NAVIGATION */}
           {/* ========================================================================= */}
-          <nav className={`hidden lg:flex items-center gap-1 xl:gap-2 text-sm font-semibold ${isLearner ? "text-white" : isMainWebsite ? "text-white" : "text-slate-700"}`}>
+          <nav className={`hidden lg:flex items-center gap-1 xl:gap-2 text-sm font-semibold ${isLearner || isEducator || isMainWebsite ? "text-white" : "text-slate-700"}`}>
             {isEducator ? (
               /* EDUCATOR SPECIFIC NAVIGATION */
               <>
                 <Link
-                  href="/teacher#courses"
-                  className="px-3 py-1.5 rounded-lg hover:text-[#16805B] hover:bg-emerald-50/70 transition-colors whitespace-nowrap"
+                  href="/teacher"
+                  className={`px-3.5 py-1.5 rounded-lg transition-colors whitespace-nowrap ${
+                    pathname === "/teacher"
+                      ? "bg-[#16805B] text-white font-bold shadow-xs"
+                      : "text-emerald-100 hover:text-white hover:bg-[#16805B]/60"
+                  }`}
                 >
-                  Teaching Toolkit
+                  Home
                 </Link>
                 <Link
-                  href="/teacher#earnings"
-                  className="px-3 py-1.5 rounded-lg hover:text-[#16805B] hover:bg-emerald-50/70 transition-colors whitespace-nowrap"
+                  href="/about"
+                  className={`px-3.5 py-1.5 rounded-lg transition-colors whitespace-nowrap ${
+                    pathname === "/about"
+                      ? "bg-[#16805B] text-white font-bold shadow-xs"
+                      : "text-emerald-100 hover:text-white hover:bg-[#16805B]/60"
+                  }`}
                 >
-                  Earnings Calculator
+                  About Us
                 </Link>
-                <a
+                <Link
+                  href="/teacher#benefits"
+                  className="px-3.5 py-1.5 rounded-lg text-emerald-100 hover:text-white hover:bg-[#16805B]/60 transition-colors whitespace-nowrap"
+                >
+                  Educator Benefits
+                </Link>
+                <Link
                   href="/teacher#how-it-works"
-                  onClick={handleHowItWorksClick}
-                  className="px-3 py-1.5 rounded-lg hover:text-[#16805B] hover:bg-emerald-50/70 transition-colors whitespace-nowrap"
+                  className="px-3.5 py-1.5 rounded-lg text-emerald-100 hover:text-white hover:bg-[#16805B]/60 transition-colors whitespace-nowrap"
                 >
-                  How It Works
-                </a>
-                <a
-                  href={getLiveDomain()}
-                  className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg hover:text-[#16805B] hover:bg-emerald-50/70 transition-colors whitespace-nowrap group"
+                  How It Works?
+                </Link>
+                <Link
+                  href="/teacher#success-stories"
+                  className="px-3.5 py-1.5 rounded-lg text-emerald-100 hover:text-white hover:bg-[#16805B]/60 transition-colors whitespace-nowrap"
                 >
-                  <span className="relative flex h-2 w-2">
-                    <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-red-400 opacity-75" />
-                    <span className="relative inline-flex rounded-full h-2 w-2 bg-red-500" />
-                  </span>
-                  <span className="font-bold text-red-600 group-hover:text-red-700">Live</span>
-                </a>
+                  Success Stories
+                </Link>
+                <Link
+                  href="/contact"
+                  className={`px-3.5 py-1.5 rounded-lg transition-colors whitespace-nowrap ${
+                    pathname === "/contact"
+                      ? "bg-[#16805B] text-white font-bold shadow-xs"
+                      : "text-emerald-100 hover:text-white hover:bg-[#16805B]/60"
+                  }`}
+                >
+                  Contact Us
+                </Link>
               </>
             ) : isLearner ? (
               /* LEARNER SPECIFIC NAVIGATION */
@@ -505,77 +528,110 @@ export function FloatingNavbar({ variant }: FloatingNavbarProps = {}) {
                 </Link>
               )}
             </div>
-          ) : isEducator && (
+          ) : isEducator ? (
             <div className="hidden lg:flex items-center gap-3 shrink-0">
-            {/* Context Switcher Link */}
-            <Link
-              href="/student"
-              className="hidden xl:inline-flex items-center gap-1 text-xs font-semibold text-slate-600 hover:text-emerald-700 px-3 py-1.5 rounded-xl border border-slate-200 hover:border-emerald-200 bg-slate-50/80 hover:bg-emerald-50/50 transition-all whitespace-nowrap shadow-2xs"
-            >
-              Learner Portal →
-            </Link>
-
-            <div className="hidden xl:block h-4 w-px bg-slate-200" />
-
-            {/* STATE 1: Unauthenticated Visitor */}
-            {!userSession ? (
-              <div className="flex items-center gap-2 sm:gap-3">
-                <Link
-                  href="/teacher/login"
-                  className="text-xs sm:text-sm font-bold text-slate-700 hover:text-[#083F3D] px-3.5 py-2 rounded-xl hover:bg-[#F2FAF8] transition-colors whitespace-nowrap"
-                >
-                  Login
-                </Link>
-                <Link
-                  href="/teacher/register"
-                  className="h-9 px-4 sm:px-5 rounded-xl text-xs sm:text-sm font-bold text-white shadow-xs hover:shadow-md transition-all whitespace-nowrap flex items-center gap-1.5 cursor-pointer active:scale-95 bg-gradient-to-r from-[#16805B] to-[#0D5C41] hover:from-[#12684A] hover:to-[#0A4732] shadow-emerald-700/20"
-                >
-                  <span>Start Teaching</span>
-                  <ArrowRight className="h-3.5 w-3.5" />
-                </Link>
-              </div>
-            ) : (
-              /* STATE 2: Authenticated User (Strictly Role-Aware) */
-              <div className="flex items-center gap-3">
-                {/* A. Role-Specific Portal Button */}
-                {(userSession.role === "STUDENT" || isLearnerRole(userSession.role)) ? (
-                  <Link
-                    href={getLearnerSubdomainUrl("/student/dashboard")}
-                    className="h-9 px-3.5 sm:px-4 rounded-xl text-xs sm:text-sm font-bold text-white bg-blue-600 hover:bg-blue-700 shadow-xs hover:shadow-md transition-all flex items-center gap-2 active:scale-95 cursor-pointer"
-                  >
-                    <LayoutDashboard className="h-4 w-4 text-blue-100" />
-                    <span>Learner Portal</span>
-                  </Link>
-                ) : (userSession.role === "TEACHER" || isEducatorRole(userSession.role)) ? (
+              {userSession && isEducatorRole(userSession.role) ? (
+                <div className="flex items-center gap-3">
                   <Link
                     href={getEducatorSubdomainUrl("/teacher/dashboard")}
-                    className="h-9 px-3.5 sm:px-4 rounded-xl text-xs sm:text-sm font-bold text-white bg-[#16805B] hover:bg-[#0D5C41] shadow-xs hover:shadow-md transition-all flex items-center gap-2 active:scale-95 cursor-pointer"
+                    className="h-9 px-4 rounded-xl text-xs sm:text-sm font-bold text-white bg-[#16805B] hover:bg-[#0D5C41] shadow-xs hover:shadow-md transition-all flex items-center gap-2 active:scale-95 cursor-pointer border border-[#35A979]/40"
                   >
                     <LayoutDashboard className="h-4 w-4 text-emerald-100" />
-                    <span>Educator Portal</span>
+                    <span>Educator Dashboard</span>
                   </Link>
-                ) : userSession.role === "ADMIN" ? (
-                  <Link
-                    href="/admin"
-                    className="h-9 px-3.5 sm:px-4 rounded-xl text-xs sm:text-sm font-bold text-white bg-[#0B4F4B] hover:bg-[#073F3C] shadow-xs hover:shadow-md transition-all flex items-center gap-2 active:scale-95 cursor-pointer"
-                  >
-                    <LayoutDashboard className="h-4 w-4 text-[#F2C14E]" />
-                    <span>Admin Governance</span>
-                  </Link>
-                ) : (
-                  <Link
-                    href="/staff/dashboard"
-                    className="h-9 px-3.5 sm:px-4 rounded-xl text-xs sm:text-sm font-bold text-white bg-[#0B4F4B] hover:bg-[#073F3C] shadow-xs hover:shadow-md transition-all flex items-center gap-2 active:scale-95 cursor-pointer"
-                  >
-                    <LayoutDashboard className="h-4 w-4 text-teal-100" />
-                    <span>Staff Dashboard</span>
-                  </Link>
-                )}
 
-                {/* B. Notification Bell Popover */}
-                <div className="flex items-center">
-                  <NotificationPopover />
+                  {/* Notification Bell Popover */}
+                  <div className="flex items-center">
+                    <NotificationPopover />
+                  </div>
+
+                  <button
+                    onClick={handleLogout}
+                    disabled={isLoggingOut}
+                    className="text-xs sm:text-sm font-bold text-emerald-200 hover:text-white px-3 py-2 rounded-xl hover:bg-white/10 transition-colors cursor-pointer"
+                  >
+                    Logout
+                  </button>
                 </div>
+              ) : (
+                <div className="flex items-center gap-2.5">
+                  <Link
+                    href="/teacher/login"
+                    className="text-xs sm:text-sm font-bold text-emerald-100 hover:text-white px-3.5 py-2 rounded-xl hover:bg-white/10 transition-colors whitespace-nowrap"
+                  >
+                    Educator Login
+                  </Link>
+                  <Link
+                    href="/teacher/register"
+                    className="h-9 px-4 sm:px-5 rounded-xl text-xs sm:text-sm font-bold text-white bg-[#16805B] hover:bg-[#0D5C41] shadow-xs hover:shadow-md transition-all whitespace-nowrap flex items-center gap-1.5 cursor-pointer active:scale-95 border border-[#35A979]/40"
+                  >
+                    <span>Become an Educator</span>
+                    <ArrowRight className="h-3.5 w-3.5" />
+                  </Link>
+                </div>
+              )}
+            </div>
+          ) : (
+            <div className="hidden lg:flex items-center gap-3 shrink-0">
+              {/* STATE 1: Unauthenticated Visitor */}
+              {!userSession ? (
+                <div className="flex items-center gap-2 sm:gap-3">
+                  <Link
+                    href="/login"
+                    className="text-xs sm:text-sm font-bold text-slate-700 hover:text-[#083F3D] px-3.5 py-2 rounded-xl hover:bg-[#F2FAF8] transition-colors whitespace-nowrap"
+                  >
+                    Login
+                  </Link>
+                  <Link
+                    href="/register"
+                    className="h-9 px-4 sm:px-5 rounded-xl text-xs sm:text-sm font-bold text-white shadow-xs hover:shadow-md transition-all whitespace-nowrap flex items-center gap-1.5 cursor-pointer active:scale-95 bg-gradient-to-r from-[#16805B] to-[#0D5C41] hover:from-[#12684A] hover:to-[#0A4732] shadow-emerald-700/20"
+                  >
+                    <span>Get Started</span>
+                    <ArrowRight className="h-3.5 w-3.5" />
+                  </Link>
+                </div>
+              ) : (
+                /* STATE 2: Authenticated User (Strictly Role-Aware) */
+                <div className="flex items-center gap-3">
+                  {/* A. Role-Specific Portal Button */}
+                  {(userSession.role === "STUDENT" || isLearnerRole(userSession.role)) ? (
+                    <Link
+                      href={getLearnerSubdomainUrl("/student/dashboard")}
+                      className="h-9 px-3.5 sm:px-4 rounded-xl text-xs sm:text-sm font-bold text-white bg-blue-600 hover:bg-blue-700 shadow-xs hover:shadow-md transition-all flex items-center gap-2 active:scale-95 cursor-pointer"
+                    >
+                      <LayoutDashboard className="h-4 w-4 text-blue-100" />
+                      <span>Learner Portal</span>
+                    </Link>
+                  ) : (userSession.role === "TEACHER" || isEducatorRole(userSession.role)) ? (
+                    <Link
+                      href={getEducatorSubdomainUrl("/teacher/dashboard")}
+                      className="h-9 px-3.5 sm:px-4 rounded-xl text-xs sm:text-sm font-bold text-white bg-[#16805B] hover:bg-[#0D5C41] shadow-xs hover:shadow-md transition-all flex items-center gap-2 active:scale-95 cursor-pointer"
+                    >
+                      <LayoutDashboard className="h-4 w-4 text-emerald-100" />
+                      <span>Educator Portal</span>
+                    </Link>
+                  ) : userSession.role === "ADMIN" ? (
+                    <Link
+                      href="/admin"
+                      className="h-9 px-3.5 sm:px-4 rounded-xl text-xs sm:text-sm font-bold text-white bg-[#0B4F4B] hover:bg-[#073F3C] shadow-xs hover:shadow-md transition-all flex items-center gap-2 active:scale-95 cursor-pointer"
+                    >
+                      <LayoutDashboard className="h-4 w-4 text-[#F2C14E]" />
+                      <span>Admin Governance</span>
+                    </Link>
+                  ) : (
+                    <Link
+                      href="/staff/dashboard"
+                      className="h-9 px-3.5 sm:px-4 rounded-xl text-xs sm:text-sm font-bold text-white bg-[#0B4F4B] hover:bg-[#073F3C] shadow-xs hover:shadow-md transition-all flex items-center gap-2 active:scale-95 cursor-pointer"
+                    >
+                      <LayoutDashboard className="h-4 w-4 text-teal-100" />
+                      <span>Staff Dashboard</span>
+                    </Link>
+                  )}
+
+                  {/* B. Notification Bell Popover */}
+                  <div className="flex items-center">
+                    <NotificationPopover />
+                  </div>
 
                 {/* C. User Profile Account Menu */}
                 <div className="relative" ref={profileDropdownRef}>
@@ -773,7 +829,9 @@ export function FloatingNavbar({ variant }: FloatingNavbarProps = {}) {
           <button
             onClick={() => setMobileOpen(!mobileOpen)}
             className={`lg:hidden p-2 rounded-xl border transition-colors ${
-              isLearner
+              isEducator
+                ? "bg-[#0D5C41] border-[#16805B]/60 text-white hover:bg-[#16805B]"
+                : isLearner
                 ? "bg-[#3157D5] border-[#4268EA] text-white hover:bg-[#1E3185]"
                 : isMainWebsite
                 ? "bg-[#0F5C5A] border-[#1B6863] text-white hover:bg-[#16805B]"
@@ -806,94 +864,112 @@ export function FloatingNavbar({ variant }: FloatingNavbarProps = {}) {
               exit={{ opacity: 0, y: -20 }}
               transition={{ duration: 0.2 }}
               className={`relative top-16 mx-3 sm:mx-6 rounded-3xl shadow-2xl p-5 space-y-4 max-h-[calc(100vh-5rem)] overflow-y-auto ${
-                isLearner
+                isEducator
+                  ? "bg-[#0D5C41] border border-[#16805B]/60 text-white"
+                  : isLearner
                   ? "bg-[#243B9B] border border-[#3157D5]/60 text-white"
                   : isMainWebsite
                   ? "bg-[#083F3D] border border-[#1B6863]/60 text-white"
                   : "bg-white border border-slate-200"
               }`}
             >
-              {/* Authenticated User Card in Mobile Drawer (PORTAL ONLY) */}
-              {(isEducator || isLearner) && userSession && (
-                <div className={`p-3.5 rounded-2xl flex items-center justify-between ${
-                  isLearner
-                    ? "bg-[#1E3185] border border-blue-400/30 text-white"
-                    : "bg-slate-50 border border-slate-100"
-                }`}>
+              {/* Authenticated User Card in Mobile Drawer */}
+              {isEducator && userSession && isEducatorRole(userSession.role) && (
+                <div className="p-3.5 rounded-2xl flex items-center justify-between bg-[#16805B]/40 border border-[#16805B]/60 text-white">
                   <div className="flex items-center gap-3">
-                    <div
-                      className={`w-10 h-10 rounded-xl text-white font-black text-sm flex items-center justify-center ${
-                        userSession.role === "STUDENT" || isLearnerRole(userSession.role)
-                          ? "bg-blue-600"
-                          : userSession.role === "TEACHER" || isEducatorRole(userSession.role)
-                          ? "bg-[#16805B]"
-                          : "bg-[#0B4F4B]"
-                      }`}
-                    >
+                    <div className="w-10 h-10 rounded-xl text-white font-black text-sm flex items-center justify-center bg-[#16805B]">
                       {getUserInitials(userSession)}
                     </div>
                     <div>
-                      <div className={`text-xs font-extrabold ${isLearner ? "text-white" : "text-slate-900"}`}>
+                      <div className="text-xs font-extrabold text-white">
                         {getUserDisplayName(userSession)}
                       </div>
-                      <div className={`text-[11px] truncate max-w-[160px] ${isLearner ? "text-blue-200" : "text-slate-500"}`}>
+                      <div className="text-[11px] truncate max-w-[160px] text-emerald-200">
                         {userSession.email}
                       </div>
                     </div>
                   </div>
-                  <span
-                    className={`text-[9px] font-black uppercase px-2 py-0.5 rounded-full ${
-                      userSession.role === "STUDENT" || isLearnerRole(userSession.role)
-                        ? "bg-blue-100 text-blue-700"
-                        : userSession.role === "TEACHER" || isEducatorRole(userSession.role)
-                        ? "bg-emerald-100 text-emerald-700"
-                        : "bg-amber-100 text-amber-800"
-                    }`}
-                  >
-                    {userSession.role === "STUDENT" || isLearnerRole(userSession.role)
-                      ? "Learner"
-                      : userSession.role === "TEACHER" || isEducatorRole(userSession.role)
-                      ? "Educator"
-                      : "Admin"}
+                  <span className="text-[9px] font-black uppercase px-2 py-0.5 rounded-full bg-emerald-100 text-emerald-800">
+                    Educator
+                  </span>
+                </div>
+              )}
+
+              {isLearner && userSession && isLearnerRole(userSession.role) && (
+                <div className="p-3.5 rounded-2xl flex items-center justify-between bg-[#1E3185] border border-blue-400/30 text-white">
+                  <div className="flex items-center gap-3">
+                    <div className="w-10 h-10 rounded-xl text-white font-black text-sm flex items-center justify-center bg-blue-600">
+                      {getUserInitials(userSession)}
+                    </div>
+                    <div>
+                      <div className="text-xs font-extrabold text-white">
+                        {getUserDisplayName(userSession)}
+                      </div>
+                      <div className="text-[11px] truncate max-w-[160px] text-blue-200">
+                        {userSession.email}
+                      </div>
+                    </div>
+                  </div>
+                  <span className="text-[9px] font-black uppercase px-2 py-0.5 rounded-full bg-blue-100 text-blue-700">
+                    Learner
                   </span>
                 </div>
               )}
 
               {/* Navigation Links */}
-              <nav className={`flex flex-col space-y-1 font-semibold text-sm ${isLearner ? "text-white" : isMainWebsite ? "text-white" : "text-slate-800"}`}>
+              <nav className={`flex flex-col space-y-1 font-semibold text-sm ${isEducator ? "text-white" : isLearner ? "text-white" : isMainWebsite ? "text-white" : "text-slate-800"}`}>
                 {isEducator ? (
                   <>
                     <Link
-                      href="/teacher#courses"
+                      href="/teacher"
                       onClick={() => setMobileOpen(false)}
-                      className="py-2 px-3 hover:bg-emerald-50 hover:text-emerald-700 rounded-xl"
+                      className={`py-2.5 px-3.5 rounded-xl transition-colors ${
+                        pathname === "/teacher"
+                          ? "bg-[#16805B] text-white font-bold shadow-xs"
+                          : "text-emerald-100 hover:text-white hover:bg-[#16805B]/60"
+                      }`}
                     >
-                      Teaching Toolkit
+                      Home
                     </Link>
                     <Link
-                      href="/teacher#earnings"
+                      href="/about"
                       onClick={() => setMobileOpen(false)}
-                      className="py-2 px-3 hover:bg-emerald-50 hover:text-emerald-700 rounded-xl"
+                      className="py-2.5 px-3.5 rounded-xl text-emerald-100 hover:text-white hover:bg-[#16805B]/60 transition-colors"
                     >
-                      Earnings Calculator
+                      About Us
                     </Link>
-                    <a
-                      href="/teacher#how-it-works"
-                      onClick={handleHowItWorksClick}
-                      className="py-2 px-3 hover:bg-emerald-50 hover:text-emerald-700 rounded-xl"
-                    >
-                      How It Works
-                    </a>
-                    <a
-                      href={getLiveDomain()}
+                    <Link
+                      href="/teacher#benefits"
                       onClick={() => setMobileOpen(false)}
-                      className="py-2 px-3 hover:bg-emerald-50 rounded-xl flex items-center justify-between text-red-600 font-bold"
+                      className="py-2.5 px-3.5 rounded-xl text-emerald-100 hover:text-white hover:bg-[#16805B]/60 transition-colors"
                     >
-                      <span>Live Events</span>
-                      <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-bold bg-red-100 text-red-600">
-                        🔴 Live
-                      </span>
-                    </a>
+                      Educator Benefits
+                    </Link>
+                    <Link
+                      href="/teacher#how-it-works"
+                      onClick={() => setMobileOpen(false)}
+                      className="py-2.5 px-3.5 rounded-xl text-emerald-100 hover:text-white hover:bg-[#16805B]/60 transition-colors"
+                    >
+                      How It Works?
+                    </Link>
+                    <Link
+                      href="/teacher#success-stories"
+                      onClick={() => setMobileOpen(false)}
+                      className="py-2.5 px-3.5 rounded-xl text-emerald-100 hover:text-white hover:bg-[#16805B]/60 transition-colors"
+                    >
+                      Success Stories
+                    </Link>
+                    <Link
+                      href="/contact"
+                      onClick={() => setMobileOpen(false)}
+                      className={`py-2.5 px-3.5 rounded-xl transition-colors ${
+                        pathname === "/contact"
+                          ? "bg-[#16805B] text-white font-bold shadow-xs"
+                          : "text-emerald-100 hover:text-white hover:bg-[#16805B]/60"
+                      }`}
+                    >
+                      Contact Us
+                    </Link>
                   </>
                 ) : isLearner ? (
                   <>
@@ -1039,54 +1115,57 @@ export function FloatingNavbar({ variant }: FloatingNavbarProps = {}) {
                     </Link>
                   )}
                 </div>
-              ) : isEducator && (
-                <div className="pt-3 border-t border-slate-100 flex flex-col gap-2">
-                  {!userSession ? (
+              ) : isEducator ? (
+                <div className="pt-3 border-t border-[#16805B]/40 flex flex-col gap-2">
+                  {userSession && isEducatorRole(userSession.role) ? (
+                    <>
+                      <Link
+                        href={getEducatorSubdomainUrl("/teacher/dashboard")}
+                        onClick={() => setMobileOpen(false)}
+                        className="w-full py-2.5 rounded-xl text-white text-sm font-bold shadow-xs transition-colors flex items-center justify-center gap-2 cursor-pointer bg-[#16805B] hover:bg-[#0D5C41]"
+                      >
+                        <LayoutDashboard className="h-4 w-4" />
+                        <span>Educator Dashboard</span>
+                      </Link>
+
+                      <button
+                        type="button"
+                        onClick={(e) => {
+                          setMobileOpen(false);
+                          handleLogout(e);
+                        }}
+                        disabled={isLoggingOut}
+                        className="w-full py-2 rounded-xl text-emerald-200 hover:text-white text-xs font-semibold flex items-center justify-center gap-2 border border-emerald-500/30 hover:bg-[#16805B]/40 cursor-pointer disabled:opacity-60 disabled:cursor-not-allowed"
+                      >
+                        {isLoggingOut ? (
+                          <Loader2 className="h-3.5 w-3.5 animate-spin text-white" />
+                        ) : (
+                          <LogOut className="h-3.5 w-3.5 text-white" />
+                        )}
+                        <span>{isLoggingOut ? "Signing out..." : "Sign Out"}</span>
+                      </button>
+                    </>
+                  ) : (
                     <>
                       <Link
                         href="/teacher/login"
                         onClick={() => setMobileOpen(false)}
-                        className="w-full py-2.5 rounded-xl border border-slate-200 text-slate-800 text-sm font-bold hover:bg-slate-50 transition-colors text-center cursor-pointer block"
+                        className="w-full py-2.5 rounded-xl border border-emerald-500/40 text-white text-sm font-bold hover:bg-[#16805B]/40 transition-colors text-center cursor-pointer block"
                       >
-                        Login
+                        Educator Login
                       </Link>
                       <Link
                         href="/teacher/register"
                         onClick={() => setMobileOpen(false)}
                         className="w-full py-2.5 rounded-xl text-white text-sm font-bold shadow-xs transition-colors flex items-center justify-center gap-1.5 cursor-pointer bg-[#16805B] hover:bg-[#0D5C41]"
                       >
-                        <span>Start Teaching</span>
+                        <span>Become an Educator</span>
                         <ArrowRight className="h-4 w-4" />
                       </Link>
                     </>
-                  ) : (
-                    <>
-                      <Link
-                        href={getDashboardPath(userSession)}
-                        onClick={() => setMobileOpen(false)}
-                        className="w-full py-2.5 rounded-xl text-white text-sm font-bold shadow-xs transition-colors flex items-center justify-center gap-2 cursor-pointer bg-[#16805B] hover:bg-[#0D5C41]"
-                      >
-                        <LayoutDashboard className="h-4 w-4" />
-                        <span>{getDashboardLabel(userSession)}</span>
-                      </Link>
-
-                      <button
-                        type="button"
-                        onClick={(e) => handleLogout(e)}
-                        disabled={isLoggingOut}
-                        className="w-full py-2 rounded-xl text-rose-600 text-xs font-semibold hover:bg-rose-50 flex items-center justify-center gap-2 border border-rose-100 cursor-pointer disabled:opacity-60 disabled:cursor-not-allowed"
-                      >
-                        {isLoggingOut ? (
-                          <Loader2 className="h-3.5 w-3.5 animate-spin text-rose-500" />
-                        ) : (
-                          <LogOut className="h-3.5 w-3.5 text-rose-500" />
-                        )}
-                        <span>{isLoggingOut ? "Signing out..." : "Sign Out"}</span>
-                      </button>
-                    </>
                   )}
                 </div>
-              )}
+              ) : null}
             </motion.div>
           </div>
         )}

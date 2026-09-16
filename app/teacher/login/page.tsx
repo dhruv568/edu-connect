@@ -10,7 +10,7 @@ import { GlassBadge } from "@/components/glass/glass-badge";
 import { GlassButton } from "@/components/glass/glass-button";
 import { Input } from "@/components/ui/input";
 import { useToast } from "@/components/ui/toast";
-import { isEducatorRole, isLearnerRole } from "@/lib/auth/roles";
+import { isEducatorRole } from "@/lib/auth/roles";
 import { Logo } from "@/components/brand/logo";
 import {
   Mail,
@@ -21,6 +21,7 @@ import {
   TrendingUp,
   Video,
   ShieldCheck,
+  IndianRupee,
 } from "lucide-react";
 
 export default function TeacherLoginPage() {
@@ -31,7 +32,7 @@ export default function TeacherLoginPage() {
   const router = useRouter();
   const { showToast } = useToast();
 
-  // Authentication & Back-Button (bfcache) Protection
+  // Authentication & Session Protection
   useEffect(() => {
     const checkAuthenticatedState = async () => {
       try {
@@ -45,14 +46,7 @@ export default function TeacherLoginPage() {
             const role = json.data.user.role;
             if (isEducatorRole(role)) {
               window.location.replace("/teacher/dashboard");
-            } else if (isLearnerRole(role)) {
-              window.location.replace("/student/dashboard");
-            } else if (role === "ADMIN") {
-              window.location.replace("/admin");
-            } else if (role === "STAFF") {
-              window.location.replace("/staff/dashboard");
-            } else {
-              window.location.replace("/teacher/dashboard");
+              return;
             }
           }
         }
@@ -65,11 +59,10 @@ export default function TeacherLoginPage() {
       const searchParams = new URLSearchParams(window.location.search);
       if (searchParams.get("restart") === "true") {
         document.cookie = "educonnects_pending_otp=; path=/; max-age=0;";
-        document.cookie = "admin_pending_otp=; path=/; max-age=0;";
       }
     } catch {}
 
-    const onPageShow = (event: PageTransitionEvent) => {
+    const onPageShow = () => {
       checkAuthenticatedState();
     };
 
@@ -85,11 +78,11 @@ export default function TeacherLoginPage() {
       const res = await fetch("/api/auth/login", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ email, password }),
+        body: JSON.stringify({ email: email.trim().toLowerCase(), password }),
       });
 
       const data = await res.json();
-      if (!res.ok) throw new Error(data.error || "Educator login failed.");
+      if (!res.ok) throw new Error(data.error || "Educator login failed. Please verify your credentials.");
 
       if (data.data?.requiresVerification || data.data?.requiresOtp) {
         showToast(
@@ -97,12 +90,11 @@ export default function TeacherLoginPage() {
           "Please enter the 6-digit OTP code sent to your email to complete login.",
           "info"
         );
-        router.push(data.data.redirectPath || `/verify-email?email=${encodeURIComponent(email)}&redirectTo=/teacher/dashboard`);
+        router.push(`/verify-email?email=${encodeURIComponent(email)}&redirectTo=/teacher/dashboard`);
       } else {
         showToast("Welcome Back!", `Signed in as ${data.data.user.firstName || "Educator"}`, "success");
-        // Trigger hard navigation to guarantee fresh session and bypass client router caching
-        const destination = data.data.redirectPath || "/teacher/dashboard";
-        window.location.replace(destination);
+        // Strictly redirect to Educator Dashboard
+        window.location.replace("/teacher/dashboard");
       }
     } catch (err: any) {
       showToast("Authentication Error", err.message, "error");
@@ -112,99 +104,99 @@ export default function TeacherLoginPage() {
   };
 
   return (
-    <div className="min-h-screen flex flex-col bg-slate-50 relative overflow-hidden font-sans">
-      {/* Role-Specific Teacher Navbar */}
+    <div data-theme="educator" className="min-h-screen flex flex-col bg-[#F0FAF5]/40 relative overflow-hidden font-sans">
+      {/* Educator Navbar */}
       <FloatingNavbar variant="teacher" />
 
       <main className="flex-1 pt-28 sm:pt-32 pb-20 max-w-5xl mx-auto px-4 sm:px-6 w-full flex items-center">
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-12 items-center w-full">
-          {/* Left Column: Teacher Highlights & Analytics */}
+          {/* Left Column: Educator Highlights */}
           <div className="lg:col-span-6 space-y-6 hidden lg:block">
-            <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-indigo-500/10 border border-indigo-500/20 text-indigo-700 text-xs font-bold uppercase tracking-wider">
-              <GraduationCap className="h-3.5 w-3.5 text-indigo-600" />
-              <span>Educator Teaching Portal</span>
+            <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-[#F0FAF5] border border-[#A7F3D0] text-[#0D5C41] text-xs font-black uppercase tracking-wider shadow-2xs">
+              <Sparkles className="h-3.5 w-3.5 text-[#16805B]" />
+              <span>Verified Educator Portal</span>
             </div>
 
             <div className="space-y-3">
               <h1 className="text-4xl font-black text-slate-900 tracking-tight leading-tight">
                 Manage Your <br />
-                <span className="bg-gradient-to-r from-indigo-600 via-purple-600 to-pink-600 bg-clip-text text-transparent">
+                <span className="bg-gradient-to-r from-[#16805B] via-[#0D5C41] to-[#16805B] bg-clip-text text-transparent">
                   Teaching Business
                 </span>
               </h1>
-              <p className="text-sm text-slate-600 leading-relaxed">
-                Access your schedule, launch HD live classrooms, publish new LMS courses, and monitor your bank payouts.
+              <p className="text-sm text-slate-600 leading-relaxed font-medium">
+                Access your schedule, launch HD live classrooms, publish structured LMS video courses, and monitor automated direct bank payouts.
               </p>
             </div>
 
             {/* Feature Bullets */}
             <div className="space-y-3 pt-2">
-              <div className="flex items-center gap-3 text-xs font-semibold text-slate-700">
-                <div className="p-2 rounded-xl bg-indigo-100 text-indigo-700">
-                  <TrendingUp className="h-4 w-4" />
+              <div className="flex items-center gap-3 text-xs font-bold text-slate-700">
+                <div className="p-2 rounded-xl bg-[#F0FAF5] text-[#16805B] border border-[#A7F3D0]">
+                  <IndianRupee className="h-4 w-4" />
                 </div>
-                <span>Keep 85% of every rupee earned with automated direct bank transfers</span>
+                <span>Keep 85%+ of your revenue with automated Cashfree bank transfers</span>
               </div>
-              <div className="flex items-center gap-3 text-xs font-semibold text-slate-700">
-                <div className="p-2 rounded-xl bg-purple-100 text-purple-700">
+              <div className="flex items-center gap-3 text-xs font-bold text-slate-700">
+                <div className="p-2 rounded-xl bg-[#F0FAF5] text-[#16805B] border border-[#A7F3D0]">
                   <Video className="h-4 w-4" />
                 </div>
-                <span>One-click LiveKit interactive room with screen sharing & attendance logs</span>
+                <span>Built-in HD interactive classroom with whiteboards &amp; attendance tracking</span>
               </div>
-              <div className="flex items-center gap-3 text-xs font-semibold text-slate-700">
-                <div className="p-2 rounded-xl bg-emerald-100 text-emerald-700">
+              <div className="flex items-center gap-3 text-xs font-bold text-slate-700">
+                <div className="p-2 rounded-xl bg-[#F0FAF5] text-[#16805B] border border-[#A7F3D0]">
                   <ShieldCheck className="h-4 w-4" />
                 </div>
-                <span>Verified educator trust badge to stand out in platform searches</span>
+                <span>Verified educator trust badge to stand out in platform discovery</span>
               </div>
             </div>
 
-            {/* Testimonial Quote */}
+            {/* Indian Educator Testimonial Snippet */}
             <div className="p-4 rounded-2xl bg-white border border-slate-200/90 shadow-sm space-y-2">
               <div className="flex items-center gap-3">
                 <img
-                  src="https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?w=100&auto=format&fit=crop&q=80"
-                  alt="Teacher"
-                  className="w-9 h-9 rounded-full object-cover ring-2 ring-indigo-500/30"
+                  src="/images/educators/vikramaditya-sen.jpg"
+                  alt="Prof. Vikramaditya Sen"
+                  className="w-10 h-10 rounded-full object-cover ring-2 ring-[#16805B]/30"
                 />
                 <div>
-                  <div className="text-xs font-bold text-slate-900">Prof. Vikram Malhotra</div>
-                  <div className="text-[10px] text-slate-500">Advanced Mathematics • ₹1.2L+/month</div>
+                  <div className="text-xs font-black text-slate-900">Prof. Vikramaditya Sen</div>
+                  <div className="text-[10px] text-slate-500 font-semibold">Physics Mentor &amp; Olympiad Coach • Bangalore</div>
                 </div>
               </div>
-              <p className="text-xs text-slate-600 italic">
-                &ldquo;EduConnects eliminated all scheduling and payment hassles. I now teach 180+ students monthly with zero admin overhead.&rdquo;
+              <p className="text-xs text-slate-600 italic leading-relaxed">
+                &ldquo;EduConnects eliminated all scheduling and payment friction. I teach motivated students with complete curriculum autonomy.&rdquo;
               </p>
             </div>
           </div>
 
-          {/* Right Column: Teacher Login Form */}
+          {/* Right Column: Educator Sign In Card */}
           <div className="lg:col-span-6 max-w-md mx-auto w-full space-y-6">
             <div className="text-center lg:text-left space-y-2">
               <div className="flex justify-center lg:justify-start">
-                <Logo variant="compact" size="md" roleContext="teacher" href="/" priority />
+                <Logo variant="compact" size="md" roleContext="teacher" href="/teacher" priority />
               </div>
-              <h2 className="text-2xl sm:text-3xl font-black text-slate-900">
+              <h2 className="text-2xl sm:text-3xl font-black text-slate-900 tracking-tight">
                 Educator Sign In
               </h2>
-              <p className="text-xs text-slate-500">
-                Enter your teacher credentials to access your portal
+              <p className="text-xs text-slate-500 font-medium">
+                Enter your educator credentials to access your teaching dashboard
               </p>
             </div>
 
             <GlassCard
-              glowColor="rgba(99, 102, 241, 0.15)"
-              className="p-7 sm:p-8 border border-white/90 shadow-xl space-y-6"
+              glowColor="rgba(22, 128, 91, 0.15)"
+              className="p-7 sm:p-8 border border-white/90 shadow-xl space-y-6 bg-white/95"
             >
               <form onSubmit={handleLogin} className="space-y-4">
                 <Input
                   label="Educator Email Address"
                   type="email"
-                  placeholder="teacher@example.com"
+                  placeholder="educator@example.com"
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
                   required
-                  leftIcon={<Mail className="h-4 w-4 text-indigo-600" />}
+                  leftIcon={<Mail className="h-4 w-4 text-[#16805B]" />}
                 />
 
                 <Input
@@ -214,34 +206,33 @@ export default function TeacherLoginPage() {
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
                   required
-                  leftIcon={<Lock className="h-4 w-4 text-indigo-600" />}
+                  leftIcon={<Lock className="h-4 w-4 text-[#16805B]" />}
                 />
 
-                <div className="flex items-center justify-between text-xs font-semibold">
-                  <Link href="/forgot-password" className="text-indigo-600 hover:underline">
+                <div className="flex items-center justify-between text-xs font-bold">
+                  <Link href="/forgot-password" className="text-[#16805B] hover:text-[#0D5C41] hover:underline">
                     Forgot password?
                   </Link>
-                  <Link href="/teacher/register" className="text-slate-600 hover:text-indigo-700">
-                    Need an account?
+                  <Link href="/teacher/register" className="text-slate-600 hover:text-[#0D5C41]">
+                    Become an Educator →
                   </Link>
                 </div>
 
                 <GlassButton
                   type="submit"
-                  variant="primary"
-                  className="w-full mt-2 bg-indigo-600 hover:bg-indigo-700 border-indigo-500 shadow-indigo-600/20"
+                  variant="educator"
+                  className="w-full mt-2 text-white font-black text-sm shadow-md"
                   isLoading={loading}
                   rightIcon={<ArrowRight className="h-4 w-4" />}
                 >
-                  Sign In as Educator
+                  Sign In to Educator Portal
                 </GlassButton>
               </form>
 
-              {/* Cross Role Links */}
-              <div className="pt-2 text-center text-xs text-slate-500 border-t border-slate-100">
-                Are you a learner?{" "}
-                <Link href="/student/login" className="text-emerald-600 hover:underline font-bold">
-                  Sign in as Learner →
+              <div className="pt-2 text-center text-xs text-slate-500 border-t border-slate-100 font-medium">
+                New to EduConnects?{" "}
+                <Link href="/teacher/register" className="text-[#16805B] hover:text-[#0D5C41] hover:underline font-bold">
+                  Register as an Educator →
                 </Link>
               </div>
             </GlassCard>

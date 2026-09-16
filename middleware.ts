@@ -66,6 +66,11 @@ export function middleware(request: NextRequest) {
     return NextResponse.redirect(targetUrl);
   }
 
+  if (isEducatorSubdomain && (pathname.startsWith("/admin") || pathname.startsWith("/staff") || pathname.startsWith("/governance"))) {
+    const targetUrl = new URL(pathname, "https://educonnects.co.in");
+    return NextResponse.redirect(targetUrl);
+  }
+
   // Prevent main domain showing learner/educator dashboards directly
   if (isMainDomain && pathname.startsWith("/student")) {
     return NextResponse.redirect(new URL(pathname, studentDomainUrl));

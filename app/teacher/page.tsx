@@ -5,6 +5,7 @@ import Link from "next/link";
 import { motion, AnimatePresence } from "framer-motion";
 import { FloatingNavbar } from "@/components/homepage/floating-navbar";
 import { PremiumFooter } from "@/components/homepage/premium-footer";
+import { EducatorHeroSlideshow } from "@/components/homepage/educator-hero-slideshow";
 import { GlassCard } from "@/components/glass/glass-card";
 import { GlassBadge } from "@/components/glass/glass-badge";
 import { GlassButton } from "@/components/glass/glass-button";
@@ -37,7 +38,7 @@ import {
 } from "lucide-react";
 import { formatCurrency } from "@/lib/currency";
 import { UserRole, UserSession } from "@/types/auth";
-import { isEducatorRole, isLearnerRole, isAdminRole } from "@/lib/auth/roles";
+import { isEducatorRole } from "@/lib/auth/roles";
 
 export default function TeacherLandingPage() {
   const [authModalOpen, setAuthModalOpen] = useState(false);
@@ -116,36 +117,36 @@ export default function TeacherLandingPage() {
     },
     {
       step: "02",
+      title: "Pay ₹99 Registration Fee",
+      desc: "Complete the nominal ₹99 educator registration fee via Cashfree to verify your application and activate your onboarding.",
+      icon: IndianRupee,
+    },
+    {
+      step: "03",
       title: "Admin Verification",
       desc: "Submit identity and qualification documents for verification to earn the verified educator trust badge.",
       icon: ShieldCheck,
     },
     {
-      step: "03",
-      title: "Build Courses & Schedule Slots",
+      step: "04",
+      title: "Schedule Classes & Build Courses",
       desc: "Upload structured video lessons, set weekly live class availability, or offer 1-on-1 trial demo slots.",
       icon: BookOpen,
     },
     {
-      step: "04",
-      title: "Teach & Inspire Learners",
-      desc: "Conduct interactive classes inside the browser using our built-in video classroom and shared whiteboard.",
-      icon: Video,
-    },
-    {
       step: "05",
-      title: "Automated Bank Payouts",
-      desc: "Track every completed session in your financial ledger and receive automatic direct deposits via Cashfree.",
-      icon: IndianRupee,
+      title: "Teach & Automated Payouts",
+      desc: "Conduct interactive classes inside the browser and receive automated weekly direct bank deposits via Cashfree.",
+      icon: Award,
     },
   ];
 
   const teacherTestimonials = [
     {
-      name: "Dr. Kavita Narang",
+      name: "Dr. Kavita Deshmukh",
       role: "Senior Mathematics Educator",
       location: "New Delhi",
-      avatar: "https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=150&auto=format&fit=crop&q=80",
+      avatar: "/images/educators/kavita-deshmukh.jpg",
       rating: 5,
       achievement: "₹84,000 / mo Avg. Earnings",
       subjects: "JEE Advanced Calculus",
@@ -153,10 +154,10 @@ export default function TeacherLandingPage() {
         "Transitioning from offline coaching centers to EduConnects was the best career decision I've made. I teach 15 hours weekly from my study, enjoy complete syllabus autonomy, and receive automatic weekly bank deposits.",
     },
     {
-      name: "Prof. Sanjeev Kapoor",
+      name: "Prof. Vikramaditya Sen",
       role: "Physics Mentor & Olympiad Coach",
       location: "Bangalore",
-      avatar: "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=150&auto=format&fit=crop&q=80",
+      avatar: "/images/educators/vikramaditya-sen.jpg",
       rating: 5,
       achievement: "240+ Active Learners",
       subjects: "Mechanics & Electromagnetism",
@@ -167,7 +168,7 @@ export default function TeacherLandingPage() {
       name: "Meenakshi Sundaram",
       role: "Computer Science & AI Instructor",
       location: "Hyderabad",
-      avatar: "https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?w=150&auto=format&fit=crop&q=80",
+      avatar: "/images/educators/meenakshi-sundaram.jpg",
       rating: 5,
       achievement: "₹1,15,000+ Gross Monthly Revenue",
       subjects: "Python & Data Structures",
@@ -178,9 +179,14 @@ export default function TeacherLandingPage() {
 
   const teacherFaqs = [
     {
+      question: "Why is there a ₹99 Educator Registration Fee?",
+      answer:
+        "The nominal ₹99 registration fee ensures serious, verified educator applications and prevents automated spam. It covers document verification overhead and grants full access to the Educator Dashboard, LiveKit digital classroom, and course publishing suite. Learners are never charged any registration fee.",
+    },
+    {
       question: "How do I become a verified educator on EduConnects?",
       answer:
-        "Simply sign up as an educator, complete your professional profile (headline, subjects, experience, hourly rate), and submit your educational degrees or certificates in our multi-step onboarding portal. Our administration team audits each application within 24-48 hours.",
+        "Simply sign up as an educator, complete your professional profile (headline, subjects, experience, hourly rate), pay the ₹99 registration fee, and submit your educational degrees or certificates in our multi-step onboarding portal. Our administration team audits each application within 24-48 hours.",
     },
     {
       question: "How do live classes work for educators?",
@@ -190,7 +196,7 @@ export default function TeacherLandingPage() {
     {
       question: "How do I create and sell on-demand video courses?",
       answer:
-        "Our course builder allows you to organize your curriculum into sections, upload high-definition video lessons with automated Mux video processing, attach supplementary PDF study notes, set a course price, and publish to the platform.",
+        "Our course builder allows you to organize your curriculum into sections, upload high-definition video lessons with automated video processing, attach supplementary PDF study notes, set a course price, and publish to the platform.",
     },
     {
       question: "How and when do I receive payouts?",
@@ -216,32 +222,35 @@ export default function TeacherLandingPage() {
 
       <main className="flex-1">
         {/* ========================================================================= */}
-        {/* 1. HERO SECTION */}
+        {/* 1. HERO SECTION WITH BACKGROUND SLIDESHOW */}
         {/* ========================================================================= */}
-        <section className="relative pt-32 sm:pt-36 lg:pt-44 pb-20 lg:pb-28 overflow-hidden bg-gradient-to-b from-[#F0FAF5] via-slate-50 to-white">
-          {/* Subtle Background Glow Elements */}
+        <section className="relative pt-32 sm:pt-36 lg:pt-44 pb-20 lg:pb-28 overflow-hidden bg-[#083827]">
+          {/* 5-Slide Educator Background Slideshow */}
+          <EducatorHeroSlideshow />
+
+          {/* Subtle Accent Glow Elements */}
           <div className="absolute top-20 left-1/2 -translate-x-1/2 w-full max-w-7xl h-[500px] pointer-events-none -z-10">
-            <div className="absolute top-10 left-10 w-96 h-96 bg-[#16805B]/15 rounded-full blur-3xl" />
-            <div className="absolute top-20 right-10 w-96 h-96 bg-[#35A979]/15 rounded-full blur-3xl" />
+            <div className="absolute top-10 left-10 w-96 h-96 bg-[#16805B]/20 rounded-full blur-3xl" />
+            <div className="absolute top-20 right-10 w-96 h-96 bg-[#35A979]/20 rounded-full blur-3xl" />
           </div>
 
-          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
             <div className="grid grid-cols-1 lg:grid-cols-12 gap-12 lg:gap-8 items-center">
               {/* Left Column: Copy & CTAs */}
               <div className="lg:col-span-7 space-y-6 text-center lg:text-left">
-                <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-[#F0FAF5] border border-[#A7F3D0] text-[#0D5C41] text-xs font-extrabold uppercase tracking-wider shadow-2xs">
-                  <Sparkles className="h-3.5 w-3.5 text-[#16805B]" />
+                <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-[#0D5C41]/80 backdrop-blur-md border border-[#35A979]/50 text-emerald-200 text-xs font-extrabold uppercase tracking-wider shadow-md">
+                  <Sparkles className="h-3.5 w-3.5 text-[#35A979]" />
                   <span>The Platform Built for Independent Educators</span>
                 </div>
 
-                <h1 className="text-4xl sm:text-5xl lg:text-6xl font-black text-slate-900 tracking-tight leading-[1.15]">
-                  Turn your knowledge into impact. <br />
-                  <span className="bg-gradient-to-r from-[#16805B] via-[#0D5C41] to-[#16805B] bg-clip-text text-transparent">
-                    Teach. Grow. Earn.
+                <h1 className="text-4xl sm:text-5xl lg:text-6xl font-black text-white tracking-tight leading-[1.15]">
+                  Teach. Connect. Grow. <br />
+                  <span className="bg-gradient-to-r from-emerald-300 via-[#35A979] to-teal-200 bg-clip-text text-transparent">
+                    Turn Knowledge Into Impact
                   </span>
                 </h1>
 
-                <p className="text-base sm:text-lg text-slate-600 max-w-2xl mx-auto lg:mx-0 leading-relaxed font-normal">
+                <p className="text-base sm:text-lg text-emerald-100/90 max-w-2xl mx-auto lg:mx-0 leading-relaxed font-normal">
                   Build your verified educator brand, conduct high-definition live classes in the browser, sell recorded video courses, and receive automated direct bank payouts.
                 </p>
 
@@ -249,75 +258,41 @@ export default function TeacherLandingPage() {
                 <div className="flex flex-col sm:flex-row items-center justify-center lg:justify-start gap-4 pt-2">
                   {userSession && isEducatorRole(userSession.role) ? (
                     <Link href="/teacher/dashboard" className="w-full sm:w-auto">
-                      <GlassButton
-                        variant="educator"
-                        size="lg"
-                        className="w-full sm:w-auto text-white shadow-xl shadow-emerald-700/25 text-sm font-bold"
-                        leftIcon={<LayoutDashboard className="h-4 w-4" />}
-                      >
-                        Go to Educator Dashboard
-                      </GlassButton>
-                    </Link>
-                  ) : userSession && isLearnerRole(userSession.role) ? (
-                    <Link href="/student/dashboard" className="w-full sm:w-auto">
-                      <GlassButton
-                        variant="primary"
-                        size="lg"
-                        className="w-full sm:w-auto text-white shadow-xl text-sm font-bold"
-                        leftIcon={<LayoutDashboard className="h-4 w-4" />}
-                      >
-                        Go to Learner Dashboard
-                      </GlassButton>
-                    </Link>
-                  ) : userSession && isAdminRole(userSession.role) ? (
-                    <Link href="/admin" className="w-full sm:w-auto">
-                      <GlassButton
-                        variant="primary"
-                        size="lg"
-                        className="w-full sm:w-auto text-white shadow-xl text-sm font-bold"
-                        leftIcon={<LayoutDashboard className="h-4 w-4" />}
-                      >
-                        Go to Admin Dashboard
-                      </GlassButton>
+                      <button className="w-full sm:w-auto px-7 py-3.5 rounded-xl font-bold text-white bg-[#16805B] hover:bg-[#0D5C41] shadow-xl shadow-black/30 text-sm flex items-center justify-center gap-2 transition-all active:scale-95 cursor-pointer">
+                        <LayoutDashboard className="h-4 w-4 text-emerald-200" />
+                        <span>Go to Educator Dashboard</span>
+                      </button>
                     </Link>
                   ) : (
                     <Link href="/teacher/register" className="w-full sm:w-auto">
-                      <GlassButton
-                        variant="educator"
-                        size="lg"
-                        className="w-full sm:w-auto text-white shadow-xl shadow-emerald-700/25 text-sm font-bold"
-                        rightIcon={<ArrowRight className="h-4 w-4" />}
-                      >
-                        Start Teaching
-                      </GlassButton>
+                      <button className="w-full sm:w-auto px-7 py-3.5 rounded-xl font-bold text-white bg-[#16805B] hover:bg-[#0D5C41] shadow-xl shadow-black/30 text-sm flex items-center justify-center gap-2 transition-all active:scale-95 cursor-pointer">
+                        <span>Become an Educator</span>
+                        <ArrowRight className="h-4 w-4" />
+                      </button>
                     </Link>
                   )}
 
-                  <Link href="#how-it-works" className="w-full sm:w-auto">
-                    <GlassButton
-                      variant="secondary"
-                      size="lg"
-                      className="w-full sm:w-auto text-sm"
-                      leftIcon={<FileCheck className="h-4 w-4 text-slate-600" />}
-                    >
-                      Learn How It Works
-                    </GlassButton>
-                  </Link>
+                  <a href="#how-it-works" className="w-full sm:w-auto">
+                    <button className="w-full sm:w-auto px-6 py-3.5 rounded-xl font-bold text-white bg-white/10 hover:bg-white/20 border border-white/25 backdrop-blur-md text-sm flex items-center justify-center gap-2 transition-all active:scale-95 cursor-pointer">
+                      <FileCheck className="h-4 w-4 text-emerald-300" />
+                      <span>How It Works?</span>
+                    </button>
+                  </a>
                 </div>
 
                 {/* Educator Trust Stats */}
-                <div className="pt-6 border-t border-slate-200/80 grid grid-cols-3 gap-4 text-left max-w-lg mx-auto lg:mx-0">
+                <div className="pt-6 border-t border-white/20 grid grid-cols-3 gap-4 text-left max-w-lg mx-auto lg:mx-0">
                   <div>
-                    <div className="text-2xl lg:text-3xl font-black text-[#16805B]">85%+</div>
-                    <div className="text-xs text-slate-500 font-medium">Revenue Share</div>
+                    <div className="text-2xl lg:text-3xl font-black text-emerald-300">85%+</div>
+                    <div className="text-xs text-emerald-100 font-medium">Revenue Share</div>
                   </div>
                   <div>
-                    <div className="text-2xl lg:text-3xl font-black text-slate-900">Direct</div>
-                    <div className="text-xs text-slate-500 font-medium">Cashfree Payouts</div>
+                    <div className="text-2xl lg:text-3xl font-black text-white">Direct</div>
+                    <div className="text-xs text-emerald-100 font-medium">Cashfree Payouts</div>
                   </div>
                   <div>
-                    <div className="text-2xl lg:text-3xl font-black text-[#0D5C41]">100%</div>
-                    <div className="text-xs text-slate-500 font-medium">Content Ownership</div>
+                    <div className="text-2xl lg:text-3xl font-black text-[#35A979]">100%</div>
+                    <div className="text-xs text-emerald-100 font-medium">Content Ownership</div>
                   </div>
                 </div>
               </div>
@@ -326,19 +301,19 @@ export default function TeacherLandingPage() {
               <div className="lg:col-span-5 relative">
                 <div className="relative mx-auto max-w-md lg:max-w-none">
                   <GlassCard
-                    glowColor="rgba(22, 128, 91, 0.2)"
-                    className="p-6 border-2 border-white shadow-2xl space-y-5 rounded-3xl bg-white/90 backdrop-blur-xl"
+                    glowColor="rgba(22, 128, 91, 0.4)"
+                    className="p-6 border-2 border-white/30 shadow-2xl space-y-5 rounded-3xl bg-white/95 backdrop-blur-xl"
                   >
                     {/* Header with Verification Status */}
                     <div className="flex items-center justify-between border-b border-slate-100 pb-3">
                       <div className="flex items-center gap-3">
                         <img
-                          src="https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=100&auto=format&fit=crop&q=80"
-                          alt="Educator avatar"
-                          className="w-10 h-10 rounded-2xl object-cover ring-2 ring-[#16805B]/30 shadow-sm"
+                          src="/images/educators/kavita-deshmukh.jpg"
+                          alt="Dr. Kavita Deshmukh"
+                          className="w-10 h-10 rounded-2xl object-cover ring-2 ring-[#16805B]/40 shadow-sm"
                         />
                         <div>
-                          <div className="text-xs font-black text-slate-900">Dr. Kavita Narang</div>
+                          <div className="text-xs font-black text-slate-900">Dr. Kavita Deshmukh</div>
                           <div className="text-[10px] text-slate-500 font-semibold">Senior Mathematics Educator</div>
                         </div>
                       </div>
@@ -720,7 +695,7 @@ export default function TeacherLandingPage() {
             <div className="text-center max-w-2xl mx-auto space-y-3">
               <GlassBadge variant="educator">SIMPLE & TRANSPARENT ONBOARDING</GlassBadge>
               <h2 className="text-3xl sm:text-4xl font-black text-slate-900 tracking-tight">
-                How Becoming an Educator Works
+                How Becoming an Educator Works?
               </h2>
               <p className="text-sm text-slate-600">
                 From initial registration to your first live class, our streamlined process gets you teaching quickly.
@@ -760,7 +735,7 @@ export default function TeacherLandingPage() {
             <div className="text-center max-w-2xl mx-auto space-y-3">
               <GlassBadge variant="educator">EDUCATOR ADVANTAGES</GlassBadge>
               <h2 className="text-3xl sm:text-4xl font-black text-slate-900 tracking-tight">
-                Why Top Educators Choose EduConnects
+                Why Top Educators Choose EduConnects?
               </h2>
               <p className="text-sm text-slate-600">
                 Built specifically for independent educators, coaches, and subject experts.
@@ -925,19 +900,19 @@ export default function TeacherLandingPage() {
                 </GlassButton>
               </Link>
 
-              <Link href="#how-it-works" className="w-full sm:w-auto">
+              <a href="#how-it-works" className="w-full sm:w-auto">
                 <GlassButton
                   variant="ghost"
                   size="lg"
                   className="w-full sm:w-auto text-white border border-white/30 hover:bg-white/10"
                 >
-                  Review Onboarding Steps
+                  How It Works?
                 </GlassButton>
-              </Link>
+              </a>
             </div>
 
             <div className="pt-6 flex items-center justify-center gap-6 text-xs text-[#A7F3D0]">
-              <span>✓ Free application</span>
+              <span>✓ Nominal ₹99 Registration Fee</span>
               <span>•</span>
               <span>✓ Verified Educator Badge</span>
               <span>•</span>
