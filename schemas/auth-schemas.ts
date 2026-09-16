@@ -11,6 +11,7 @@ export const RegisterSchema = z.object({
     .regex(/[0-9]/, "Password must contain at least one number"),
   firstName: z.string().min(2, "First name must be at least 2 characters"),
   lastName: z.string().min(2, "Last name must be at least 2 characters"),
+  phone: z.string().optional(),
   role: RoleEnum.default("STUDENT"),
 });
 

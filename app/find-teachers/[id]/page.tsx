@@ -109,7 +109,12 @@ export default function PublicTeacherProfilePage() {
                 <span className="text-xs text-slate-500">Hourly Trial Rate</span>
                 <div className="text-2xl font-black text-slate-900">{formatCurrency(teacher.hourlyRate)}</div>
               </div>
-              <GlassButton variant="primary" size="lg" onClick={() => setAuthModalOpen(true)}>
+              <GlassButton
+                variant="primary"
+                size="lg"
+                className="bg-[#3157D5] hover:bg-[#243B9B] text-white"
+                onClick={() => router.push(`/student/register?educatorId=${teacher.id}&trial=true`)}
+              >
                 Book Trial Lesson
               </GlassButton>
             </div>

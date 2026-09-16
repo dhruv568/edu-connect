@@ -100,16 +100,19 @@ export function TeacherPreviewModal({ teacher, isOpen, onClose, onOpenAuth }: Te
             </Link>
 
             <div className="flex items-center gap-3 w-full sm:w-auto justify-end">
-              <GlassButton
-                variant="primary"
-                onClick={() => {
-                  onClose();
-                  onOpenAuth("STUDENT");
-                }}
-                rightIcon={<ArrowRight className="h-4 w-4" />}
+              <Link
+                href={`/student/register?educatorId=${teacher.id}&trial=true`}
+                onClick={onClose}
+                className="w-full sm:w-auto"
               >
-                Book Trial Lesson
-              </GlassButton>
+                <GlassButton
+                  variant="primary"
+                  className="w-full bg-[#3157D5] hover:bg-[#243B9B] text-white"
+                  rightIcon={<ArrowRight className="h-4 w-4" />}
+                >
+                  Book Trial Lesson
+                </GlassButton>
+              </Link>
             </div>
           </div>
         </motion.div>

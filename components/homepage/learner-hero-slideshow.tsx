@@ -31,8 +31,8 @@ const LEARNER_SLIDES: LearnerSlide[] = [
   },
   {
     url: "https://images.unsplash.com/photo-1523240795612-9a054b0db644?w=1600&auto=format&fit=crop&q=80",
-    alt: "Celebrating academic milestones, top exam percentiles, and career growth",
-    theme: "Learning & Career Growth",
+    alt: "Celebrating academic milestones, top exam percentiles, and learning growth",
+    theme: "Learn and Grow",
   },
 ];
 
@@ -47,10 +47,12 @@ export function LearnerHeroSlideshow() {
 
     if (prefersReducedMotion) return;
 
-    // Smooth, unobtrusive background image cycling every 7 seconds
+    // Smooth, visible background image cycling every 5 seconds (4-6s requirement)
     const interval = setInterval(() => {
-      setCurrentIndex((prev) => (prev + 1) % LEARNER_SLIDES.length);
-    }, 7000);
+      if (typeof document !== "undefined" && !document.hidden) {
+        setCurrentIndex((prev) => (prev + 1) % LEARNER_SLIDES.length);
+      }
+    }, 5000);
 
     return () => clearInterval(interval);
   }, []);
@@ -58,16 +60,16 @@ export function LearnerHeroSlideshow() {
   return (
     <div
       aria-hidden="true"
-      className="absolute inset-0 -z-10 overflow-hidden pointer-events-none select-none"
+      className="absolute inset-0 z-0 overflow-hidden pointer-events-none select-none"
     >
-      {/* 1. Slideshow Image Layers */}
+      {/* 1. IMAGE LAYER (Properly visible at 48% opacity, recognizing the scene) */}
       {LEARNER_SLIDES.map((slide, index) => {
         const isActive = index === currentIndex;
         return (
           <div
             key={slide.url}
             className={`absolute inset-0 transition-opacity duration-1000 ease-in-out ${
-              isActive ? "opacity-25" : "opacity-0"
+              isActive ? "opacity-50" : "opacity-0"
             }`}
           >
             <img
@@ -80,12 +82,13 @@ export function LearnerHeroSlideshow() {
         );
       })}
 
-      {/* 2. Soft Learner Blue & White Gradient Overlays for High Contrast Text Legibility */}
-      <div className="absolute inset-0 bg-gradient-to-b from-[#F3F6FF]/90 via-white/85 to-[#F3F6FF]/95" />
+      {/* 2. OVERLAY LAYER (Keeps text completely sharp & legible using Learner palette) */}
+      <div className="absolute inset-0 bg-gradient-to-r from-[#F3F6FF]/92 via-white/80 to-[#F3F6FF]/88" />
+      <div className="absolute inset-0 bg-gradient-to-b from-transparent via-white/20 to-[#F3F6FF]/95" />
 
       {/* 3. Subtle Brand Accent Glows (#3157D5 and #667EEA) */}
-      <div className="absolute -top-24 left-1/2 -translate-x-1/2 w-[800px] h-[450px] bg-[#3157D5]/8 rounded-full blur-3xl" />
-      <div className="absolute top-1/3 right-10 w-[500px] h-[350px] bg-[#667EEA]/8 rounded-full blur-3xl" />
+      <div className="absolute -top-20 left-1/4 w-[600px] h-[400px] bg-[#3157D5]/10 rounded-full blur-3xl" />
+      <div className="absolute top-1/3 right-10 w-[500px] h-[350px] bg-[#667EEA]/10 rounded-full blur-3xl" />
     </div>
   );
 }

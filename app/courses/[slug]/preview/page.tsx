@@ -136,7 +136,7 @@ export default function DedicatedCoursePreviewPage() {
       const data = await res.json();
 
       if (res.status === 401) {
-        router.push(`/login?redirect=/courses/${slug}/preview`);
+        router.push(`/student/register?courseId=${course.id}`);
         return;
       }
 

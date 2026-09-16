@@ -34,6 +34,20 @@ export default function LoginPage() {
           const json = await res.json();
           if (json?.data?.user) {
             const role = json.data.user.role;
+            const isLearnerHost =
+              typeof window !== "undefined" &&
+              (window.location.hostname.startsWith("learners.") ||
+                window.location.hostname.startsWith("learner.") ||
+                window.location.hostname.startsWith("students.") ||
+                window.location.hostname.startsWith("student."));
+
+            if (isLearnerHost) {
+              if (isLearnerRole(role)) {
+                window.location.replace("/student/dashboard");
+              }
+              return;
+            }
+
             if (isEducatorRole(role)) {
               window.location.replace("/teacher/dashboard");
             } else if (isLearnerRole(role)) {

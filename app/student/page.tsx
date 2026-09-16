@@ -375,17 +375,10 @@ export default function StudentLandingPage() {
 
       <main className="flex-1">
         {/* ========================================================================= */}
-        {/* 1. HERO SECTION */}
-        {/* ========================================================================= */}
-        <section className="relative pt-32 sm:pt-36 lg:pt-44 pb-20 lg:pb-28 overflow-hidden bg-gradient-to-b from-blue-50/70 via-slate-50 to-white">
+        <section className="relative pt-32 sm:pt-36 lg:pt-44 pb-20 lg:pb-28 overflow-hidden bg-[#F3F6FF]">
           <LearnerHeroSlideshow />
-          {/* Subtle Background Elements */}
-          <div className="absolute top-20 left-1/2 -translate-x-1/2 w-full max-w-7xl h-[500px] pointer-events-none -z-10">
-            <div className="absolute top-10 left-10 w-96 h-96 bg-blue-500/15 rounded-full blur-3xl" />
-            <div className="absolute top-20 right-10 w-96 h-96 bg-sky-400/15 rounded-full blur-3xl" />
-          </div>
 
-          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
             <div className="grid grid-cols-1 lg:grid-cols-12 gap-12 lg:gap-8 items-center">
               {/* Hero Left Column: Copy & CTAs */}
               <div className="lg:col-span-7 space-y-6 text-center lg:text-left">
@@ -754,8 +747,8 @@ export default function StudentLandingPage() {
                   </div>
 
                   <div className="pt-5 mt-4 border-t border-slate-100">
-                    <Link href="/find-teachers" className="w-full block">
-                      <button className="w-full py-2 px-3 rounded-xl bg-blue-600 hover:bg-blue-700 text-white text-xs font-bold transition-colors flex items-center justify-center gap-1 shadow-sm">
+                    <Link href={`/student/register?educatorId=${teacher.id}&trial=true`} className="w-full block">
+                      <button className="w-full py-2.5 px-3 rounded-xl bg-[#3157D5] hover:bg-[#243B9B] text-white text-xs font-bold transition-colors flex items-center justify-center gap-1 shadow-sm cursor-pointer">
                         <span>Book Trial Lesson</span>
                         <ArrowRight className="h-3.5 w-3.5" />
                       </button>

@@ -56,6 +56,11 @@ export function middleware(request: NextRequest) {
     return NextResponse.redirect(targetUrl);
   }
 
+  if (isStudentSubdomain && pathname.startsWith("/admin")) {
+    const targetUrl = new URL(pathname, "https://educonnects.co.in");
+    return NextResponse.redirect(targetUrl);
+  }
+
   if (isEducatorSubdomain && pathname.startsWith("/student")) {
     const targetUrl = new URL(pathname, studentDomainUrl);
     return NextResponse.redirect(targetUrl);
@@ -329,6 +334,39 @@ export function middleware(request: NextRequest) {
     pathname === "/staff/login";
 
   if (isLoginRoute) {
+    // 1. Learner login route or Learner subdomain login:
+    // Only redirect away if ALREADY logged in as a Learner.
+    // If user has an Admin or Educator session in cookies, clicking Learner Login must open Learner Login!
+    const isLearnerLoginRequest =
+      pathname === "/student/login" ||
+      pathname === "/learner/login" ||
+      (isStudentSubdomain && pathname === "/login");
+
+    if (isLearnerLoginRequest) {
+      if (isLearnerRole(userSession.role)) {
+        const target = isStudentSubdomain ? "/dashboard" : "/student/dashboard";
+        return NextResponse.redirect(new URL(target, request.url));
+      }
+      // Allow accessing the Learner Login page
+      const rewrite = getSubdomainRewrite();
+      return rewrite || NextResponse.next();
+    }
+
+    // 2. Educator login route or Educator subdomain login:
+    const isEducatorLoginRequest =
+      pathname === "/teacher/login" ||
+      pathname === "/educator/login" ||
+      (isEducatorSubdomain && pathname === "/login");
+
+    if (isEducatorLoginRequest) {
+      if (isEducatorRole(userSession.role)) {
+        const target = isEducatorSubdomain ? "/dashboard" : "/teacher/dashboard";
+        return NextResponse.redirect(new URL(target, request.url));
+      }
+      const rewrite = getSubdomainRewrite();
+      return rewrite || NextResponse.next();
+    }
+
     if (isEducatorRole(userSession.role)) {
       const target = isEducatorSubdomain ? "/dashboard" : "/teacher/dashboard";
       return NextResponse.redirect(new URL(target, request.url));

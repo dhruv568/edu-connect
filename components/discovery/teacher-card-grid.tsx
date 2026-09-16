@@ -1,6 +1,7 @@
 "use client";
 
 import React, { useState } from "react";
+import Link from "next/link";
 import { GlassCard } from "@/components/glass/glass-card";
 import { GlassBadge } from "@/components/glass/glass-badge";
 import { GlassButton } from "@/components/glass/glass-button";
@@ -94,9 +95,11 @@ export function TeacherCardGrid({ teachers, loading = false, onOpenAuth }: Teach
             </div>
 
             <div className="pt-4 border-t border-slate-100 mt-4 flex items-center gap-2">
-              <GlassButton variant="primary" size="sm" className="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold" rightIcon={<ArrowRight className="h-3.5 w-3.5" />}>
-                Book Trial Lesson
-              </GlassButton>
+              <Link href={`/student/register?educatorId=${t.id}&trial=true`} className="w-full">
+                <GlassButton variant="primary" size="sm" className="w-full bg-[#3157D5] hover:bg-[#243B9B] text-white font-bold" rightIcon={<ArrowRight className="h-3.5 w-3.5" />}>
+                  Book Trial Lesson
+                </GlassButton>
+              </Link>
             </div>
           </GlassCard>
         ))}

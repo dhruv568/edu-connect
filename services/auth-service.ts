@@ -76,6 +76,7 @@ export class AuthService {
       interests: input.interests,
       learningPreferences: input.learningPreferences,
       emergencyContact: input.emergencyContact,
+      phone: input.phone,
     };
 
     // Store strictly in pending_registrations temporary storage.
@@ -350,6 +351,7 @@ export class AuthService {
               create: {
                 firstName: pending.firstName,
                 lastName: pending.lastName,
+                phone: extra.phone || null,
               },
             },
             ...(role === "TEACHER" && {

@@ -45,14 +45,6 @@ export default function StudentLoginPage() {
             const role = json.data.user.role;
             if (isLearnerRole(role)) {
               window.location.replace("/student/dashboard");
-            } else if (isEducatorRole(role)) {
-              window.location.replace("/teacher/dashboard");
-            } else if (role === "ADMIN") {
-              window.location.replace("/admin");
-            } else if (role === "STAFF") {
-              window.location.replace("/staff/dashboard");
-            } else {
-              window.location.replace("/student/dashboard");
             }
           }
         }

@@ -107,7 +107,7 @@ export default function CourseDetailPage() {
       const data = await res.json();
 
       if (res.status === 401) {
-        router.push(`/login?redirect=/courses/${slug}`);
+        router.push(`/student/register?courseId=${course.id}`);
         return;
       }
 
