@@ -28,21 +28,25 @@ import { Logo } from "@/components/brand/logo";
 
 export interface PremiumFooterProps {
   showCta?: boolean;
+  variant?: "default" | "student" | "teacher";
 }
 
-export function PremiumFooter({ showCta = false }: PremiumFooterProps = {}) {
+export function PremiumFooter({ showCta = false, variant }: PremiumFooterProps = {}) {
   const pathname = usePathname();
   const [socials, setSocials] = useState(OFFICIAL_COMPANY_INFO.socials);
 
   const isEducator =
-    pathname === "/teacher" ||
-    pathname?.startsWith("/teacher/") ||
-    pathname === "/register/teacher" ||
-    (typeof window !== "undefined" &&
-      (window.location.hostname.startsWith("educators.") ||
-        window.location.hostname.startsWith("educator.") ||
-        window.location.hostname.startsWith("teachers.") ||
-        window.location.hostname.startsWith("teacher.")));
+    variant === "teacher" ||
+    (variant !== "default" &&
+      variant !== "student" &&
+      (pathname === "/teacher" ||
+        pathname?.startsWith("/teacher/") ||
+        pathname === "/register/teacher" ||
+        (typeof window !== "undefined" &&
+          (window.location.hostname.startsWith("educators.") ||
+            window.location.hostname.startsWith("educator.") ||
+            window.location.hostname.startsWith("teachers.") ||
+            window.location.hostname.startsWith("teacher.")))));
 
   const isLearner =
     !isEducator &&

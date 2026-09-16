@@ -235,25 +235,29 @@ export function FloatingNavbar({ variant }: FloatingNavbarProps = {}) {
 
   const isLearner =
     variant === "student" ||
-    pathname === "/student" ||
-    pathname?.startsWith("/student/") ||
-    (typeof window !== "undefined" &&
-      (window.location.hostname.startsWith("learners.") ||
-        window.location.hostname.startsWith("learner.") ||
-        window.location.hostname.startsWith("students.") ||
-        window.location.hostname.startsWith("student.")));
+    (variant !== "default" &&
+      variant !== "teacher" &&
+      (pathname === "/student" ||
+        pathname?.startsWith("/student/") ||
+        (typeof window !== "undefined" &&
+          (window.location.hostname.startsWith("learners.") ||
+            window.location.hostname.startsWith("learner.") ||
+            window.location.hostname.startsWith("students.") ||
+            window.location.hostname.startsWith("student.")))));
 
   const isEducator =
     variant === "teacher" ||
-    pathname === "/teacher" ||
-    pathname?.startsWith("/teacher/") ||
-    pathname === "/register/teacher" ||
-    pathname?.startsWith("/register/teacher/") ||
-    (typeof window !== "undefined" &&
-      (window.location.hostname.startsWith("educators.") ||
-        window.location.hostname.startsWith("educator.") ||
-        window.location.hostname.startsWith("teachers.") ||
-        window.location.hostname.startsWith("teacher.")));
+    (variant !== "default" &&
+      variant !== "student" &&
+      (pathname === "/teacher" ||
+        pathname?.startsWith("/teacher/") ||
+        pathname === "/register/teacher" ||
+        pathname?.startsWith("/register/teacher/") ||
+        (typeof window !== "undefined" &&
+          (window.location.hostname.startsWith("educators.") ||
+            window.location.hostname.startsWith("educator.") ||
+            window.location.hostname.startsWith("teachers.") ||
+            window.location.hostname.startsWith("teacher.")))));
 
   const isMainWebsite = !isLearner && !isEducator;
 

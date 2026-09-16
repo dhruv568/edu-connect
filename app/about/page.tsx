@@ -1,6 +1,6 @@
 "use client";
 
-import React from "react";
+import React, { useState, useEffect } from "react";
 import Link from "next/link";
 import { FloatingNavbar } from "@/components/homepage/floating-navbar";
 import { PremiumFooter } from "@/components/homepage/premium-footer";
@@ -26,6 +26,62 @@ import {
 } from "lucide-react";
 
 export default function AboutPage() {
+  const [themeMode, setThemeMode] = useState<"educator" | "main">(() => {
+    if (typeof window !== "undefined") {
+      const hostname = window.location.hostname.toLowerCase();
+      const params = new URLSearchParams(window.location.search);
+      const themeParam = params.get("theme") || params.get("site");
+      if (themeParam === "educator" || themeParam === "educators" || themeParam === "teacher") {
+        return "educator";
+      }
+      if (themeParam === "main" || themeParam === "default") {
+        return "main";
+      }
+      if (
+        hostname.startsWith("educators.") ||
+        hostname.startsWith("educator.") ||
+        hostname.startsWith("teachers.") ||
+        hostname.startsWith("teacher.") ||
+        hostname === "educators.educonnects.co.in"
+      ) {
+        return "educator";
+      }
+    }
+    return "main";
+  });
+
+  useEffect(() => {
+    const updateTheme = () => {
+      if (typeof window !== "undefined") {
+        const hostname = window.location.hostname.toLowerCase();
+        const params = new URLSearchParams(window.location.search);
+        const themeParam = params.get("theme") || params.get("site");
+
+        if (themeParam === "educator" || themeParam === "educators" || themeParam === "teacher") {
+          setThemeMode("educator");
+        } else if (themeParam === "main" || themeParam === "default") {
+          setThemeMode("main");
+        } else if (
+          hostname.startsWith("educators.") ||
+          hostname.startsWith("educator.") ||
+          hostname.startsWith("teachers.") ||
+          hostname.startsWith("teacher.") ||
+          hostname === "educators.educonnects.co.in"
+        ) {
+          setThemeMode("educator");
+        } else {
+          setThemeMode("main");
+        }
+      }
+    };
+
+    updateTheme();
+    window.addEventListener("popstate", updateTheme);
+    return () => window.removeEventListener("popstate", updateTheme);
+  }, []);
+
+  const isEducator = themeMode === "educator";
+
   const stats = [
     { label: "Active Students", value: "15,000+", sub: "Enrolled globally" },
     { label: "Verified Educators", value: "850+", sub: "Audit certified" },
@@ -39,28 +95,36 @@ export default function AboutPage() {
       title: "Academic Audit",
       desc: "Every educator's university degrees, STEM certifications, and institutional background are verified.",
       icon: FileCheck,
-      color: "text-blue-600 bg-blue-50 border-blue-200",
+      color: isEducator
+        ? "text-[#16805B] bg-[#E6F7F0] border-[#A7F3D0]"
+        : "text-[#0F5C5A] bg-[#E6F0EF] border-[#DCE5E4]",
     },
     {
       num: "02",
       title: "Pedagogy Screening",
       desc: "Educators conduct a live mock teaching session to evaluate conceptual clarity and student empathy.",
       icon: Video,
-      color: "text-indigo-600 bg-indigo-50 border-indigo-200",
+      color: isEducator
+        ? "text-[#0D5C41] bg-[#E8F8F2] border-[#A7F3D0]"
+        : "text-[#16706E] bg-[#EAF5F4] border-[#CDE5E3]",
     },
     {
       num: "03",
       title: "Hardware & AV Check",
       desc: "Instructors must pass high-definition audio, digital pen tablet, and fiber-connection tests.",
       icon: Headphones,
-      color: "text-purple-600 bg-purple-50 border-purple-200",
+      color: isEducator
+        ? "text-[#16805B] bg-[#E6F7F0] border-[#A7F3D0]"
+        : "text-[#0F5C5A] bg-[#E6F0EF] border-[#DCE5E4]",
     },
     {
       num: "04",
       title: "Continuous Governance",
       desc: "Student ratings are monitored live, with escrow payouts held until session completion.",
       icon: ShieldCheck,
-      color: "text-emerald-600 bg-emerald-50 border-emerald-200",
+      color: isEducator
+        ? "text-[#0D5C41] bg-slate-100 border-slate-200"
+        : "text-[#083F3D] bg-slate-100 border-slate-200",
     },
   ];
 
@@ -95,27 +159,60 @@ export default function AboutPage() {
   ];
 
   return (
-    <div className="min-h-screen flex flex-col bg-slate-50 relative overflow-hidden font-sans">
-      {/* Background Decorative Gradient Elements */}
-      <div className="liquid-blob-1 top-20 left-1/4" />
-      <div className="liquid-blob-2 top-1/2 right-10" />
+    <div
+      data-theme={isEducator ? "educator" : "main"}
+      className={`min-h-screen flex flex-col ${
+        isEducator ? "bg-[#F0FAF5]/40" : "bg-[#F2FAF8]/40"
+      } relative overflow-hidden font-sans transition-colors duration-200`}
+    >
+      {/* Background Decorative Ambient Blobs */}
+      <div
+        className={`liquid-blob-1 top-20 left-1/4 pointer-events-none ${
+          isEducator ? "bg-[#16805B]/10" : "bg-[#0F5C5A]/10"
+        }`}
+      />
+      <div
+        className={`liquid-blob-2 top-1/2 right-10 pointer-events-none ${
+          isEducator ? "bg-[#35A979]/10" : "bg-[#16706E]/10"
+        }`}
+      />
 
-      <FloatingNavbar />
+      <FloatingNavbar variant={isEducator ? "teacher" : "default"} />
 
       <main className="flex-1 pt-32 pb-24 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 w-full space-y-24 relative z-10">
         {/* Hero Section */}
         <div className="text-center max-w-3xl mx-auto space-y-4">
-          <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-blue-500/10 border border-blue-500/20 text-blue-700 text-xs font-bold uppercase tracking-wider">
-            <Sparkles className="h-3.5 w-3.5 text-blue-600" />
+          <div
+            className={`inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full text-xs font-bold uppercase tracking-wider shadow-2xs ${
+              isEducator
+                ? "bg-[#E6F7F0] border border-[#A7F3D0] text-[#0D5C41]"
+                : "bg-[#E6F0EF] border border-[#DCE5E4] text-[#0F5C5A]"
+            }`}
+          >
+            <Sparkles
+              className={`h-3.5 w-3.5 ${
+                isEducator ? "text-[#16805B]" : "text-[#0F5C5A]"
+              }`}
+            />
             <span>The EduConnects Vision</span>
           </div>
           <h1 className="text-4xl sm:text-5xl lg:text-6xl font-black text-slate-900 tracking-tight leading-tight">
             Connecting Education for{" "}
-            <span className="bg-gradient-to-r from-blue-600 via-indigo-600 to-purple-600 bg-clip-text text-transparent">
+            <span
+              className={
+                isEducator
+                  ? "bg-gradient-to-r from-[#16805B] via-[#0D5C41] to-[#16805B] bg-clip-text text-transparent"
+                  : "bg-gradient-to-r from-[#0F5C5A] via-[#16706E] to-[#083F3D] bg-clip-text text-transparent"
+              }
+            >
               Every Curious Learner
             </span>
           </h1>
-          <p className="text-base sm:text-lg text-slate-600 leading-relaxed max-w-2xl mx-auto">
+          <p
+            className={`text-base sm:text-lg ${
+              isEducator ? "text-slate-700 font-normal" : "text-slate-600 font-normal"
+            } leading-relaxed max-w-2xl mx-auto`}
+          >
             EduConnects is built on the conviction that transparent flexible learning models, certified educators, and real-time interactive classrooms unlock academic excellence.
           </p>
         </div>
@@ -123,9 +220,24 @@ export default function AboutPage() {
         {/* High-Impact Statistics Banner */}
         <div className="grid grid-cols-2 md:grid-cols-4 gap-4 sm:gap-6">
           {stats.map((s, idx) => (
-            <GlassCard key={idx} className="p-6 text-center space-y-1 border-2 border-white/90 shadow-md">
-              <div className="text-3xl sm:text-4xl font-black text-blue-600">{s.value}</div>
-              <div className="text-xs font-bold text-slate-800 uppercase tracking-wider">{s.label}</div>
+            <GlassCard
+              key={idx}
+              className={`p-6 text-center space-y-1 border-2 bg-white/90 shadow-xs transition-all ${
+                isEducator
+                  ? "border-[#A7F3D0]/60 hover:border-[#16805B]/40"
+                  : "border-[#DCE5E4]/80 hover:border-[#0F5C5A]/30"
+              }`}
+            >
+              <div
+                className={`text-3xl sm:text-4xl font-black ${
+                  isEducator ? "text-[#16805B]" : "text-[#0F5C5A]"
+                }`}
+              >
+                {s.value}
+              </div>
+              <div className="text-xs font-bold text-slate-800 uppercase tracking-wider">
+                {s.label}
+              </div>
               <p className="text-[11px] text-slate-500 font-medium">{s.sub}</p>
             </GlassCard>
           ))}
@@ -143,15 +255,27 @@ export default function AboutPage() {
               />
               <div className="absolute inset-0 bg-gradient-to-t from-slate-950/80 via-transparent to-transparent" />
               <div className="absolute bottom-6 left-6 right-6 text-white space-y-1">
-                <span className="text-xs font-extrabold uppercase tracking-wider text-blue-400">Interactive Pedagogy</span>
+                <span
+                  className={`text-xs font-extrabold uppercase tracking-wider ${
+                    isEducator ? "text-emerald-400" : "text-teal-300"
+                  }`}
+                >
+                  Interactive Pedagogy
+                </span>
                 <h4 className="text-lg font-bold">1-on-1 Mentorship That Actually Adapts</h4>
-                <p className="text-xs text-slate-300">Live whiteboard, real-time formula solving, and instant Q&A.</p>
+                <p className="text-xs text-slate-300">
+                  Live whiteboard, real-time formula solving, and instant Q&A.
+                </p>
               </div>
             </div>
 
             {/* Floating Trust Chip */}
             <div className="absolute -top-4 -right-4 bg-white p-3.5 rounded-2xl shadow-xl border border-slate-100 hidden sm:flex items-center gap-3">
-              <div className="p-2.5 rounded-xl bg-emerald-50 text-emerald-600">
+              <div
+                className={`p-2.5 rounded-xl ${
+                  isEducator ? "bg-[#E6F7F0] text-[#16805B]" : "bg-[#E6F0EF] text-[#0F5C5A]"
+                }`}
+              >
                 <ShieldCheck className="h-6 w-6" />
               </div>
               <div>
@@ -164,18 +288,34 @@ export default function AboutPage() {
           {/* Right: Core Pillars */}
           <div className="lg:col-span-6 space-y-6">
             <div className="space-y-3">
-              <span className="text-xs font-extrabold text-indigo-600 uppercase tracking-widest">Our Core Philosophy</span>
+              <span
+                className={`text-xs font-extrabold uppercase tracking-widest ${
+                  isEducator ? "text-[#16805B]" : "text-[#0F5C5A]"
+                }`}
+              >
+                Our Core Philosophy
+              </span>
               <h2 className="text-2xl sm:text-3xl font-extrabold text-slate-900 tracking-tight">
                 Why EduConnects Was Created
               </h2>
-              <p className="text-sm text-slate-600 leading-relaxed">
+              <p className="text-sm text-slate-600 leading-relaxed font-normal">
                 Traditional tutoring platforms forced families into rigid, expensive annual subscriptions with little control over teaching quality. We built EduConnects around three transparent pillars:
               </p>
             </div>
 
             <div className="space-y-4">
-              <div className="flex items-start gap-4 p-4 rounded-2xl bg-white border border-slate-200/80 shadow-xs">
-                <div className="p-2.5 rounded-xl bg-blue-50 text-blue-600 shrink-0">
+              <div
+                className={`flex items-start gap-4 p-4 rounded-2xl bg-white border ${
+                  isEducator ? "border-[#A7F3D0]/60" : "border-[#DCE5E4]/80"
+                } shadow-xs`}
+              >
+                <div
+                  className={`p-2.5 rounded-xl shrink-0 ${
+                    isEducator
+                      ? "bg-[#E6F7F0] text-[#16805B]"
+                      : "bg-[#E6F0EF] text-[#0F5C5A]"
+                  }`}
+                >
                   <Target className="h-5 w-5" />
                 </div>
                 <div>
@@ -186,8 +326,18 @@ export default function AboutPage() {
                 </div>
               </div>
 
-              <div className="flex items-start gap-4 p-4 rounded-2xl bg-white border border-slate-200/80 shadow-xs">
-                <div className="p-2.5 rounded-xl bg-indigo-50 text-indigo-600 shrink-0">
+              <div
+                className={`flex items-start gap-4 p-4 rounded-2xl bg-white border ${
+                  isEducator ? "border-[#A7F3D0]/60" : "border-[#DCE5E4]/80"
+                } shadow-xs`}
+              >
+                <div
+                  className={`p-2.5 rounded-xl shrink-0 ${
+                    isEducator
+                      ? "bg-[#E8F8F2] text-[#0D5C41]"
+                      : "bg-[#EAF5F4] text-[#16706E]"
+                  }`}
+                >
                   <Video className="h-5 w-5" />
                 </div>
                 <div>
@@ -198,8 +348,18 @@ export default function AboutPage() {
                 </div>
               </div>
 
-              <div className="flex items-start gap-4 p-4 rounded-2xl bg-white border border-slate-200/80 shadow-xs">
-                <div className="p-2.5 rounded-xl bg-emerald-50 text-emerald-600 shrink-0">
+              <div
+                className={`flex items-start gap-4 p-4 rounded-2xl bg-white border ${
+                  isEducator ? "border-[#A7F3D0]/60" : "border-[#DCE5E4]/80"
+                } shadow-xs`}
+              >
+                <div
+                  className={`p-2.5 rounded-xl shrink-0 ${
+                    isEducator
+                      ? "bg-[#E6F7F0] text-[#35A979]"
+                      : "bg-[#E6F0EF] text-[#083F3D]"
+                  }`}
+                >
                   <Award className="h-5 w-5" />
                 </div>
                 <div>
@@ -216,7 +376,13 @@ export default function AboutPage() {
         {/* 4-Stage Educator Verification Process (Infographic Grid) */}
         <div className="space-y-8">
           <div className="text-center max-w-2xl mx-auto space-y-2">
-            <span className="text-xs font-extrabold text-blue-600 uppercase tracking-widest">Quality Assurance</span>
+            <span
+              className={`text-xs font-extrabold uppercase tracking-widest ${
+                isEducator ? "text-[#16805B]" : "text-[#0F5C5A]"
+              }`}
+            >
+              Quality Assurance
+            </span>
             <h2 className="text-2xl sm:text-3xl font-extrabold text-slate-900">
               The 4-Stage Educator Verification Protocol
             </h2>
@@ -229,7 +395,14 @@ export default function AboutPage() {
             {verificationStages.map((stage) => {
               const Icon = stage.icon;
               return (
-                <GlassCard key={stage.num} className="p-6 space-y-4 border-2 border-white/90 flex flex-col justify-between">
+                <GlassCard
+                  key={stage.num}
+                  className={`p-6 space-y-4 border-2 bg-white/90 shadow-xs flex flex-col justify-between transition-all ${
+                    isEducator
+                      ? "border-[#A7F3D0]/60 hover:border-[#16805B]/30"
+                      : "border-[#DCE5E4]/80 hover:border-[#0F5C5A]/30"
+                  }`}
+                >
                   <div className="space-y-3">
                     <div className="flex items-center justify-between">
                       <div className={`p-3 rounded-2xl border ${stage.color}`}>
@@ -240,8 +413,17 @@ export default function AboutPage() {
                     <h3 className="text-base font-bold text-slate-900">{stage.title}</h3>
                     <p className="text-xs text-slate-600 leading-relaxed">{stage.desc}</p>
                   </div>
-                  <div className="pt-2 flex items-center gap-1.5 text-[11px] font-bold text-blue-600">
-                    <CheckCircle2 className="h-3.5 w-3.5 text-emerald-500" /> Audit Mandatory
+                  <div
+                    className={`pt-2 flex items-center gap-1.5 text-[11px] font-bold ${
+                      isEducator ? "text-[#16805B]" : "text-[#0F5C5A]"
+                    }`}
+                  >
+                    <CheckCircle2
+                      className={`h-3.5 w-3.5 ${
+                        isEducator ? "text-emerald-500" : "text-teal-600"
+                      }`}
+                    />
+                    Audit Mandatory
                   </div>
                 </GlassCard>
               );
@@ -252,7 +434,13 @@ export default function AboutPage() {
         {/* Faculty & Educator Spotlight */}
         <div className="space-y-8">
           <div className="text-center max-w-2xl mx-auto space-y-2">
-            <span className="text-xs font-extrabold text-indigo-600 uppercase tracking-widest">Faculty Spotlight</span>
+            <span
+              className={`text-xs font-extrabold uppercase tracking-widest ${
+                isEducator ? "text-[#16805B]" : "text-[#0F5C5A]"
+              }`}
+            >
+              Faculty Spotlight
+            </span>
             <h2 className="text-2xl sm:text-3xl font-extrabold text-slate-900">
               Meet Some of Our Verified Educators
             </h2>
@@ -263,16 +451,31 @@ export default function AboutPage() {
 
           <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
             {facultySpotlight.map((f, idx) => (
-              <GlassCard key={idx} className="p-6 space-y-4 border-2 border-white/90 shadow-md">
+              <GlassCard
+                key={idx}
+                className={`p-6 space-y-4 border-2 bg-white/90 shadow-xs transition-all ${
+                  isEducator
+                    ? "border-[#A7F3D0]/60 hover:border-[#16805B]/30"
+                    : "border-[#DCE5E4]/80 hover:border-[#0F5C5A]/30"
+                }`}
+              >
                 <div className="flex items-center gap-4">
                   <img
                     src={f.avatar}
                     alt={f.name}
-                    className="w-16 h-16 rounded-full object-cover ring-4 ring-blue-500/20"
+                    className={`w-16 h-16 rounded-full object-cover ring-4 ${
+                      isEducator ? "ring-[#16805B]/25" : "ring-[#0F5C5A]/25"
+                    }`}
                   />
                   <div>
                     <h3 className="text-base font-bold text-slate-900">{f.name}</h3>
-                    <p className="text-xs font-semibold text-blue-600">{f.subject}</p>
+                    <p
+                      className={`text-xs font-semibold ${
+                        isEducator ? "text-[#16805B]" : "text-[#0F5C5A]"
+                      }`}
+                    >
+                      {f.subject}
+                    </p>
                     <p className="text-[11px] text-slate-500">{f.credential}</p>
                   </div>
                 </div>
@@ -289,21 +492,43 @@ export default function AboutPage() {
         </div>
 
         {/* Call to Action Banner */}
-        <div className="p-8 sm:p-12 rounded-3xl bg-gradient-to-r from-blue-600 via-indigo-600 to-purple-600 text-white flex flex-col md:flex-row items-center justify-between gap-6 shadow-2xl">
+        <div
+          className={`p-8 sm:p-12 rounded-3xl text-white flex flex-col md:flex-row items-center justify-between gap-6 shadow-2xl transition-all ${
+            isEducator
+              ? "bg-gradient-to-r from-[#0D5C41] via-[#16805B] to-[#0D5C41] border border-[#16805B]/40"
+              : "bg-gradient-to-r from-[#083F3D] via-[#0F5C5A] to-[#083F3D] border border-[#1B6863]/40"
+          }`}
+        >
           <div className="space-y-2 text-center md:text-left">
             <h3 className="text-2xl sm:text-3xl font-black">Ready to begin your learning journey?</h3>
-            <p className="text-sm text-blue-100 max-w-lg">
+            <p
+              className={`text-sm max-w-lg ${
+                isEducator ? "text-emerald-100" : "text-teal-100"
+              }`}
+            >
               Explore hundreds of verified tutors or book a trial demo session with zero commitment today.
             </p>
           </div>
           <div className="flex flex-col sm:flex-row gap-3">
             <Link href="/find-teachers">
-              <GlassButton variant="secondary" size="lg" className="bg-white text-indigo-700 hover:bg-slate-50">
+              <GlassButton
+                variant="secondary"
+                size="lg"
+                className={`bg-white ${
+                  isEducator
+                    ? "text-[#0D5C41] hover:bg-emerald-50"
+                    : "text-[#083F3D] hover:bg-teal-50"
+                } font-bold shadow-md`}
+              >
                 Explore Teachers
               </GlassButton>
             </Link>
             <Link href="/register/teacher">
-              <GlassButton variant="primary" size="lg" className="border border-white/40">
+              <GlassButton
+                variant="primary"
+                size="lg"
+                className="border border-white/40 text-white hover:bg-white/10 font-bold"
+              >
                 Apply to Teach
               </GlassButton>
             </Link>
@@ -311,7 +536,7 @@ export default function AboutPage() {
         </div>
       </main>
 
-      <PremiumFooter />
+      <PremiumFooter variant={isEducator ? "teacher" : "default"} />
     </div>
   );
 }
