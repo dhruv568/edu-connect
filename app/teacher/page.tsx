@@ -772,7 +772,7 @@ export default function TeacherLandingPage() {
         {/* ========================================================================= */}
         {/* 6. EDUCATOR SUCCESS STORIES */}
         {/* ========================================================================= */}
-        <section className="py-20 bg-slate-50 border-b border-slate-200">
+        <section id="success-stories" className="py-20 bg-slate-50 border-b border-slate-200">
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 space-y-12">
             <div className="text-center max-w-2xl mx-auto space-y-3">
               <GlassBadge variant="educator">PROVEN EDUCATOR SUCCESS</GlassBadge>
