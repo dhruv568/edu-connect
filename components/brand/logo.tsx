@@ -120,15 +120,15 @@ export function Logo({
   // Render content based on variant & roleContext
   let content: React.ReactNode;
 
-  // Main EduConnects Website: Official brand asset with emblem + wordmark + tagline
+  // Main EduConnects Website: Official brand asset with emblem + wordmark typography
   if (roleContext === "default") {
-    const MAIN_SIZE_CLASSES: Record<LogoSize, string> = {
-      xs: "h-8 sm:h-9",
-      sm: "h-9 sm:h-10",
-      md: "h-[46px] sm:h-[52px] lg:h-[58px] xl:h-[62px]",
-      lg: "h-[54px] sm:h-[64px] lg:h-[72px] xl:h-[78px]",
-      xl: "h-[64px] sm:h-[76px] lg:h-[88px]",
-      "2xl": "h-[76px] sm:h-[94px] lg:h-[110px]",
+    const MAIN_IMAGE_SIZE_CLASSES: Record<LogoSize, string> = {
+      xs: "h-7 sm:h-8",
+      sm: "h-8 sm:h-9",
+      md: "h-10 sm:h-11 md:h-12",
+      lg: "h-12 sm:h-14 lg:h-16",
+      xl: "h-14 sm:h-16 lg:h-20",
+      "2xl": "h-16 sm:h-20 lg:h-24",
     };
 
     const hasCustomDim = Boolean(width || height);
@@ -139,12 +139,12 @@ export function Logo({
         }
       : {};
 
-    content = (
+    const imageElement = (
       <div
         style={customStyle}
         className={`relative inline-flex items-center justify-center shrink-0 select-none aspect-[3/2] ${
-          hasCustomDim ? "" : (MAIN_SIZE_CLASSES[size] || MAIN_SIZE_CLASSES.md)
-        } ${className}`}
+          hasCustomDim ? "" : (MAIN_IMAGE_SIZE_CLASSES[size] || MAIN_IMAGE_SIZE_CLASSES.md)
+        }`}
       >
         <Image
           src={officialLogo}
@@ -153,10 +153,38 @@ export function Logo({
           height={1024}
           priority={priority}
           className="h-full w-auto max-w-full max-h-full object-contain filter drop-shadow-xs transition-transform duration-200 group-hover:scale-[1.02]"
-          sizes="(max-width: 640px) 75px, (max-width: 1024px) 95px, 125px"
+          sizes="(max-width: 640px) 70px, (max-width: 1024px) 85px, 100px"
         />
       </div>
     );
+
+    if (variant === "mark") {
+      content = (
+        <div className={`inline-flex items-center select-none ${className}`}>
+          {imageElement}
+        </div>
+      );
+    } else {
+      content = (
+        <div className={`inline-flex items-center gap-2 sm:gap-2.5 select-none ${className}`}>
+          {imageElement}
+          <div className="flex flex-col justify-center min-w-0 text-left">
+            <span
+              className={`${preset.textSize} font-black tracking-tight leading-none ${getPrimaryTextColor()}`}
+            >
+              Edu<span className={getAccentTextColor()}>Connects</span>
+            </span>
+            {showTagline && (
+              <span
+                className={`${preset.subSize} font-semibold tracking-wide mt-0.5 truncate ${getTaglineTextColor()}`}
+              >
+                {resolvedTagline}
+              </span>
+            )}
+          </div>
+        </div>
+      );
+    }
   } else if (variant === "full") {
     content = (
       <div className={`inline-flex flex-col items-center select-none ${className}`}>
