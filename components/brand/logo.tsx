@@ -3,6 +3,7 @@
 import React from "react";
 import Image from "next/image";
 import Link from "next/link";
+import officialLogo from "@/logo for educonnect.co.in.png";
 
 export type LogoVariant = "full" | "mark" | "horizontal" | "compact";
 export type LogoSize = "xs" | "sm" | "md" | "lg" | "xl" | "2xl";
@@ -116,10 +117,47 @@ export function Logo({
     return "text-slate-500";
   };
 
-  // Render content based on variant
+  // Render content based on variant & roleContext
   let content: React.ReactNode;
 
-  if (variant === "full") {
+  // Main EduConnects Website: Official brand asset with emblem + wordmark + tagline
+  if (roleContext === "default") {
+    const MAIN_SIZE_CLASSES: Record<LogoSize, string> = {
+      xs: "h-8 sm:h-9",
+      sm: "h-9 sm:h-10",
+      md: "h-[46px] sm:h-[52px] lg:h-[58px] xl:h-[62px]",
+      lg: "h-[54px] sm:h-[64px] lg:h-[72px] xl:h-[78px]",
+      xl: "h-[64px] sm:h-[76px] lg:h-[88px]",
+      "2xl": "h-[76px] sm:h-[94px] lg:h-[110px]",
+    };
+
+    const hasCustomDim = Boolean(width || height);
+    const customStyle: React.CSSProperties = hasCustomDim
+      ? {
+          width: width ? `${width}px` : height ? `${Math.round(height * 1.5)}px` : "auto",
+          height: height ? `${height}px` : width ? `${Math.round(width / 1.5)}px` : "auto",
+        }
+      : {};
+
+    content = (
+      <div
+        style={customStyle}
+        className={`relative inline-flex items-center justify-center shrink-0 select-none aspect-[3/2] ${
+          hasCustomDim ? "" : (MAIN_SIZE_CLASSES[size] || MAIN_SIZE_CLASSES.md)
+        } ${className}`}
+      >
+        <Image
+          src={officialLogo}
+          alt="EduConnects"
+          width={1536}
+          height={1024}
+          priority={priority}
+          className="h-full w-auto max-w-full max-h-full object-contain filter drop-shadow-xs transition-transform duration-200 group-hover:scale-[1.02]"
+          sizes="(max-width: 640px) 75px, (max-width: 1024px) 95px, 125px"
+        />
+      </div>
+    );
+  } else if (variant === "full") {
     content = (
       <div className={`inline-flex flex-col items-center select-none ${className}`}>
         <div
@@ -154,7 +192,7 @@ export function Logo({
       </div>
     );
   } else {
-    // "compact" or "horizontal"
+    // "compact" or "horizontal" for role-specific portals (Learner, Educator, Admin)
     content = (
       <div className={`inline-flex items-center gap-2.5 sm:gap-3 select-none ${className}`}>
         <div

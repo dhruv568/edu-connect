@@ -170,7 +170,7 @@ function VerifyEmailForm() {
         className="w-full max-w-md bg-white rounded-3xl p-8 shadow-xl border border-slate-200/80 text-center relative z-10 space-y-6"
       >
         <div className="flex justify-center">
-          <Logo variant="compact" size="md" href="/" priority />
+          <Logo variant="compact" size="lg" href="/" priority />
         </div>
         {verified ? (
           <div className="space-y-4 py-4">

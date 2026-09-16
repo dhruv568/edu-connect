@@ -873,6 +873,23 @@ export function FloatingNavbar({ variant }: FloatingNavbarProps = {}) {
                   : "bg-white border border-slate-200"
               }`}
             >
+              {/* Main Website Mobile Drawer Brand Header */}
+              {isMainWebsite && (
+                <div className="pb-3 mb-1 border-b border-[#1B6863]/60 flex items-center justify-between">
+                  <Logo
+                    size="md"
+                    roleContext="default"
+                    theme="dark"
+                    href={getMainDomain() + "/"}
+                    onClick={() => setMobileOpen(false)}
+                    priority
+                  />
+                  <span className="text-[10px] font-bold text-teal-200 bg-[#0F5C5A] px-2.5 py-1 rounded-full border border-[#1B6863]">
+                    Official Portal
+                  </span>
+                </div>
+              )}
+
               {/* Authenticated User Card in Mobile Drawer */}
               {isEducator && userSession && isEducatorRole(userSession.role) && (
                 <div className="p-3.5 rounded-2xl flex items-center justify-between bg-[#16805B]/40 border border-[#16805B]/60 text-white">

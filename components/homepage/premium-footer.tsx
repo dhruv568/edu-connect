@@ -137,21 +137,22 @@ export function PremiumFooter({ showCta = false }: PremiumFooterProps = {}) {
             <Logo
               variant="compact"
               size="lg"
+              roleContext={isEducator ? "teacher" : isLearner ? "student" : "default"}
               theme="dark"
               href={isEducator ? "/teacher" : isLearner ? "/student" : "/"}
               showTagline={false}
             />
-            <p
-              className={`text-xs ${
-                isEducator
-                  ? "text-[#35A979]"
-                  : isLearner
-                  ? "text-blue-200"
-                  : "text-[#2A8C84]"
-              } font-bold uppercase tracking-wider`}
-            >
-              {isEducator ? "Teach • Connect • Grow" : "Learn • Grow • Belong"}
-            </p>
+            {(isEducator || isLearner) && (
+              <p
+                className={`text-xs ${
+                  isEducator
+                    ? "text-[#35A979]"
+                    : "text-blue-200"
+                } font-bold uppercase tracking-wider`}
+              >
+                {isEducator ? "Teach • Connect • Grow" : "Learn • Grow • Belong"}
+              </p>
+            )}
             <p
               className={`text-xs sm:text-[13px] ${
                 isEducator

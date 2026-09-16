@@ -173,7 +173,7 @@ export default function LoginPage() {
           <div className="lg:col-span-6 max-w-md mx-auto w-full space-y-6">
             <div className="text-center lg:text-left space-y-2">
               <div className="flex justify-center lg:justify-start">
-                <Logo variant="compact" size="md" href="/" priority />
+                <Logo variant="compact" size="lg" href="/" priority />
               </div>
               <h2 className="text-2xl sm:text-3xl font-black text-slate-900">Sign In to EduConnects</h2>
               <p className="text-xs text-slate-500">Access your Teacher or Student Dashboard</p>
