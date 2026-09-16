@@ -326,10 +326,10 @@ export function FloatingNavbar({ variant }: FloatingNavbarProps = {}) {
             <Link
               href="/teacher"
               onClick={() => setMobileOpen(false)}
-              className="group flex items-center focus:outline-none focus-visible:ring-2 focus-visible:ring-emerald-400 rounded-xl"
+              className="group flex items-center gap-2.5 sm:gap-3 focus:outline-none focus-visible:ring-2 focus-visible:ring-emerald-400 rounded-xl select-none shrink-0"
               aria-label="EduConnects Educator Home"
             >
-              <div className="relative h-11 sm:h-12 w-auto aspect-[3/2] flex items-center justify-center select-none transition-transform duration-200 group-hover:scale-[1.03]">
+              <div className="relative h-10 sm:h-11 md:h-12 w-auto aspect-[3/2] flex items-center justify-center shrink-0 transition-transform duration-200 group-hover:scale-[1.03]">
                 <Image
                   src={officialLogo}
                   alt="EduConnects"
@@ -337,9 +337,12 @@ export function FloatingNavbar({ variant }: FloatingNavbarProps = {}) {
                   height={1024}
                   priority
                   className="h-full w-auto max-h-full object-contain filter drop-shadow-[0_2px_8px_rgba(0,0,0,0.3)]"
-                  sizes="(max-width: 640px) 90px, (max-width: 1024px) 120px, 140px"
+                  sizes="(max-width: 640px) 80px, (max-width: 1024px) 100px, 120px"
                 />
               </div>
+              <span className="text-base sm:text-lg font-black tracking-tight leading-none text-white transition-opacity group-hover:opacity-95">
+                Edu<span className="text-[#35A979]">Connects</span>
+              </span>
             </Link>
           ) : (
             <div className="flex items-center gap-2 sm:gap-3 shrink-0">
@@ -887,10 +890,10 @@ export function FloatingNavbar({ variant }: FloatingNavbarProps = {}) {
                   <Link
                     href="/teacher"
                     onClick={() => setMobileOpen(false)}
-                    className="flex items-center"
+                    className="group flex items-center gap-2.5"
                     aria-label="EduConnects Educator Home"
                   >
-                    <div className="relative h-10 w-auto aspect-[3/2] flex items-center justify-center select-none">
+                    <div className="relative h-9 w-auto aspect-[3/2] flex items-center justify-center select-none shrink-0">
                       <Image
                         src={officialLogo}
                         alt="EduConnects"
@@ -900,6 +903,9 @@ export function FloatingNavbar({ variant }: FloatingNavbarProps = {}) {
                         className="h-full w-auto max-h-full object-contain filter drop-shadow-[0_2px_6px_rgba(0,0,0,0.3)]"
                       />
                     </div>
+                    <span className="text-base font-black tracking-tight leading-none text-white">
+                      Edu<span className="text-[#35A979]">Connects</span>
+                    </span>
                   </Link>
                   <span className="text-[10px] font-bold text-emerald-200 bg-[#16805B]/60 px-2.5 py-1 rounded-full border border-emerald-400/30">
                     Educator Portal
