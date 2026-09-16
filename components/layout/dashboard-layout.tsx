@@ -435,12 +435,13 @@ export function DashboardLayout({ role, userName, userEmail, children }: Dashboa
               <Logo
                 variant="mark"
                 size="md"
+                roleContext={isEducatorRole(role) ? "teacher" : isAdminOrStaff ? "admin" : "student"}
                 href={false}
                 priority
               />
               <div className="min-w-0">
                 <h1 className="text-sm font-black text-white tracking-tight">
-                  EDU<span className={isAdminOrStaff ? "text-[#F2C14E]" : isEducatorRole(role) ? "text-emerald-400" : "text-blue-400"}>CONNECTS</span>
+                  EDU<span className={isAdminOrStaff ? "text-[#F2C14E]" : isEducatorRole(role) ? "text-[#35A979]" : "text-blue-400"}>CONNECTS</span>
                 </h1>
                 <Badge variant={roleColors[role] || "student"} size="sm">
                   {currentRoleTitle}

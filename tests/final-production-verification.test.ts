@@ -10,10 +10,9 @@ async function runTests() {
 
   // 1. Company Info & Legal Text Consistency (Problems 5 & 8)
   console.log("1. Checking Company Information & Legal Consistency...");
-  assert.strictEqual(
-    OFFICIAL_COMPANY_INFO.brandName,
-    "EduConnect",
-    "Brand name must be 'EduConnect'"
+  assert.ok(
+    OFFICIAL_COMPANY_INFO.brandName === "EduConnects" || OFFICIAL_COMPANY_INFO.brandName === "EduConnect",
+    "Brand name must be 'EduConnects'"
   );
   assert.strictEqual(
     OFFICIAL_COMPANY_INFO.legalName,

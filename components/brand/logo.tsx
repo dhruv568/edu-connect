@@ -49,12 +49,12 @@ const MARK_RATIO = 1185 / 635;
 const FULL_RATIO = 1355 / 1161;
 
 const SIZE_PRESETS: Record<LogoSize, { markH: number; fullH: number; textSize: string; subSize: string }> = {
-  xs: { markH: 22, fullH: 36, textSize: "text-xs", subSize: "text-[9px]" },
-  sm: { markH: 28, fullH: 48, textSize: "text-sm", subSize: "text-[10px]" },
-  md: { markH: 34, fullH: 64, textSize: "text-base", subSize: "text-[11px]" },
-  lg: { markH: 42, fullH: 84, textSize: "text-lg", subSize: "text-xs" },
-  xl: { markH: 52, fullH: 110, textSize: "text-xl", subSize: "text-xs" },
-  "2xl": { markH: 64, fullH: 140, textSize: "text-2xl", subSize: "text-sm" },
+  xs: { markH: 26, fullH: 40, textSize: "text-xs", subSize: "text-[9px]" },
+  sm: { markH: 32, fullH: 52, textSize: "text-sm", subSize: "text-[10px]" },
+  md: { markH: 42, fullH: 72, textSize: "text-base sm:text-lg", subSize: "text-[11px]" },
+  lg: { markH: 52, fullH: 96, textSize: "text-lg sm:text-xl", subSize: "text-xs" },
+  xl: { markH: 64, fullH: 125, textSize: "text-xl sm:text-2xl", subSize: "text-sm" },
+  "2xl": { markH: 80, fullH: 160, textSize: "text-2xl sm:text-3xl", subSize: "text-base" },
 };
 
 export function Logo({
@@ -102,140 +102,76 @@ export function Logo({
   const getAccentTextColor = () => {
     if (isDarkTheme) {
       if (roleContext === "student") return "text-blue-400";
-      if (roleContext === "teacher") return "text-emerald-400";
+      if (roleContext === "teacher") return "text-[#35A979]";
+      if (roleContext === "admin") return "text-[#F2C14E]";
       return "text-[#2A8C84]";
     }
     if (roleContext === "student") return "text-blue-600";
     if (roleContext === "teacher") return "text-[#16805B]";
+    if (roleContext === "admin") return "text-[#B8860B]";
     return "text-[#0F5C5A]";
   };
 
   const getTaglineTextColor = () => {
     if (isDarkTheme) {
+      if (roleContext === "teacher") return "text-emerald-200/90";
       return "text-teal-200/80";
     }
+    if (roleContext === "teacher") return "text-[#0D5C41]";
     return "text-slate-500";
   };
 
   // Render content based on variant & roleContext
   let content: React.ReactNode;
 
-  // Main EduConnects Website: Official brand asset with emblem + wordmark typography
-  if (roleContext === "default") {
-    const MAIN_IMAGE_SIZE_CLASSES: Record<LogoSize, string> = {
-      xs: "h-7 sm:h-8",
-      sm: "h-8 sm:h-9",
-      md: "h-10 sm:h-11 md:h-12",
-      lg: "h-12 sm:h-14 lg:h-16",
-      xl: "h-14 sm:h-16 lg:h-20",
-      "2xl": "h-16 sm:h-20 lg:h-24",
-    };
+  // Official EduConnects brand asset (logo for educonnect.co.in.png)
+  // Applied consistently across main and educator websites with slightly increased visibility and exact 3:2 ratio
+  const MAIN_IMAGE_SIZE_CLASSES: Record<LogoSize, string> = {
+    xs: "h-8 sm:h-9",
+    sm: "h-9 sm:h-10.5",
+    md: "h-11 sm:h-12 md:h-14",
+    lg: "h-14 sm:h-16 lg:h-20",
+    xl: "h-16 sm:h-20 lg:h-24",
+    "2xl": "h-20 sm:h-24 lg:h-28",
+  };
 
-    const hasCustomDim = Boolean(width || height);
-    const customStyle: React.CSSProperties = hasCustomDim
-      ? {
-          width: width ? `${width}px` : height ? `${Math.round(height * 1.5)}px` : "auto",
-          height: height ? `${height}px` : width ? `${Math.round(width / 1.5)}px` : "auto",
-        }
-      : {};
+  const hasCustomDim = Boolean(width || height);
+  const customStyle: React.CSSProperties = hasCustomDim
+    ? {
+        width: width ? `${width}px` : height ? `${Math.round(height * 1.5)}px` : "auto",
+        height: height ? `${height}px` : width ? `${Math.round(width / 1.5)}px` : "auto",
+      }
+    : {};
 
-    const imageElement = (
-      <div
-        style={customStyle}
-        className={`relative inline-flex items-center justify-center shrink-0 select-none aspect-[3/2] ${
-          hasCustomDim ? "" : (MAIN_IMAGE_SIZE_CLASSES[size] || MAIN_IMAGE_SIZE_CLASSES.md)
-        }`}
-      >
-        <Image
-          src={officialLogo}
-          alt="EduConnects"
-          width={1536}
-          height={1024}
-          priority={priority}
-          className="h-full w-auto max-w-full max-h-full object-contain filter drop-shadow-xs transition-transform duration-200 group-hover:scale-[1.02]"
-          sizes="(max-width: 640px) 70px, (max-width: 1024px) 85px, 100px"
-        />
-      </div>
-    );
+  const imageElement = (
+    <div
+      style={customStyle}
+      className={`relative inline-flex items-center justify-center shrink-0 select-none aspect-[3/2] ${
+        hasCustomDim ? "" : (MAIN_IMAGE_SIZE_CLASSES[size] || MAIN_IMAGE_SIZE_CLASSES.md)
+      }`}
+    >
+      <Image
+        src={officialLogo}
+        alt="EduConnects"
+        width={1536}
+        height={1024}
+        priority={priority}
+        className="h-full w-auto max-w-full max-h-full object-contain filter drop-shadow-xs transition-transform duration-200 group-hover:scale-[1.02]"
+        sizes="(max-width: 640px) 90px, (max-width: 1024px) 110px, 140px"
+      />
+    </div>
+  );
 
-    if (variant === "mark") {
-      content = (
-        <div className={`inline-flex items-center select-none ${className}`}>
-          {imageElement}
-        </div>
-      );
-    } else {
-      content = (
-        <div className={`inline-flex items-center gap-2 sm:gap-2.5 select-none ${className}`}>
-          {imageElement}
-          <div className="flex flex-col justify-center min-w-0 text-left">
-            <span
-              className={`${preset.textSize} font-black tracking-tight leading-none ${getPrimaryTextColor()}`}
-            >
-              Edu<span className={getAccentTextColor()}>Connects</span>
-            </span>
-            {showTagline && (
-              <span
-                className={`${preset.subSize} font-semibold tracking-wide mt-0.5 truncate ${getTaglineTextColor()}`}
-              >
-                {resolvedTagline}
-              </span>
-            )}
-          </div>
-        </div>
-      );
-    }
-  } else if (variant === "full") {
+  if (variant === "mark") {
     content = (
-      <div className={`inline-flex flex-col items-center select-none ${className}`}>
-        <div
-          style={{ width: fullWidth, height: fullHeight }}
-          className="relative flex items-center justify-center shrink-0"
-        >
-          <Image
-            src="/images/logo-transparent.png"
-            alt="EduConnects"
-            width={fullWidth}
-            height={fullHeight}
-            priority={priority}
-            className="w-full h-full object-contain filter drop-shadow-xs transition-transform duration-200"
-          />
-        </div>
-      </div>
-    );
-  } else if (variant === "mark") {
-    content = (
-      <div
-        style={{ width: markWidth, height: markHeight }}
-        className={`relative inline-flex items-center justify-center shrink-0 select-none ${className}`}
-      >
-        <Image
-          src="/images/logo-mark.png"
-          alt="EduConnects"
-          width={markWidth}
-          height={markHeight}
-          priority={priority}
-          className="w-full h-full object-contain filter drop-shadow-xs transition-transform duration-200"
-        />
+      <div className={`inline-flex items-center select-none ${className}`}>
+        {imageElement}
       </div>
     );
   } else {
-    // "compact" or "horizontal" for role-specific portals (Learner, Educator, Admin)
     content = (
       <div className={`inline-flex items-center gap-2.5 sm:gap-3 select-none ${className}`}>
-        <div
-          style={{ width: markWidth, height: markHeight }}
-          className="relative flex items-center justify-center shrink-0"
-        >
-          <Image
-            src="/images/logo-mark.png"
-            alt="EduConnects"
-            width={markWidth}
-            height={markHeight}
-            priority={priority}
-            className="w-full h-full object-contain filter drop-shadow-xs transition-transform duration-200"
-          />
-        </div>
+        {imageElement}
         <div className="flex flex-col justify-center min-w-0 text-left">
           <span
             className={`${preset.textSize} font-black tracking-tight leading-none ${getPrimaryTextColor()}`}

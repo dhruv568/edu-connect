@@ -22,24 +22,19 @@ export default function EducatorLogoutPage() {
       {/* Top Header */}
       <header className="w-full border-b border-[#1B6863]/40 bg-[#073F3C]/60 backdrop-blur-md sticky top-0 z-30">
         <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 h-16 sm:h-20 flex items-center justify-between">
-          <Link href="/" className="flex items-center gap-3 group">
+          <Link href="/teacher" className="flex items-center gap-2.5 group">
             {/* Official brand asset: /images/logo.jpeg rendered cleanly via Logo component */}
-            <Logo variant="mark" size="md" href={false} priority />
-            <div>
-              <span className="text-lg sm:text-xl font-black text-white tracking-tight">
-                EDUCONNECTS
-              </span>
-              <span className="hidden sm:inline-block ml-2 text-[11px] font-bold uppercase tracking-widest text-[#F2C14E] bg-[#F2C14E]/10 px-2 py-0.5 rounded-full border border-[#F2C14E]/20">
-                Educator Portal
-              </span>
-            </div>
+            <Logo variant="compact" size="md" roleContext="teacher" theme="dark" href={false} priority />
+            <span className="hidden sm:inline-block ml-1 text-[10px] font-black uppercase tracking-wider text-emerald-100 bg-[#16805B]/80 px-2.5 py-0.5 rounded-full border border-[#35A979]/40">
+              Educator Portal
+            </span>
           </Link>
 
           <Link
-            href="/"
-            className="inline-flex items-center gap-2 text-xs sm:text-sm font-semibold text-teal-200 hover:text-white transition-colors"
+            href="/teacher"
+            className="inline-flex items-center gap-2 text-xs sm:text-sm font-semibold text-emerald-200 hover:text-white transition-colors"
           >
-            <Home className="h-4 w-4" />
+            <Home className="h-4 w-4 text-[#35A979]" />
             <span>Return to Homepage</span>
           </Link>
         </div>
@@ -143,11 +138,11 @@ export default function EducatorLogoutPage() {
           </Link>
 
           <Link
-            href="/"
-            className="w-full sm:w-auto inline-flex items-center justify-center gap-2 px-8 py-3.5 rounded-2xl bg-[#0F5C5A]/80 hover:bg-[#157976] text-white border border-[#1B6863] font-bold text-sm tracking-wide transition-all active:scale-95"
+            href="/teacher"
+            className="w-full sm:w-auto inline-flex items-center justify-center gap-2 px-8 py-3.5 rounded-2xl bg-[#16805B] hover:bg-[#0D5C41] text-white border border-[#35A979]/50 font-bold text-sm tracking-wide transition-all active:scale-95 shadow-lg shadow-emerald-900/30"
           >
-            <Home className="h-4 w-4 text-teal-300" />
-            <span>Return to Homepage</span>
+            <Home className="h-4 w-4 text-emerald-200" />
+            <span>Return to Educator Website</span>
           </Link>
         </div>
       </main>
