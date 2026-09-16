@@ -224,33 +224,33 @@ export default function TeacherLandingPage() {
         {/* ========================================================================= */}
         {/* 1. HERO SECTION WITH BACKGROUND SLIDESHOW */}
         {/* ========================================================================= */}
-        <section className="relative pt-32 sm:pt-36 lg:pt-44 pb-20 lg:pb-28 overflow-hidden bg-[#083827]">
+        <section className="relative pt-32 sm:pt-36 lg:pt-44 pb-20 lg:pb-28 overflow-hidden bg-gradient-to-b from-[#F0FAF5] via-white to-[#F0FAF5]/50">
           {/* 5-Slide Educator Background Slideshow */}
           <EducatorHeroSlideshow />
 
           {/* Subtle Accent Glow Elements */}
           <div className="absolute top-20 left-1/2 -translate-x-1/2 w-full max-w-7xl h-[500px] pointer-events-none -z-10">
-            <div className="absolute top-10 left-10 w-96 h-96 bg-[#16805B]/20 rounded-full blur-3xl" />
-            <div className="absolute top-20 right-10 w-96 h-96 bg-[#35A979]/20 rounded-full blur-3xl" />
+            <div className="absolute top-10 left-10 w-96 h-96 bg-[#16805B]/10 rounded-full blur-3xl" />
+            <div className="absolute top-20 right-10 w-96 h-96 bg-[#35A979]/10 rounded-full blur-3xl" />
           </div>
 
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
             <div className="grid grid-cols-1 lg:grid-cols-12 gap-12 lg:gap-8 items-center">
               {/* Left Column: Copy & CTAs */}
               <div className="lg:col-span-7 space-y-6 text-center lg:text-left">
-                <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-[#0D5C41]/80 backdrop-blur-md border border-[#35A979]/50 text-emerald-200 text-xs font-extrabold uppercase tracking-wider shadow-md">
-                  <Sparkles className="h-3.5 w-3.5 text-[#35A979]" />
+                <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-[#E6F7F0] border border-[#A7F3D0] text-[#0D5C41] text-xs font-extrabold uppercase tracking-wider shadow-2xs">
+                  <Sparkles className="h-3.5 w-3.5 text-[#16805B]" />
                   <span>The Platform Built for Independent Educators</span>
                 </div>
 
-                <h1 className="text-4xl sm:text-5xl lg:text-6xl font-black text-white tracking-tight leading-[1.15]">
+                <h1 className="text-4xl sm:text-5xl lg:text-6xl font-black text-slate-900 tracking-tight leading-[1.15]">
                   Teach. Connect. Grow. <br />
-                  <span className="bg-gradient-to-r from-emerald-300 via-[#35A979] to-teal-200 bg-clip-text text-transparent">
+                  <span className="bg-gradient-to-r from-[#16805B] via-[#0D5C41] to-[#16805B] bg-clip-text text-transparent">
                     Turn Knowledge Into Impact
                   </span>
                 </h1>
 
-                <p className="text-base sm:text-lg text-emerald-100/90 max-w-2xl mx-auto lg:mx-0 leading-relaxed font-normal">
+                <p className="text-base sm:text-lg text-slate-700 max-w-2xl mx-auto lg:mx-0 leading-relaxed font-medium">
                   Build your verified educator brand, conduct high-definition live classes in the browser, sell recorded video courses, and receive automated direct bank payouts.
                 </p>
 
@@ -258,14 +258,14 @@ export default function TeacherLandingPage() {
                 <div className="flex flex-col sm:flex-row items-center justify-center lg:justify-start gap-4 pt-2">
                   {userSession && isEducatorRole(userSession.role) ? (
                     <Link href="/teacher/dashboard" className="w-full sm:w-auto">
-                      <button className="w-full sm:w-auto px-7 py-3.5 rounded-xl font-bold text-white bg-[#16805B] hover:bg-[#0D5C41] shadow-xl shadow-black/30 text-sm flex items-center justify-center gap-2 transition-all active:scale-95 cursor-pointer">
-                        <LayoutDashboard className="h-4 w-4 text-emerald-200" />
+                      <button className="w-full sm:w-auto px-7 py-3.5 rounded-xl font-bold text-white bg-[#16805B] hover:bg-[#0D5C41] shadow-xl shadow-emerald-900/20 text-sm flex items-center justify-center gap-2 transition-all active:scale-95 cursor-pointer">
+                        <LayoutDashboard className="h-4 w-4 text-emerald-100" />
                         <span>Go to Educator Dashboard</span>
                       </button>
                     </Link>
                   ) : (
                     <Link href="/teacher/register" className="w-full sm:w-auto">
-                      <button className="w-full sm:w-auto px-7 py-3.5 rounded-xl font-bold text-white bg-[#16805B] hover:bg-[#0D5C41] shadow-xl shadow-black/30 text-sm flex items-center justify-center gap-2 transition-all active:scale-95 cursor-pointer">
+                      <button className="w-full sm:w-auto px-7 py-3.5 rounded-xl font-bold text-white bg-[#16805B] hover:bg-[#0D5C41] shadow-xl shadow-emerald-900/20 text-sm flex items-center justify-center gap-2 transition-all active:scale-95 cursor-pointer">
                         <span>Become an Educator</span>
                         <ArrowRight className="h-4 w-4" />
                       </button>
@@ -273,26 +273,26 @@ export default function TeacherLandingPage() {
                   )}
 
                   <a href="#how-it-works" className="w-full sm:w-auto">
-                    <button className="w-full sm:w-auto px-6 py-3.5 rounded-xl font-bold text-white bg-white/10 hover:bg-white/20 border border-white/25 backdrop-blur-md text-sm flex items-center justify-center gap-2 transition-all active:scale-95 cursor-pointer">
-                      <FileCheck className="h-4 w-4 text-emerald-300" />
+                    <button className="w-full sm:w-auto px-6 py-3.5 rounded-xl font-bold text-slate-800 bg-white hover:bg-[#F0FAF5] border border-slate-300 shadow-sm text-sm flex items-center justify-center gap-2 transition-all active:scale-95 cursor-pointer">
+                      <FileCheck className="h-4 w-4 text-[#16805B]" />
                       <span>How It Works?</span>
                     </button>
                   </a>
                 </div>
 
                 {/* Educator Trust Stats */}
-                <div className="pt-6 border-t border-white/20 grid grid-cols-3 gap-4 text-left max-w-lg mx-auto lg:mx-0">
+                <div className="pt-6 border-t border-slate-200/90 grid grid-cols-3 gap-4 text-left max-w-lg mx-auto lg:mx-0">
                   <div>
-                    <div className="text-2xl lg:text-3xl font-black text-emerald-300">85%+</div>
-                    <div className="text-xs text-emerald-100 font-medium">Revenue Share</div>
+                    <div className="text-2xl lg:text-3xl font-black text-[#16805B]">85%+</div>
+                    <div className="text-xs text-slate-600 font-bold">Revenue Share</div>
                   </div>
                   <div>
-                    <div className="text-2xl lg:text-3xl font-black text-white">Direct</div>
-                    <div className="text-xs text-emerald-100 font-medium">Cashfree Payouts</div>
+                    <div className="text-2xl lg:text-3xl font-black text-slate-900">Direct</div>
+                    <div className="text-xs text-slate-600 font-bold">Cashfree Payouts</div>
                   </div>
                   <div>
-                    <div className="text-2xl lg:text-3xl font-black text-[#35A979]">100%</div>
-                    <div className="text-xs text-emerald-100 font-medium">Content Ownership</div>
+                    <div className="text-2xl lg:text-3xl font-black text-[#0D5C41]">100%</div>
+                    <div className="text-xs text-slate-600 font-bold">Content Ownership</div>
                   </div>
                 </div>
               </div>
