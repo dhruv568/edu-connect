@@ -132,7 +132,7 @@ export default function AboutPage() {
     {
       name: "Dr. Rajeshwar Kulkarni",
       role: "Head of Physical Sciences",
-      avatar: "/images/educators/educator_03.jpg",
+      avatar: "/images/educators/male-2.png",
       subject: "Chemistry & Medical Prep",
       credential: "Ex-University Lecturer (19+ Yrs)",
       rating: "4.97",

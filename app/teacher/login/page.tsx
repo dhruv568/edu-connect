@@ -155,7 +155,7 @@ export default function TeacherLoginPage() {
             <div className="p-4 rounded-2xl bg-white border border-slate-200/90 shadow-sm space-y-2">
               <div className="flex items-center gap-3">
                 <img
-                  src="/images/educators/vikramaditya-sen.jpg"
+                  src="/images/educators/male-1.png"
                   alt="Prof. Vikramaditya Sen"
                   className="w-10 h-10 rounded-full object-cover ring-2 ring-[#16805B]/30"
                 />

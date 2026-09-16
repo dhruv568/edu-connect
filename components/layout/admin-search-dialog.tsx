@@ -22,6 +22,7 @@ import {
   Settings,
   ArrowRight,
   Sparkles,
+  Tag,
 } from "lucide-react";
 
 interface SearchEntry {
@@ -42,6 +43,15 @@ const ADMIN_SEARCH_ENTRIES: SearchEntry[] = [
     icon: LayoutDashboard,
     keywords: ["dashboard", "home", "stats", "overview", "metrics", "summary", "attention"],
     description: "Executive platform overview, priority queues, and business activity",
+  },
+  // Marketing & Offers
+  {
+    title: "Global Offers & Promotions",
+    category: "Marketing",
+    href: "/admin/offers",
+    icon: Tag,
+    keywords: ["offers", "promotions", "discounts", "coupons", "banner", "campaign", "sale", "marketing"],
+    description: "Create and manage site-wide promotional offer banners across all 3 platforms",
   },
   // People
   {

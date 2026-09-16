@@ -5,6 +5,7 @@ import "./globals.css";
 import { ToastProvider } from "@/components/ui/toast";
 import { NavigationHistoryTracker } from "@/components/providers/navigation-history-tracker";
 import { AIAssistantProvider } from "@/components/ai/ai-assistant-provider";
+import { GlobalOfferBanner } from "@/components/offers/global-offer-banner";
 
 const inter = Inter({ subsets: ["latin"] });
 
@@ -37,6 +38,7 @@ export default function RootLayout({
         <NavigationHistoryTracker />
         <ToastProvider>{children}</ToastProvider>
         <AIAssistantProvider />
+        <GlobalOfferBanner />
       </body>
     </html>
   );

@@ -146,7 +146,7 @@ export default function TeacherLandingPage() {
       name: "Dr. Kavita Deshmukh",
       role: "Senior Mathematics Educator",
       location: "New Delhi",
-      avatar: "/images/educators/kavita-deshmukh.jpg",
+      avatar: "/images/educators/female-1.png",
       rating: 5,
       achievement: "₹84,000 / mo Avg. Earnings",
       subjects: "JEE Advanced Calculus",
@@ -157,7 +157,7 @@ export default function TeacherLandingPage() {
       name: "Prof. Vikramaditya Sen",
       role: "Physics Mentor & Olympiad Coach",
       location: "Bangalore",
-      avatar: "/images/educators/vikramaditya-sen.jpg",
+      avatar: "/images/educators/male-1.png",
       rating: 5,
       achievement: "240+ Active Learners",
       subjects: "Mechanics & Electromagnetism",
@@ -308,7 +308,7 @@ export default function TeacherLandingPage() {
                     <div className="flex items-center justify-between border-b border-slate-100 pb-3">
                       <div className="flex items-center gap-3">
                         <img
-                          src="/images/educators/kavita-deshmukh.jpg"
+                          src="/images/educators/female-1.png"
                           alt="Dr. Kavita Deshmukh"
                           className="w-10 h-10 rounded-2xl object-cover ring-2 ring-[#16805B]/40 shadow-sm"
                         />

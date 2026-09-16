@@ -28,6 +28,8 @@ import {
   Loader2,
   ChevronDown,
   ChevronRight,
+  Tag,
+  Sparkles,
 } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { UserRole } from "@/types/auth";
@@ -233,6 +235,8 @@ export function DashboardLayout({ role, userName, userEmail, children }: Dashboa
     ShieldAlert,
     UserCheck,
     Settings,
+    Tag,
+    Sparkles,
   };
 
   // Structured grouped admin navigation sections
@@ -242,6 +246,13 @@ export function DashboardLayout({ role, userName, userEmail, children }: Dashboa
       title: "OVERVIEW",
       items: [
         { label: "Dashboard", icon: LayoutDashboard, href: "/admin" },
+      ],
+    },
+    {
+      id: "promotions",
+      title: "MARKETING & OFFERS",
+      items: [
+        { label: "Global Offers", icon: Tag, href: "/admin/offers" },
       ],
     },
     {

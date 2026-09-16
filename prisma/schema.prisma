@@ -1056,3 +1056,21 @@ model AiMessage {
   @@map("ai_messages")
 }
 
+model Offer {
+  id             String    @id @default(uuid())
+  title          String
+  description    String?
+  discountText   String?   // e.g. "FLAT 40% OFF", "USE CODE: EDU40"
+  ctaText        String?   @default("Explore Now")
+  ctaLink        String?   @default("/courses")
+  startDate      DateTime?
+  endDate        DateTime?
+  isActive       Boolean   @default(true)
+  targetAudience String    @default("ALL") // ALL | MAIN | LEARNERS | EDUCATORS
+  createdAt      DateTime  @default(now())
+  updatedAt      DateTime  @updatedAt
+
+  @@index([isActive, startDate, endDate])
+  @@map("offers")
+}
+

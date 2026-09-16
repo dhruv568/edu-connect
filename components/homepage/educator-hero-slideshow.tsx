@@ -1,4 +1,4 @@
-﻿"use client";
+"use client";
 
 import React, { useState, useEffect } from "react";
 
@@ -10,7 +10,7 @@ interface EducatorSlide {
 
 const EDUCATOR_SLIDES: EducatorSlide[] = [
   {
-    url: "/images/educators/anand-vardhan.jpg",
+    url: "/images/educators/male-3.png",
     alt: "Build Your Teaching Career with verified educator credentials on EduConnects",
     theme: "Build Your Teaching Career",
   },
@@ -20,17 +20,17 @@ const EDUCATOR_SLIDES: EducatorSlide[] = [
     theme: "Share Your Expertise",
   },
   {
-    url: "/images/educators/vikramaditya-sen.jpg",
+    url: "/images/educators/male-1.png",
     alt: "Teach Live. Teach Better. with HD video classroom and interactive whiteboards",
     theme: "Teach Live. Teach Better.",
   },
   {
-    url: "/images/educators/arundhati-mukherjee.jpg",
+    url: "/images/educators/female-3.png",
     alt: "Create Courses. Grow Your Reach. with on-demand video modules and resources",
     theme: "Create Courses. Grow Your Reach.",
   },
   {
-    url: "/images/educators/harish-parthasarathy.jpg",
+    url: "/images/educators/male-4.png",
     alt: "Build Your Educator Brand with direct payouts and verified authority",
     theme: "Build Your Educator Brand",
   },

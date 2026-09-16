@@ -33,7 +33,7 @@ export function TeacherCarousel({ onOpenAuth }: TeacherCarouselProps) {
       name: "Dr. Vikramaditya Sen",
       subject: "Physics & Mechanics",
       headline: "Senior Faculty of Theoretical & Applied Physics",
-      avatar: "/images/educators/educator_01.jpg",
+      avatar: "/images/educators/male-1.png",
       rating: 4.96,
       reviewsCount: 52,
       experience: "18+ Years",

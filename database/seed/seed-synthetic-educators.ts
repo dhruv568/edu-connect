@@ -37,7 +37,7 @@ export const SYNTHETIC_EDUCATORS: SyntheticEducatorData[] = [
     location: "Kolkata, West Bengal",
     rating: 4.96,
     bio: "Specializes in conceptual physics and classical mechanics for advanced learners and Olympiad preparation. Focuses on intuitive first-principles understanding before mathematical formulation.",
-    avatarUrl: "/images/educators/educator_01.jpg",
+    avatarUrl: "/images/educators/male-1.png",
     qualification: {
       degree: "Ph.D. in Physics",
       institution: "Indian Institute of Technology (IIT) Delhi",
@@ -77,7 +77,7 @@ export const SYNTHETIC_EDUCATORS: SyntheticEducatorData[] = [
     location: "Pune, Maharashtra",
     rating: 4.97,
     bio: "Passionate chemistry mentor bridging molecular theory with real-world biochemical phenomena. Renowned for visual reaction mechanism frameworks and systematic mnemonic techniques.",
-    avatarUrl: "/images/educators/educator_03.jpg",
+    avatarUrl: "/images/educators/male-2.png",
     qualification: {
       degree: "Ph.D. in Chemistry",
       institution: "Savitribai Phule Pune University",
@@ -117,7 +117,7 @@ export const SYNTHETIC_EDUCATORS: SyntheticEducatorData[] = [
     location: "New Delhi, NCR",
     rating: 4.91,
     bio: "Experienced economics tutor helping students grasp market dynamics, game theory, and macroeconomic models. Integrates case studies from emerging economies with rigorous analytical problem sets.",
-    avatarUrl: "/images/educators/educator_05.jpg",
+    avatarUrl: "/images/educators/male-3.png",
     qualification: {
       degree: "M.A. in Economics",
       institution: "Delhi School of Economics",
@@ -137,7 +137,7 @@ export const SYNTHETIC_EDUCATORS: SyntheticEducatorData[] = [
     location: "Mumbai, Maharashtra",
     rating: 4.95,
     bio: "Dedicated biology instructor who transforms complex physiological cycles into vivid structural narratives. Specializes in cell biology, genetic inheritance models, and clinical case contexts.",
-    avatarUrl: "/images/educators/educator_06.jpg",
+    avatarUrl: "/images/educators/female-1.png",
     qualification: {
       degree: "M.Sc. in Life Sciences",
       institution: "University of Mumbai",
@@ -157,7 +157,7 @@ export const SYNTHETIC_EDUCATORS: SyntheticEducatorData[] = [
     location: "Coimbatore, Tamil Nadu",
     rating: 4.92,
     bio: "Chartered Accountant and veteran academician simplifying balance sheets, cash flows, and corporate accounting frameworks. Believes accounting is the language of enterprise decision-making.",
-    avatarUrl: "/images/educators/educator_07.jpg",
+    avatarUrl: "/images/educators/male-4.png",
     qualification: {
       degree: "M.Com & FCA",
       institution: "The Institute of Chartered Accountants of India",
@@ -177,7 +177,7 @@ export const SYNTHETIC_EDUCATORS: SyntheticEducatorData[] = [
     location: "Kolkata, West Bengal",
     rating: 4.89,
     bio: "Academic writing scholar and communications coach focusing on critical literary analysis, articulate oral rhetoric, and structured persuasive prose for competitive and university examinations.",
-    avatarUrl: "/images/educators/educator_08.jpg",
+    avatarUrl: "/images/educators/female-2.png",
     qualification: {
       degree: "Ph.D. in English Literature",
       institution: "Jadavpur University",
@@ -197,7 +197,7 @@ export const SYNTHETIC_EDUCATORS: SyntheticEducatorData[] = [
     location: "Varanasi, Uttar Pradesh",
     rating: 4.95,
     bio: "Specializes in competitive quantitative problem-solving, speed mathematics, and probabilistic thinking. Emphasizes systematic pattern identification to eliminate exam fatigue.",
-    avatarUrl: "/images/educators/educator_09.jpg",
+    avatarUrl: "/images/educators/male-5.png",
     qualification: {
       degree: "M.Sc. in Applied Mathematics",
       institution: "Banaras Hindu University (BHU)",
@@ -217,7 +217,7 @@ export const SYNTHETIC_EDUCATORS: SyntheticEducatorData[] = [
     location: "Howrah, West Bengal",
     rating: 4.90,
     bio: "Guides students through equilibrium, electrochemistry, and thermodynamics with crystal-clear mathematical derivations and laboratory analogies that demystify physical chemistry.",
-    avatarUrl: "/images/educators/educator_10.jpg",
+    avatarUrl: "/images/educators/female-3.png",
     qualification: {
       degree: "M.Sc. in Chemistry",
       institution: "University of Calcutta",
@@ -337,7 +337,7 @@ export const SYNTHETIC_EDUCATORS: SyntheticEducatorData[] = [
     location: "Nagpur, Maharashtra",
     rating: 4.88,
     bio: "Naturalist and botany educator specializing in plant physiology, photosynthesis biochemistry, and ecological conservation principles. Inspires students with structured comparative notes.",
-    avatarUrl: "/images/educators/educator_16.jpg",
+    avatarUrl: "/images/educators/female-4.png",
     qualification: {
       degree: "M.Sc. in Botany",
       institution: "Savitribai Phule Pune University",

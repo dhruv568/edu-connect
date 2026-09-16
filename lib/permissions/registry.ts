@@ -165,6 +165,15 @@ export const PROJECT_FEATURES: FeatureDefinition[] = [
     icon: "Settings",
     sortOrder: 15,
   },
+  {
+    key: "offers",
+    name: "Global Offers & Promotions",
+    description: "Manage global promotional offers, discount badges, and campaigns across all platforms.",
+    moduleGroup: "Administration",
+    route: "/admin/offers",
+    icon: "Sparkles",
+    sortOrder: 16,
+  },
 ];
 
 export const PROJECT_PERMISSIONS: PermissionDefinition[] = [
@@ -790,6 +799,26 @@ export const PROJECT_PERMISSIONS: PermissionDefinition[] = [
     action: "manage",
     featureKey: "settings",
     sortOrder: 141,
+  },
+
+  // Offers
+  {
+    key: "offers.view",
+    name: "View Offers",
+    description: "View promotional offers and active campaign metrics",
+    moduleGroup: "Offers",
+    action: "view",
+    featureKey: "offers",
+    sortOrder: 150,
+  },
+  {
+    key: "offers.manage",
+    name: "Manage Offers",
+    description: "Create, edit, toggle active status, and delete promotional offers",
+    moduleGroup: "Offers",
+    action: "manage",
+    featureKey: "offers",
+    sortOrder: 151,
   },
 ];
 
