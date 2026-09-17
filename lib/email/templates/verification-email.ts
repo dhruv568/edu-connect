@@ -78,17 +78,17 @@ export function generateVerificationEmailHtml(params: EmailTemplateParams): stri
               <table role="presentation" border="0" cellpadding="0" cellspacing="0" width="100%">
                 <tr>
                   <td align="center">
-                    <!-- Brand Logo -->
+                    <!-- Brand Logo (Transparent) -->
                     <table role="presentation" border="0" cellpadding="0" cellspacing="0" style="margin: 0 auto 12px auto;">
                       <tr>
-                        <td align="center" style="background-color: #ffffff; padding: 8px; border-radius: 16px; box-shadow: 0 4px 12px rgba(0,0,0,0.15);">
-                          <img src="${baseUrl}/images/favicon.png" alt="EduConnects Logo" width="48" height="48" style="display: block; width: 48px; height: 48px; border-radius: 10px; border: 0;" />
+                        <td align="center" style="background: transparent; background-color: transparent; padding: 0; border: 0;">
+                          <img src="${baseUrl}/images/favicon.png" alt="EduConnects Logo" width="56" height="56" style="display: block; width: 56px; height: 56px; max-width: 56px; border: 0; outline: none; text-decoration: none; margin: 0 auto; background: transparent;" />
                         </td>
                       </tr>
                     </table>
 
                     <!-- Brand Name & Subtitle -->
-                    <h1 style="margin: 0; font-size: 24px; font-weight: 900; color: #ffffff; letter-spacing: 1px; text-transform: uppercase;">
+                    <h1 style="margin: 0; font-size: 26px; font-weight: 900; color: #ffffff; letter-spacing: -0.2px; text-transform: none;">
                       EduConnects
                     </h1>
                     <p style="margin: 4px 0 0 0; font-size: 12px; font-weight: 600; color: #A7F3D0; letter-spacing: 0.5px;">

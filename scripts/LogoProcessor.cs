@@ -27,7 +27,7 @@ public class LogoProcessor {
             int markX = 179;
             int markY = 17;
             int markW = 1132;
-            int markH = 774;
+            int markH = 730;
 
             // Full Logo Bounds: X: 178 to 1365 (Width: 1188) Y: 17 to 999 (Height: 983)
             int fullX = 178;
