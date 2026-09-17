@@ -1,78 +1,72 @@
 import assert from "node:assert";
 
-console.log("🧪 Running Learner Educator-Course Preservation & Payment Order Validation Test...\n");
+console.log("🧪 Running Educator Direct Booking & Course Enrollment Flow Validation Tests...\n");
 
-// 1. Simulate Educator Selection & Course ID Auto-Resolution
-function resolveCourseForEducator(educator: any, coursesList: any[]) {
-  let matchedCourse = educator.courses && educator.courses.length > 0 ? educator.courses[0] : null;
-  if (!matchedCourse && coursesList.length > 0) {
-    matchedCourse = coursesList.find((c: any) => c.teacherId === educator.id || c.teacherId === educator.teacherProfileId) || coursesList[0];
-  }
-  return matchedCourse;
-}
-
-// Test Case A: Educator with published courses
-console.log("Test A: Educator with published courses resolves first course ID...");
-const sampleEducatorA = {
-  id: "teacher-user-123",
-  teacherProfileId: "teacher-profile-123",
-  courses: [{ id: "course-abc-1", title: "Physics 101" }],
-};
-const courseA = resolveCourseForEducator(sampleEducatorA, []);
-assert.ok(courseA, "Course object resolved");
-assert.strictEqual(courseA.id, "course-abc-1", "Resolved course ID matches educator's course");
-console.log("✅ Passed: Educator course ID auto-resolved.\n");
-
-// Test Case B: Educator without inline courses array, but present in catalog
-console.log("Test B: Educator without inline courses resolves matching course from catalog...");
-const sampleEducatorB = {
-  id: "teacher-user-456",
-  teacherProfileId: "teacher-profile-456",
-  courses: [],
-};
-const catalog = [
-  { id: "course-xyz-9", title: "Chemistry 201", teacherId: "teacher-user-456" },
-];
-const courseB = resolveCourseForEducator(sampleEducatorB, catalog);
-assert.ok(courseB, "Course object resolved from catalog");
-assert.strictEqual(courseB.id, "course-xyz-9", "Resolved course ID matches teacherId in catalog");
-console.log("✅ Passed: Catalog matching resolved course ID.\n");
-
-// Test Case C: Payment payload pre-validation
-console.log("Test C: Pre-payment payload validation prevents missing courseId error...");
-function validatePaymentPayload(state: any, coursesList: any[]) {
-  let courseIdToUse = state.selectedCourseId;
-
-  if (!courseIdToUse) {
-    if (state.selectedCourse?.id) {
-      courseIdToUse = state.selectedCourse.id;
-    } else if (state.selectedEducator) {
-      const match = resolveCourseForEducator(state.selectedEducator, coursesList);
-      courseIdToUse = match ? match.id : null;
+// Test Case 1: Educator Direct Booking Flow does NOT require courseId
+console.log("Test 1: Educator direct booking creates LIVE_CLASS_BOOKING without courseId...");
+function buildEducatorBookingPayload(state: any) {
+  if (state.selectionType === "EDUCATOR" || state.isTrial) {
+    if (!state.selectedEducatorId) {
+      throw new Error("BAD_REQUEST: Educator selection required.");
     }
+    return {
+      type: "LIVE_CLASS_BOOKING",
+      teacherId: state.selectedEducatorId,
+      selectedDate: state.selectedDate,
+      selectedSlotTime: state.selectedSlotTime,
+    };
   }
-
-  if (!courseIdToUse) {
-    throw new Error("BAD_REQUEST: courseId is required for course enrollment.");
-  }
-
-  return {
-    type: "COURSE_ENROLLMENT",
-    courseId: courseIdToUse,
-  };
+  throw new Error("Invalid type");
 }
 
-const stateWithEducatorOnly = {
-  selectedEducatorId: "teacher-user-123",
-  selectedEducator: sampleEducatorA,
-  selectedCourseId: null,
-  selectedCourse: null,
+const educatorFlowState = {
+  selectionType: "EDUCATOR",
+  selectedEducatorId: "teacher-profile-999",
+  selectedCourseId: null, // Explicitly NULL
+  selectedDate: "2026-09-18",
+  selectedSlotTime: "11:00 AM - 12:00 PM",
+  isTrial: true,
 };
 
-const validatedPayload = validatePaymentPayload(stateWithEducatorOnly, []);
-assert.strictEqual(validatedPayload.type, "COURSE_ENROLLMENT");
-assert.strictEqual(validatedPayload.courseId, "course-abc-1");
-assert.ok(validatedPayload.courseId, "courseId is populated and valid");
-console.log("✅ Passed: Payload validation populates courseId automatically.\n");
+const bookingPayload = buildEducatorBookingPayload(educatorFlowState);
+assert.strictEqual(bookingPayload.type, "LIVE_CLASS_BOOKING");
+assert.strictEqual(bookingPayload.teacherId, "teacher-profile-999");
+assert.strictEqual(bookingPayload.selectedDate, "2026-09-18");
+assert.strictEqual(bookingPayload.selectedSlotTime, "11:00 AM - 12:00 PM");
+assert.strictEqual((bookingPayload as any).courseId, undefined, "courseId is NOT required or sent");
+console.log("✅ Passed: Educator direct booking succeeds without requiring courseId.\n");
 
-console.log("🎉 ALL EDUCATOR-COURSE PRESERVATION TESTS PASSED SUCCESSFULLY! 🚀");
+// Test Case 2: Course Enrollment Flow requires courseId
+console.log("Test 2: Course enrollment flow requires valid courseId...");
+function buildCourseEnrollmentPayload(state: any) {
+  if (state.selectionType === "COURSE") {
+    if (!state.selectedCourseId) {
+      throw new Error("BAD_REQUEST: courseId is required for course enrollment.");
+    }
+    return {
+      type: "COURSE_ENROLLMENT",
+      courseId: state.selectedCourseId,
+    };
+  }
+  throw new Error("Invalid type");
+}
+
+const courseFlowState = {
+  selectionType: "COURSE",
+  selectedCourseId: "course-phys-101",
+};
+
+const coursePayload = buildCourseEnrollmentPayload(courseFlowState);
+assert.strictEqual(coursePayload.type, "COURSE_ENROLLMENT");
+assert.strictEqual(coursePayload.courseId, "course-phys-101");
+console.log("✅ Passed: Course enrollment flow validates courseId correctly.\n");
+
+// Test Case 3: Course Enrollment throws error if courseId missing
+console.log("Test 3: Missing courseId in course enrollment mode throws BAD_REQUEST...");
+assert.throws(
+  () => buildCourseEnrollmentPayload({ selectionType: "COURSE", selectedCourseId: null }),
+  /BAD_REQUEST: courseId is required for course enrollment/
+);
+console.log("✅ Passed: Missing courseId correctly rejected for course enrollment.\n");
+
+console.log("🎉 ALL BOOKING FLOW VALIDATION TESTS PASSED SUCCESSFULLY! 🚀");

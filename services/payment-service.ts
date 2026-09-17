@@ -10,6 +10,9 @@ export interface CreateOrderParams {
   type: "COURSE_ENROLLMENT" | "LIVE_CLASS_BOOKING";
   courseId?: string;
   liveClassSlotId?: string;
+  teacherId?: string;
+  selectedDate?: string;
+  selectedSlotTime?: string;
 }
 
 export interface VerifyPaymentParams {
@@ -36,7 +39,7 @@ export class PaymentService {
    * Create Cashfree Payment Order (Server-Side Price Calculation)
    */
   static async createPaymentOrder(params: CreateOrderParams) {
-    const { userId, type, courseId, liveClassSlotId } = params;
+    const { userId, type, courseId, liveClassSlotId, teacherId, selectedDate, selectedSlotTime } = params;
 
     // Validate User exists & is STUDENT
     const user = await prisma.user.findUnique({
@@ -50,7 +53,7 @@ export class PaymentService {
 
     let amountPaise = 0;
     let title = "";
-    let teacherId = "";
+    let targetTeacherId = "";
     let refCourseId: string | null = null;
     let refSlotId: string | null = null;
 
@@ -93,19 +96,78 @@ export class PaymentService {
       // Price calculation directly from DB (Integer paise)
       amountPaise = toPaise(course.price);
       title = course.title;
-      teacherId = course.teacherId;
+      targetTeacherId = course.teacherId;
       refCourseId = course.id;
     } else if (type === "LIVE_CLASS_BOOKING") {
-      if (!liveClassSlotId) {
-        throw new Error("BAD_REQUEST: liveClassSlotId is required for live class booking.");
+      let slot = null;
+
+      if (liveClassSlotId) {
+        slot = await prisma.liveClassSlot.findUnique({
+          where: { id: liveClassSlotId },
+          include: { bookings: true },
+        });
       }
 
-      const slot = await prisma.liveClassSlot.findUnique({
-        where: { id: liveClassSlotId },
-        include: { bookings: true },
-      });
+      const reqTeacherId = teacherId || (params as any).educatorId;
 
-      if (!slot || slot.status === "CANCELLED" || slot.status === "COMPLETED") {
+      if (!slot && reqTeacherId) {
+        slot = await prisma.liveClassSlot.findFirst({
+          where: {
+            teacherId: reqTeacherId,
+            status: { in: ["SCHEDULED", "OPEN"] },
+          },
+          include: { bookings: true },
+          orderBy: { startTime: "asc" },
+        });
+
+        if (!slot) {
+          const teacher = await prisma.teacherProfile.findFirst({
+            where: { OR: [{ id: reqTeacherId }, { userId: reqTeacherId }] },
+            include: { user: { include: { profile: true } } },
+          });
+
+          if (teacher) {
+            const rawName = `${teacher.user.profile?.firstName || ''} ${teacher.user.profile?.lastName || ''}`.trim() || "Educator";
+            let startTime = new Date(Date.now() + 24 * 60 * 60 * 1000);
+            if (selectedDate && selectedSlotTime) {
+              const cleanTime = selectedSlotTime.split("-")[0].trim();
+              const parsed = new Date(`${selectedDate} ${cleanTime}`);
+              if (!isNaN(parsed.getTime())) startTime = parsed;
+            }
+            const endTime = new Date(startTime.getTime() + 60 * 60 * 1000);
+
+            slot = await prisma.liveClassSlot.create({
+              data: {
+                title: `1-on-1 Trial Session with ${rawName}`,
+                description: `Personalized 1-on-1 live classroom session with ${rawName}`,
+                subject: teacher.subjects?.split(",")[0]?.trim() || "General",
+                teacherId: teacher.id,
+                startTime,
+                endTime,
+                price: teacher.hourlyRate || 499,
+                classType: "ONE_TO_ONE",
+                maxCapacity: 1,
+                status: "OPEN",
+              },
+              include: { bookings: true },
+            });
+          }
+        }
+      }
+
+      if (!slot) {
+        slot = await prisma.liveClassSlot.findFirst({
+          where: { status: { in: ["SCHEDULED", "OPEN"] } },
+          include: { bookings: true },
+          orderBy: { startTime: "asc" },
+        });
+      }
+
+      if (!slot) {
+        throw new Error("BAD_REQUEST: liveClassSlotId or educatorId is required for live class booking.");
+      }
+
+      if (slot.status === "CANCELLED" || slot.status === "COMPLETED") {
         throw new Error("NOT_FOUND: Live class slot is no longer available.");
       }
 
@@ -127,7 +189,7 @@ export class PaymentService {
       // Price calculation directly from DB
       amountPaise = toPaise(slot.price);
       title = slot.title;
-      teacherId = slot.teacherId;
+      targetTeacherId = slot.teacherId;
       refSlotId = slot.id;
     } else {
       throw new Error("BAD_REQUEST: Invalid payment type specified.");

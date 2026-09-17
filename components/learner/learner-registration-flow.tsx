@@ -51,6 +51,9 @@ interface FlowState {
   selectedCourse: any | null;
   selectedEducatorId: string | null;
   selectedEducator: any | null;
+  selectedDate: string;
+  selectedSlotTime: string;
+  selectedSlotId: string | null;
   isTrial: boolean;
   orderData: any | null;
   paymentLoading: boolean;
@@ -60,6 +63,31 @@ interface FlowState {
 }
 
 const STORAGE_KEY = "educonnects_learner_flow_state";
+
+const AVAILABLE_TIME_SLOTS = [
+  "09:00 AM - 10:00 AM",
+  "11:00 AM - 12:00 PM",
+  "02:00 PM - 03:00 PM",
+  "04:00 PM - 05:00 PM",
+  "06:00 PM - 07:00 PM",
+  "08:00 PM - 09:00 PM",
+];
+
+function getUpcomingDates() {
+  const dates = [];
+  const days = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
+  const months = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
+  
+  for (let i = 1; i <= 5; i++) {
+    const d = new Date();
+    d.setDate(d.getDate() + i);
+    const dayName = i === 1 ? "Tomorrow" : days[d.getDay()];
+    const dateStr = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
+    const displayDate = `${months[d.getMonth()]} ${d.getDate()}`;
+    dates.push({ dayName, dateStr, displayDate });
+  }
+  return dates;
+}
 
 const STEPS = [
   { number: 1, label: "Learner Info" },
@@ -93,6 +121,9 @@ function LearnerRegistrationFlowContent() {
     selectedCourse: null,
     selectedEducatorId: null,
     selectedEducator: null,
+    selectedDate: getUpcomingDates()[0].dateStr,
+    selectedSlotTime: AVAILABLE_TIME_SLOTS[0],
+    selectedSlotId: null,
     isTrial: false,
     orderData: null,
     paymentLoading: false,
@@ -448,37 +479,8 @@ function LearnerRegistrationFlowContent() {
 
   // Trigger Step 4 Payment
   const handleInitiatePayment = async () => {
-    // Resolve & validate course ID
-    let courseIdToUse = state.selectedCourseId;
-
-    if (!courseIdToUse) {
-      if (state.selectedCourse?.id) {
-        courseIdToUse = state.selectedCourse.id;
-      } else if (state.selectedEducator) {
-        if (state.selectedEducator.courses && state.selectedEducator.courses.length > 0) {
-          courseIdToUse = state.selectedEducator.courses[0].id;
-        } else {
-          const match = coursesList.find(
-            (c) => c.teacherId === state.selectedEducator.id || c.teacherId === state.selectedEducator.teacherProfileId
-          );
-          courseIdToUse = match ? match.id : (coursesList[0]?.id || null);
-        }
-      }
-    }
-
-    if (!courseIdToUse) {
-      setState((prev) => ({
-        ...prev,
-        step: 4,
-        paymentLoading: false,
-        paymentError: "BAD_REQUEST: courseId is required for course enrollment. Please select a program or educator.",
-      }));
-      return;
-    }
-
     setState((prev) => ({
       ...prev,
-      selectedCourseId: courseIdToUse,
       step: 4,
       paymentLoading: true,
       paymentError: null,
@@ -486,10 +488,30 @@ function LearnerRegistrationFlowContent() {
     }));
 
     try {
-      const payload: any = {
-        type: "COURSE_ENROLLMENT",
-        courseId: courseIdToUse,
-      };
+      let payload: any;
+
+      if (state.selectionType === "EDUCATOR" || state.isTrial) {
+        const targetTeacherId = state.selectedEducator?.id || state.selectedEducatorId;
+        if (!targetTeacherId) {
+          throw new Error("BAD_REQUEST: Please select an educator before booking.");
+        }
+        payload = {
+          type: "LIVE_CLASS_BOOKING",
+          teacherId: targetTeacherId,
+          liveClassSlotId: state.selectedSlotId || undefined,
+          selectedDate: state.selectedDate,
+          selectedSlotTime: state.selectedSlotTime,
+        };
+      } else {
+        const targetCourseId = state.selectedCourseId || state.selectedCourse?.id;
+        if (!targetCourseId) {
+          throw new Error("BAD_REQUEST: courseId is required for course enrollment.");
+        }
+        payload = {
+          type: "COURSE_ENROLLMENT",
+          courseId: targetCourseId,
+        };
+      }
 
       const res = await fetch("/api/payments/create-order", {
         method: "POST",
@@ -911,34 +933,91 @@ function LearnerRegistrationFlowContent() {
             </div>
           )}
 
-          {/* If Educator is Pre-selected */}
+          {/* If Educator is Selected: Show Profile + Date & Time Slot Picker */}
           {state.selectedEducator && (
-            <div className="p-5 rounded-3xl bg-indigo-50/70 border-2 border-[#3157D5] flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
-              <div className="flex items-center gap-3">
-                <img
-                  src={state.selectedEducator.avatarUrl || "/images/educators/educator_01.jpg"}
-                  alt={state.selectedEducator.name}
-                  className="w-14 h-14 rounded-2xl object-cover ring-2 ring-[#3157D5]/20 shrink-0"
-                />
-                <div className="space-y-0.5">
-                  <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full bg-emerald-100 text-emerald-700 text-[11px] font-bold">
-                    <Check className="w-3 h-3" /> Selected Educator
-                  </span>
-                  <h3 className="text-base font-black text-slate-900">{state.selectedEducator.name}</h3>
-                  <p className="text-xs text-slate-600">{state.selectedEducator.headline}</p>
+            <div className="space-y-4">
+              <div className="p-5 rounded-3xl bg-indigo-50/70 border-2 border-[#3157D5] flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+                <div className="flex items-center gap-3">
+                  <img
+                    src={state.selectedEducator.avatarUrl || "/images/educators/educator_01.jpg"}
+                    alt={state.selectedEducator.name}
+                    className="w-14 h-14 rounded-2xl object-cover ring-2 ring-[#3157D5]/20 shrink-0"
+                  />
+                  <div className="space-y-0.5">
+                    <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full bg-emerald-100 text-emerald-700 text-[11px] font-bold">
+                      <Check className="w-3 h-3" /> Selected Educator
+                    </span>
+                    <h3 className="text-base font-black text-slate-900">{state.selectedEducator.name}</h3>
+                    <p className="text-xs text-slate-600">{state.selectedEducator.headline}</p>
+                  </div>
+                </div>
+                <div className="text-right shrink-0 space-y-1">
+                  <div className="text-xl font-black text-[#243B9B]">
+                    {formatCurrency(state.selectedEducator.hourlyRate || 499)}/session
+                  </div>
+                  <button
+                    type="button"
+                    onClick={() => setState((p) => ({ ...p, selectedEducatorId: null, selectedEducator: null }))}
+                    className="text-xs text-[#3157D5] hover:underline font-semibold"
+                  >
+                    Change Educator
+                  </button>
                 </div>
               </div>
-              <div className="text-right shrink-0 space-y-1">
-                <div className="text-xl font-black text-[#243B9B]">
-                  {formatCurrency(state.selectedEducator.hourlyRate || 800)}/hr
+
+              {/* Educator Available Date & Time Slot Selector */}
+              <div className="p-5 rounded-3xl bg-blue-50/80 border border-blue-200 space-y-4">
+                <div className="flex items-center justify-between">
+                  <h4 className="text-xs font-black uppercase tracking-wider text-slate-700 flex items-center gap-1.5">
+                    <Clock className="w-4 h-4 text-[#3157D5]" /> Select Date & Session Slot
+                  </h4>
+                  <span className="text-[11px] font-bold text-emerald-700 bg-emerald-100/80 px-2.5 py-0.5 rounded-full">
+                    1-on-1 Interactive Session
+                  </span>
                 </div>
-                <button
-                  type="button"
-                  onClick={() => setState((p) => ({ ...p, selectedEducatorId: null, selectedEducator: null }))}
-                  className="text-xs text-[#3157D5] hover:underline font-semibold"
-                >
-                  Change Educator
-                </button>
+
+                {/* Available Date Pills */}
+                <div className="space-y-1.5">
+                  <label className="text-[11px] font-bold text-slate-500 uppercase tracking-wider">Available Dates:</label>
+                  <div className="grid grid-cols-2 sm:grid-cols-5 gap-2">
+                    {getUpcomingDates().map((d) => (
+                      <button
+                        key={d.dateStr}
+                        type="button"
+                        onClick={() => setState((p) => ({ ...p, selectedDate: d.dateStr }))}
+                        className={`py-2 px-3 rounded-xl text-xs font-bold border transition-all text-center ${
+                          state.selectedDate === d.dateStr
+                            ? "bg-[#3157D5] text-white border-[#3157D5] shadow-sm ring-2 ring-[#3157D5]/20"
+                            : "bg-white text-slate-700 border-slate-200 hover:border-blue-300"
+                        }`}
+                      >
+                        <div>{d.dayName}</div>
+                        <div className="text-[10px] opacity-80 font-normal">{d.displayDate}</div>
+                      </button>
+                    ))}
+                  </div>
+                </div>
+
+                {/* Available Time Slot Pills */}
+                <div className="space-y-1.5">
+                  <label className="text-[11px] font-bold text-slate-500 uppercase tracking-wider">Available Time Slots (IST):</label>
+                  <div className="grid grid-cols-2 sm:grid-cols-3 gap-2">
+                    {AVAILABLE_TIME_SLOTS.map((slot) => (
+                      <button
+                        key={slot}
+                        type="button"
+                        onClick={() => setState((p) => ({ ...p, selectedSlotTime: slot }))}
+                        className={`py-2 px-3 rounded-xl text-xs font-bold border transition-all text-center ${
+                          state.selectedSlotTime === slot
+                            ? "bg-slate-900 text-white border-slate-900 shadow-sm"
+                            : "bg-white text-slate-700 border-slate-200 hover:border-slate-400"
+                        }`}
+                      >
+                        {slot}
+                      </button>
+                    ))}
+                  </div>
+                </div>
               </div>
             </div>
           )}
@@ -1168,19 +1247,32 @@ function LearnerRegistrationFlowContent() {
             {/* Selected Product Summary */}
             <div className="p-5 rounded-2xl bg-blue-50/60 border border-blue-200 space-y-3">
               <div className="flex items-center justify-between border-b border-blue-200 pb-2">
-                <span className="text-xs font-bold uppercase tracking-wider text-blue-900">Program Selection</span>
+                <span className="text-xs font-bold uppercase tracking-wider text-blue-900">
+                  {state.selectionType === "EDUCATOR" ? "1-on-1 Educator Booking" : "Course Enrollment"}
+                </span>
                 <span className="text-[11px] text-[#3157D5] font-bold">
-                  {state.selectedCourse ? "Course Enrollment" : "1-on-1 Trial Demo"}
+                  {state.selectionType === "EDUCATOR" ? "Live Classroom Session" : "Full LMS Access"}
                 </span>
               </div>
               <div className="space-y-1.5 text-xs">
                 <div className="font-black text-slate-900 text-sm">
-                  {state.selectedCourse ? state.selectedCourse.title : state.selectedEducator?.name}
+                  {state.selectionType === "EDUCATOR" ? `1-on-1 Class with ${state.selectedEducator?.name || "Educator"}` : state.selectedCourse?.title}
                 </div>
-                <div className="text-slate-600 text-xs">
-                  {state.selectedCourse ? `Subject: ${state.selectedCourse.subject}` : state.selectedEducator?.headline}
-                </div>
-                <div className="text-[11px] text-slate-500">
+                {state.selectionType === "EDUCATOR" ? (
+                  <>
+                    <div className="text-slate-700 text-xs font-semibold flex items-center gap-1.5 mt-1">
+                      <Clock className="w-3.5 h-3.5 text-[#3157D5]" /> Date: <span className="font-bold">{state.selectedDate}</span>
+                    </div>
+                    <div className="text-slate-700 text-xs font-semibold flex items-center gap-1.5">
+                      <Video className="w-3.5 h-3.5 text-[#3157D5]" /> Time Slot: <span className="font-bold">{state.selectedSlotTime}</span>
+                    </div>
+                  </>
+                ) : (
+                  <div className="text-slate-600 text-xs">
+                    Subject: {state.selectedCourse?.subject}
+                  </div>
+                )}
+                <div className="text-[11px] text-slate-500 pt-1">
                   Format: Live WebRTC Classrooms + 24/7 LMS Replays
                 </div>
               </div>
