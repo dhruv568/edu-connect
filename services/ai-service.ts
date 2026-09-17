@@ -1,6 +1,7 @@
 import OpenAI from "openai";
 import { prisma } from "@/lib/prisma";
 import { MAX_HISTORY_MESSAGES } from "@/lib/ai/rate-limiter";
+import { OFFICIAL_COMPANY_INFO } from "@/lib/company";
 
 export type AssistantRole = "ADMIN" | "EDUCATOR" | "LEARNER" | "guest";
 
@@ -144,7 +145,13 @@ Core Personality & Capabilities:
   • Contact Support: /contact or support@educonnects.co.in
 - Portals: Whenever a user asks for the "Learner Portal" or "Educator Portal" (or how to access the learner or educator portal), ALWAYS provide the exact clickable link:
   • Learner Portal: [Learner Portal](https://learners.educonnects.co.in)
-  • Educator Portal: [Educator Portal](https://educators.educonnects.co.in)
+- Official Company & Legal Entity Information:
+  Whenever the user asks for company details, legal information, corporate identity, CIN, registered office, parent company, or ownership, you MUST provide these EXACT details:
+  • Company / Legal Entity: Shrivastava ProFunnels Ventures Pvt Ltd
+  • CIN: U85499UP2024PTC212061
+  • Registered Office: Bard No. 8, Basundhara Colony, Chandmari, Lalitpur (UP), 284403
+  • Platform / Brand: EduConnects
+  STRICT RULE: Do not invent, modify, or substitute any company details under any circumstances.
 - Advisory Only: You are advisory and informational. You cannot directly execute database mutations or financial debits (e.g. do not say "I have booked your class"). Explain the exact steps the user can take.
 - Security & Privacy: Never disclose unauthorized information, admin passwords, database tokens, or other users' personal information. Never ask for or expose OTPs, passwords, or payment credentials.`;
 
@@ -286,6 +293,41 @@ export function generateFallbackResponse(
     /\b(kaise|kya|karna|karni|kare|hai|hain|hota|hoti|hoga|batao|bataiye|madad|chahiye|dhunde|khoje|puchna|shukriya|accha|theek)\b/i.test(
       query
     );
+
+  // 0a. Official Company & Legal Information Queries
+  if (
+    query.includes("company information") ||
+    query.includes("company info") ||
+    query.includes("company details") ||
+    query.includes("legal information") ||
+    query.includes("legal info") ||
+    query.includes("legal details") ||
+    query.includes("legal entity") ||
+    query.includes("legal name") ||
+    query.includes("cin") ||
+    query.includes("corporate details") ||
+    query.includes("corporate info") ||
+    query.includes("corporate information") ||
+    query.includes("registered office") ||
+    query.includes("registered address") ||
+    query.includes("office address") ||
+    query.includes("company address") ||
+    query.includes("parent company") ||
+    query.includes("who owns educonnects") ||
+    query.includes("who owns this company") ||
+    query.includes("shrivastava profunnels") ||
+    query.includes("company registration") ||
+    query === "company" ||
+    query === "company?" ||
+    query === "what is the company name" ||
+    query.includes("company name")
+  ) {
+    return "Here is the official company and legal information for EduConnects:\n\n" +
+      "**Shrivastava ProFunnels Ventures Pvt Ltd**\n" +
+      "- **CIN:** U85499UP2024PTC212061\n" +
+      "- **Registered Office:** Bard No. 8, Basundhara Colony, Chandmari, Lalitpur (UP), 284403\n\n" +
+      "EduConnects is operated by Shrivastava ProFunnels Ventures Pvt Ltd.";
+  }
 
   // 0. Direct Portal Link Queries
   if (

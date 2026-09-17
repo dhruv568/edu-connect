@@ -458,7 +458,41 @@ async function runTests() {
     );
   }
 
-  console.log("\n✨ All 12 EduConnects AI Assistant Tests Passed Successfully! 🎉\n");
+  // =========================================================================
+  // TEST 13: Official Company and Legal Information Verification
+  // =========================================================================
+  console.log("\nTEST 13: Official Company and Legal Information");
+  {
+    const legalQueries = [
+      "What is your company information?",
+      "Can you give me your legal entity name and CIN?",
+      "Where is your registered office address?",
+      "Who owns EduConnects?",
+    ];
+
+    for (const q of legalQueries) {
+      const res = await processAiChat({
+        message: q,
+        role: "guest",
+      });
+
+      assert.ok(
+        res.response.includes("Shrivastava ProFunnels Ventures Pvt Ltd"),
+        `Response for "${q}" must include legal name 'Shrivastava ProFunnels Ventures Pvt Ltd'`
+      );
+      assert.ok(
+        res.response.includes("U85499UP2024PTC212061"),
+        `Response for "${q}" must include CIN 'U85499UP2024PTC212061'`
+      );
+      assert.ok(
+        res.response.includes("Bard No. 8, Basundhara Colony, Chandmari, Lalitpur (UP), 284403"),
+        `Response for "${q}" must include registered office address 'Bard No. 8, Basundhara Colony, Chandmari, Lalitpur (UP), 284403'`
+      );
+    }
+    console.log("  ✔ Official Company Information, CIN, and Registered Office strictly verified!");
+  }
+
+  console.log("\n✨ All 13 EduConnects AI Assistant Tests Passed Successfully! 🎉\n");
   process.exit(0);
 }
 
