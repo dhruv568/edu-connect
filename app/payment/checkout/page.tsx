@@ -237,7 +237,7 @@ function CheckoutContent() {
                 </>
               ) : (
                 <>
-                  <CreditCard className="w-5 h-5" /> Pay {formatPaise(orderData.amountPaise)} Securely
+                  <CreditCard className="w-5 h-5" /> {type === "LIVE_CLASS_BOOKING" ? "Book Now" : "Pay Now"} ({formatPaise(orderData.amountPaise)})
                 </>
               )}
             </button>

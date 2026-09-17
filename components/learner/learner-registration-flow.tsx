@@ -1238,7 +1238,11 @@ function LearnerRegistrationFlowContent() {
               className="bg-[#3157D5] hover:bg-[#243B9B] text-white font-bold px-8 py-3.5 shadow-lg shadow-[#3157D5]/20"
               rightIcon={<CreditCard className="h-4 w-4" />}
             >
-              {activePrice === 0 ? "Complete Free Enrollment" : "Proceed to Cashfree Payment"}
+              {activePrice === 0
+                ? "Complete Free Enrollment"
+                : state.selectionType === "EDUCATOR" || state.isTrial
+                ? "Book Now"
+                : "Pay Now"}
             </GlassButton>
           </div>
         </GlassCard>
@@ -1318,7 +1322,7 @@ function LearnerRegistrationFlowContent() {
                 onClick={handleInitiatePayment}
                 className="bg-[#3157D5] hover:bg-[#243B9B] text-white font-bold px-8"
               >
-                Open Cashfree Checkout
+                {state.selectionType === "EDUCATOR" || state.isTrial ? "Book Now" : "Pay Now"}
               </GlassButton>
             </div>
           )}
