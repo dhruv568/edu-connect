@@ -234,14 +234,21 @@ function LearnerRegistrationFlowContent() {
     }
   }, [state.selectedCourseId, coursesList, state.selectedCourse]);
 
-  // Hydrate selected educator object if ID is present
+  // Hydrate selected educator object if ID is present and resolve courseId
   useEffect(() => {
     if (state.selectedEducatorId && !state.selectedEducator) {
       fetch(`/api/teachers/${state.selectedEducatorId}`)
         .then((r) => r.json())
         .then((d) => {
           if (d.success && d.data?.teacher) {
-            setState((prev) => ({ ...prev, selectedEducator: d.data.teacher }));
+            const teacher = d.data.teacher;
+            const teacherCourse = teacher.courses && teacher.courses.length > 0 ? teacher.courses[0] : null;
+            setState((prev) => ({
+              ...prev,
+              selectedEducator: teacher,
+              selectedCourseId: prev.selectedCourseId || (teacherCourse ? teacherCourse.id : prev.selectedCourseId),
+              selectedCourse: prev.selectedCourse || (teacherCourse || prev.selectedCourse),
+            }));
           }
         })
         .catch(() => {
@@ -250,6 +257,31 @@ function LearnerRegistrationFlowContent() {
         });
     }
   }, [state.selectedEducatorId, educatorsList, state.selectedEducator]);
+
+  // Auto-resolve course ID when an educator is selected but courseId is not yet assigned
+  useEffect(() => {
+    if (state.selectedEducator && !state.selectedCourseId) {
+      if (state.selectedEducator.courses && state.selectedEducator.courses.length > 0) {
+        const firstCourse = state.selectedEducator.courses[0];
+        setState((prev) => ({
+          ...prev,
+          selectedCourseId: firstCourse.id,
+          selectedCourse: prev.selectedCourse || firstCourse,
+        }));
+      } else if (coursesList.length > 0) {
+        const match = coursesList.find(
+          (c) => c.teacherId === state.selectedEducator.id || c.teacherId === state.selectedEducator.teacherProfileId
+        ) || coursesList[0];
+        if (match) {
+          setState((prev) => ({
+            ...prev,
+            selectedCourseId: match.id,
+            selectedCourse: prev.selectedCourse || match,
+          }));
+        }
+      }
+    }
+  }, [state.selectedEducator, state.selectedCourseId, coursesList]);
 
   // If order_id is present on URL on mount (e.g. Cashfree return redirect), auto-verify
   useEffect(() => {
@@ -416,8 +448,37 @@ function LearnerRegistrationFlowContent() {
 
   // Trigger Step 4 Payment
   const handleInitiatePayment = async () => {
+    // Resolve & validate course ID
+    let courseIdToUse = state.selectedCourseId;
+
+    if (!courseIdToUse) {
+      if (state.selectedCourse?.id) {
+        courseIdToUse = state.selectedCourse.id;
+      } else if (state.selectedEducator) {
+        if (state.selectedEducator.courses && state.selectedEducator.courses.length > 0) {
+          courseIdToUse = state.selectedEducator.courses[0].id;
+        } else {
+          const match = coursesList.find(
+            (c) => c.teacherId === state.selectedEducator.id || c.teacherId === state.selectedEducator.teacherProfileId
+          );
+          courseIdToUse = match ? match.id : (coursesList[0]?.id || null);
+        }
+      }
+    }
+
+    if (!courseIdToUse) {
+      setState((prev) => ({
+        ...prev,
+        step: 4,
+        paymentLoading: false,
+        paymentError: "BAD_REQUEST: courseId is required for course enrollment. Please select a program or educator.",
+      }));
+      return;
+    }
+
     setState((prev) => ({
       ...prev,
+      selectedCourseId: courseIdToUse,
       step: 4,
       paymentLoading: true,
       paymentError: null,
@@ -427,7 +488,7 @@ function LearnerRegistrationFlowContent() {
     try {
       const payload: any = {
         type: "COURSE_ENROLLMENT",
-        courseId: state.selectedCourseId || undefined,
+        courseId: courseIdToUse,
       };
 
       const res = await fetch("/api/payments/create-order", {
@@ -991,7 +1052,20 @@ function LearnerRegistrationFlowContent() {
                     return (
                       <div
                         key={e.id}
-                        onClick={() => setState((p) => ({ ...p, selectedEducatorId: e.id, selectedEducator: e, isTrial: true }))}
+                        onClick={() => {
+                          let matchedCourse = e.courses && e.courses.length > 0 ? e.courses[0] : null;
+                          if (!matchedCourse && coursesList.length > 0) {
+                            matchedCourse = coursesList.find((c: any) => c.teacherId === e.id || c.teacherId === e.teacherProfileId) || coursesList[0];
+                          }
+                          setState((p) => ({
+                            ...p,
+                            selectedEducatorId: e.id,
+                            selectedEducator: e,
+                            isTrial: true,
+                            selectedCourseId: matchedCourse ? matchedCourse.id : p.selectedCourseId,
+                            selectedCourse: matchedCourse || p.selectedCourse,
+                          }));
+                        }}
                         className={`p-4 rounded-2xl border-2 transition-all cursor-pointer flex items-center justify-between gap-3 ${
                           isSelected
                             ? "bg-indigo-50/80 border-[#3157D5] shadow-md shadow-[#3157D5]/10"

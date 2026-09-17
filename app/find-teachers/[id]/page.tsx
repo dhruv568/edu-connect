@@ -113,7 +113,11 @@ export default function PublicTeacherProfilePage() {
                 variant="primary"
                 size="lg"
                 className="bg-[#3157D5] hover:bg-[#243B9B] text-white"
-                onClick={() => router.push(`/student/register?educatorId=${teacher.id}&trial=true`)}
+                onClick={() => {
+                  const firstCourse = teacher.courses && teacher.courses.length > 0 ? teacher.courses[0] : null;
+                  const cParam = firstCourse ? `&courseId=${firstCourse.id}` : "";
+                  router.push(`/student/register?educatorId=${teacher.id}${cParam}&trial=true`);
+                }}
               >
                 Book Trial Lesson
               </GlassButton>

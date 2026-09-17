@@ -13,6 +13,7 @@ function CheckoutContent() {
 
   const type = searchParams.get("type") || "COURSE_ENROLLMENT";
   const courseId = searchParams.get("courseId");
+  const educatorId = searchParams.get("educatorId");
   const slotId = searchParams.get("slotId");
 
   const [loading, setLoading] = useState(true);
@@ -25,12 +26,36 @@ function CheckoutContent() {
       setLoading(true);
       setError(null);
       try {
+        let activeCourseId = courseId;
+        if (!activeCourseId && educatorId && type === "COURSE_ENROLLMENT") {
+          try {
+            const tRes = await fetch(`/api/teachers/${educatorId}`);
+            const tJson = await tRes.json();
+            if (tJson.success && tJson.data?.teacher?.courses?.length > 0) {
+              activeCourseId = tJson.data.teacher.courses[0].id;
+            } else {
+              const cRes = await fetch("/api/courses?limit=1");
+              const cJson = await cRes.json();
+              if (cJson.success && cJson.data?.courses?.length > 0) {
+                activeCourseId = cJson.data.courses[0].id;
+              }
+            }
+          } catch {}
+        }
+
+        if (type === "COURSE_ENROLLMENT" && !activeCourseId) {
+          throw new Error("BAD_REQUEST: courseId is required for course enrollment.");
+        }
+        if (type === "LIVE_CLASS_BOOKING" && !slotId) {
+          throw new Error("BAD_REQUEST: liveClassSlotId is required for live class booking.");
+        }
+
         const res = await fetch("/api/payments/create-order", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({
             type,
-            courseId: courseId || undefined,
+            courseId: activeCourseId || undefined,
             liveClassSlotId: slotId || undefined,
           }),
         });
@@ -54,13 +79,13 @@ function CheckoutContent() {
       }
     }
 
-    if (courseId || slotId) {
+    if (courseId || educatorId || slotId) {
       initOrder();
     } else {
-      setError("No valid product selected for checkout.");
+      setError("BAD_REQUEST: courseId is required for course enrollment.");
       setLoading(false);
     }
-  }, [type, courseId, slotId, router]);
+  }, [type, courseId, educatorId, slotId, router]);
 
   const loadCashfreeSdk = (): Promise<any> => {
     return new Promise((resolve, reject) => {
