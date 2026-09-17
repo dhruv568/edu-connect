@@ -30,6 +30,7 @@ import {
   ChevronRight,
   Tag,
   Sparkles,
+  Award,
 } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { UserRole } from "@/types/auth";
@@ -295,6 +296,14 @@ export function DashboardLayout({ role, userName, userEmail, children }: Dashboa
       ],
     },
     {
+      id: "training_cert",
+      title: "TRAINING & CERTIFICATION",
+      items: [
+        { label: "Educator Training Program", icon: GraduationCap, href: "/admin/training" },
+        { label: "Certificate Management", icon: Award, href: "/admin/certificates" },
+      ],
+    },
+    {
       id: "live",
       title: "LIVE",
       items: [
@@ -341,6 +350,7 @@ export function DashboardLayout({ role, userName, userEmail, children }: Dashboa
   const staticNavItems = {
     TEACHER: [
       { label: "Educator Dashboard", icon: LayoutDashboard, href: "/teacher/dashboard" },
+      { label: "15-Day Training", icon: Award, href: "/teacher/training/learn" },
       { label: "Profile Onboarding", icon: FileCheck, href: "/teacher/onboarding" },
       { label: "Verification Status", icon: ShieldCheck, href: "/teacher/verification" },
       { label: "Live Class Slots", icon: Video, href: "/teacher/live-classes" },

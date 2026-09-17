@@ -9,6 +9,7 @@ import nodemailer from "nodemailer";
 import { generateVerificationEmailHtml, EmailTemplateParams } from "./templates/verification-email";
 import { generateNotificationEmailHtml, NotificationEmailParams } from "./templates/verification-templates";
 import { generatePasswordResetEmailHtml, PasswordResetEmailParams } from "./templates/password-reset-email";
+import { generateCertificateEmailHtml, CertificateEmailParams } from "./templates/certificate-email";
 import { getPublicAppUrl } from "../app-url";
 
 export interface SendEmailPayload {
@@ -25,11 +26,22 @@ export interface SendPasswordResetPayload {
   resetUrl: string;
 }
 
+export interface SendCertificatePayload {
+  to: string;
+  subject: string;
+  educatorName: string;
+  certificateNumber: string;
+  programTitle: string;
+  completionDate: string;
+  pdfBuffer: Buffer;
+}
+
 export interface IEmailProvider {
   name: string;
   sendVerificationEmail(payload: SendEmailPayload): Promise<boolean>;
   sendPasswordResetEmail(payload: SendPasswordResetPayload): Promise<boolean>;
   sendNotificationEmail(payload: NotificationEmailParams): Promise<boolean>;
+  sendCertificateEmail(payload: SendCertificatePayload): Promise<boolean>;
 }
 
 /**
@@ -76,6 +88,19 @@ export class ConsoleEmailProvider implements IEmailProvider {
     console.log(`Status Badge: [${params.statusBadgeText}]`);
     console.log(`Headline: ${params.headline}`);
     if (params.reasonText) console.log(`Reason: ${params.reasonText}`);
+    console.log("==================================================\n");
+    return true;
+  }
+
+  async sendCertificateEmail(payload: SendCertificatePayload): Promise<boolean> {
+    console.log("\n==================================================");
+    console.log("🎓 [EMAIL SERVICE: CERTIFICATE ISSUANCE DISPATCH]");
+    console.log(`To:             ${payload.to}`);
+    console.log(`Subject:        ${payload.subject}`);
+    console.log(`Recipient:      ${payload.educatorName}`);
+    console.log(`Certificate ID: ${payload.certificateNumber}`);
+    console.log(`Program:        ${payload.programTitle}`);
+    console.log(`Attachment:     EduConnects-Certificate-${payload.certificateNumber}.pdf (${payload.pdfBuffer.length} bytes)`);
     console.log("==================================================\n");
     return true;
   }
@@ -212,6 +237,50 @@ export class SMTPEmailProvider implements IEmailProvider {
       return false;
     }
   }
+
+  async sendCertificateEmail(payload: SendCertificatePayload): Promise<boolean> {
+    const appUrl = getPublicAppUrl();
+    const verificationUrl = `${appUrl}/certificate/verify/${payload.certificateNumber}`;
+    const html = generateCertificateEmailHtml({
+      recipientEmail: payload.to,
+      educatorName: payload.educatorName,
+      certificateNumber: payload.certificateNumber,
+      programTitle: payload.programTitle,
+      completionDate: payload.completionDate,
+      verificationUrl,
+      appUrl,
+    });
+    const from = process.env.EMAIL_FROM || (process.env.SMTP_USER ? `EduConnects <${process.env.SMTP_USER}>` : "EduConnects <noreply@educonnects.co.in>");
+    const mailOptions = {
+      from,
+      to: payload.to,
+      subject: payload.subject,
+      html,
+      attachments: [
+        {
+          filename: `EduConnects-Certificate-${payload.certificateNumber}.pdf`,
+          content: payload.pdfBuffer,
+        },
+      ],
+    };
+
+    try {
+      await this.transporter.sendMail(mailOptions);
+      console.log(`✅ [SMTP] Certificate email with PDF attachment sent to ${payload.to}`);
+      return true;
+    } catch (primaryErr: any) {
+      if (this.fallbackTransporter) {
+        try {
+          await this.fallbackTransporter.sendMail(mailOptions);
+          return true;
+        } catch (altErr: any) {
+          console.error(`❌ [SMTP Certificate Delivery Error]:`, altErr?.message || altErr);
+          return false;
+        }
+      }
+      return false;
+    }
+  }
 }
 
 /**
@@ -342,5 +411,34 @@ export class EmailService {
       actionUrl: `${getPublicAppUrl()}/staff/register`,
       actionText: "Go to Staff Registration",
     });
+  }
+
+  static async sendCertificateEmail(params: {
+    email: string;
+    educatorName: string;
+    certificateNumber: string;
+    programTitle?: string;
+    completionDate?: string;
+    pdfBuffer: Buffer;
+  }): Promise<boolean> {
+    const provider = getEmailProvider();
+    const programTitle = params.programTitle || "15-Day Educator Training Program";
+    const completionDate = params.completionDate || new Date().toLocaleDateString("en-IN", { day: "numeric", month: "long", year: "numeric" });
+    const subject = `Your EduConnects Completion Certificate - ${programTitle} 🎓`;
+
+    try {
+      return await provider.sendCertificateEmail({
+        to: params.email,
+        subject,
+        educatorName: params.educatorName,
+        certificateNumber: params.certificateNumber,
+        programTitle,
+        completionDate,
+        pdfBuffer: params.pdfBuffer,
+      });
+    } catch (err) {
+      console.error("❌ EmailService.sendCertificateEmail error:", err);
+      return false;
+    }
   }
 }

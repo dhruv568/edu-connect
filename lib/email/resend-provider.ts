@@ -1,8 +1,10 @@
 import { Resend } from "resend";
-import { IEmailProvider, SendEmailPayload, SendPasswordResetPayload } from "./email-service";
+import { IEmailProvider, SendEmailPayload, SendPasswordResetPayload, SendCertificatePayload } from "./email-service";
 import { generateVerificationEmailHtml } from "./templates/verification-email";
 import { generatePasswordResetEmailHtml } from "./templates/password-reset-email";
 import { generateNotificationEmailHtml, NotificationEmailParams } from "./templates/verification-templates";
+import { generateCertificateEmailHtml } from "./templates/certificate-email";
+import { getPublicAppUrl } from "../app-url";
 
 export class ResendEmailProvider implements IEmailProvider {
   name = "Resend (Production Transactional Email)";
@@ -147,6 +149,55 @@ export class ResendEmailProvider implements IEmailProvider {
       console.error("❌ Unexpected error in ResendEmailProvider.sendNotificationEmail:", err.message || err);
       if (this.smtpFallback) {
         return await this.smtpFallback.sendNotificationEmail(params);
+      }
+      return false;
+    }
+  }
+
+  async sendCertificateEmail(payload: SendCertificatePayload): Promise<boolean> {
+    const appUrl = getPublicAppUrl();
+    const verificationUrl = `${appUrl}/certificate/verify/${payload.certificateNumber}`;
+    const html = generateCertificateEmailHtml({
+      recipientEmail: payload.to,
+      educatorName: payload.educatorName,
+      certificateNumber: payload.certificateNumber,
+      programTitle: payload.programTitle,
+      completionDate: payload.completionDate,
+      verificationUrl,
+      appUrl,
+    });
+    const headers = this.getCustomHeaders();
+
+    try {
+      const { data, error } = await this.resend.emails.send({
+        from: this.defaultFrom,
+        to: payload.to,
+        subject: payload.subject,
+        html,
+        attachments: [
+          {
+            filename: `EduConnects-Certificate-${payload.certificateNumber}.pdf`,
+            content: payload.pdfBuffer,
+          },
+        ],
+        ...(headers ? { headers } : {}),
+      });
+
+      if (!error && data?.id) {
+        console.log(`✅ [Resend] Certificate email with PDF attachment delivered to ${payload.to} (ID: ${data.id})`);
+        return true;
+      }
+
+      console.warn(`⚠️ [Resend API Error]: ${error?.message || "Certificate delivery rejected"}`);
+      if (this.smtpFallback) {
+        console.log(`🔄 Attempting SMTP fallback for certificate email to ${payload.to}...`);
+        return await this.smtpFallback.sendCertificateEmail(payload);
+      }
+      return false;
+    } catch (err: any) {
+      console.error("❌ Unexpected error in ResendEmailProvider.sendCertificateEmail:", err.message || err);
+      if (this.smtpFallback) {
+        return await this.smtpFallback.sendCertificateEmail(payload);
       }
       return false;
     }

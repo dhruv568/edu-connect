@@ -181,9 +181,22 @@ export function PremiumFooter({ showCta = false, variant }: PremiumFooterProps =
                   : "bg-[#052C2A]/90 border border-[#1B6863]"
               } text-xs space-y-1.5 shadow-sm`}
             >
-              <p className="font-bold text-white text-xs">
-                Shrivastava ProFunnels Ventures Pvt Ltd
-              </p>
+              <div className="space-y-0.5">
+                <p
+                  className={`text-[11px] font-medium tracking-wide ${
+                    isEducator
+                      ? "text-emerald-300/85"
+                      : isLearner
+                      ? "text-blue-300/85"
+                      : "text-teal-300/85"
+                  }`}
+                >
+                  A MyProFunnels Ventures Company
+                </p>
+                <p className="font-bold text-white text-xs sm:text-sm">
+                  Shrivastava ProFunnels Ventures Pvt Ltd
+                </p>
+              </div>
               <p
                 className={`font-mono ${
                   isEducator

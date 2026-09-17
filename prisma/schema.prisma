@@ -48,6 +48,8 @@ model User {
   reportsResolved       Report[]                     @relation("ReportResolvedBy")
   courseModerations     CourseModerationHistory[]    @relation("CourseModerationAdmin")
   aiConversations       AiConversation[]
+  trainingEnrollments   TrainingEnrollment[]
+  certificates          Certificate[]
 
   @@map("users")
 }
@@ -1093,4 +1095,205 @@ model Offer {
   @@index([isActive, startDate, endDate])
   @@map("offers")
 }
+
+model TrainingProgram {
+  id           String               @id @default(uuid())
+  slug         String               @unique @default("15-day-educator-training")
+  title        String               @default("15-Day Educator Training Program")
+  description  String?
+  totalDays    Int                  @default(15)
+  isSequential Boolean              @default(true)
+  status       String               @default("PUBLISHED") // DRAFT | PUBLISHED | ARCHIVED
+  createdAt    DateTime             @default(now())
+  updatedAt    DateTime             @updatedAt
+
+  days         TrainingDay[]
+  enrollments  TrainingEnrollment[]
+
+  @@map("training_programs")
+}
+
+model TrainingDay {
+  id                 String                @id @default(uuid())
+  programId          String
+  dayNumber          Int
+  title              String
+  description        String?
+  learningObjectives String?               // JSON string array of objectives
+  instructions       String?
+  videoAssetId       String?               // Mux asset ID
+  videoPlaybackId    String?               // Mux playback ID
+  videoDuration      Float?                // duration in seconds
+  resources          String?               // JSON string of [{ name, url, type }]
+  isPublished        Boolean               @default(false)
+  orderIndex         Int                   @default(0)
+  createdAt          DateTime              @default(now())
+  updatedAt          DateTime              @updatedAt
+
+  program            TrainingProgram       @relation(fields: [programId], references: [id], onDelete: Cascade)
+  quiz               TrainingQuiz?
+  dayProgress        TrainingDayProgress[]
+
+  @@unique([programId, dayNumber])
+  @@index([programId, orderIndex])
+  @@map("training_days")
+}
+
+model TrainingQuiz {
+  id            String                @id @default(uuid())
+  dayId         String                @unique
+  title         String
+  description   String?
+  passingScore  Int                   @default(70) // Percentage required to pass
+  questionCount Int                   @default(5)
+  maxAttempts   Int                   @default(3) // 0 for unlimited, or e.g. 3
+  isPublished   Boolean               @default(false)
+  questions     String                // JSON array of [{ id, questionNumber, question, options: [{ key, text }], correctAnswer, explanation }]
+  createdAt     DateTime              @default(now())
+  updatedAt     DateTime              @updatedAt
+
+  day           TrainingDay           @relation(fields: [dayId], references: [id], onDelete: Cascade)
+  attempts      TrainingQuizAttempt[]
+
+  @@map("training_quizzes")
+}
+
+model TrainingEnrollment {
+  id                   String                @id @default(uuid())
+  programId            String
+  userId               String
+  status               String                @default("ENROLLED") // ENROLLED | IN_PROGRESS | COMPLETED | CERTIFICATE_ELIGIBLE | CERTIFIED
+  currentDay           Int                   @default(1)
+  completedDaysCount   Int                   @default(0)
+  completionPercentage Float                 @default(0.0)
+  startDate            DateTime              @default(now())
+  completedAt          DateTime?
+  certificateEligibleAt DateTime?
+  createdAt            DateTime              @default(now())
+  updatedAt            DateTime              @updatedAt
+
+  program              TrainingProgram       @relation(fields: [programId], references: [id], onDelete: Cascade)
+  user                 User                  @relation(fields: [userId], references: [id], onDelete: Cascade)
+  dayProgress          TrainingDayProgress[]
+  quizAttempts         TrainingQuizAttempt[]
+  certificate          Certificate?
+
+  @@unique([programId, userId])
+  @@index([userId, status])
+  @@map("training_enrollments")
+}
+
+model TrainingDayProgress {
+  id                    String             @id @default(uuid())
+  enrollmentId          String
+  dayId                 String
+  dayNumber             Int
+  videoWatched          Boolean            @default(false)
+  videoWatchTimeSeconds Float              @default(0)
+  contentCompleted      Boolean            @default(false)
+  quizPassed            Boolean            @default(false)
+  bestScore             Float?
+  isCompleted           Boolean            @default(false)
+  completedAt           DateTime?
+  createdAt             DateTime           @default(now())
+  updatedAt             DateTime           @updatedAt
+
+  enrollment            TrainingEnrollment @relation(fields: [enrollmentId], references: [id], onDelete: Cascade)
+  day                   TrainingDay        @relation(fields: [dayId], references: [id], onDelete: Cascade)
+
+  @@unique([enrollmentId, dayId])
+  @@index([enrollmentId, dayNumber])
+  @@map("training_day_progress")
+}
+
+model TrainingQuizAttempt {
+  id             String             @id @default(uuid())
+  enrollmentId   String
+  quizId         String
+  attemptNumber  Int
+  totalQuestions Int
+  correctAnswers Int
+  scorePercentage Float
+  passed         Boolean
+  answers        String             // JSON string of user submitted answers
+  submittedAt    DateTime           @default(now())
+
+  enrollment     TrainingEnrollment @relation(fields: [enrollmentId], references: [id], onDelete: Cascade)
+  quiz           TrainingQuiz       @relation(fields: [quizId], references: [id], onDelete: Cascade)
+
+  @@index([enrollmentId, quizId])
+  @@map("training_quiz_attempts")
+}
+
+model CertificateTemplate {
+  id             String        @id @default(uuid())
+  title          String        @default("15-Day Educator Certification Template")
+  badgeText      String        @default("VERIFIED EDUCATOR")
+  headline       String        @default("Certificate of Completion")
+  subtext        String        @default("This is proudly presented to")
+  bodyText       String        @default("For successfully completing the intensive 15-Day Educator Training Program, demonstrating mastery of live interactive classroom delivery, digital curriculum design, and online pedagogical excellence.")
+  issuerName     String        @default("EduConnects Academy")
+  issuerTitle    String        @default("Director of Academic Excellence")
+  primaryColor   String        @default("#16805B")
+  accentColor    String        @default("#0D5C41")
+  orientation    String        @default("LANDSCAPE") // LANDSCAPE | PORTRAIT
+  namePlacementY Float         @default(300)
+  idPlacementY   Float         @default(120)
+  datePlacementY Float         @default(120)
+  isActive       Boolean       @default(true)
+  createdAt      DateTime      @default(now())
+  updatedAt      DateTime      @updatedAt
+
+  certificates   Certificate[]
+
+  @@map("certificate_templates")
+}
+
+model Certificate {
+  id                String               @id @default(uuid())
+  certificateNumber String               @unique // e.g. EDU-CERT-2026-XXXXXX
+  enrollmentId      String               @unique // 1-to-1 with TrainingEnrollment
+  templateId        String?
+  userId            String
+  educatorName      String               // Verified educator name
+  educatorEmail     String               // Verified educator email
+  programTitle      String               @default("15-Day Educator Training Program")
+  completionDate    DateTime             @default(now())
+  issueDate         DateTime             @default(now())
+  pdfUrl            String?
+  status            String               @default("ISSUED") // ISSUED | REVOKED
+  revokedAt         DateTime?
+  revocationReason  String?
+  regeneratedAt     DateTime?
+  regenerationCount Int                  @default(0)
+  emailSentAt       DateTime?
+  createdAt         DateTime             @default(now())
+  updatedAt         DateTime             @updatedAt
+
+  enrollment        TrainingEnrollment   @relation(fields: [enrollmentId], references: [id], onDelete: Cascade)
+  template          CertificateTemplate? @relation(fields: [templateId], references: [id], onDelete: SetNull)
+  user              User                 @relation(fields: [userId], references: [id], onDelete: Cascade)
+  auditLogs         CertificateAuditLog[]
+
+  @@index([certificateNumber])
+  @@index([userId])
+  @@index([status])
+  @@map("certificates")
+}
+
+model CertificateAuditLog {
+  id            String      @id @default(uuid())
+  certificateId String
+  action        String      // GENERATED | EMAILED | RESENT | REVOKED | REGENERATED | VERIFIED_VIEWED
+  performedById String?     // Admin User ID or "SYSTEM" or "EDUCATOR"
+  details       String?
+  ipAddress     String?
+  createdAt     DateTime    @default(now())
+
+  certificate   Certificate @relation(fields: [certificateId], references: [id], onDelete: Cascade)
+
+  @@index([certificateId])
+  @@map("certificate_audit_logs")
+}
+
 
