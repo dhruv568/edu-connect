@@ -90,7 +90,7 @@ export default function TeacherLandingPage() {
     },
     {
       icon: Video,
-      title: "Built-In LiveKit Classroom",
+      title: "Built-In Live Classroom",
       desc: "No third-party subscriptions required. Conduct HD live classes with digital whiteboard, chat, and screen share.",
       badge: "Zero Setup Cost",
     },
