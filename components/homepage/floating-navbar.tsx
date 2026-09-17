@@ -369,17 +369,9 @@ export function FloatingNavbar({ variant }: FloatingNavbarProps = {}) {
               <div className="flex items-center gap-1 xl:gap-1.5">
                 {[
                   { label: "Home", href: "/teacher", targetId: null },
-                  { label: "Training Program", href: "/teacher/training", targetId: null },
                   { label: "About Us", href: "/about", targetId: null },
-                  {
-                    label: "How It Works?",
-                    href: "/teacher#how-it-works",
-                    targetId: "how-it-works",
-                    subItems: [
-                      { label: "Educator Benefits", href: "/teacher#benefits", targetId: "benefits" },
-                    ],
-                  },
-                  { label: "Success Stories", href: "/teacher#success-stories", targetId: "success-stories" },
+                  { label: "How It Works?", href: "/teacher#how-it-works", targetId: "how-it-works" },
+                  { label: "Training Program", href: "/teacher/training", targetId: null },
                   { label: "Contact Us", href: "/contact", targetId: null },
                 ].map((item) => {
                   const isActive =
@@ -390,57 +382,6 @@ export function FloatingNavbar({ variant }: FloatingNavbarProps = {}) {
                       : item.href.startsWith("/") && !item.targetId
                       ? pathname === item.href
                       : false;
-
-                  if (item.subItems) {
-                    return (
-                      <div key={item.label} className="relative group flex items-center">
-                        <Link
-                          href={item.href}
-                          onClick={(e) => {
-                            if (item.targetId && pathname === "/teacher") {
-                              e.preventDefault();
-                              const el = document.getElementById(item.targetId);
-                              if (el) {
-                                el.scrollIntoView({ behavior: "smooth" });
-                              }
-                            }
-                          }}
-                          className={`px-3.5 py-2 rounded-xl text-sm font-medium transition-all duration-200 whitespace-nowrap flex items-center gap-1 ${
-                            isActive
-                              ? "bg-[#16805B] text-white font-semibold shadow-xs"
-                              : "text-emerald-100/90 hover:text-white hover:bg-white/10"
-                          }`}
-                        >
-                          <span>{item.label}</span>
-                          <ChevronDown className="h-3.5 w-3.5 opacity-70 group-hover:opacity-100 group-hover:rotate-180 transition-transform duration-200" />
-                        </Link>
-                        {/* Dropdown Menu */}
-                        <div className="absolute top-full left-0 pt-2 hidden group-hover:block z-50">
-                          <div className="bg-[#0D5C41] border border-[#16805B]/60 rounded-xl p-1.5 shadow-xl backdrop-blur-md min-w-[175px]">
-                            {item.subItems.map((sub) => (
-                              <Link
-                                key={sub.label}
-                                href={sub.href}
-                                onClick={(e) => {
-                                  if (sub.targetId && pathname === "/teacher") {
-                                    e.preventDefault();
-                                    const el = document.getElementById(sub.targetId);
-                                    if (el) {
-                                      el.scrollIntoView({ behavior: "smooth" });
-                                    }
-                                  }
-                                }}
-                                className="flex items-center gap-2 px-3 py-2 rounded-lg text-xs font-semibold text-emerald-100/90 hover:text-white hover:bg-[#16805B] transition-colors whitespace-nowrap"
-                              >
-                                <Sparkles className="h-3 w-3 text-emerald-300 shrink-0" />
-                                <span>{sub.label}</span>
-                              </Link>
-                            ))}
-                          </div>
-                        </div>
-                      </div>
-                    );
-                  }
 
                   return (
                     <Link
@@ -1039,11 +980,9 @@ export function FloatingNavbar({ variant }: FloatingNavbarProps = {}) {
                   <>
                     {[
                       { label: "Home", href: "/teacher", targetId: null },
-                      { label: "Training Program", href: "/teacher/training", targetId: null },
                       { label: "About Us", href: "/about", targetId: null },
                       { label: "How It Works?", href: "/teacher#how-it-works", targetId: "how-it-works" },
-                      { label: "Educator Benefits", href: "/teacher#benefits", targetId: "benefits", isSubItem: true },
-                      { label: "Success Stories", href: "/teacher#success-stories", targetId: "success-stories" },
+                      { label: "Training Program", href: "/teacher/training", targetId: null },
                       { label: "Contact Us", href: "/contact", targetId: null },
                     ].map((item) => {
                       const isActive =
@@ -1069,23 +1008,14 @@ export function FloatingNavbar({ variant }: FloatingNavbarProps = {}) {
                               }
                             }
                           }}
-                          className={`${
-                            item.isSubItem
-                              ? "py-2 pl-7 pr-3.5 rounded-xl text-xs font-medium transition-colors flex items-center justify-between text-emerald-200/90 hover:text-white hover:bg-white/10"
-                              : "py-2.5 px-3.5 rounded-xl text-sm font-medium transition-colors flex items-center justify-between"
-                          } ${
-                            isActive && !item.isSubItem
+                          className={`py-2.5 px-3.5 rounded-xl text-sm font-medium transition-colors flex items-center justify-between ${
+                            isActive
                               ? "bg-[#16805B] text-white font-semibold shadow-xs"
-                              : !item.isSubItem
-                              ? "text-emerald-100/90 hover:text-white hover:bg-white/10"
-                              : ""
+                              : "text-emerald-100/90 hover:text-white hover:bg-white/10"
                           }`}
                         >
-                          <span className="flex items-center gap-2">
-                            {item.isSubItem && <span className="text-emerald-400/90 font-bold">↳</span>}
-                            <span>{item.label}</span>
-                          </span>
-                          {isActive && !item.isSubItem && <span className="w-1.5 h-1.5 rounded-full bg-emerald-300" />}
+                          <span>{item.label}</span>
+                          {isActive && <span className="w-1.5 h-1.5 rounded-full bg-emerald-300" />}
                         </Link>
                       );
                     })}
