@@ -197,11 +197,15 @@ export default function StaffLoginPage() {
 
               <Input
                 label="6-Digit Verification Code"
+                type="text"
+                inputMode="numeric"
+                autoComplete="one-time-code"
                 value={otp}
                 onChange={(e) => setOtp(e.target.value.replace(/\D/g, "").slice(0, 6))}
                 placeholder="123456"
                 leftIcon={<KeyRound className="h-4 w-4" />}
                 className="text-center font-mono tracking-widest text-lg"
+                maxLength={6}
                 autoFocus
                 required
               />

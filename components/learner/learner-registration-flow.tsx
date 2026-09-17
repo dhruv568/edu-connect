@@ -819,9 +819,10 @@ function LearnerRegistrationFlowContent() {
                   type="text"
                   maxLength={6}
                   inputMode="numeric"
+                  autoComplete="one-time-code"
                   pattern="[0-9]*"
                   value={state.otp}
-                  onChange={(e) => setState((p) => ({ ...p, otp: e.target.value.replace(/\D/g, "") }))}
+                  onChange={(e) => setState((p) => ({ ...p, otp: e.target.value.replace(/\D/g, "").slice(0, 6) }))}
                   placeholder="000000"
                   autoFocus
                   className="w-full text-center tracking-[0.5em] text-2xl font-black h-14 bg-white border-2 border-[#3157D5]/40 rounded-2xl outline-none focus:border-[#3157D5] focus:ring-4 focus:ring-[#3157D5]/10 text-slate-900"

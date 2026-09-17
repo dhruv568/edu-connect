@@ -60,6 +60,13 @@ function VerifyEmailForm() {
     }
   }, [queryToken, queryEmail, redirectTo, router, showToast]);
 
+  // Auto-focus first input on load when not verifying a query token link
+  useEffect(() => {
+    if (!verifyingToken && !verified) {
+      inputRefs.current[0]?.focus();
+    }
+  }, [verifyingToken, verified]);
+
   // Resend cooldown timer
   useEffect(() => {
     if (resendCooldown > 0) {
@@ -68,33 +75,106 @@ function VerifyEmailForm() {
     }
   }, [resendCooldown]);
 
-  const handleOtpChange = (index: number, value: string) => {
-    if (!/^\d*$/.test(value)) return;
-    setErrorMessage(null);
-    const newOtp = [...otp];
-    newOtp[index] = value.slice(-1);
-    setOtp(newOtp);
+  // Distribute digits into OTP boxes starting from a given index (or 0 if 6+ digits)
+  const fillOtp = (text: string, startIndex = 0) => {
+    const digits = text.replace(/\D/g, "");
+    if (!digits) return;
 
-    if (value && index < 5) {
-      inputRefs.current[index + 1]?.focus();
+    setErrorMessage(null);
+
+    // If 6 or more digits (complete OTP), distribute across all 6 slots starting at index 0
+    if (digits.length >= 6) {
+      const full = digits.slice(0, 6).split("");
+      setOtp(full);
+      inputRefs.current[5]?.focus();
+      return;
     }
+
+    // Distribute partial digits starting from startIndex
+    const newOtp = [...otp];
+    let lastFilled = startIndex;
+    for (let i = 0; i < digits.length && startIndex + i < 6; i++) {
+      newOtp[startIndex + i] = digits[i];
+      lastFilled = startIndex + i;
+    }
+    setOtp(newOtp);
+    const nextTarget = Math.min(lastFilled + 1, 5);
+    inputRefs.current[nextTarget]?.focus();
+  };
+
+  const handleOtpChange = (index: number, value: string) => {
+    const digits = value.replace(/\D/g, "");
+    setErrorMessage(null);
+
+    // Cleared
+    if (!digits) {
+      const newOtp = [...otp];
+      newOtp[index] = "";
+      setOtp(newOtp);
+      return;
+    }
+
+    // Normal single-digit typing
+    if (digits.length === 1) {
+      const newOtp = [...otp];
+      newOtp[index] = digits;
+      setOtp(newOtp);
+      if (index < 5) {
+        inputRefs.current[index + 1]?.focus();
+      }
+      return;
+    }
+
+    // If user typed into an already filled box (e.g. existing '4' with new key '7' -> '47')
+    if (digits.length === 2 && otp[index]) {
+      const typedChar = digits[0] === otp[index] ? digits[1] : digits[0];
+      const newOtp = [...otp];
+      newOtp[index] = typedChar;
+      setOtp(newOtp);
+      if (index < 5) {
+        inputRefs.current[index + 1]?.focus();
+      }
+      return;
+    }
+
+    // Multi-digit entry from autofill, mobile SMS autofill bar, or virtual keyboard
+    fillOtp(digits, index);
   };
 
   const handleKeyDown = (index: number, e: React.KeyboardEvent<HTMLInputElement>) => {
-    if (e.key === "Backspace" && !otp[index] && index > 0) {
+    if (e.key === "Backspace") {
+      if (otp[index]) {
+        // Clear current box if it has a digit
+        const newOtp = [...otp];
+        newOtp[index] = "";
+        setOtp(newOtp);
+      } else if (index > 0) {
+        // If current box is empty, jump back to previous box, clear it and focus it
+        e.preventDefault();
+        const newOtp = [...otp];
+        newOtp[index - 1] = "";
+        setOtp(newOtp);
+        inputRefs.current[index - 1]?.focus();
+      }
+    } else if (e.key === "ArrowLeft" && index > 0) {
+      e.preventDefault();
       inputRefs.current[index - 1]?.focus();
+    } else if (e.key === "ArrowRight" && index < 5) {
+      e.preventDefault();
+      inputRefs.current[index + 1]?.focus();
+    } else if (e.key === "Delete") {
+      if (otp[index]) {
+        const newOtp = [...otp];
+        newOtp[index] = "";
+        setOtp(newOtp);
+      }
     }
   };
 
-  const handlePaste = (e: React.ClipboardEvent<HTMLInputElement>) => {
+  const handlePaste = (e: React.ClipboardEvent<HTMLInputElement>, index: number) => {
     e.preventDefault();
-    const pasted = e.clipboardData.getData("text").trim();
-    if (/^\d{6}$/.test(pasted)) {
-      setErrorMessage(null);
-      const digits = pasted.split("");
-      setOtp(digits);
-      inputRefs.current[5]?.focus();
-    }
+    const pasted = e.clipboardData.getData("text");
+    fillOtp(pasted, index);
   };
 
   const handleVerifyOTP = async (e: React.FormEvent) => {
@@ -223,19 +303,25 @@ function VerifyEmailForm() {
               </div>
             ) : (
               <form onSubmit={handleVerifyOTP} className="space-y-6">
-                <div className="flex justify-center gap-2">
+                <div className="flex justify-center gap-2 sm:gap-2.5">
                   {otp.map((digit, idx) => (
                     <input
                       key={idx}
+                      id={`otp-input-${idx}`}
+                      name={`otp-${idx}`}
                       ref={(el) => { inputRefs.current[idx] = el; }}
                       type="text"
                       inputMode="numeric"
-                      maxLength={1}
+                      autoComplete={idx === 0 ? "one-time-code" : "off"}
+                      pattern="[0-9]*"
+                      maxLength={6}
                       value={digit}
                       onChange={(e) => handleOtpChange(idx, e.target.value)}
                       onKeyDown={(e) => handleKeyDown(idx, e)}
-                      onPaste={handlePaste}
-                      className="w-12 h-14 text-center text-xl font-black bg-slate-50 border-2 border-slate-200 rounded-xl text-slate-900 focus:outline-none focus:border-blue-600 focus:ring-2 focus:ring-blue-100 transition-all shadow-xs"
+                      onPaste={(e) => handlePaste(e, idx)}
+                      onFocus={(e) => e.target.select()}
+                      className="w-11 sm:w-12 h-14 text-center text-xl font-black bg-slate-50 border-2 border-slate-200 rounded-xl text-slate-900 focus:outline-none focus:border-blue-600 focus:ring-2 focus:ring-blue-100 transition-all shadow-xs"
+                      aria-label={`Digit ${idx + 1} of 6-digit verification code`}
                     />
                   ))}
                 </div>
