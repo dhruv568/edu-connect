@@ -940,7 +940,7 @@ export class AdminService {
       website: settings.company_website || "https://myprofunnels.com",
       tagline: settings.company_tagline || "Automate • Engage • Grow",
       governingLaw: settings.company_governing_law || "India",
-      whatsappNumber: settings.company_whatsapp_number || "+91 8062181499",
+      whatsappNumber: settings.company_whatsapp_number || "+91 9109019090",
       refundPeriod: settings.company_refund_period || "Within 24 Hours, subject to applicable terms and conditions.",
       pricingRange: settings.company_pricing_range || "₹99 to ₹2.99 Lakh",
       currency: settings.company_currency || "INR",

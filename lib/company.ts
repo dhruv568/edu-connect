@@ -17,8 +17,6 @@ export interface CompanyInfo {
   governingLaw: string;
   whatsappNumber: string;
   whatsappUrl: string;
-  phoneNumber: string;
-  phoneUrl: string;
   refundPeriod: string;
   paymentGateway: string;
   currency: string;
@@ -47,10 +45,8 @@ export const OFFICIAL_COMPANY_INFO: CompanyInfo = {
   website: "https://educonnects.co.in",
   tagline: "Learn • Grow • Belong",
   governingLaw: "India",
-  whatsappNumber: "+91 8062181499",
-  whatsappUrl: "https://wa.me/918062181499",
-  phoneNumber: "+91 9109019090",
-  phoneUrl: "tel:+919109019090",
+  whatsappNumber: "+91 9109019090",
+  whatsappUrl: "https://wa.me/919109019090",
   refundPeriod: "Within 24 Hours, subject to applicable terms and conditions.",
   paymentGateway: "Cashfree",
   currency: "INR",

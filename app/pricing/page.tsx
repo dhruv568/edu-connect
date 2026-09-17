@@ -49,7 +49,7 @@ export default function PricingPage() {
     },
     {
       q: "How do custom business services work?",
-      a: "For custom enterprise setups, done-for-you sales funnels, or specialized digital automation, click 'Get a Custom Quote' or contact us directly on WhatsApp at +91 8062181499.",
+      a: "For custom enterprise setups, done-for-you sales funnels, or specialized digital automation, click 'Get a Custom Quote' or contact us directly on WhatsApp at +91 9109019090.",
     },
     {
       q: "What payment gateway is used for online checkout?",

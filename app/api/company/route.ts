@@ -31,8 +31,6 @@ export async function GET() {
       tagline: settingsMap.company_tagline || OFFICIAL_COMPANY_INFO.tagline,
       governingLaw: settingsMap.company_governing_law || OFFICIAL_COMPANY_INFO.governingLaw,
       whatsappNumber: settingsMap.company_whatsapp_number || OFFICIAL_COMPANY_INFO.whatsappNumber,
-      phoneNumber: settingsMap.company_phone_number || OFFICIAL_COMPANY_INFO.phoneNumber,
-      phoneUrl: OFFICIAL_COMPANY_INFO.phoneUrl,
       refundPeriod: settingsMap.company_refund_period || OFFICIAL_COMPANY_INFO.refundPeriod,
       pricingRange: settingsMap.company_pricing_range || OFFICIAL_COMPANY_INFO.pricingRange,
       currency: settingsMap.company_currency || OFFICIAL_COMPANY_INFO.currency,

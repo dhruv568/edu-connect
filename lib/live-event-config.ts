@@ -39,7 +39,7 @@ export const liveEventConfig: LiveEventConfig = {
   liveUrl: null, // Will use internal LiveKit server session when available
   recordingUrl: null,
   registrationEnabled: true,
-  whatsappGroupUrl: "https://wa.me/918062181499",
+  whatsappGroupUrl: "https://wa.me/919109019090",
 };
 
 /**
