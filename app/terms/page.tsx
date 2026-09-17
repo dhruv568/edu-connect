@@ -57,8 +57,8 @@ export default function TermsPage() {
                 <span className="font-mono font-bold text-white">{OFFICIAL_COMPANY_INFO.pan}</span>
               </div>
               <div>
-                <span className="text-slate-400 font-medium block">Authorized Signatory:</span>
-                <span className="font-bold text-white">{OFFICIAL_COMPANY_INFO.authorizedSignatory}</span>
+                <span className="text-slate-400 font-medium block">Support Team:</span>
+                <span className="font-bold text-white">EduConnects Support Team</span>
               </div>
               <div>
                 <span className="text-slate-400 font-medium block">Governing Law:</span>
@@ -129,7 +129,7 @@ export default function TermsPage() {
             <p>
               For legal notices or questions regarding these Terms & Conditions, please contact:
               <br />
-              <strong>Authorized Signatory:</strong> {OFFICIAL_COMPANY_INFO.authorizedSignatory}
+              <strong>EduConnects Support Team</strong>
               <br />
               <strong>WhatsApp:</strong> {OFFICIAL_COMPANY_INFO.whatsappNumber}
               <br />
