@@ -724,6 +724,17 @@ export default function TeacherLandingPage() {
                 );
               })}
             </div>
+
+            {/* Direct Section Link to Educator Benefits */}
+            <div className="pt-2 text-center">
+              <a
+                href="#benefits"
+                className="inline-flex items-center gap-2 px-6 py-3 rounded-full bg-[#F0FAF5] hover:bg-[#E3F8ED] text-[#0D5C41] border border-[#A7F3D0] text-xs sm:text-sm font-bold transition-all shadow-2xs hover:shadow-xs group"
+              >
+                <span>Explore All Educator Benefits</span>
+                <span className="text-base group-hover:translate-y-0.5 transition-transform">↓</span>
+              </a>
+            </div>
           </div>
         </section>
 
