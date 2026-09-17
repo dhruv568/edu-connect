@@ -297,41 +297,45 @@ export const AIAssistantModal: React.FC<AIAssistantModalProps> = ({
       className="fixed bottom-0 right-0 sm:bottom-6 sm:right-6 z-50 w-full sm:w-[430px] h-[92vh] sm:h-[640px] max-h-[100vh] sm:max-h-[660px] flex flex-col bg-[#F4FAF7] sm:rounded-3xl shadow-2xl shadow-emerald-950/20 border border-[#A7F3D0]/80 sm:border-[#16805B]/30 overflow-hidden transition-all duration-300 animate-in fade-in slide-in-from-bottom-6"
     >
       {/* 1. Header with branding & section adaptation */}
-      <div className={`px-4 py-3.5 select-none ${theme.headerBg} ${theme.headerText} shadow-sm`}>
+      <div className="px-4 py-3.5 select-none bg-white border-b border-[#A7F3D0]/80 shadow-xs">
         {/* Mobile drag handle bar */}
-        <div className="w-10 h-1 bg-white/30 rounded-full mx-auto mb-2 sm:hidden" />
+        <div className="w-10 h-1 bg-slate-300 rounded-full mx-auto mb-2 sm:hidden" />
 
         <div className="flex items-center justify-between">
           <div className="flex items-center space-x-3">
             {/* Assistant Avatar with pulse ring */}
-            <div className="relative flex items-center justify-center w-10 h-10 rounded-2xl bg-white/15 backdrop-blur-md border border-white/25 shadow-inner">
+            <div
+              className={`relative flex items-center justify-center w-10 h-10 rounded-2xl ${theme.accentBg} text-white shadow-xs border border-white/30 shrink-0`}
+            >
               <Bot className="w-5 h-5 text-white" />
               <span
-                className="absolute -bottom-0.5 -right-0.5 w-3 h-3 rounded-full bg-emerald-400 border-2 border-emerald-900 ring-2 ring-emerald-400/40 animate-pulse"
+                className="absolute -bottom-0.5 -right-0.5 w-3 h-3 rounded-full bg-emerald-500 border-2 border-white ring-1 ring-emerald-500/40 animate-pulse"
                 title="Online & Ready"
               />
             </div>
 
             <div>
               <div className="flex items-center space-x-2">
-                <h2 className="text-[15px] font-black tracking-tight text-white">EduConnects AI</h2>
-                <span className="px-2 py-0.5 rounded-full text-[9px] font-extrabold uppercase tracking-wider bg-white/20 text-white backdrop-blur-xs border border-white/20">
+                <h2 className="text-[15px] font-black tracking-tight text-slate-900">
+                  EduConnects <span className="text-[#16805B]">AI</span>
+                </h2>
+                <span className={`px-2 py-0.5 rounded-full text-[9px] font-extrabold uppercase tracking-wider ${theme.pillBg} ${theme.pillText} border ${theme.pillBorder}`}>
                   {role === "guest" ? "Guide" : role.toLowerCase()}
                 </span>
               </div>
-              <p className="text-[11px] text-white/80 font-medium flex items-center gap-1 mt-0.5">
-                <span className="w-1.5 h-1.5 rounded-full bg-emerald-300 inline-block" />
+              <p className="text-[11px] text-slate-600 font-medium flex items-center gap-1.5 mt-0.5">
+                <span className="w-2 h-2 rounded-full bg-emerald-500 inline-block shadow-2xs shrink-0" />
                 <span>Always online & ready to assist</span>
               </p>
             </div>
           </div>
 
           {/* Action Controls */}
-          <div className="flex items-center space-x-1 text-white/85">
+          <div className="flex items-center space-x-1 text-slate-700">
             <button
               onClick={handleNewConversation}
               title="New Conversation"
-              className="p-2 rounded-xl hover:bg-white/15 transition-all focus:outline-none focus:ring-1 focus:ring-white active:scale-95"
+              className="p-2 rounded-xl text-slate-600 hover:text-slate-950 hover:bg-emerald-50 transition-all focus:outline-none focus:ring-2 focus:ring-emerald-600/30 active:scale-95"
               aria-label="Start new conversation"
             >
               <PlusCircle className="w-4 h-4" />
@@ -339,7 +343,7 @@ export const AIAssistantModal: React.FC<AIAssistantModalProps> = ({
             <button
               onClick={handleClearConversation}
               title="Clear Chat"
-              className="p-2 rounded-xl hover:bg-white/15 transition-all focus:outline-none focus:ring-1 focus:ring-white active:scale-95"
+              className="p-2 rounded-xl text-slate-600 hover:text-slate-950 hover:bg-emerald-50 transition-all focus:outline-none focus:ring-2 focus:ring-emerald-600/30 active:scale-95"
               aria-label="Clear chat history"
             >
               <RotateCcw className="w-4 h-4" />
@@ -347,7 +351,7 @@ export const AIAssistantModal: React.FC<AIAssistantModalProps> = ({
             <button
               onClick={onClose}
               title="Close Assistant"
-              className="p-2 rounded-xl hover:bg-white/20 transition-all focus:outline-none focus:ring-1 focus:ring-white active:scale-95 ml-0.5"
+              className="p-2 rounded-xl text-slate-600 hover:text-slate-950 hover:bg-rose-50 hover:text-rose-600 transition-all focus:outline-none focus:ring-2 focus:ring-emerald-600/30 active:scale-95 ml-0.5"
               aria-label="Close Assistant"
             >
               <X className="w-4 h-4" />
