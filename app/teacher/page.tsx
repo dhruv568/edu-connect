@@ -244,9 +244,12 @@ export default function TeacherLandingPage() {
                 </div>
 
                 <h1 className="text-4xl sm:text-5xl lg:text-6xl font-black text-slate-900 tracking-tight leading-[1.15]">
-                  Teach. Connect. Grow. <br />
-                  <span className="bg-gradient-to-r from-[#16805B] via-[#0D5C41] to-[#16805B] bg-clip-text text-transparent">
-                    Turn Knowledge Into Impact
+                  <span className="block">Teach. Connect. Grow.</span>
+                  <span className="block text-2xl sm:text-3xl lg:text-4xl font-bold text-slate-700 mt-2 sm:mt-2.5">
+                    Turn Knowledge Into
+                  </span>
+                  <span className="block text-3xl sm:text-4xl lg:text-5xl font-black bg-gradient-to-r from-[#16805B] via-[#0D5C41] to-[#16805B] bg-clip-text text-transparent mt-0.5 sm:mt-1">
+                    Impact
                   </span>
                 </h1>
 
