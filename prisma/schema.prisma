@@ -111,6 +111,7 @@ model TeacherProfile {
   liveClassSlots        LiveClassSlot[]
   liveClassSessions     LiveClassSession[]
   availabilities        TeacherAvailability[]
+  dateOverrides         TeacherDateOverride[]
   breaks                TeacherBreak[]
   payoutAccount         TeacherPayoutAccount?
   payouts               TeacherPayout[]
@@ -452,9 +453,10 @@ model LiveClassSlot {
   maxCapacity          Int       @default(10)
   minimumStudents      Int       @default(1)
   price                Float     @default(0)
-  status               String    @default("SCHEDULED") // DRAFT | SCHEDULED | OPEN | FULL | LIVE | COMPLETED | CANCELLED
+  status               String    @default("SCHEDULED") // DRAFT | SCHEDULED | OPEN | FULL | LIVE | COMPLETED | CANCELLED | BLOCKED | PENDING
   bookingOpenAt        DateTime?
   bookingCloseAt       DateTime?
+  lockedUntil          DateTime?
   joinBeforeMinutes    Int       @default(10)
   bufferMinutes        Int       @default(15)
   cameraRequired       Boolean   @default(true)
@@ -495,6 +497,24 @@ model TeacherAvailability {
 
   @@unique([teacherId, dayOfWeek, startTime, endTime])
   @@map("teacher_availabilities")
+}
+
+model TeacherDateOverride {
+  id        String   @id @default(uuid())
+  teacherId String
+  date      String   // "YYYY-MM-DD"
+  startTime String   // "09:00"
+  endTime   String   // "10:00"
+  type      String   @default("AVAILABLE") // AVAILABLE | BLOCKED
+  reason    String?
+  timezone  String   @default("Asia/Kolkata")
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  teacher   TeacherProfile @relation(fields: [teacherId], references: [id], onDelete: Cascade)
+
+  @@map("teacher_date_overrides")
 }
 
 model TeacherBreak {

@@ -471,7 +471,7 @@ export class LiveClassService {
   }
 
   /**
-   * Get teacher availability settings
+   * Get teacher availability settings, date overrides, and current slot statuses
    */
   static async getTeacherAvailability(userId: string) {
     const teacherId = await this.getTeacherProfileId(userId);
@@ -486,7 +486,30 @@ export class LiveClassService {
       orderBy: { dayOfWeek: "asc" },
     });
 
-    return { availabilities, breaks };
+    const dateOverrides = await prisma.teacherDateOverride.findMany({
+      where: { teacherId },
+      orderBy: { date: "asc" },
+    });
+
+    const slots = await prisma.liveClassSlot.findMany({
+      where: { teacherId },
+      include: {
+        bookings: {
+          include: {
+            student: {
+              select: {
+                id: true,
+                email: true,
+                profile: { select: { firstName: true, lastName: true } },
+              },
+            },
+          },
+        },
+      },
+      orderBy: { startTime: "asc" },
+    });
+
+    return { availabilities, breaks, dateOverrides, slots };
   }
 
   /**
@@ -526,6 +549,280 @@ export class LiveClassService {
     }
 
     return this.getTeacherAvailability(userId);
+  }
+
+  /**
+   * Add a date-specific availability or block override
+   */
+  static async addDateOverride(
+    userId: string,
+    input: { date: string; startTime: string; endTime: string; type: "AVAILABLE" | "BLOCKED"; reason?: string }
+  ) {
+    const teacherId = await this.getTeacherProfileId(userId);
+
+    const override = await prisma.teacherDateOverride.create({
+      data: {
+        teacherId,
+        date: input.date,
+        startTime: input.startTime,
+        endTime: input.endTime,
+        type: input.type,
+        reason: input.reason || null,
+      },
+    });
+
+    return override;
+  }
+
+  /**
+   * Delete a date override
+   */
+  static async deleteDateOverride(userId: string, overrideId: string) {
+    const teacherId = await this.getTeacherProfileId(userId);
+
+    await prisma.teacherDateOverride.deleteMany({
+      where: { id: overrideId, teacherId },
+    });
+
+    return { success: true };
+  }
+
+  /**
+   * Block a specific time slot or date for a teacher
+   */
+  static async blockSlot(
+    userId: string,
+    params: { slotId?: string; date?: string; startTime?: string; endTime?: string; reason?: string }
+  ) {
+    const teacherId = await this.getTeacherProfileId(userId);
+
+    if (params.slotId) {
+      const slot = await prisma.liveClassSlot.findFirst({
+        where: { id: params.slotId, teacherId },
+      });
+      if (!slot) throw new Error("Slot not found.");
+
+      const updated = await prisma.liveClassSlot.update({
+        where: { id: params.slotId },
+        data: { status: "BLOCKED" },
+      });
+      return updated;
+    } else if (params.date && params.startTime && params.endTime) {
+      const override = await prisma.teacherDateOverride.create({
+        data: {
+          teacherId,
+          date: params.date,
+          startTime: params.startTime,
+          endTime: params.endTime,
+          type: "BLOCKED",
+          reason: params.reason || "Temporarily Blocked by Educator",
+        },
+      });
+      return override;
+    } else {
+      throw new Error("BAD_REQUEST: Either slotId or date, startTime, and endTime are required.");
+    }
+  }
+
+  /**
+   * Unblock a specific time slot or date override for a teacher
+   */
+  static async unblockSlot(userId: string, params: { slotId?: string; overrideId?: string }) {
+    const teacherId = await this.getTeacherProfileId(userId);
+
+    if (params.slotId) {
+      const updated = await prisma.liveClassSlot.updateMany({
+        where: { id: params.slotId, teacherId },
+        data: { status: "OPEN" },
+      });
+      return updated;
+    } else if (params.overrideId) {
+      await prisma.teacherDateOverride.deleteMany({
+        where: { id: params.overrideId, teacherId },
+      });
+      return { success: true };
+    } else {
+      throw new Error("BAD_REQUEST: Either slotId or overrideId is required.");
+    }
+  }
+
+  /**
+   * Get dynamic educator availability for public booking flow
+   */
+  static async getPublicEducatorAvailability(teacherIdOrUserId: string, daysAhead: number = 14) {
+    let teacher = await prisma.teacherProfile.findFirst({
+      where: { OR: [{ id: teacherIdOrUserId }, { userId: teacherIdOrUserId }] },
+      include: {
+        user: { include: { profile: true } },
+        availabilities: true,
+        dateOverrides: true,
+      },
+    });
+
+    if (!teacher) {
+      throw new Error("NOT_FOUND: Educator profile not found.");
+    }
+
+    const teacherId = teacher.id;
+    const rawName = `${teacher.user.profile?.firstName || ''} ${teacher.user.profile?.lastName || ''}`.trim() || "Educator";
+
+    const now = new Date();
+    const startDate = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+    const endDate = new Date(now.getFullYear(), now.getMonth(), now.getDate() + daysAhead, 23, 59, 59);
+
+    const existingSlots = await prisma.liveClassSlot.findMany({
+      where: {
+        teacherId,
+        startTime: { gte: startDate, lte: endDate },
+      },
+      include: { bookings: true },
+    });
+
+    const days = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
+    const months = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
+
+    const datesResult = [];
+
+    const formatTime12h = (hourStr: string) => {
+      const [hStr, mStr] = hourStr.split(":");
+      const h = parseInt(hStr, 10);
+      const m = parseInt(mStr || "0", 10);
+      const ampm = h >= 12 ? "PM" : "AM";
+      const h12 = h % 12 === 0 ? 12 : h % 12;
+      return `${String(h12).padStart(2, '0')}:${String(m).padStart(2, '0')} ${ampm}`;
+    };
+
+    const generateHourSlots = (startStr: string, endStr: string) => {
+      const slots = [];
+      const [startH] = startStr.split(":").map(Number);
+      const [endH] = endStr.split(":").map(Number);
+      for (let h = startH; h < endH; h++) {
+        const sTime = `${String(h).padStart(2, '0')}:00`;
+        const eTime = `${String(h + 1).padStart(2, '0')}:00`;
+        const label = `${formatTime12h(sTime)} - ${formatTime12h(eTime)}`;
+        slots.push({ startTime: sTime, endTime: eTime, label });
+      }
+      return slots;
+    };
+
+    for (let i = 1; i <= daysAhead; i++) {
+      const d = new Date(now.getFullYear(), now.getMonth(), now.getDate() + i);
+      const dayOfWeek = d.getDay();
+      const dateStr = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
+      const dayName = i === 1 ? "Tomorrow" : days[dayOfWeek];
+      const displayDate = `${months[d.getMonth()]} ${d.getDate()}`;
+
+      const weeklyAvail = teacher.availabilities.filter((a) => a.dayOfWeek === dayOfWeek && a.isActive);
+      const dateOverrides = teacher.dateOverrides.filter((o) => o.date === dateStr);
+      const isBlockedDate = dateOverrides.some((o) => o.type === "BLOCKED" && (!o.startTime || o.startTime === "00:00"));
+
+      if (isBlockedDate) {
+        datesResult.push({
+          dateStr,
+          dayName,
+          displayDate,
+          isAvailableDay: false,
+          slots: [],
+        });
+        continue;
+      }
+
+      let candidateSlots: Array<{ startTime: string; endTime: string; label: string }> = [];
+
+      for (const wa of weeklyAvail) {
+        candidateSlots.push(...generateHourSlots(wa.startTime, wa.endTime));
+      }
+
+      const availOverrides = dateOverrides.filter((o) => o.type === "AVAILABLE");
+      for (const ao of availOverrides) {
+        candidateSlots.push(...generateHourSlots(ao.startTime, ao.endTime));
+      }
+
+      const blockedOverrides = dateOverrides.filter((o) => o.type === "BLOCKED");
+      candidateSlots = candidateSlots.filter((cs) => {
+        return !blockedOverrides.some((bo) => bo.startTime <= cs.startTime && bo.endTime >= cs.endTime);
+      });
+
+      // Default fallback slots if educator hasn't customized weekly availability yet
+      if (candidateSlots.length === 0 && weeklyAvail.length === 0 && availOverrides.length === 0) {
+        candidateSlots = generateHourSlots("09:00", "17:00");
+      }
+
+      const uniqueMap = new Map();
+      for (const cs of candidateSlots) {
+        uniqueMap.set(cs.startTime, cs);
+      }
+      candidateSlots = Array.from(uniqueMap.values());
+
+      const processedSlots = candidateSlots.map((cs) => {
+        const slotStart = new Date(`${dateStr}T${cs.startTime}:00`);
+        const slotEnd = new Date(`${dateStr}T${cs.endTime}:00`);
+
+        const existing = existingSlots.find((es) => {
+          const esStart = new Date(es.startTime);
+          return Math.abs(esStart.getTime() - slotStart.getTime()) < 5 * 60 * 1000;
+        });
+
+        let status = "AVAILABLE";
+        let slotId = existing?.id || null;
+
+        if (existing) {
+          if (existing.status === "BLOCKED") {
+            status = "BLOCKED";
+          } else if (existing.status === "CANCELLED") {
+            status = "AVAILABLE";
+          } else {
+            const activeBookings = existing.bookings.filter((b) => b.status !== "CANCELLED").length;
+            if (activeBookings >= existing.maxCapacity) {
+              status = "CONFIRMED";
+            } else if (existing.status === "PENDING" && existing.lockedUntil && new Date(existing.lockedUntil) > now) {
+              status = "PENDING";
+            } else if (existing.status === "SCHEDULED" || existing.status === "OPEN" || existing.status === "FULL") {
+              status = activeBookings > 0 ? "CONFIRMED" : "AVAILABLE";
+            }
+          }
+        }
+
+        if (slotStart < now) {
+          status = "EXPIRED";
+        }
+
+        return {
+          slotId,
+          time: cs.label,
+          startTime: cs.startTime,
+          endTime: cs.endTime,
+          startIso: slotStart.toISOString(),
+          endIso: slotEnd.toISOString(),
+          status,
+          isAvailable: status === "AVAILABLE",
+        };
+      });
+
+      const availableCount = processedSlots.filter((s) => s.isAvailable).length;
+
+      datesResult.push({
+        dateStr,
+        dayName,
+        displayDate,
+        isAvailableDay: availableCount > 0,
+        slots: processedSlots,
+      });
+    }
+
+    return {
+      educator: {
+        id: teacher.id,
+        userId: teacher.userId,
+        name: rawName,
+        headline: teacher.headline || "Educator",
+        avatarUrl: teacher.user.profile?.avatarUrl || null,
+        hourlyRate: teacher.hourlyRate || 499,
+        subjects: teacher.subjects ? teacher.subjects.split(",").map((s) => s.trim()) : ["General"],
+        rating: teacher.rating || 5.0,
+      },
+      dates: datesResult,
+    };
   }
 
   /**

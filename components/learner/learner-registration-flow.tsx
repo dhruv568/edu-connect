@@ -142,6 +142,8 @@ function LearnerRegistrationFlowContent() {
   const [submittingStep1, setSubmittingStep1] = useState(false);
   const [submittingOtp, setSubmittingOtp] = useState(false);
   const [isUserLoggedIn, setIsUserLoggedIn] = useState(false);
+  const [educatorAvailability, setEducatorAvailability] = useState<any>(null);
+  const [loadingAvailability, setLoadingAvailability] = useState(false);
 
   // Restore state from sessionStorage or URL query parameters on mount
   useEffect(() => {
@@ -265,20 +267,16 @@ function LearnerRegistrationFlowContent() {
     }
   }, [state.selectedCourseId, coursesList, state.selectedCourse]);
 
-  // Hydrate selected educator object if ID is present and resolve courseId
+  // Hydrate selected educator object if ID is present
   useEffect(() => {
     if (state.selectedEducatorId && !state.selectedEducator) {
       fetch(`/api/teachers/${state.selectedEducatorId}`)
         .then((r) => r.json())
         .then((d) => {
           if (d.success && d.data?.teacher) {
-            const teacher = d.data.teacher;
-            const teacherCourse = teacher.courses && teacher.courses.length > 0 ? teacher.courses[0] : null;
             setState((prev) => ({
               ...prev,
-              selectedEducator: teacher,
-              selectedCourseId: prev.selectedCourseId || (teacherCourse ? teacherCourse.id : prev.selectedCourseId),
-              selectedCourse: prev.selectedCourse || (teacherCourse || prev.selectedCourse),
+              selectedEducator: d.data.teacher,
             }));
           }
         })
@@ -289,30 +287,34 @@ function LearnerRegistrationFlowContent() {
     }
   }, [state.selectedEducatorId, educatorsList, state.selectedEducator]);
 
-  // Auto-resolve course ID when an educator is selected but courseId is not yet assigned
+  // Dynamically fetch educator live availability when an educator is selected
   useEffect(() => {
-    if (state.selectedEducator && !state.selectedCourseId) {
-      if (state.selectedEducator.courses && state.selectedEducator.courses.length > 0) {
-        const firstCourse = state.selectedEducator.courses[0];
-        setState((prev) => ({
-          ...prev,
-          selectedCourseId: firstCourse.id,
-          selectedCourse: prev.selectedCourse || firstCourse,
-        }));
-      } else if (coursesList.length > 0) {
-        const match = coursesList.find(
-          (c) => c.teacherId === state.selectedEducator.id || c.teacherId === state.selectedEducator.teacherProfileId
-        ) || coursesList[0];
-        if (match) {
-          setState((prev) => ({
-            ...prev,
-            selectedCourseId: match.id,
-            selectedCourse: prev.selectedCourse || match,
-          }));
-        }
-      }
+    const targetTeacherId = state.selectedEducatorId || state.selectedEducator?.id;
+    if (targetTeacherId) {
+      setLoadingAvailability(true);
+      fetch(`/api/teachers/${targetTeacherId}/availability`)
+        .then((r) => r.json())
+        .then((d) => {
+          if (d.success && d.data) {
+            setEducatorAvailability(d.data);
+            const firstAvailDate = d.data.dates?.find(
+              (dt: any) => dt.isAvailableDay && dt.slots?.some((s: any) => s.isAvailable)
+            );
+            if (firstAvailDate) {
+              const firstAvailSlot = firstAvailDate.slots.find((s: any) => s.isAvailable);
+              setState((prev) => ({
+                ...prev,
+                selectedDate: firstAvailDate.dateStr,
+                selectedSlotTime: firstAvailSlot ? firstAvailSlot.time : prev.selectedSlotTime,
+                selectedSlotId: firstAvailSlot ? firstAvailSlot.slotId : null,
+              }));
+            }
+          }
+        })
+        .catch((err) => console.error("Failed to fetch educator availability:", err))
+        .finally(() => setLoadingAvailability(false));
     }
-  }, [state.selectedEducator, state.selectedCourseId, coursesList]);
+  }, [state.selectedEducatorId, state.selectedEducator?.id]);
 
   // If order_id is present on URL on mount (e.g. Cashfree return redirect), auto-verify
   useEffect(() => {
@@ -969,55 +971,116 @@ function LearnerRegistrationFlowContent() {
               <div className="p-5 rounded-3xl bg-blue-50/80 border border-blue-200 space-y-4">
                 <div className="flex items-center justify-between">
                   <h4 className="text-xs font-black uppercase tracking-wider text-slate-700 flex items-center gap-1.5">
-                    <Clock className="w-4 h-4 text-[#3157D5]" /> Select Date & Session Slot
+                    <Clock className="w-4 h-4 text-[#3157D5]" /> Select Date & Live Session Slot
                   </h4>
                   <span className="text-[11px] font-bold text-emerald-700 bg-emerald-100/80 px-2.5 py-0.5 rounded-full">
                     1-on-1 Interactive Session
                   </span>
                 </div>
 
-                {/* Available Date Pills */}
-                <div className="space-y-1.5">
-                  <label className="text-[11px] font-bold text-slate-500 uppercase tracking-wider">Available Dates:</label>
-                  <div className="grid grid-cols-2 sm:grid-cols-5 gap-2">
-                    {getUpcomingDates().map((d) => (
-                      <button
-                        key={d.dateStr}
-                        type="button"
-                        onClick={() => setState((p) => ({ ...p, selectedDate: d.dateStr }))}
-                        className={`py-2 px-3 rounded-xl text-xs font-bold border transition-all text-center ${
-                          state.selectedDate === d.dateStr
-                            ? "bg-[#3157D5] text-white border-[#3157D5] shadow-sm ring-2 ring-[#3157D5]/20"
-                            : "bg-white text-slate-700 border-slate-200 hover:border-blue-300"
-                        }`}
-                      >
-                        <div>{d.dayName}</div>
-                        <div className="text-[10px] opacity-80 font-normal">{d.displayDate}</div>
-                      </button>
-                    ))}
+                {loadingAvailability ? (
+                  <div className="p-6 text-center text-xs text-slate-500 font-semibold animate-pulse">
+                    Fetching Educator Live Availability...
                   </div>
-                </div>
+                ) : (
+                  <>
+                    {/* Available Date Pills */}
+                    <div className="space-y-1.5">
+                      <label className="text-[11px] font-bold text-slate-500 uppercase tracking-wider">Available Dates:</label>
+                      <div className="grid grid-cols-2 sm:grid-cols-5 gap-2">
+                        {(educatorAvailability?.dates || getUpcomingDates()).map((d: any) => {
+                          const isSelected = state.selectedDate === d.dateStr;
+                          const hasAvail = d.isAvailableDay !== false;
+                          return (
+                            <button
+                              key={d.dateStr}
+                              type="button"
+                              disabled={!hasAvail}
+                              onClick={() => {
+                                const firstAvailSlot = d.slots?.find((s: any) => s.isAvailable);
+                                setState((p) => ({
+                                  ...p,
+                                  selectedDate: d.dateStr,
+                                  selectedSlotTime: firstAvailSlot ? firstAvailSlot.time : p.selectedSlotTime,
+                                  selectedSlotId: firstAvailSlot ? firstAvailSlot.slotId : null,
+                                }));
+                              }}
+                              className={`py-2 px-3 rounded-xl text-xs font-bold border transition-all text-center ${
+                                !hasAvail
+                                  ? "bg-slate-100 text-slate-400 border-slate-200 cursor-not-allowed opacity-60"
+                                  : isSelected
+                                  ? "bg-[#3157D5] text-white border-[#3157D5] shadow-sm ring-2 ring-[#3157D5]/20"
+                                  : "bg-white text-slate-700 border-slate-200 hover:border-blue-300"
+                              }`}
+                            >
+                              <div>{d.dayName}</div>
+                              <div className="text-[10px] opacity-80 font-normal">{d.displayDate}</div>
+                            </button>
+                          );
+                        })}
+                      </div>
+                    </div>
 
-                {/* Available Time Slot Pills */}
-                <div className="space-y-1.5">
-                  <label className="text-[11px] font-bold text-slate-500 uppercase tracking-wider">Available Time Slots (IST):</label>
-                  <div className="grid grid-cols-2 sm:grid-cols-3 gap-2">
-                    {AVAILABLE_TIME_SLOTS.map((slot) => (
-                      <button
-                        key={slot}
-                        type="button"
-                        onClick={() => setState((p) => ({ ...p, selectedSlotTime: slot }))}
-                        className={`py-2 px-3 rounded-xl text-xs font-bold border transition-all text-center ${
-                          state.selectedSlotTime === slot
-                            ? "bg-slate-900 text-white border-slate-900 shadow-sm"
-                            : "bg-white text-slate-700 border-slate-200 hover:border-slate-400"
-                        }`}
-                      >
-                        {slot}
-                      </button>
-                    ))}
-                  </div>
-                </div>
+                    {/* Available Time Slot Pills */}
+                    <div className="space-y-1.5">
+                      <label className="text-[11px] font-bold text-slate-500 uppercase tracking-wider">
+                        Available Time Slots for {state.selectedDate} (IST):
+                      </label>
+                      {(() => {
+                        const selectedDateObj = educatorAvailability?.dates?.find((d: any) => d.dateStr === state.selectedDate);
+                        const availableSlots = selectedDateObj?.slots || AVAILABLE_TIME_SLOTS.map((t) => ({ time: t, isAvailable: true, status: "AVAILABLE" }));
+
+                        if (!availableSlots || availableSlots.length === 0) {
+                          return (
+                            <div className="p-4 bg-amber-50 border border-amber-200 rounded-2xl text-xs text-amber-800 font-semibold text-center">
+                              No slots available on this date. Please select another date.
+                            </div>
+                          );
+                        }
+
+                        return (
+                          <div className="grid grid-cols-2 sm:grid-cols-3 gap-2">
+                            {availableSlots.map((slotObj: any) => {
+                              const slotLabel = typeof slotObj === "string" ? slotObj : slotObj.time;
+                              const isAvail = typeof slotObj === "string" ? true : slotObj.isAvailable;
+                              const status = typeof slotObj === "string" ? "AVAILABLE" : slotObj.status;
+                              const isSelected = state.selectedSlotTime === slotLabel;
+
+                              return (
+                                <button
+                                  key={slotLabel}
+                                  type="button"
+                                  disabled={!isAvail}
+                                  onClick={() =>
+                                    setState((p) => ({
+                                      ...p,
+                                      selectedSlotTime: slotLabel,
+                                      selectedSlotId: slotObj.slotId || null,
+                                    }))
+                                  }
+                                  className={`py-2 px-3 rounded-xl text-xs font-bold border transition-all text-center flex flex-col items-center justify-center ${
+                                    !isAvail
+                                      ? "bg-slate-100 text-slate-400 border-slate-200 cursor-not-allowed"
+                                      : isSelected
+                                      ? "bg-slate-900 text-white border-slate-900 shadow-sm ring-2 ring-slate-900/20"
+                                      : "bg-white text-slate-700 border-slate-200 hover:border-slate-400"
+                                  }`}
+                                >
+                                  <div>{slotLabel}</div>
+                                  {!isAvail && (
+                                    <div className="text-[9px] font-extrabold uppercase text-rose-600 tracking-wider">
+                                      {status === "CONFIRMED" ? "BOOKED" : status}
+                                    </div>
+                                  )}
+                                </button>
+                              );
+                            })}
+                          </div>
+                        );
+                      })()}
+                    </div>
+                  </>
+                )}
               </div>
             </div>
           )}
@@ -1132,17 +1195,14 @@ function LearnerRegistrationFlowContent() {
                       <div
                         key={e.id}
                         onClick={() => {
-                          let matchedCourse = e.courses && e.courses.length > 0 ? e.courses[0] : null;
-                          if (!matchedCourse && coursesList.length > 0) {
-                            matchedCourse = coursesList.find((c: any) => c.teacherId === e.id || c.teacherId === e.teacherProfileId) || coursesList[0];
-                          }
                           setState((p) => ({
                             ...p,
+                            selectionType: "EDUCATOR",
                             selectedEducatorId: e.id,
                             selectedEducator: e,
                             isTrial: true,
-                            selectedCourseId: matchedCourse ? matchedCourse.id : p.selectedCourseId,
-                            selectedCourse: matchedCourse || p.selectedCourse,
+                            selectedCourseId: null,
+                            selectedCourse: null,
                           }));
                         }}
                         className={`p-4 rounded-2xl border-2 transition-all cursor-pointer flex items-center justify-between gap-3 ${

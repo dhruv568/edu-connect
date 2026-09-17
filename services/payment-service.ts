@@ -171,6 +171,14 @@ export class PaymentService {
         throw new Error("NOT_FOUND: Live class slot is no longer available.");
       }
 
+      if (slot.status === "BLOCKED") {
+        throw new Error("SLOT_BLOCKED: This slot has been blocked by the Educator.");
+      }
+
+      if (slot.status === "PENDING" && slot.lockedUntil && new Date(slot.lockedUntil) > new Date()) {
+        throw new Error("SLOT_LOCKED: This slot is currently locked in checkout. Please choose another slot or try again shortly.");
+      }
+
       // Capacity protection check
       const activeBookings = slot.bookings.filter((b) => b.status !== "CANCELLED").length;
       if (activeBookings >= slot.maxCapacity) {
@@ -185,6 +193,16 @@ export class PaymentService {
       if (existingBooking) {
         throw new Error("DUPLICATE_PURCHASE: You have already booked this live class.");
       }
+
+      // Apply 15-minute slot lock
+      const lockExpiration = new Date(Date.now() + 15 * 60 * 1000);
+      await prisma.liveClassSlot.update({
+        where: { id: slot.id },
+        data: {
+          status: "PENDING",
+          lockedUntil: lockExpiration,
+        },
+      });
 
       // Price calculation directly from DB
       amountPaise = toPaise(slot.price);
@@ -434,6 +452,17 @@ export class PaymentService {
           failureReason: "Payment not successful with Cashfree",
         },
       });
+
+      if (transaction.liveClassSlotId) {
+        await prisma.liveClassSlot.update({
+          where: { id: transaction.liveClassSlotId },
+          data: {
+            status: "OPEN",
+            lockedUntil: null,
+          },
+        });
+      }
+
       throw new Error("SECURITY_ERROR: Payment status verification failed.");
     }
 
@@ -511,6 +540,17 @@ export class PaymentService {
             });
 
         bookingId = booking.id;
+
+        const newCount = activeBookings + (existingBooking ? 0 : 1);
+        const updatedSlotStatus = newCount >= slot.maxCapacity ? "FULL" : "SCHEDULED";
+
+        await prisma.liveClassSlot.update({
+          where: { id: slot.id },
+          data: {
+            status: updatedSlotStatus,
+            lockedUntil: null,
+          },
+        });
 
         await prisma.paymentTransaction.update({
           where: { id: transaction.id },

@@ -29,3 +29,42 @@ export async function PUT(request: NextRequest) {
     return handleApiError(error);
   }
 }
+
+export async function POST(request: NextRequest) {
+  try {
+    const session = await requireRole(["TEACHER"]);
+    const body = await request.json();
+
+    if (body.action === "BLOCK_SLOT") {
+      const blocked = await LiveClassService.blockSlot(session.userId, body);
+      return apiSuccess({ message: "Slot blocked successfully!", blocked });
+    } else if (body.action === "UNBLOCK_SLOT") {
+      const unblocked = await LiveClassService.unblockSlot(session.userId, body);
+      return apiSuccess({ message: "Slot unblocked successfully!", unblocked });
+    } else {
+      const override = await LiveClassService.addDateOverride(session.userId, body);
+      return apiSuccess({ message: "Date availability updated successfully!", override });
+    }
+  } catch (error: any) {
+    return handleApiError(error);
+  }
+}
+
+export async function DELETE(request: NextRequest) {
+  try {
+    const session = await requireRole(["TEACHER"]);
+    const { searchParams } = new URL(request.url);
+    const overrideId = searchParams.get("overrideId");
+    const slotId = searchParams.get("slotId");
+
+    if (overrideId) {
+      await LiveClassService.deleteDateOverride(session.userId, overrideId);
+    } else if (slotId) {
+      await LiveClassService.unblockSlot(session.userId, { slotId });
+    }
+
+    return apiSuccess({ message: "Override removed successfully!" });
+  } catch (error: any) {
+    return handleApiError(error);
+  }
+}
