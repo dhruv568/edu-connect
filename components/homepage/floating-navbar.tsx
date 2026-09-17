@@ -984,8 +984,8 @@ export function FloatingNavbar({ variant }: FloatingNavbarProps = {}) {
                       { label: "Home", href: "/teacher", targetId: null },
                       { label: "Training Program", href: "/teacher/training", targetId: null },
                       { label: "About Us", href: "/about", targetId: null },
-                      { label: "Educator Benefits", href: "/teacher#benefits", targetId: "benefits" },
                       { label: "How It Works?", href: "/teacher#how-it-works", targetId: "how-it-works" },
+                      { label: "Educator Benefits", href: "/teacher#benefits", targetId: "benefits" },
                       { label: "Success Stories", href: "/teacher#success-stories", targetId: "success-stories" },
                       { label: "Contact Us", href: "/contact", targetId: null },
                     ].map((item) => {
