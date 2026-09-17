@@ -64,12 +64,12 @@ interface EducatorFlowState {
 const STORAGE_KEY = "educonnects_educator_flow_state";
 
 const STEPS = [
-  { number: 1, label: "Basic Info" },
-  { number: 2, label: "Verification" },
-  { number: 3, label: "Profile" },
-  { number: 4, label: "₹99 Fee" },
-  { number: 5, label: "Payment" },
-  { number: 6, label: "Complete" },
+  { number: 1, label: "Educator Info" },
+  { number: 2, label: "OTP Verification" },
+  { number: 3, label: "Professional Details" },
+  { number: 4, label: "Payment" },
+  { number: 5, label: "Verification" },
+  { number: 6, label: "Account Activation" },
 ];
 
 function EducatorRegistrationFlowContent() {
@@ -454,7 +454,7 @@ function EducatorRegistrationFlowContent() {
       {/* Progress Header */}
       <div className="text-center space-y-2">
         <GlassBadge variant="educator">
-          STEP {state.step} OF 6 • EDUCATOR REGISTRATION &amp; VERIFICATION
+          STEP {state.step} OF 6 • {STEPS[state.step - 1]?.label.toUpperCase()}
         </GlassBadge>
         <h1 className="text-3xl sm:text-4xl font-black text-slate-900 tracking-tight">
           {state.step === 1 && "Create Your Educator Account"}
@@ -472,17 +472,68 @@ function EducatorRegistrationFlowContent() {
           {state.step === 5 && "Secure INR (₹) processing via Cashfree Payment Gateway."}
           {state.step === 6 && "Confirming payment and preparing your Educator Dashboard."}
         </p>
+      </div>
 
-        {/* Step Progress Bar */}
-        <div className="flex items-center justify-center gap-1.5 pt-3 max-w-md mx-auto">
-          {STEPS.map((s) => (
-            <div
-              key={s.number}
-              className={`h-2 rounded-full flex-1 transition-all duration-300 ${
-                state.step >= s.number ? "bg-[#16805B]" : "bg-slate-200"
-              }`}
-            />
-          ))}
+      {/* 6-Step Multi-Step Progress Indicator Card */}
+      <div className="bg-white/95 backdrop-blur-md p-4 sm:p-5 rounded-3xl border border-[#A7F3D0]/70 sm:border-slate-200/90 shadow-sm">
+        <div className="grid grid-cols-6 gap-1 sm:gap-2 relative">
+          {STEPS.map((s, idx) => {
+            const isCompleted = state.step > s.number;
+            const isCurrent = state.step === s.number;
+            return (
+              <div key={s.number} className="flex flex-col items-center text-center relative">
+                {/* Connecting Line - Left half */}
+                {idx > 0 && (
+                  <div
+                    className={`absolute top-4 sm:top-4.5 -left-1/2 right-1/2 h-0.5 -translate-y-1/2 z-0 transition-colors duration-300 ${
+                      state.step >= s.number ? "bg-[#16805B]" : "bg-slate-200"
+                    }`}
+                  />
+                )}
+                {/* Connecting Line - Right half */}
+                {idx < STEPS.length - 1 && (
+                  <div
+                    className={`absolute top-4 sm:top-4.5 left-1/2 -right-1/2 h-0.5 -translate-y-1/2 z-0 transition-colors duration-300 ${
+                      state.step > s.number ? "bg-[#16805B]" : "bg-slate-200"
+                    }`}
+                  />
+                )}
+
+                {/* Step Circle */}
+                <div
+                  className={`relative z-10 w-8 h-8 sm:w-9 sm:h-9 rounded-full flex items-center justify-center text-xs font-black transition-all duration-300 select-none ${
+                    isCompleted
+                      ? "bg-[#16805B] text-white shadow-sm"
+                      : isCurrent
+                      ? "bg-[#16805B] text-white shadow-md shadow-[#16805B]/30 ring-4 ring-[#16805B]/20 scale-105"
+                      : "bg-white text-slate-400 border-2 border-slate-200"
+                  }`}
+                  title={`Step ${s.number}: ${s.label}`}
+                >
+                  {isCompleted ? (
+                    <Check className="w-4 h-4 stroke-[3]" />
+                  ) : (
+                    <span>{s.number}</span>
+                  )}
+                </div>
+
+                {/* Step Label */}
+                <div className="mt-2 w-full px-0.5 select-none">
+                  <p
+                    className={`text-[10px] sm:text-xs leading-tight transition-colors ${
+                      isCurrent
+                        ? "text-[#0D5C41] font-black"
+                        : isCompleted
+                        ? "text-[#16805B] font-bold"
+                        : "text-slate-400 font-medium"
+                    }`}
+                  >
+                    {s.label}
+                  </p>
+                </div>
+              </div>
+            );
+          })}
         </div>
       </div>
 
