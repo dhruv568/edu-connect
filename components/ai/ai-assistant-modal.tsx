@@ -294,7 +294,7 @@ export const AIAssistantModal: React.FC<AIAssistantModalProps> = ({
       role="dialog"
       aria-label="EduConnects AI Assistant"
       aria-modal="true"
-      className="fixed bottom-0 right-0 sm:bottom-6 sm:right-6 z-50 w-full sm:w-[430px] h-[92vh] sm:h-[640px] max-h-[100vh] sm:max-h-[660px] flex flex-col bg-white sm:rounded-3xl shadow-2xl shadow-slate-900/20 border border-slate-200/90 overflow-hidden transition-all duration-300 animate-in fade-in slide-in-from-bottom-6"
+      className="fixed bottom-0 right-0 sm:bottom-6 sm:right-6 z-50 w-full sm:w-[430px] h-[92vh] sm:h-[640px] max-h-[100vh] sm:max-h-[660px] flex flex-col bg-[#F4FAF7] sm:rounded-3xl shadow-2xl shadow-emerald-950/20 border border-[#A7F3D0]/80 sm:border-[#16805B]/30 overflow-hidden transition-all duration-300 animate-in fade-in slide-in-from-bottom-6"
     >
       {/* 1. Header with branding & section adaptation */}
       <div className={`px-4 py-3.5 select-none ${theme.headerBg} ${theme.headerText} shadow-sm`}>
@@ -357,10 +357,10 @@ export const AIAssistantModal: React.FC<AIAssistantModalProps> = ({
       </div>
 
       {/* 2. Messages List Area */}
-      <div className="flex-1 overflow-y-auto p-4 space-y-4 bg-gradient-to-b from-slate-50/70 to-slate-100/40">
+      <div className="flex-1 overflow-y-auto p-4 space-y-4 bg-gradient-to-b from-[#F2FAF7] via-[#EAF6F0] to-[#E2F2EA]">
         {/* Welcome Starter Card & Suggested Questions when starting */}
         {messages.length <= 1 && (
-          <div className="p-4 rounded-3xl bg-white border border-slate-200/80 shadow-xs mb-3 space-y-3">
+          <div className="p-4 rounded-3xl bg-white border border-[#A7F3D0]/70 shadow-xs mb-3 space-y-3">
             <div className="flex items-start gap-3">
               <div className="w-9 h-9 rounded-2xl bg-gradient-to-tr from-teal-500 to-emerald-400 text-white flex items-center justify-center shrink-0 shadow-xs">
                 <Sparkles className="w-4 h-4" />
@@ -427,7 +427,7 @@ export const AIAssistantModal: React.FC<AIAssistantModalProps> = ({
 
                 {/* Metadata & Copy action */}
                 <div
-                  className={`flex items-center gap-1.5 mt-1.5 px-1 text-[11px] text-slate-400 ${
+                  className={`flex items-center gap-1.5 mt-1.5 px-1 text-[11px] text-slate-500 ${
                     isUser ? "justify-end" : "justify-start"
                   }`}
                 >
@@ -435,7 +435,7 @@ export const AIAssistantModal: React.FC<AIAssistantModalProps> = ({
                   {!isUser && !msg.isError && msg.content && (
                     <button
                       onClick={() => handleCopyMessage(msg.id, msg.content)}
-                      className="opacity-0 group-hover:opacity-100 hover:text-slate-700 transition-opacity ml-1.5 flex items-center gap-1 font-medium bg-slate-100 hover:bg-slate-200 px-1.5 py-0.5 rounded text-[10px]"
+                      className="opacity-0 group-hover:opacity-100 hover:text-slate-800 transition-opacity ml-1.5 flex items-center gap-1 font-medium bg-white hover:bg-emerald-50 border border-[#A7F3D0]/60 px-1.5 py-0.5 rounded text-[10px] text-slate-600 shadow-2xs"
                       title="Copy response"
                     >
                       {copiedMessageId === msg.id ? (
@@ -463,8 +463,8 @@ export const AIAssistantModal: React.FC<AIAssistantModalProps> = ({
             <div className="w-7 h-7 rounded-xl bg-white text-teal-700 border border-teal-200/80 flex items-center justify-center shrink-0 shadow-xs">
               <Bot className="w-4 h-4 text-teal-600 animate-pulse" />
             </div>
-            <div className="bg-white border border-slate-200/90 px-4 py-3 rounded-2xl rounded-tl-xs shadow-xs flex items-center gap-2.5">
-              <span className="text-xs text-slate-500 font-medium">EduConnects AI is thinking</span>
+            <div className="bg-white border border-[#A7F3D0]/60 px-4 py-3 rounded-2xl rounded-tl-xs shadow-xs flex items-center gap-2.5">
+              <span className="text-xs text-slate-600 font-medium">EduConnects AI is thinking</span>
               <div className="flex items-center space-x-1">
                 <span className="w-1.5 h-1.5 bg-teal-600 rounded-full animate-bounce [animation-delay:-0.3s]" />
                 <span className="w-1.5 h-1.5 bg-teal-600 rounded-full animate-bounce [animation-delay:-0.15s]" />
@@ -497,7 +497,7 @@ export const AIAssistantModal: React.FC<AIAssistantModalProps> = ({
       </div>
 
       {/* 3. Input command bar */}
-      <div className="p-3.5 bg-white border-t border-slate-100 shadow-md">
+      <div className="p-3.5 bg-white border-t border-[#A7F3D0]/60 shadow-md">
         <form
           onSubmit={(e) => {
             e.preventDefault();
@@ -532,7 +532,7 @@ export const AIAssistantModal: React.FC<AIAssistantModalProps> = ({
           </button>
         </form>
 
-        <div className="flex items-center justify-between mt-2 px-1 text-[11px] text-slate-400">
+        <div className="flex items-center justify-between mt-2 px-1 text-[11px] text-slate-500">
           <span className="flex items-center gap-1">
             Press <kbd className="font-mono bg-slate-100 px-1.5 py-0.5 rounded text-[10px] text-slate-600 border border-slate-200">Enter ↵</kbd> to send
           </span>
