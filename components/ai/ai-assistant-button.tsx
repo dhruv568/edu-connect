@@ -24,7 +24,7 @@ export const AIAssistantButton: React.FC<AIAssistantButtonProps> = ({
   }
 
   return (
-    <div className="fixed bottom-5 right-5 z-50 flex items-center select-none">
+    <div className="fixed bottom-5 right-5 sm:bottom-24 sm:right-6 md:bottom-24 md:right-6 lg:bottom-5 lg:right-5 z-50 flex items-center select-none">
       {/* Floating Action Button */}
       <button
         onClick={onClick}
