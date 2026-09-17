@@ -12,266 +12,182 @@ export interface EmailTemplateParams {
 }
 
 /**
- * Generates a premium, responsive HTML template for EduConnects Email OTP Verification.
- * Designed with liquid-glass aesthetic, soft gradients, high contrast, and robust mobile support.
+ * Generates a modern, professional, mobile-responsive & Gmail-friendly HTML template
+ * for EduConnects Email OTP Verification (Learner, Educator & Admin verification).
  */
 export function generateVerificationEmailHtml(params: EmailTemplateParams): string {
   const { firstName, otp, expiresInMinutes = 10, appUrl, isAdminLogin } = params;
 
   const recipientName = firstName && firstName.trim() ? firstName.trim() : "there";
   const baseUrl = appUrl || getPublicAppUrl();
-  const currentYear = new Date().getFullYear();
 
-  // Format OTP code with visual spacing for email display (e.g. 4 8 2 9 1 3)
-  const formattedOtp = otp ? otp.split("").join(" ") : "0 0 0 0 0 0";
+  // Format OTP code with clear character spacing for email displays (e.g. 4  8  2  9  1  3)
+  const formattedOtp = otp ? otp.split("").join("&nbsp;&nbsp;") : "0&nbsp;&nbsp;0&nbsp;&nbsp;0&nbsp;&nbsp;0&nbsp;&nbsp;0&nbsp;&nbsp;0";
 
-  const emailTitle = isAdminLogin ? "EduConnects Admin Login" : "Your EduConnects Verification Code 🎓";
+  const emailSubjectTitle = isAdminLogin
+    ? "EduConnects Admin Security Verification"
+    : "Your EduConnects Verification Code 🎓";
 
   return `<!DOCTYPE html>
-<html lang="en">
+<html lang="en" xmlns="http://www.w3.org/1999/xhtml" xmlns:v="urn:schemas-microsoft-com:vml" xmlns:o="urn:schemas-microsoft-com:office:office">
 <head>
-  <meta charset="UTF-8">
+  <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <meta http-equiv="X-UA-Compatible" content="IE=edge">
-  <title>${emailTitle}</title>
+  <meta name="x-apple-disable-message-reformatting">
+  <title>${emailSubjectTitle}</title>
+  <!--[if mso]>
+  <noscript>
+    <xml>
+      <o:OfficeDocumentSettings>
+        <o:PixelsPerInch>96</o:PixelsPerInch>
+      </o:OfficeDocumentSettings>
+    </xml>
+  </noscript>
+  <![endif]-->
   <style>
-    body {
-      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
-      background-color: #f1f5f9;
-      color: #0f172a;
-      margin: 0;
-      padding: 0;
-      width: 100% !important;
-      -webkit-font-smoothing: antialiased;
-      -webkit-text-size-adjust: 100%;
-    }
-    table {
-      border-collapse: collapse;
-    }
-    .wrapper {
-      width: 100%;
-      table-layout: fixed;
-      background-color: #f1f5f9;
-      padding: 40px 16px;
-    }
-    .main-card {
-      max-width: 540px;
-      margin: 0 auto;
-      background: #ffffff;
-      border-radius: 24px;
-      overflow: hidden;
-      box-shadow: 0 20px 40px rgba(15, 23, 42, 0.08);
-      border: 1px solid #e2e8f0;
-    }
-    .header-banner {
-      background: linear-gradient(135deg, #1e40af 0%, #2563eb 50%, #3b82f6 100%);
-      padding: 36px 24px;
-      text-align: center;
-    }
-    .brand-title {
-      color: #ffffff;
-      font-size: 26px;
-      font-weight: 900;
-      letter-spacing: 1.5px;
-      margin: 0;
-      text-transform: uppercase;
-    }
-    .brand-tagline {
-      color: #93c5fd;
-      font-size: 13px;
-      font-weight: 600;
-      letter-spacing: 0.5px;
-      margin-top: 4px;
-      margin-bottom: 0;
-    }
-    .badge-icon {
-      width: 56px;
-      height: 56px;
-      background: #ffffff;
-      border-radius: 18px;
-      line-height: 56px;
-      font-size: 28px;
-      margin: -28px auto 0 auto;
-      text-align: center;
-      box-shadow: 0 8px 20px rgba(37, 99, 235, 0.2);
-    }
-    .content-body {
-      padding: 32px 36px;
-      text-align: center;
-    }
-    .greeting {
-      font-size: 20px;
-      font-weight: 700;
-      color: #0f172a;
-      margin-top: 12px;
-      margin-bottom: 8px;
-    }
-    .welcome-text {
-      font-size: 15px;
-      line-height: 1.6;
-      color: #475569;
-      margin: 0 0 24px 0;
-    }
-    .otp-container {
-      background: linear-gradient(135deg, #eff6ff 0%, #dbeafe 100%);
-      border: 2px solid #bfdbfe;
-      border-radius: 20px;
-      padding: 28px 20px;
-      margin: 24px 0;
-      text-align: center;
-      box-shadow: inset 0 2px 4px rgba(255, 255, 255, 0.8);
-    }
-    .otp-header-label {
-      font-size: 11px;
-      font-weight: 800;
-      text-transform: uppercase;
-      letter-spacing: 2px;
-      color: #1e40af;
-      margin-bottom: 12px;
-    }
-    .otp-digits {
-      font-size: 34px;
-      font-weight: 900;
-      letter-spacing: 10px;
-      color: #1e3a8a;
-      font-family: 'Courier New', Courier, monospace;
-      margin: 8px 0;
-      user-select: all;
-      -webkit-user-select: all;
-    }
-    .expiry-badge {
-      display: inline-block;
-      font-size: 12px;
-      font-weight: 700;
-      color: #2563eb;
-      background: #ffffff;
-      padding: 6px 14px;
-      border-radius: 9999px;
-      margin-top: 12px;
-      border: 1px solid #bfdbfe;
-    }
-    .security-notice {
-      background: #f8fafc;
-      border-left: 4px solid #3b82f6;
-      border-radius: 8px;
-      padding: 14px 16px;
-      font-size: 13px;
-      color: #475569;
-      text-align: left;
-      margin: 24px 0;
-      line-height: 1.5;
-    }
-    .cta-container {
-      margin: 28px 0;
-    }
-    .cta-button {
-      display: inline-block;
-      background: linear-gradient(135deg, #2563eb 0%, #1d4ed8 100%);
-      color: #ffffff !important;
-      font-size: 15px;
-      font-weight: 700;
-      text-decoration: none;
-      padding: 14px 36px;
-      border-radius: 14px;
-      box-shadow: 0 10px 20px rgba(37, 99, 235, 0.3);
-      transition: all 0.2s ease;
-    }
-    .disregard-text {
-      font-size: 13px;
-      color: #94a3b8;
-      line-height: 1.5;
-      margin-top: 20px;
-      margin-bottom: 0;
-    }
-    .footer {
-      background-color: #f8fafc;
-      padding: 24px 36px;
-      text-align: center;
-      border-top: 1px solid #f1f5f9;
-    }
-    .footer-brand {
-      font-weight: 700;
-      font-size: 14px;
-      color: #475569;
-      margin: 0;
-    }
-    .footer-tagline {
-      font-size: 12px;
-      color: #94a3b8;
-      margin: 2px 0 12px 0;
-    }
-    .footer-copyright {
-      font-size: 11px;
-      color: #cbd5e1;
-      margin: 0;
+    body, table, td, a { -webkit-text-size-adjust: 100%; -ms-text-size-adjust: 100%; }
+    table, td { mso-table-lspace: 0pt; mso-table-rspace: 0pt; }
+    img { -ms-interpolation-mode: bicubic; border: 0; outline: none; text-decoration: none; }
+    body { height: 100% !important; margin: 0 !important; padding: 0 !important; width: 100% !important; background-color: #f1f5f9; color: #0f172a; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; }
+    
+    @media screen and (max-width: 600px) {
+      .email-wrapper { padding: 12px !important; }
+      .main-card { width: 100% !important; max-width: 100% !important; border-radius: 16px !important; }
+      .header-padding { padding: 28px 20px !important; }
+      .content-padding { padding: 24px 20px !important; }
+      .footer-padding { padding: 20px 16px !important; }
+      .otp-code { font-size: 32px !important; letter-spacing: 6px !important; }
+      .cta-button { display: block !important; width: 100% !important; text-align: center !important; }
     }
   </style>
 </head>
-<body>
-  <div class="wrapper">
-    <div class="main-card">
-      <!-- Header Banner -->
-      <div class="header-banner">
-        <div style="margin-bottom: 12px;">
-          <img src="${baseUrl}/images/logo.jpeg" alt="EduConnect Logo" width="56" height="56" style="border-radius: 14px; border: 2px solid rgba(255,255,255,0.4); display: inline-block; object-fit: cover;" />
-        </div>
-        <h1 class="brand-title">${isAdminLogin ? "EduConnects Admin Login" : "EDUCONNECT"}</h1>
-        <p class="brand-tagline">${isAdminLogin ? "System Administration & Governance Gateway" : "Learn • Grow • Belong"}</p>
-      </div>
+<body style="margin: 0; padding: 0; background-color: #f1f5f9; color: #0f172a;">
 
-      <!-- Icon Avatar Badge -->
-      <div class="badge-icon">${isAdminLogin ? "🛡️" : "🎓"}</div>
+  <!-- Outer Table Wrapper -->
+  <table role="presentation" border="0" cellpadding="0" cellspacing="0" width="100%" class="email-wrapper" style="background-color: #f1f5f9; padding: 32px 12px;">
+    <tr>
+      <td align="center">
+        
+        <!-- Main Card Container -->
+        <table class="main-card" role="presentation" border="0" cellpadding="0" cellspacing="0" width="560" style="max-width: 560px; width: 100%; background-color: #ffffff; border-radius: 24px; overflow: hidden; border: 1px solid #e2e8f0; box-shadow: 0 20px 40px -15px rgba(15, 23, 42, 0.08);">
+          
+          <!-- Header Banner -->
+          <tr>
+            <td class="header-padding" align="center" style="background: linear-gradient(135deg, #083F3D 0%, #0F5C5A 50%, #2A8C84 100%); padding: 36px 32px; text-align: center;">
+              <table role="presentation" border="0" cellpadding="0" cellspacing="0" width="100%">
+                <tr>
+                  <td align="center">
+                    <!-- Brand Logo -->
+                    <table role="presentation" border="0" cellpadding="0" cellspacing="0" style="margin: 0 auto 12px auto;">
+                      <tr>
+                        <td align="center" style="background-color: #ffffff; padding: 8px; border-radius: 16px; box-shadow: 0 4px 12px rgba(0,0,0,0.15);">
+                          <img src="${baseUrl}/images/favicon.png" alt="EduConnects Logo" width="48" height="48" style="display: block; width: 48px; height: 48px; border-radius: 10px; border: 0;" />
+                        </td>
+                      </tr>
+                    </table>
 
-      <!-- Body Content -->
-      <div class="content-body">
-        ${
-          isAdminLogin
-            ? `
-        <h2 class="greeting" style="font-size: 20px; font-weight: 800; color: #0f172a; margin-top: 14px; margin-bottom: 6px;">EduConnects Admin Login</h2>
-        <p class="welcome-text" style="font-size: 15px; font-weight: 600; color: #334155; margin: 0 0 20px 0;">
-          Your one-time verification code is:
-        </p>
-        `
-            : `
-        <h2 class="greeting">Hello ${recipientName},</h2>
-        <p class="welcome-text">
-          Welcome to EduConnects! 🎓<br>
-          Your one-time verification code is below. Enter this code to verify your identity and access your dashboard:
-        </p>
-        `
-        }
+                    <!-- Brand Name & Subtitle -->
+                    <h1 style="margin: 0; font-size: 24px; font-weight: 900; color: #ffffff; letter-spacing: 1px; text-transform: uppercase;">
+                      EduConnects
+                    </h1>
+                    <p style="margin: 4px 0 0 0; font-size: 12px; font-weight: 600; color: #A7F3D0; letter-spacing: 0.5px;">
+                      ${isAdminLogin ? "Admin Security Verification Gateway" : "Learn • Grow • Belong"}
+                    </p>
+                  </td>
+                </tr>
+              </table>
+            </td>
+          </tr>
 
-        <!-- OTP Card -->
-        <div class="otp-container">
-          <div class="otp-header-label">${isAdminLogin ? "ADMIN ONE-TIME PASSCODE" : "VERIFICATION CODE"}</div>
-          <div class="otp-digits">${formattedOtp}</div>
-          <div class="expiry-badge">⏱️ This OTP expires in ${expiresInMinutes} minutes.</div>
-        </div>
+          <!-- Main Body Content -->
+          <tr>
+            <td class="content-padding" style="padding: 32px 36px; text-align: center;">
+              
+              <!-- Greeting & Headline -->
+              ${
+                isAdminLogin
+                  ? `
+                <h2 style="margin: 0 0 8px 0; font-size: 20px; font-weight: 800; color: #0f172a; tracking-tight: -0.4px;">
+                  Admin Security Passcode
+                </h2>
+                <p style="margin: 0 0 20px 0; font-size: 14px; line-height: 1.6; color: #475569;">
+                  Your one-time security passcode for EduConnects Admin Portal verification is below:
+                </p>
+              `
+                  : `
+                <h2 style="margin: 0 0 8px 0; font-size: 20px; font-weight: 800; color: #0f172a; tracking-tight: -0.4px;">
+                  Hello ${recipientName}! 👋
+                </h2>
+                <p style="margin: 0 0 20px 0; font-size: 14px; line-height: 1.6; color: #475569;">
+                  Thank you for using EduConnects. Your one-time verification code is below. Enter this code to verify your account and complete your login:
+                </p>
+              `
+              }
 
-        <!-- Security Notice -->
-        <div class="security-notice">
-          <strong>🔐 Security Notice:</strong> If you did not request this login or verification, you can safely ignore this email. Never share this verification code with anyone.
-        </div>
+              <!-- OTP Container Box -->
+              <table role="presentation" border="0" cellpadding="0" cellspacing="0" width="100%" style="margin: 24px 0;">
+                <tr>
+                  <td align="center" style="background: linear-gradient(135deg, #f0fdf4 0%, #e6f0ef 100%); border: 2px solid #a7f3d0; border-radius: 20px; padding: 24px 16px; text-align: center;">
+                    <div style="font-size: 11px; font-weight: 800; text-transform: uppercase; letter-spacing: 2px; color: #0f5c5a; margin-bottom: 8px;">
+                      ${isAdminLogin ? "ADMIN PASSCODE" : "ONE-TIME VERIFICATION CODE"}
+                    </div>
+                    <div class="otp-code" style="font-size: 36px; font-weight: 900; color: #083f3d; letter-spacing: 8px; font-family: 'SFMono-Regular', Consolas, 'Liberation Mono', Menlo, Courier, monospace; margin: 6px 0; user-select: all; -webkit-user-select: all;">
+                      ${formattedOtp}
+                    </div>
+                    <div style="margin-top: 10px;">
+                      <span style="display: inline-block; font-size: 11px; font-weight: 700; color: #0f5c5a; background-color: #ffffff; padding: 5px 14px; border-radius: 9999px; border: 1px solid #a7f3d0;">
+                        ⏱️ Valid for ${expiresInMinutes} minutes
+                      </span>
+                    </div>
+                  </td>
+                </tr>
+              </table>
 
-        <!-- Call to Action Button (Zero OTP in URL) -->
-        <div class="cta-container">
-          <a href="${baseUrl}/${isAdminLogin ? "verify-email?email=" + encodeURIComponent(params.recipientEmail) + "&redirectTo=/admin" : "verify-otp?email=" + encodeURIComponent(params.recipientEmail)}" class="cta-button" target="_blank">${isAdminLogin ? "Open Admin Portal" : "Verify OTP"}</a>
-        </div>
+              <!-- Explicit Verification Note Callout (User Requirement) -->
+              <div style="margin: 24px 0; background-color: #f0fdf4; border: 1px solid #bbf7d0; border-left: 4px solid #16a34a; border-radius: 12px; padding: 14px 18px; text-align: left;">
+                <p style="margin: 0; font-size: 13px; line-height: 1.55; color: #166534; font-weight: 500;">
+                  Someone visited our official website <a href="https://www.educonnects.co.in" style="color: #15803d; font-weight: 700; text-decoration: underline;" target="_blank">www.educonnects.co.in</a> and requested this verification email. If you did not request it, please ignore this email. Thank you!
+                </p>
+              </div>
 
-        <!-- Disregard Disclaimer -->
-        <p class="disregard-text">
-          If you did not request this login, you can ignore this email.
-        </p>
-      </div>
+              <!-- CTA Button -->
+              <div style="margin: 28px 0 12px 0;">
+                <a href="${baseUrl}/${isAdminLogin ? "verify-email?email=" + encodeURIComponent(params.recipientEmail) + "&redirectTo=/admin" : "verify-otp?email=" + encodeURIComponent(params.recipientEmail)}" class="cta-button" target="_blank" style="display: inline-block; background: linear-gradient(135deg, #0f5c5a 0%, #083f3d 100%); color: #ffffff !important; font-size: 15px; font-weight: 700; text-decoration: none; padding: 14px 36px; border-radius: 14px; box-shadow: 0 10px 20px rgba(15, 92, 90, 0.25); text-align: center;">
+                  ${isAdminLogin ? "Open Admin Portal" : "Verify Email Now"} &rarr;
+                </a>
+              </div>
 
-      <!-- Footer -->
-      <div class="footer">
-        <p class="footer-brand" style="font-weight: 700; font-size: 13px; color: #334155; margin: 0;">&copy; ${currentYear} ${OFFICIAL_COMPANY_INFO.legalName}</p>
-        <p class="footer-tagline" style="font-size: 12px; color: #64748b; margin: 4px 0 0 0;">Brand Name: ${OFFICIAL_COMPANY_INFO.brandName}</p>
-        <p class="footer-copyright" style="font-size: 11px; color: #94a3b8; margin: 6px 0 0 0;">All rights reserved.</p>
-      </div>
-    </div>
-  </div>
+            </td>
+          </tr>
+
+          <!-- Standardized EduConnects Footer (Exact User Requirement) -->
+          <tr>
+            <td class="footer-padding" style="background-color: #f8fafc; border-top: 1px solid #e2e8f0; padding: 24px 32px; text-align: center; font-size: 12px; line-height: 1.6; color: #64748b;">
+              <p style="margin: 0 0 4px 0; font-weight: 700; color: #1e293b; font-size: 13px;">
+                &copy; 2026 EduConnects
+              </p>
+              <p style="margin: 0 0 4px 0; font-weight: 600; color: #475569;">
+                Office Address
+              </p>
+              <p style="margin: 0 0 2px 0; color: #64748b;">
+                Powered by MyProFunnels Ventures
+              </p>
+              <p style="margin: 0 0 2px 0; color: #64748b;">
+                Registered Business: Shrivastava ProFunnels Ventures Pvt Ltd
+              </p>
+              <p style="margin: 0; color: #64748b;">
+                Civil Lines, Lalitpur, Uttar Pradesh 284403
+              </p>
+            </td>
+          </tr>
+
+        </table>
+
+      </td>
+    </tr>
+  </table>
+
 </body>
 </html>`;
 }
