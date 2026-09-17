@@ -161,6 +161,25 @@ export default function ContactPage() {
                   </div>
                 </div>
 
+                {/* Mobile Number */}
+                <div className="flex items-start gap-4">
+                  <div className="p-3 bg-sky-50 text-sky-600 rounded-2xl border border-sky-100 shrink-0 shadow-2xs">
+                    <Phone className="h-5 w-5" />
+                  </div>
+                  <div className="space-y-0.5">
+                    <h4 className="text-xs font-bold text-slate-500 uppercase tracking-wider">
+                      Mobile Number
+                    </h4>
+                    <a
+                      href={OFFICIAL_COMPANY_INFO.phoneUrl}
+                      className="text-sm font-bold text-sky-600 hover:underline flex items-center gap-1"
+                    >
+                      {OFFICIAL_COMPANY_INFO.phoneNumber}
+                    </a>
+                    <p className="text-[11px] text-slate-500 font-medium">Direct call & phone support</p>
+                  </div>
+                </div>
+
                 {/* Official WhatsApp */}
                 <div className="flex items-start gap-4">
                   <div className="p-3 bg-emerald-50 text-emerald-600 rounded-2xl border border-emerald-100 shrink-0 shadow-2xs">
