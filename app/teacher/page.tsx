@@ -117,8 +117,8 @@ export default function TeacherLandingPage() {
     },
     {
       step: "02",
-      title: "Pay ₹99 Registration Fee",
-      desc: "Complete the nominal ₹99 educator registration fee via Cashfree to verify your application and activate your onboarding.",
+      title: "Pay Registration Fee",
+      desc: "Complete the educator registration fee via Cashfree to verify your application and activate your onboarding.",
       icon: IndianRupee,
     },
     {
@@ -162,7 +162,7 @@ export default function TeacherLandingPage() {
       achievement: "240+ Active Learners",
       subjects: "Mechanics & Electromagnetism",
       quote:
-        "The built-in LiveKit classroom with interactive whiteboard is smoother than any third-party app I used. My students love live problem-solving, and on-demand video course sales provide reliable passive revenue.",
+        "The built-in live classroom with interactive whiteboard is smoother than any third-party app I used. My students love live problem-solving, and on-demand video course sales provide reliable passive revenue.",
     },
     {
       name: "Meenakshi Sundaram",
@@ -179,19 +179,19 @@ export default function TeacherLandingPage() {
 
   const teacherFaqs = [
     {
-      question: "Why is there a ₹99 Educator Registration Fee?",
+      question: "Why is there an Educator Registration Fee?",
       answer:
-        "The nominal ₹99 registration fee ensures serious, verified educator applications and prevents automated spam. It covers document verification overhead and grants full access to the Educator Dashboard, LiveKit digital classroom, and course publishing suite. Learners are never charged any registration fee.",
+        "The nominal registration fee ensures serious, verified educator applications and prevents automated spam. It covers document verification overhead and grants full access to the Educator Dashboard, live digital classroom, and course publishing suite. Learners are never charged any registration fee.",
     },
     {
       question: "How do I become a verified educator on EduConnects?",
       answer:
-        "Simply sign up as an educator, complete your professional profile (headline, subjects, experience, hourly rate), pay the ₹99 registration fee, and submit your educational degrees or certificates in our multi-step onboarding portal. Our administration team audits each application within 24-48 hours.",
+        "Simply sign up as an educator, complete your professional profile (headline, subjects, experience, hourly rate), pay the registration fee, and submit your educational degrees or certificates in our multi-step onboarding portal. Our administration team audits each application within 24-48 hours.",
     },
     {
       question: "How do live classes work for educators?",
       answer:
-        "You define your weekly availability and schedule live class slots (1-on-1 or group). When a learner books, both of you receive instant notifications. At class time, enter the built-in LiveKit classroom directly from your dashboard with HD video, interactive whiteboard, and chat.",
+        "You define your weekly availability and schedule live class slots (1-on-1 or group). When a learner books, both of you receive instant notifications. At class time, enter the built-in live classroom directly from your dashboard with HD video, interactive whiteboard, and chat.",
     },
     {
       question: "How do I create and sell on-demand video courses?",
@@ -514,7 +514,7 @@ export default function TeacherLandingPage() {
                   Schedule Live Classes with Built-In Whiteboard
                 </h3>
                 <p className="text-sm text-slate-600 leading-relaxed">
-                  Host 1-on-1 private tutorials or high-capacity group classes directly in the browser with LiveKit WebRTC video.
+                  Host 1-on-1 private tutorials or high-capacity group classes directly in the browser with real-time WebRTC video.
                 </p>
                 <div className="space-y-2.5 text-xs sm:text-sm text-slate-700 font-semibold">
                   <div className="flex items-center gap-2">
@@ -926,7 +926,7 @@ export default function TeacherLandingPage() {
             </div>
 
             <div className="pt-6 flex items-center justify-center gap-6 text-xs text-[#A7F3D0]">
-              <span>✓ Nominal ₹99 Registration Fee</span>
+              <span>✓ Nominal Registration Fee</span>
               <span>•</span>
               <span>✓ Verified Educator Badge</span>
               <span>•</span>
