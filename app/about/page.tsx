@@ -180,6 +180,107 @@ export default function AboutPage() {
       <FloatingNavbar variant={isEducator ? "teacher" : "default"} />
 
       <main className="flex-1 pt-32 pb-24 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 w-full space-y-24 relative z-10">
+        {/* ========================================================================= */}
+        {/* 1. ABOUT THE FOUNDER SECTION (FIRST SECTION BEFORE ALL EXISTING CONTENT) */}
+        {/* ========================================================================= */}
+        <section className="relative rounded-3xl overflow-hidden shadow-2xl border border-emerald-500/20 bg-slate-950">
+          {/* Banner Background with Subtle Gradient Overlay */}
+          <div className="absolute inset-0 -z-0">
+            <img
+              src="/images/educonnects-owner-banner.jpeg"
+              alt="EduConnects Banner"
+              className="w-full h-full object-cover object-center filter brightness-[0.45] scale-105 transition-transform duration-700 hover:scale-100"
+            />
+            <div className="absolute inset-0 bg-gradient-to-r from-slate-950/95 via-emerald-950/85 to-slate-950/95" />
+            <div className="absolute inset-0 bg-[radial-gradient(circle_at_top_right,rgba(22,128,91,0.25),transparent_50%)]" />
+          </div>
+
+          <div className="relative z-10 p-6 sm:p-10 lg:p-14 text-white">
+            <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-12 items-center">
+              {/* Founder Portrait Column */}
+              <div className="lg:col-span-5 flex flex-col items-center text-center">
+                <div className="relative w-full max-w-[320px] sm:max-w-[360px] aspect-[4/5] rounded-3xl overflow-hidden shadow-2xl border-4 border-emerald-400/40 bg-slate-900 group">
+                  <img
+                    src="/images/educonnect-owner-photo.jpeg"
+                    alt="Neeraj Shrivastava - Founder of EduConnects"
+                    className="w-full h-full object-cover object-top transition-transform duration-500 group-hover:scale-105"
+                  />
+                  <div className="absolute inset-0 bg-gradient-to-t from-slate-950/90 via-slate-950/20 to-transparent" />
+                  <div className="absolute bottom-4 left-4 right-4 text-left">
+                    <span className="inline-block text-[10px] font-extrabold uppercase tracking-wider text-emerald-300 bg-emerald-950/80 px-2.5 py-0.5 rounded-full border border-emerald-400/30 mb-1">
+                      Founder & Academic Leader
+                    </span>
+                    <div className="text-lg sm:text-xl font-black text-white">Neeraj Shrivastava</div>
+                    <div className="text-xs text-slate-300 font-medium">Founder of EduConnects</div>
+                  </div>
+                </div>
+              </div>
+
+              {/* Founder Narrative & Vision/Mission Column */}
+              <div className="lg:col-span-7 space-y-6">
+                <div className="space-y-3">
+                  <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-emerald-500/20 border border-emerald-400/40 text-emerald-200 text-xs font-bold uppercase tracking-wider">
+                    <GraduationCap className="h-3.5 w-3.5 text-emerald-400" />
+                    <span>Leadership & Vision</span>
+                  </div>
+
+                  <h2 className="text-3xl sm:text-4xl lg:text-5xl font-black tracking-tight text-white">
+                    About the Founder
+                  </h2>
+
+                  <p className="text-base sm:text-lg font-medium text-emerald-100 leading-relaxed">
+                    Neeraj Shrivastava, Founder of EduConnects, brings over a decade of experience across education, academic leadership, technology and entrepreneurship.
+                  </p>
+
+                  <p className="text-sm sm:text-base text-slate-200 leading-relaxed font-normal">
+                    His journey began with B.Sc. in Mathematics (2002) and M.Sc. in Computer Science (2004). After preparing for the IAS in Delhi (2009–2011), he dedicated himself to education, working as a teacher at Aspirant International School and later at Rani Lakshmibai Public School, where he progressed from TGT to PGT. In 2023–24, he served as Principal at AVM Inter College, Lalitpur.
+                  </p>
+
+                  <div className="p-3.5 sm:p-4 rounded-2xl bg-emerald-950/60 border border-emerald-400/30 text-xs sm:text-sm font-semibold text-emerald-200 leading-relaxed">
+                    His transition from student → teacher → academic leader → entrepreneur inspired the creation of EduConnects in 2026.
+                  </div>
+                </div>
+
+                {/* Our Vision & Our Mission Cards */}
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 pt-2">
+                  <div className="p-4 sm:p-5 rounded-2xl bg-white/10 border border-emerald-400/20 backdrop-blur-md space-y-2">
+                    <div className="flex items-center gap-2">
+                      <div className="p-1.5 rounded-lg bg-emerald-500/20 text-emerald-300">
+                        <Target className="h-4 w-4" />
+                      </div>
+                      <h3 className="text-base sm:text-lg font-black text-white">
+                        Our Vision
+                      </h3>
+                    </div>
+                    <p className="text-xs sm:text-sm text-slate-200 leading-relaxed font-normal">
+                      To connect learners, educators and opportunities through technology and make quality education more accessible.
+                    </p>
+                  </div>
+
+                  <div className="p-4 sm:p-5 rounded-2xl bg-white/10 border border-emerald-400/20 backdrop-blur-md space-y-2">
+                    <div className="flex items-center gap-2">
+                      <div className="p-1.5 rounded-lg bg-emerald-500/20 text-emerald-300">
+                        <Heart className="h-4 w-4" />
+                      </div>
+                      <h3 className="text-base sm:text-lg font-black text-white">
+                        Our Mission
+                      </h3>
+                    </div>
+                    <p className="text-xs sm:text-sm text-slate-200 leading-relaxed font-normal">
+                      To create a trusted ecosystem where students can find the right educators, educators can reach more learners, and everyone can learn, teach, grow and create opportunities together.
+                    </p>
+                  </div>
+                </div>
+
+                {/* Tagline */}
+                <div className="pt-3 border-t border-emerald-500/30 flex items-center justify-between flex-wrap gap-2 text-xs sm:text-sm font-bold text-emerald-200">
+                  <span>EduConnects — Connecting Education. Creating Opportunities.</span>
+                </div>
+              </div>
+            </div>
+          </div>
+        </section>
+
         {/* Hero Section */}
         <div className="text-center max-w-3xl mx-auto space-y-4">
           <div
