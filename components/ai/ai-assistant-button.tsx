@@ -29,7 +29,7 @@ export const AIAssistantButton: React.FC<AIAssistantButtonProps> = ({
       <button
         onClick={onClick}
         aria-label="Open EduConnects AI Assistant"
-        className={`group relative flex items-center justify-center w-14 h-14 rounded-full shadow-xl transition-all duration-300 transform hover:scale-105 active:scale-95 focus:outline-none focus:ring-4 focus:ring-offset-2 focus:ring-teal-500/40 ${theme.floatingButtonBg}`}
+        className={`group relative flex items-center justify-center w-14 h-14 rounded-full shadow-2xl transition-all duration-300 transform hover:scale-105 active:scale-95 focus:outline-none focus:ring-4 focus:ring-offset-2 focus:ring-teal-500/40 ${theme.floatingButtonBg}`}
       >
         {/* Soft pulsing halo */}
         <span className="absolute -inset-1 rounded-full bg-current opacity-20 animate-ping pointer-events-none" />
@@ -40,10 +40,11 @@ export const AIAssistantButton: React.FC<AIAssistantButtonProps> = ({
           <Sparkles className="w-3.5 h-3.5 absolute -top-1 -right-1 text-amber-300 animate-pulse" />
         </div>
 
-        {/* Tooltip on hover for desktop */}
-        <span className="absolute right-16 px-3 py-1.5 rounded-lg bg-slate-900 text-white text-xs font-medium whitespace-nowrap opacity-0 group-hover:opacity-100 transition-opacity duration-200 pointer-events-none shadow-md hidden sm:block">
-          Ask EduConnects AI
-        </span>
+        {/* Floating pill badge on desktop */}
+        <div className="absolute right-16 px-3.5 py-1.5 rounded-full bg-slate-900/90 backdrop-blur-md text-white text-xs font-semibold whitespace-nowrap opacity-0 group-hover:opacity-100 transition-all duration-200 pointer-events-none shadow-xl border border-white/15 hidden sm:flex items-center gap-1.5 translate-x-2 group-hover:translate-x-0">
+          <Sparkles className="w-3 h-3 text-amber-400" />
+          <span>Ask EduConnects AI</span>
+        </div>
 
         {/* Optional notification / first-time badge */}
         {unreadCount > 0 && (

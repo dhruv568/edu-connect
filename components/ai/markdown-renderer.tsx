@@ -8,16 +8,14 @@ interface MarkdownRendererProps {
 
 /**
  * Lightweight and secure inline markdown renderer for AI chat messages.
- * Supports: bold, italic, links [text](/href), inline code `code`, lists, and paragraphs.
+ * Supports: headings, bold, italic, links [text](/href), inline code `code`, lists, rules, and paragraphs.
  */
 export const MarkdownRenderer: React.FC<MarkdownRendererProps> = ({ content, className = "" }) => {
   if (!content) return null;
 
-  // Split by line breaks to handle paragraphs and lists
   const lines = content.split("\n");
 
   const renderInline = (text: string): React.ReactNode[] => {
-    // Regex for: links [text](url), bold **text**, inline code `code`
     const tokenRegex = /(\[[^\]]+\]\([^)]+\)|\*\*[^*]+\*\*|`[^`]+`)/g;
     const parts = text.split(tokenRegex);
 
@@ -34,9 +32,10 @@ export const MarkdownRenderer: React.FC<MarkdownRendererProps> = ({ content, cla
             <Link
               key={index}
               href={href}
-              className="font-medium text-emerald-700 underline underline-offset-2 hover:text-emerald-900 transition-colors"
+              className="inline-flex items-center gap-1 font-semibold text-teal-700 bg-teal-50/90 hover:bg-teal-100/90 border border-teal-200/70 px-2 py-0.5 rounded-lg text-[13px] transition-all hover:shadow-2xs group my-0.5 align-baseline"
             >
-              {label}
+              <span>{label}</span>
+              <span className="text-[10px] text-teal-500 group-hover:translate-x-0.5 transition-transform">→</span>
             </Link>
           );
         }
@@ -46,9 +45,10 @@ export const MarkdownRenderer: React.FC<MarkdownRendererProps> = ({ content, cla
             href={href}
             target="_blank"
             rel="noopener noreferrer"
-            className="font-medium text-emerald-700 underline underline-offset-2 hover:text-emerald-900 transition-colors"
+            className="inline-flex items-center gap-1 font-semibold text-teal-700 bg-teal-50/90 hover:bg-teal-100/90 border border-teal-200/70 px-2 py-0.5 rounded-lg text-[13px] transition-all hover:shadow-2xs group my-0.5 align-baseline"
           >
-            {label} ↗
+            <span>{label}</span>
+            <span className="text-[10px] text-teal-500 group-hover:translate-x-0.5 group-hover:-translate-y-0.5 transition-transform">↗</span>
           </a>
         );
       }
@@ -56,14 +56,14 @@ export const MarkdownRenderer: React.FC<MarkdownRendererProps> = ({ content, cla
       // Bold: **text**
       const boldMatch = part.match(/^\*\*([^*]+)\*\*$/);
       if (boldMatch) {
-        return <strong key={index} className="font-semibold">{boldMatch[1]}</strong>;
+        return <strong key={index} className="font-bold text-slate-900">{boldMatch[1]}</strong>;
       }
 
       // Code: `code`
       const codeMatch = part.match(/^`([^`]+)`$/);
       if (codeMatch) {
         return (
-          <code key={index} className="px-1.5 py-0.5 rounded bg-slate-100 font-mono text-xs text-slate-800 border border-slate-200">
+          <code key={index} className="px-1.5 py-0.5 rounded-md bg-slate-100 font-mono text-[12px] text-slate-800 font-medium border border-slate-200/70 shadow-2xs">
             {codeMatch[1]}
           </code>
         );
@@ -74,19 +74,42 @@ export const MarkdownRenderer: React.FC<MarkdownRendererProps> = ({ content, cla
   };
 
   return (
-    <div className={`space-y-1.5 leading-relaxed text-sm ${className}`}>
+    <div className={`space-y-1.5 leading-relaxed text-[13.5px] ${className}`}>
       {lines.map((line, idx) => {
         const trimmed = line.trim();
         if (!trimmed) {
           return <div key={idx} className="h-1.5" />;
         }
 
+        // Horizontal Rule
+        if (trimmed === "---" || trimmed === "***") {
+          return <hr key={idx} className="my-2 border-slate-200" />;
+        }
+
+        // Heading 3
+        if (trimmed.startsWith("### ")) {
+          return (
+            <h4 key={idx} className="font-bold text-slate-900 text-[14px] mt-2.5 mb-1 tracking-tight">
+              {renderInline(trimmed.slice(4))}
+            </h4>
+          );
+        }
+
+        // Heading 2
+        if (trimmed.startsWith("## ")) {
+          return (
+            <h3 key={idx} className="font-extrabold text-slate-900 text-[15px] mt-3 mb-1.5 tracking-tight">
+              {renderInline(trimmed.slice(3))}
+            </h3>
+          );
+        }
+
         // Bullet list item
         if (trimmed.startsWith("- ") || trimmed.startsWith("* ")) {
           return (
-            <div key={idx} className="flex items-start space-x-2 pl-1">
-              <span className="text-slate-400 select-none mt-0.5">•</span>
-              <div className="flex-1">{renderInline(trimmed.slice(2))}</div>
+            <div key={idx} className="flex items-start gap-2.5 pl-0.5 my-0.5">
+              <span className="w-1.5 h-1.5 rounded-full bg-teal-600 mt-2 shrink-0 select-none shadow-2xs" />
+              <div className="flex-1 leading-relaxed text-slate-700">{renderInline(trimmed.slice(2))}</div>
             </div>
           );
         }
@@ -95,14 +118,16 @@ export const MarkdownRenderer: React.FC<MarkdownRendererProps> = ({ content, cla
         const numMatch = trimmed.match(/^(\d+)\.\s+(.*)$/);
         if (numMatch) {
           return (
-            <div key={idx} className="flex items-start space-x-2 pl-1">
-              <span className="text-slate-500 font-semibold select-none text-xs mt-0.5">{numMatch[1]}.</span>
-              <div className="flex-1">{renderInline(numMatch[2])}</div>
+            <div key={idx} className="flex items-start gap-2 pl-0.5 my-0.5">
+              <span className="flex items-center justify-center w-4 h-4 rounded-full bg-teal-50 border border-teal-200/90 text-teal-800 font-bold text-[10px] shrink-0 mt-0.5 select-none">
+                {numMatch[1]}
+              </span>
+              <div className="flex-1 leading-relaxed text-slate-700">{renderInline(numMatch[2])}</div>
             </div>
           );
         }
 
-        return <p key={idx}>{renderInline(line)}</p>;
+        return <p key={idx} className="text-slate-800 leading-relaxed">{renderInline(line)}</p>;
       })}
     </div>
   );

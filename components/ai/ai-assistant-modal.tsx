@@ -294,70 +294,92 @@ export const AIAssistantModal: React.FC<AIAssistantModalProps> = ({
       role="dialog"
       aria-label="EduConnects AI Assistant"
       aria-modal="true"
-      className="fixed bottom-0 right-0 sm:bottom-5 sm:right-5 z-50 w-full sm:w-[420px] h-[92vh] sm:h-[620px] max-h-[100vh] sm:max-h-[640px] flex flex-col bg-white sm:rounded-2xl shadow-2xl border border-slate-200 overflow-hidden transition-all duration-300 animate-in fade-in slide-in-from-bottom-6"
+      className="fixed bottom-0 right-0 sm:bottom-6 sm:right-6 z-50 w-full sm:w-[430px] h-[92vh] sm:h-[640px] max-h-[100vh] sm:max-h-[660px] flex flex-col bg-white sm:rounded-3xl shadow-2xl shadow-slate-900/20 border border-slate-200/90 overflow-hidden transition-all duration-300 animate-in fade-in slide-in-from-bottom-6"
     >
       {/* 1. Header with branding & section adaptation */}
-      <div className={`flex items-center justify-between px-4 py-3.5 shadow-sm select-none ${theme.headerBg} ${theme.headerText}`}>
-        <div className="flex items-center space-x-2.5">
-          <div className="w-9 h-9 rounded-full bg-white/15 backdrop-blur-sm flex items-center justify-center border border-white/20 shadow-inner">
-            <Bot className="w-5 h-5 text-white" />
-          </div>
-          <div>
-            <div className="flex items-center space-x-1.5">
-              <h2 className="text-sm font-bold tracking-tight">EduConnects AI Assistant</h2>
-              <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse" title="Online" />
-            </div>
-            <p className="text-[11px] text-white/80 capitalize font-medium">
-              {role === "guest" ? "Platform Guide" : `${role.toLowerCase()} Assistant`}
-            </p>
-          </div>
-        </div>
+      <div className={`px-4 py-3.5 select-none ${theme.headerBg} ${theme.headerText} shadow-sm`}>
+        {/* Mobile drag handle bar */}
+        <div className="w-10 h-1 bg-white/30 rounded-full mx-auto mb-2 sm:hidden" />
 
-        {/* Action Controls */}
-        <div className="flex items-center space-x-1 text-white/80">
-          <button
-            onClick={handleNewConversation}
-            title="New Conversation"
-            className="p-1.5 rounded-lg hover:bg-white/15 transition-colors focus:outline-none focus:ring-1 focus:ring-white"
-            aria-label="Start new conversation"
-          >
-            <PlusCircle className="w-4 h-4" />
-          </button>
-          <button
-            onClick={handleClearConversation}
-            title="Clear Chat"
-            className="p-1.5 rounded-lg hover:bg-white/15 transition-colors focus:outline-none focus:ring-1 focus:ring-white"
-            aria-label="Clear chat history"
-          >
-            <RotateCcw className="w-4 h-4" />
-          </button>
-          <button
-            onClick={onClose}
-            title="Close Assistant"
-            className="p-1.5 rounded-lg hover:bg-white/15 transition-colors focus:outline-none focus:ring-1 focus:ring-white"
-            aria-label="Close Assistant"
-          >
-            <X className="w-4 h-4" />
-          </button>
+        <div className="flex items-center justify-between">
+          <div className="flex items-center space-x-3">
+            {/* Assistant Avatar with pulse ring */}
+            <div className="relative flex items-center justify-center w-10 h-10 rounded-2xl bg-white/15 backdrop-blur-md border border-white/25 shadow-inner">
+              <Bot className="w-5 h-5 text-white" />
+              <span
+                className="absolute -bottom-0.5 -right-0.5 w-3 h-3 rounded-full bg-emerald-400 border-2 border-emerald-900 ring-2 ring-emerald-400/40 animate-pulse"
+                title="Online & Ready"
+              />
+            </div>
+
+            <div>
+              <div className="flex items-center space-x-2">
+                <h2 className="text-[15px] font-black tracking-tight text-white">EduConnects AI</h2>
+                <span className="px-2 py-0.5 rounded-full text-[9px] font-extrabold uppercase tracking-wider bg-white/20 text-white backdrop-blur-xs border border-white/20">
+                  {role === "guest" ? "Guide" : role.toLowerCase()}
+                </span>
+              </div>
+              <p className="text-[11px] text-white/80 font-medium flex items-center gap-1 mt-0.5">
+                <span className="w-1.5 h-1.5 rounded-full bg-emerald-300 inline-block" />
+                <span>Always online & ready to assist</span>
+              </p>
+            </div>
+          </div>
+
+          {/* Action Controls */}
+          <div className="flex items-center space-x-1 text-white/85">
+            <button
+              onClick={handleNewConversation}
+              title="New Conversation"
+              className="p-2 rounded-xl hover:bg-white/15 transition-all focus:outline-none focus:ring-1 focus:ring-white active:scale-95"
+              aria-label="Start new conversation"
+            >
+              <PlusCircle className="w-4 h-4" />
+            </button>
+            <button
+              onClick={handleClearConversation}
+              title="Clear Chat"
+              className="p-2 rounded-xl hover:bg-white/15 transition-all focus:outline-none focus:ring-1 focus:ring-white active:scale-95"
+              aria-label="Clear chat history"
+            >
+              <RotateCcw className="w-4 h-4" />
+            </button>
+            <button
+              onClick={onClose}
+              title="Close Assistant"
+              className="p-2 rounded-xl hover:bg-white/20 transition-all focus:outline-none focus:ring-1 focus:ring-white active:scale-95 ml-0.5"
+              aria-label="Close Assistant"
+            >
+              <X className="w-4 h-4" />
+            </button>
+          </div>
         </div>
       </div>
 
       {/* 2. Messages List Area */}
-      <div className="flex-1 overflow-y-auto p-4 space-y-4 bg-slate-50/60">
-        {/* Contextual Quick Questions Pills on top when starting */}
+      <div className="flex-1 overflow-y-auto p-4 space-y-4 bg-gradient-to-b from-slate-50/70 to-slate-100/40">
+        {/* Welcome Starter Card & Suggested Questions when starting */}
         {messages.length <= 1 && (
-          <div className="mb-3 space-y-2">
-            <div className="flex items-center space-x-1 text-xs font-semibold text-slate-500 uppercase tracking-wider">
-              <Sparkles className="w-3 h-3 text-amber-500" />
-              <span>Suggested Questions</span>
+          <div className="p-4 rounded-3xl bg-white border border-slate-200/80 shadow-xs mb-3 space-y-3">
+            <div className="flex items-start gap-3">
+              <div className="w-9 h-9 rounded-2xl bg-gradient-to-tr from-teal-500 to-emerald-400 text-white flex items-center justify-center shrink-0 shadow-xs">
+                <Sparkles className="w-4 h-4" />
+              </div>
+              <div>
+                <h3 className="text-sm font-bold text-slate-900 tracking-tight">How can I help you today?</h3>
+                <p className="text-xs text-slate-500 mt-0.5 leading-relaxed">
+                  Ask any question about courses, teachers, and live classes, or pick a suggested topic below:
+                </p>
+              </div>
             </div>
-            <div className="flex flex-wrap gap-1.5">
+
+            <div className="flex flex-wrap gap-1.5 pt-1">
               {quickQuestions.map((q, idx) => (
                 <button
                   key={idx}
                   onClick={() => handleSendMessage(q)}
                   disabled={isLoading}
-                  className={`text-xs font-medium px-3 py-1.5 rounded-full border transition-all duration-200 text-left ${theme.pillBg} ${theme.pillBorder} ${theme.pillText} active:scale-95 shadow-2xs hover:shadow-xs`}
+                  className={`text-xs font-semibold px-3.5 py-1.5 rounded-full border transition-all duration-200 text-left ${theme.pillBg} ${theme.pillBorder} ${theme.pillText} active:scale-95 shadow-2xs hover:shadow-xs hover:border-teal-400/80`}
                 >
                   {q}
                 </button>
@@ -376,24 +398,24 @@ export const AIAssistantModal: React.FC<AIAssistantModalProps> = ({
             >
               {/* Avatar */}
               <div
-                className={`w-7 h-7 rounded-full flex items-center justify-center shrink-0 text-xs font-bold ${
+                className={`w-7 h-7 rounded-xl flex items-center justify-center shrink-0 text-xs font-bold ${
                   isUser
                     ? `${theme.accentBg} text-white shadow-xs`
-                    : "bg-white text-emerald-800 border border-slate-200 shadow-xs"
+                    : "bg-white text-teal-700 border border-teal-200/80 shadow-xs"
                 }`}
               >
-                {isUser ? <User className="w-4 h-4" /> : <Bot className="w-4 h-4 text-emerald-700" />}
+                {isUser ? <User className="w-4 h-4" /> : <Bot className="w-4 h-4 text-teal-700" />}
               </div>
 
               {/* Message Bubble */}
-              <div className={`max-w-[82%] relative group`}>
+              <div className="max-w-[84%] relative group">
                 <div
-                  className={`p-3.5 rounded-2xl text-sm ${
+                  className={`p-4 rounded-2xl text-[13.5px] leading-relaxed ${
                     isUser
-                      ? `${theme.bubbleUserBg} ${theme.bubbleUserText} rounded-tr-xs shadow-xs`
+                      ? `${theme.bubbleUserBg} ${theme.bubbleUserText} rounded-tr-xs shadow-xs font-normal`
                       : msg.isError
                       ? "bg-rose-50 border border-rose-200 text-rose-800 rounded-tl-xs shadow-xs"
-                      : "bg-white border border-slate-200 text-slate-800 rounded-tl-xs shadow-xs"
+                      : "bg-white border border-slate-200/90 text-slate-800 rounded-tl-xs shadow-xs"
                   }`}
                 >
                   {isUser ? (
@@ -405,7 +427,7 @@ export const AIAssistantModal: React.FC<AIAssistantModalProps> = ({
 
                 {/* Metadata & Copy action */}
                 <div
-                  className={`flex items-center gap-1.5 mt-1 px-1 text-[10px] text-slate-400 ${
+                  className={`flex items-center gap-1.5 mt-1.5 px-1 text-[11px] text-slate-400 ${
                     isUser ? "justify-end" : "justify-start"
                   }`}
                 >
@@ -413,13 +435,19 @@ export const AIAssistantModal: React.FC<AIAssistantModalProps> = ({
                   {!isUser && !msg.isError && msg.content && (
                     <button
                       onClick={() => handleCopyMessage(msg.id, msg.content)}
-                      className="opacity-0 group-hover:opacity-100 hover:text-slate-600 transition-opacity ml-1 flex items-center gap-0.5"
+                      className="opacity-0 group-hover:opacity-100 hover:text-slate-700 transition-opacity ml-1.5 flex items-center gap-1 font-medium bg-slate-100 hover:bg-slate-200 px-1.5 py-0.5 rounded text-[10px]"
                       title="Copy response"
                     >
                       {copiedMessageId === msg.id ? (
-                        <Check className="w-3 h-3 text-emerald-600" />
+                        <>
+                          <Check className="w-3 h-3 text-emerald-600" />
+                          <span className="text-emerald-700">Copied</span>
+                        </>
                       ) : (
-                        <Copy className="w-3 h-3" />
+                        <>
+                          <Copy className="w-3 h-3" />
+                          <span>Copy</span>
+                        </>
                       )}
                     </button>
                   )}
@@ -432,14 +460,15 @@ export const AIAssistantModal: React.FC<AIAssistantModalProps> = ({
         {/* Loading / Typing indicator */}
         {isLoading && (
           <div className="flex items-start gap-2.5">
-            <div className="w-7 h-7 rounded-full bg-white text-emerald-800 border border-slate-200 flex items-center justify-center shrink-0 shadow-xs">
-              <Bot className="w-4 h-4 text-emerald-700" />
+            <div className="w-7 h-7 rounded-xl bg-white text-teal-700 border border-teal-200/80 flex items-center justify-center shrink-0 shadow-xs">
+              <Bot className="w-4 h-4 text-teal-600 animate-pulse" />
             </div>
-            <div className="bg-white border border-slate-200 p-3 rounded-2xl rounded-tl-xs shadow-xs">
-              <div className="flex items-center space-x-1.5">
-                <span className="w-2 h-2 bg-emerald-600 rounded-full animate-bounce [animation-delay:-0.3s]" />
-                <span className="w-2 h-2 bg-emerald-600 rounded-full animate-bounce [animation-delay:-0.15s]" />
-                <span className="w-2 h-2 bg-emerald-600 rounded-full animate-bounce" />
+            <div className="bg-white border border-slate-200/90 px-4 py-3 rounded-2xl rounded-tl-xs shadow-xs flex items-center gap-2.5">
+              <span className="text-xs text-slate-500 font-medium">EduConnects AI is thinking</span>
+              <div className="flex items-center space-x-1">
+                <span className="w-1.5 h-1.5 bg-teal-600 rounded-full animate-bounce [animation-delay:-0.3s]" />
+                <span className="w-1.5 h-1.5 bg-teal-600 rounded-full animate-bounce [animation-delay:-0.15s]" />
+                <span className="w-1.5 h-1.5 bg-teal-600 rounded-full animate-bounce" />
               </div>
             </div>
           </div>
@@ -447,17 +476,17 @@ export const AIAssistantModal: React.FC<AIAssistantModalProps> = ({
 
         {/* Error state with retry */}
         {errorMessage && (
-          <div className="flex items-center justify-between p-2.5 rounded-lg bg-rose-50 border border-rose-200 text-rose-700 text-xs">
-            <div className="flex items-center space-x-1.5">
-              <AlertCircle className="w-4 h-4 shrink-0" />
-              <span>An error occurred.</span>
+          <div className="flex items-center justify-between p-3 rounded-xl bg-rose-50 border border-rose-200 text-rose-700 text-xs">
+            <div className="flex items-center space-x-2">
+              <AlertCircle className="w-4 h-4 shrink-0 text-rose-600" />
+              <span>An error occurred. Please try again.</span>
             </div>
             <button
               onClick={() => {
                 const lastUser = [...messages].reverse().find((m) => m.role === "user");
                 if (lastUser) handleSendMessage(lastUser.content);
               }}
-              className="font-semibold underline hover:text-rose-900 transition-colors"
+              className="font-bold underline hover:text-rose-900 transition-colors"
             >
               Retry
             </button>
@@ -467,8 +496,8 @@ export const AIAssistantModal: React.FC<AIAssistantModalProps> = ({
         <div ref={messagesEndRef} />
       </div>
 
-      {/* 3. Input footer */}
-      <div className="p-3 bg-white border-t border-slate-200">
+      {/* 3. Input command bar */}
+      <div className="p-3.5 bg-white border-t border-slate-100 shadow-md">
         <form
           onSubmit={(e) => {
             e.preventDefault();
@@ -476,7 +505,7 @@ export const AIAssistantModal: React.FC<AIAssistantModalProps> = ({
           }}
           className="relative flex items-end gap-2"
         >
-          <div className="relative flex-1 rounded-xl border border-slate-300 focus-within:border-teal-600 focus-within:ring-2 focus-within:ring-teal-500/20 bg-slate-50/50 transition-all">
+          <div className="relative flex-1 rounded-2xl border border-slate-200 focus-within:border-teal-600 focus-within:ring-4 focus-within:ring-teal-500/15 bg-slate-50/80 focus-within:bg-white transition-all">
             <textarea
               ref={textareaRef}
               value={inputText}
@@ -484,8 +513,8 @@ export const AIAssistantModal: React.FC<AIAssistantModalProps> = ({
               onKeyDown={handleKeyDown}
               rows={1}
               maxLength={1000}
-              placeholder="Type any question, topic, or ask for guidance..."
-              className="w-full resize-none bg-transparent px-3.5 py-2.5 text-sm text-slate-800 placeholder-slate-400 focus:outline-none max-h-32"
+              placeholder="Ask anything about courses, teachers, live classes..."
+              className="w-full resize-none bg-transparent px-4 py-2.5 text-sm text-slate-900 placeholder-slate-400 focus:outline-none max-h-32 font-normal leading-relaxed"
             />
           </div>
 
@@ -493,21 +522,21 @@ export const AIAssistantModal: React.FC<AIAssistantModalProps> = ({
             type="submit"
             disabled={!inputText.trim() || isLoading}
             aria-label="Send message"
-            className={`flex items-center justify-center w-10 h-10 rounded-xl transition-all duration-200 shrink-0 ${
+            className={`flex items-center justify-center w-10 h-10 rounded-2xl transition-all duration-200 shrink-0 shadow-xs ${
               inputText.trim() && !isLoading
                 ? `${theme.accentBg} ${theme.accentHover} text-white shadow-md active:scale-95`
-                : "bg-slate-100 text-slate-400 cursor-not-allowed"
+                : "bg-slate-100 text-slate-400 cursor-not-allowed border border-slate-200/60"
             }`}
           >
             <Send className="w-4 h-4" />
           </button>
         </form>
 
-        <div className="flex items-center justify-between mt-1.5 px-1">
-          <p className="text-[10px] text-slate-400">
-            Press <kbd className="font-mono bg-slate-100 px-1 rounded text-slate-500">Enter</kbd> to send, <kbd className="font-mono bg-slate-100 px-1 rounded text-slate-500">Shift+Enter</kbd> for newline
-          </p>
-          <span className="text-[10px] text-slate-400">
+        <div className="flex items-center justify-between mt-2 px-1 text-[11px] text-slate-400">
+          <span className="flex items-center gap-1">
+            Press <kbd className="font-mono bg-slate-100 px-1.5 py-0.5 rounded text-[10px] text-slate-600 border border-slate-200">Enter ↵</kbd> to send
+          </span>
+          <span>
             {inputText.length > 0 ? `${inputText.length}/1000` : "EduConnects AI"}
           </span>
         </div>
