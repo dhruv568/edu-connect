@@ -33,19 +33,19 @@ export class AuthService {
   }) {
     const normalizedEmail = input.email.toLowerCase().trim();
 
-    // 1. Check if user already exists and is fully verified in the main users database
+    // 1. Check if user already exists in the main users database
     const existingUser = await prisma.user.findUnique({
       where: { email: normalizedEmail },
     });
 
     if (existingUser) {
-      if (existingUser.emailVerified) {
-        throw new Error("An account with this email already exists.");
+      if (existingUser.emailVerified && existingUser.status === "ACTIVE") {
+        throw new Error("Email already registered. An account with this email already exists. Please log in to your account.");
+      } else if (existingUser.emailVerified) {
+        throw new Error("Email already registered. An account with this email already exists. Please log in to your account.");
       } else {
-        // Legacy unverified account from prior flawed flow: clean up so user can freshly register
-        await prisma.user.delete({
-          where: { id: existingUser.id },
-        });
+        // User exists in pending/unverified state: preserve existing record and data without deleting
+        // Update passwordHash for the pending user record once password is encrypted below
       }
     }
 
@@ -55,6 +55,12 @@ export class AuthService {
     }
 
     const passwordHash = await hashPassword(input.password);
+    if (existingUser) {
+      await prisma.user.update({
+        where: { id: existingUser.id },
+        data: { passwordHash },
+      });
+    }
     const expiryMinutes = getOtpExpiryMinutes();
     const expiresAt = new Date(Date.now() + expiryMinutes * 60 * 1000);
 
@@ -338,25 +344,74 @@ export class AuthService {
 
       const role = pending.role as UserRole;
 
-      // Transactionally create User and Profile in main database, and clean up pending registration
+      // Transactionally create or update User and Profile in main database, and clean up pending registration
       const createdUser = await prisma.$transaction(async (tx) => {
-        const newUser = await tx.user.create({
-          data: {
-            email: normalizedEmail,
-            passwordHash: pending.passwordHash,
-            role,
-            emailVerified: true,
-            emailVerifiedAt: now,
-            profile: {
-              create: {
+        const existingUser = await tx.user.findUnique({
+          where: { email: normalizedEmail },
+          include: {
+            profile: true,
+            teacherProfile: true,
+            studentProfile: true,
+          },
+        });
+
+        let targetUser;
+
+        if (existingUser) {
+          // Continue existing registration idempotently instead of creating duplicate user
+          targetUser = await tx.user.update({
+            where: { id: existingUser.id },
+            data: {
+              passwordHash: pending.passwordHash || existingUser.passwordHash,
+              role: existingUser.role || role,
+              emailVerified: true,
+              emailVerifiedAt: existingUser.emailVerifiedAt || now,
+            },
+            include: {
+              profile: true,
+              teacherProfile: true,
+              studentProfile: true,
+            },
+          });
+
+          if (targetUser.profile) {
+            await tx.profile.update({
+              where: { userId: targetUser.id },
+              data: {
+                firstName: pending.firstName || targetUser.profile.firstName,
+                lastName: pending.lastName || targetUser.profile.lastName,
+                phone: extra.phone || targetUser.profile.phone,
+              },
+            });
+          } else {
+            await tx.profile.create({
+              data: {
+                userId: targetUser.id,
                 firstName: pending.firstName,
                 lastName: pending.lastName,
                 phone: extra.phone || null,
               },
-            },
-            ...(role === "TEACHER" && {
-              teacherProfile: {
-                create: {
+            });
+          }
+
+          if (role === "TEACHER" || targetUser.role === "TEACHER") {
+            if (targetUser.teacherProfile) {
+              await tx.teacherProfile.update({
+                where: { userId: targetUser.id },
+                data: {
+                  headline: extra.headline || targetUser.teacherProfile.headline,
+                  subjects: extra.subjects || targetUser.teacherProfile.subjects,
+                  experienceYears: extra.experienceYears !== undefined ? extra.experienceYears : targetUser.teacherProfile.experienceYears,
+                  hourlyRate: extra.hourlyRate !== undefined ? extra.hourlyRate : targetUser.teacherProfile.hourlyRate,
+                  qualifications: extra.qualifications || targetUser.teacherProfile.qualifications,
+                  languages: extra.languages || targetUser.teacherProfile.languages,
+                  teachingMode: extra.teachingMode || targetUser.teacherProfile.teachingMode,
+                },
+              });
+            } else {
+              await tx.teacherProfile.create({
+                data: {
+                  userId: targetUser.id,
                   headline: extra.headline || "Educator",
                   subjects: extra.subjects || "Mathematics",
                   experienceYears: extra.experienceYears || 0,
@@ -366,30 +421,81 @@ export class AuthService {
                   teachingMode: extra.teachingMode || "ONLINE",
                   verificationStatus: "PENDING",
                 },
-              },
-            }),
-            ...(role === "STUDENT" && {
-              studentProfile: {
-                create: {
+              });
+            }
+          } else if (role === "STUDENT" || targetUser.role === "STUDENT") {
+            if (targetUser.studentProfile) {
+              await tx.studentProfile.update({
+                where: { userId: targetUser.id },
+                data: {
+                  gradeLevel: extra.gradeLevel || targetUser.studentProfile.gradeLevel,
+                  interests: extra.interests || targetUser.studentProfile.interests,
+                  learningPreferences: extra.learningPreferences || targetUser.studentProfile.learningPreferences,
+                },
+              });
+            } else {
+              await tx.studentProfile.create({
+                data: {
+                  userId: targetUser.id,
                   gradeLevel: extra.gradeLevel || "Grade 10",
                   interests: extra.interests,
                   learningPreferences: extra.learningPreferences,
                 },
+              });
+            }
+          }
+        } else {
+          targetUser = await tx.user.create({
+            data: {
+              email: normalizedEmail,
+              passwordHash: pending.passwordHash,
+              role,
+              emailVerified: true,
+              emailVerifiedAt: now,
+              profile: {
+                create: {
+                  firstName: pending.firstName,
+                  lastName: pending.lastName,
+                  phone: extra.phone || null,
+                },
               },
-            }),
-          },
-          include: {
-            profile: true,
-            teacherProfile: true,
-            studentProfile: true,
-          },
+              ...(role === "TEACHER" && {
+                teacherProfile: {
+                  create: {
+                    headline: extra.headline || "Educator",
+                    subjects: extra.subjects || "Mathematics",
+                    experienceYears: extra.experienceYears || 0,
+                    hourlyRate: extra.hourlyRate || 40.0,
+                    qualifications: extra.qualifications,
+                    languages: extra.languages || "English",
+                    teachingMode: extra.teachingMode || "ONLINE",
+                    verificationStatus: "PENDING",
+                  },
+                },
+              }),
+              ...(role === "STUDENT" && {
+                studentProfile: {
+                  create: {
+                    gradeLevel: extra.gradeLevel || "Grade 10",
+                    interests: extra.interests,
+                    learningPreferences: extra.learningPreferences,
+                  },
+                },
+              }),
+            },
+            include: {
+              profile: true,
+              teacherProfile: true,
+              studentProfile: true,
+            },
+          });
+        }
+
+        await tx.pendingRegistration.deleteMany({
+          where: { email: normalizedEmail },
         });
 
-        await tx.pendingRegistration.delete({
-          where: { id: pending.id },
-        });
-
-        return newUser;
+        return targetUser;
       }, {
         maxWait: 10000,
         timeout: 20000,
@@ -558,22 +664,69 @@ export class AuthService {
       const role = pending.role as UserRole;
 
       const createdUser = await prisma.$transaction(async (tx) => {
-        const newUser = await tx.user.create({
-          data: {
-            email: normalizedEmail,
-            passwordHash: pending.passwordHash,
-            role,
-            emailVerified: true,
-            emailVerifiedAt: now,
-            profile: {
-              create: {
+        const existingUser = await tx.user.findUnique({
+          where: { email: normalizedEmail },
+          include: {
+            profile: true,
+            teacherProfile: true,
+            studentProfile: true,
+          },
+        });
+
+        let targetUser;
+
+        if (existingUser) {
+          targetUser = await tx.user.update({
+            where: { id: existingUser.id },
+            data: {
+              passwordHash: pending.passwordHash || existingUser.passwordHash,
+              role: existingUser.role || role,
+              emailVerified: true,
+              emailVerifiedAt: existingUser.emailVerifiedAt || now,
+            },
+            include: {
+              profile: true,
+              teacherProfile: true,
+              studentProfile: true,
+            },
+          });
+
+          if (targetUser.profile) {
+            await tx.profile.update({
+              where: { userId: targetUser.id },
+              data: {
+                firstName: pending.firstName || targetUser.profile.firstName,
+                lastName: pending.lastName || targetUser.profile.lastName,
+              },
+            });
+          } else {
+            await tx.profile.create({
+              data: {
+                userId: targetUser.id,
                 firstName: pending.firstName,
                 lastName: pending.lastName,
               },
-            },
-            ...(role === "TEACHER" && {
-              teacherProfile: {
-                create: {
+            });
+          }
+
+          if (role === "TEACHER" || targetUser.role === "TEACHER") {
+            if (targetUser.teacherProfile) {
+              await tx.teacherProfile.update({
+                where: { userId: targetUser.id },
+                data: {
+                  headline: extra.headline || targetUser.teacherProfile.headline,
+                  subjects: extra.subjects || targetUser.teacherProfile.subjects,
+                  experienceYears: extra.experienceYears !== undefined ? extra.experienceYears : targetUser.teacherProfile.experienceYears,
+                  hourlyRate: extra.hourlyRate !== undefined ? extra.hourlyRate : targetUser.teacherProfile.hourlyRate,
+                  qualifications: extra.qualifications || targetUser.teacherProfile.qualifications,
+                  languages: extra.languages || targetUser.teacherProfile.languages,
+                  teachingMode: extra.teachingMode || targetUser.teacherProfile.teachingMode,
+                },
+              });
+            } else {
+              await tx.teacherProfile.create({
+                data: {
+                  userId: targetUser.id,
                   headline: extra.headline || "Educator",
                   subjects: extra.subjects || "Mathematics",
                   experienceYears: extra.experienceYears || 0,
@@ -583,30 +736,80 @@ export class AuthService {
                   teachingMode: extra.teachingMode || "ONLINE",
                   verificationStatus: "PENDING",
                 },
-              },
-            }),
-            ...(role === "STUDENT" && {
-              studentProfile: {
-                create: {
+              });
+            }
+          } else if (role === "STUDENT" || targetUser.role === "STUDENT") {
+            if (targetUser.studentProfile) {
+              await tx.studentProfile.update({
+                where: { userId: targetUser.id },
+                data: {
+                  gradeLevel: extra.gradeLevel || targetUser.studentProfile.gradeLevel,
+                  interests: extra.interests || targetUser.studentProfile.interests,
+                  learningPreferences: extra.learningPreferences || targetUser.studentProfile.learningPreferences,
+                },
+              });
+            } else {
+              await tx.studentProfile.create({
+                data: {
+                  userId: targetUser.id,
                   gradeLevel: extra.gradeLevel || "Grade 10",
                   interests: extra.interests,
                   learningPreferences: extra.learningPreferences,
                 },
+              });
+            }
+          }
+        } else {
+          targetUser = await tx.user.create({
+            data: {
+              email: normalizedEmail,
+              passwordHash: pending.passwordHash,
+              role,
+              emailVerified: true,
+              emailVerifiedAt: now,
+              profile: {
+                create: {
+                  firstName: pending.firstName,
+                  lastName: pending.lastName,
+                },
               },
-            }),
-          },
-          include: {
-            profile: true,
-            teacherProfile: true,
-            studentProfile: true,
-          },
+              ...(role === "TEACHER" && {
+                teacherProfile: {
+                  create: {
+                    headline: extra.headline || "Educator",
+                    subjects: extra.subjects || "Mathematics",
+                    experienceYears: extra.experienceYears || 0,
+                    hourlyRate: extra.hourlyRate || 40.0,
+                    qualifications: extra.qualifications,
+                    languages: extra.languages || "English",
+                    teachingMode: extra.teachingMode || "ONLINE",
+                    verificationStatus: "PENDING",
+                  },
+                },
+              }),
+              ...(role === "STUDENT" && {
+                studentProfile: {
+                  create: {
+                    gradeLevel: extra.gradeLevel || "Grade 10",
+                    interests: extra.interests,
+                    learningPreferences: extra.learningPreferences,
+                  },
+                },
+              }),
+            },
+            include: {
+              profile: true,
+              teacherProfile: true,
+              studentProfile: true,
+            },
+          });
+        }
+
+        await tx.pendingRegistration.deleteMany({
+          where: { email: normalizedEmail },
         });
 
-        await tx.pendingRegistration.delete({
-          where: { id: pending.id },
-        });
-
-        return newUser;
+        return targetUser;
       }, {
         maxWait: 10000,
         timeout: 20000,

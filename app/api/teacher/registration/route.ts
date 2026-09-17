@@ -24,14 +24,20 @@ export async function GET(request: NextRequest) {
   // Check if already registered
   const existingUser = await prisma.user.findUnique({
     where: { email },
-    include: { teacherProfile: true },
+    include: { teacherProfile: true, profile: true },
   });
   if (existingUser) {
-    return apiSuccess({
-      status: "COMPLETED",
-      registered: true,
-      message: "Account already exists.",
-    });
+    const isFullyRegistered =
+      existingUser.status === "ACTIVE" &&
+      existingUser.emailVerified &&
+      existingUser.teacherProfile !== null;
+    if (isFullyRegistered) {
+      return apiSuccess({
+        status: "COMPLETED",
+        registered: true,
+        message: "Email already registered. Please log in to your account.",
+      });
+    }
   }
 
   const pending = await prisma.pendingRegistration.findUnique({
@@ -39,6 +45,20 @@ export async function GET(request: NextRequest) {
   });
 
   if (!pending) {
+    if (existingUser) {
+      return apiSuccess({
+        status: "PENDING",
+        exists: true,
+        registered: false,
+        firstName: existingUser.profile?.firstName || "",
+        lastName: existingUser.profile?.lastName || "",
+        phone: existingUser.profile?.phone || "",
+        step: existingUser.emailVerified ? 3 : 2,
+        otpVerified: existingUser.emailVerified,
+        profile: null,
+        orderData: null,
+      });
+    }
     return apiSuccess({
       status: "NOT_FOUND",
       exists: false,
@@ -107,16 +127,30 @@ export async function POST(request: NextRequest) {
       }
 
       const normalizedEmail = email.toLowerCase().trim();
+      const passwordHash = await hashPassword(password);
 
-      // Ensure user doesn't already exist
+      // Ensure user doesn't already exist as an active account
       const existingUser = await prisma.user.findUnique({
         where: { email: normalizedEmail },
+        include: { teacherProfile: true },
       });
       if (existingUser) {
-        return apiBadRequest("An account with this email address already exists. Please sign in instead.");
+        const isAlreadyActive =
+          existingUser.status === "ACTIVE" &&
+          existingUser.emailVerified &&
+          existingUser.teacherProfile !== null;
+        if (isAlreadyActive) {
+          return apiBadRequest("Email already registered. Please log in to your account.");
+        }
+        // User exists in pending/unverified registration state:
+        // Continue existing registration without deleting records or creating duplicate user
+        await prisma.user.update({
+          where: { id: existingUser.id },
+          data: {
+            passwordHash,
+          },
+        });
       }
-
-      const passwordHash = await hashPassword(password);
       const otp = generateOTP();
       const rawToken = generateVerificationToken();
       const codeHash = hashToken(otp);
@@ -219,6 +253,26 @@ export async function POST(request: NextRequest) {
         where: { email: normalizedEmail },
       });
       if (!pending) {
+        const existing = await prisma.user.findUnique({
+          where: { email: normalizedEmail },
+          include: { teacherProfile: true },
+        });
+        if (existing) {
+          const isAlreadyActive =
+            existing.status === "ACTIVE" &&
+            existing.emailVerified &&
+            existing.teacherProfile !== null;
+          if (isAlreadyActive) {
+            return apiBadRequest("Email already registered. Please log in to your account.");
+          }
+          if (existing.emailVerified) {
+            return apiSuccess({
+              verified: true,
+              step: 3,
+              message: "Email verified successfully.",
+            });
+          }
+        }
         return apiBadRequest("Pending registration record not found. Please restart registration.");
       }
 
@@ -237,6 +291,28 @@ export async function POST(request: NextRequest) {
           data: { attempts: pending.attempts + 1 },
         });
         return apiBadRequest("Incorrect verification code. Please check your inbox.");
+      }
+
+      // If user already exists in main database, verify their record idempotently
+      const existingUser = await prisma.user.findUnique({
+        where: { email: normalizedEmail },
+        include: { teacherProfile: true },
+      });
+      if (existingUser) {
+        const isAlreadyActive =
+          existingUser.status === "ACTIVE" &&
+          existingUser.emailVerified &&
+          existingUser.teacherProfile !== null;
+        if (isAlreadyActive) {
+          return apiBadRequest("Email already registered. Please log in to your account.");
+        }
+        await prisma.user.update({
+          where: { id: existingUser.id },
+          data: {
+            emailVerified: true,
+            emailVerifiedAt: existingUser.emailVerifiedAt || new Date(),
+          },
+        });
       }
 
       // Mark OTP verified in registrationData
@@ -392,6 +468,42 @@ export async function POST(request: NextRequest) {
         where: { email: normalizedEmail },
       });
       if (!pending) {
+        // If pending record was already deleted, check if user is already completed and active
+        const existing = await prisma.user.findUnique({
+          where: { email: normalizedEmail },
+          include: { profile: true, teacherProfile: true },
+        });
+        if (existing && existing.status === "ACTIVE") {
+          const userSession: UserSession = {
+            id: existing.id,
+            userId: existing.id,
+            email: existing.email,
+            role: "TEACHER",
+            emailVerified: true,
+            firstName: existing.profile?.firstName || "Educator",
+            lastName: existing.profile?.lastName || "",
+          };
+          const response = apiSuccess(
+            {
+              user: userSession,
+              redirectUrl: "/teacher/dashboard",
+            },
+            "Educator registration already confirmed! Welcome to EduConnects."
+          );
+          const isProd = process.env.NODE_ENV === "production";
+          const isEduconnects = Boolean(rawHost && rawHost.includes("educonnects.co.in"));
+          const domain = getCookieDomain(rawHost);
+          const cookieOptions: any = {
+            httpOnly: true,
+            secure: isProd || isEduconnects,
+            sameSite: "lax",
+            path: "/",
+            maxAge: 7 * 24 * 60 * 60,
+          };
+          if (domain) cookieOptions.domain = domain;
+          response.cookies.set("educonnects_session", encodeSession(userSession), cookieOptions);
+          return response;
+        }
         return apiBadRequest("Registration record not found.");
       }
 
@@ -428,28 +540,75 @@ export async function POST(request: NextRequest) {
         return apiBadRequest(paymentMessage || "Payment not completed or failed. Your educator account has not been activated.");
       }
 
-      // Complete registration: Create User, Profile, TeacherProfile, and PaymentTransaction transactionally!
+      // Complete registration: Create or update User, Profile, TeacherProfile, and PaymentTransaction transactionally!
       const prof = data.profile || {};
       const now = new Date();
 
       const createdUser = await prisma.$transaction(async (tx) => {
-        const newUser = await tx.user.create({
-          data: {
-            email: normalizedEmail,
-            passwordHash: pending.passwordHash,
-            role: "TEACHER",
-            status: "ACTIVE",
-            emailVerified: true,
-            emailVerifiedAt: now,
-            profile: {
-              create: {
+        const existingUser = await tx.user.findUnique({
+          where: { email: normalizedEmail },
+          include: {
+            profile: true,
+            teacherProfile: true,
+          },
+        });
+
+        let finalUser;
+
+        if (existingUser) {
+          finalUser = await tx.user.update({
+            where: { id: existingUser.id },
+            data: {
+              passwordHash: pending.passwordHash || existingUser.passwordHash,
+              role: "TEACHER",
+              status: "ACTIVE",
+              emailVerified: true,
+              emailVerifiedAt: existingUser.emailVerifiedAt || now,
+            },
+            include: {
+              profile: true,
+              teacherProfile: true,
+            },
+          });
+
+          if (finalUser.profile) {
+            await tx.profile.update({
+              where: { userId: finalUser.id },
+              data: {
+                firstName: pending.firstName || finalUser.profile.firstName,
+                lastName: pending.lastName || finalUser.profile.lastName,
+                phone: data.phone || finalUser.profile.phone,
+              },
+            });
+          } else {
+            await tx.profile.create({
+              data: {
+                userId: finalUser.id,
                 firstName: pending.firstName,
                 lastName: pending.lastName,
                 phone: data.phone || null,
               },
-            },
-            teacherProfile: {
-              create: {
+            });
+          }
+
+          if (finalUser.teacherProfile) {
+            await tx.teacherProfile.update({
+              where: { userId: finalUser.id },
+              data: {
+                headline: prof.headline || finalUser.teacherProfile.headline,
+                subjects: prof.subjects || finalUser.teacherProfile.subjects,
+                experienceYears: Number(prof.experienceYears) || finalUser.teacherProfile.experienceYears,
+                hourlyRate: Number(prof.hourlyRate) || finalUser.teacherProfile.hourlyRate,
+                qualifications: prof.qualifications || finalUser.teacherProfile.qualifications,
+                languages: prof.languages || finalUser.teacherProfile.languages,
+                teachingMode: prof.teachingMode || finalUser.teacherProfile.teachingMode,
+                bio: prof.bio || prof.specialization || finalUser.teacherProfile.bio,
+              },
+            });
+          } else {
+            await tx.teacherProfile.create({
+              data: {
+                userId: finalUser.id,
                 headline: prof.headline || "Educator",
                 subjects: prof.subjects || "Mathematics",
                 experienceYears: Number(prof.experienceYears) || 1,
@@ -460,36 +619,81 @@ export async function POST(request: NextRequest) {
                 bio: prof.bio || prof.specialization || null,
                 verificationStatus: "PENDING",
               },
+            });
+          }
+        } else {
+          finalUser = await tx.user.create({
+            data: {
+              email: normalizedEmail,
+              passwordHash: pending.passwordHash,
+              role: "TEACHER",
+              status: "ACTIVE",
+              emailVerified: true,
+              emailVerifiedAt: now,
+              profile: {
+                create: {
+                  firstName: pending.firstName,
+                  lastName: pending.lastName,
+                  phone: data.phone || null,
+                },
+              },
+              teacherProfile: {
+                create: {
+                  headline: prof.headline || "Educator",
+                  subjects: prof.subjects || "Mathematics",
+                  experienceYears: Number(prof.experienceYears) || 1,
+                  hourlyRate: Number(prof.hourlyRate) || 500,
+                  qualifications: prof.qualifications || null,
+                  languages: prof.languages || "English",
+                  teachingMode: prof.teachingMode || "ONLINE",
+                  bio: prof.bio || prof.specialization || null,
+                  verificationStatus: "PENDING",
+                },
+              },
             },
-          },
-          include: {
-            profile: true,
-            teacherProfile: true,
+            include: {
+              profile: true,
+              teacherProfile: true,
+            },
+          });
+        }
+
+        // Record Payment Transaction for ₹99 idempotently
+        const existingTx = await tx.paymentTransaction.findFirst({
+          where: {
+            OR: [
+              { providerOrderId: orderId },
+              { internalReference: orderId },
+            ],
           },
         });
 
-        // Record Payment Transaction for ₹99
-        await tx.paymentTransaction.create({
-          data: {
-            userId: newUser.id,
-            type: "EDUCATOR_REGISTRATION",
-            status: "CAPTURED",
-            amountPaise: 9900,
-            currency: "INR",
-            provider: "CASHFREE",
-            providerOrderId: orderId,
-            providerPaymentId: cfPaymentId || `cf_reg_${Date.now()}`,
-            internalReference: orderId,
-            capturedAt: now,
-          },
-        });
+        if (!existingTx) {
+          await tx.paymentTransaction.create({
+            data: {
+              userId: finalUser.id,
+              type: "EDUCATOR_REGISTRATION",
+              status: "CAPTURED",
+              amountPaise: 9900,
+              currency: "INR",
+              provider: "CASHFREE",
+              providerOrderId: orderId,
+              providerPaymentId: cfPaymentId || `cf_reg_${Date.now()}`,
+              internalReference: orderId,
+              capturedAt: now,
+            },
+          });
+        }
 
         // Remove from pending registrations
-        await tx.pendingRegistration.delete({
-          where: { id: pending.id },
+        await tx.pendingRegistration.deleteMany({
+          where: { email: normalizedEmail },
         });
 
-        return newUser;
+        return finalUser;
+      }, {
+        maxWait: 10000,
+        timeout: 20000,
       });
 
       // Send welcome email
