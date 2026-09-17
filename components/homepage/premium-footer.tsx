@@ -382,6 +382,15 @@ export function PremiumFooter({ showCta = false, variant }: PremiumFooterProps =
                   </li>
                   <li>
                     <Link
+                      href="/teacher/training"
+                      className="text-emerald-100 hover:text-white hover:translate-x-0.5 transition-all flex items-center gap-2.5"
+                    >
+                      <Award className="h-3.5 w-3.5 text-[#35A979] shrink-0" />
+                      <span>15-Day Training Program</span>
+                    </Link>
+                  </li>
+                  <li>
+                    <Link
                       href="/teacher"
                       className="text-emerald-100 hover:text-white hover:translate-x-0.5 transition-all flex items-center gap-2.5"
                     >

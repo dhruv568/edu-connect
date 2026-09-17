@@ -369,6 +369,7 @@ export function FloatingNavbar({ variant }: FloatingNavbarProps = {}) {
               <div className="flex items-center gap-1 xl:gap-1.5">
                 {[
                   { label: "Home", href: "/teacher", targetId: null },
+                  { label: "Training Program", href: "/teacher/training", targetId: null },
                   { label: "About Us", href: "/about", targetId: null },
                   { label: "Educator Benefits", href: "/teacher#benefits", targetId: "benefits" },
                   { label: "How It Works?", href: "/teacher#how-it-works", targetId: "how-it-works" },
@@ -378,6 +379,8 @@ export function FloatingNavbar({ variant }: FloatingNavbarProps = {}) {
                   const isActive =
                     item.href === "/teacher"
                       ? pathname === "/teacher"
+                      : item.href === "/teacher/training"
+                      ? pathname === "/teacher/training" || pathname === "/training" || pathname === "/training-program" || pathname === "/teachers-training-program"
                       : item.href.startsWith("/") && !item.targetId
                       ? pathname === item.href
                       : false;
@@ -979,6 +982,7 @@ export function FloatingNavbar({ variant }: FloatingNavbarProps = {}) {
                   <>
                     {[
                       { label: "Home", href: "/teacher", targetId: null },
+                      { label: "Training Program", href: "/teacher/training", targetId: null },
                       { label: "About Us", href: "/about", targetId: null },
                       { label: "Educator Benefits", href: "/teacher#benefits", targetId: "benefits" },
                       { label: "How It Works?", href: "/teacher#how-it-works", targetId: "how-it-works" },
@@ -988,6 +992,8 @@ export function FloatingNavbar({ variant }: FloatingNavbarProps = {}) {
                       const isActive =
                         item.href === "/teacher"
                           ? pathname === "/teacher"
+                          : item.href === "/teacher/training"
+                          ? pathname === "/teacher/training" || pathname === "/training" || pathname === "/training-program" || pathname === "/teachers-training-program"
                           : item.href.startsWith("/") && !item.targetId
                           ? pathname === item.href
                           : false;

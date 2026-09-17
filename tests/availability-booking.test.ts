@@ -166,7 +166,7 @@ async function runTests() {
     console.log("\n7. Testing Payment Capture & Booking Confirmation...");
     const verifyResult = await PaymentService.verifyAndCompletePayment({
       userId: testStudentUser.id,
-      orderId: orderResult.cfOrderId || orderResult.internalReference,
+      orderId: (orderResult.cfOrderId || orderResult.internalReference || "") as string,
       cfPaymentId: `cf_pay_test_${Date.now()}`,
       paymentStatus: "SUCCESS",
     });

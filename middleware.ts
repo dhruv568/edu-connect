@@ -169,6 +169,14 @@ export function middleware(request: NextRequest) {
         if (pathname === "/verification") {
           return NextResponse.rewrite(new URL("/teacher/verification", request.url));
         }
+        if (
+          pathname === "/training" ||
+          pathname === "/training-program" ||
+          pathname === "/teachers-training-program" ||
+          pathname.startsWith("/training/")
+        ) {
+          return NextResponse.rewrite(new URL("/teacher/training", request.url));
+        }
         if (pathname === "/login") {
           return NextResponse.rewrite(new URL("/teacher/login", request.url));
         }
@@ -190,6 +198,14 @@ export function middleware(request: NextRequest) {
     pathname.startsWith("/live/") ||
     pathname === "/student" ||
     pathname === "/teacher" ||
+    pathname === "/teacher/training" ||
+    pathname.startsWith("/teacher/training") ||
+    pathname === "/training" ||
+    pathname.startsWith("/training") ||
+    pathname === "/training-program" ||
+    pathname.startsWith("/training-program") ||
+    pathname === "/teachers-training-program" ||
+    pathname.startsWith("/teachers-training-program") ||
     pathname === "/student/login" ||
     pathname === "/teacher/login" ||
     pathname === "/student/register" ||
@@ -426,13 +442,14 @@ export function middleware(request: NextRequest) {
     }
   }
 
-  // Protect private teacher subroutes (allow public /teacher, /teacher/login, /teacher/register, /teacher/logout)
+  // Protect private teacher subroutes (allow public /teacher, /teacher/login, /teacher/register, /teacher/logout, /teacher/training)
   if (
     pathname.startsWith("/teacher") &&
     pathname !== "/teacher" &&
     pathname !== "/teacher/login" &&
     pathname !== "/teacher/register" &&
-    pathname !== "/teacher/logout"
+    pathname !== "/teacher/logout" &&
+    !pathname.startsWith("/teacher/training")
   ) {
     if (!isEducatorRole(userSession.role)) {
       if (isLearnerRole(userSession.role)) {
