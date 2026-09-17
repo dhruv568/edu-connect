@@ -163,20 +163,20 @@ export const THEMES: Record<"home" | "learner" | "educator" | "admin", ThemeConf
  */
 export const QUICK_QUESTIONS: Record<AssistantRole, string[]> = {
   LEARNER: [
+    "Learner Portal",
     "Find an Educator",
     "Find a Course",
     "How do live classes work?",
     "How do I book a trial?",
-    "How do I update my profile?",
     "How do I contact support?",
   ],
   EDUCATOR: [
+    "Educator Portal",
     "How do I create a course?",
     "How do I become verified?",
     "How do I create a live class?",
     "How do payouts work?",
-    "How do I update my profile?",
-    "How do I upload documents?",
+    "How do I contact support?",
   ],
   ADMIN: [
     "Explain Admin Dashboard",
@@ -186,11 +186,11 @@ export const QUICK_QUESTIONS: Record<AssistantRole, string[]> = {
     "Platform overview",
   ],
   guest: [
-    "What is EduConnects?",
+    "Learner Portal",
+    "Educator Portal",
     "Find an Educator",
     "Find Courses",
     "How does EduConnects work?",
-    "Become an Educator",
     "Contact Support",
   ],
 };

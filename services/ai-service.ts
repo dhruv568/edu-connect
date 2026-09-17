@@ -125,7 +125,9 @@ Core Personality & Capabilities:
 - General Knowledge & Education: For general educational or informational queries (e.g. physics, mathematics, science, AI vs Machine Learning, study strategies, coding, writing an email to an educator, or explaining concepts simply), answer directly, informatively, and clearly. Do NOT refuse general educational questions.
 - Simplification: When asked to explain something in simple language or for beginners ("explain like I'm 5", "in simple terms"), provide intuitive analogies and clear, step-by-step explanations.
 - Writing Assistance: When asked to draft an email or message to an educator or support, produce a well-formatted, polite, ready-to-use template.
-- Platform Knowledge: When answering about EduConnects, provide accurate information based on real website functionality and include relevant internal links:
+- Platform Knowledge: When answering about EduConnects, provide accurate information based on real website functionality and include relevant links:
+  • Learner Portal: [Learner Portal](https://learners.educonnects.co.in)
+  • Educator Portal: [Educator Portal](https://educators.educonnects.co.in)
   • Browse Courses: /courses
   • Find Verified Educators: /find-teachers
   • Learner Dashboard: /student/dashboard
@@ -140,6 +142,9 @@ Core Personality & Capabilities:
   • Admin Verification Queue: /admin/verification
   • Password Reset: /forgot-password or click "Forgot Password" on /login
   • Contact Support: /contact or support@educonnects.co.in
+- Portals: Whenever a user asks for the "Learner Portal" or "Educator Portal" (or how to access the learner or educator portal), ALWAYS provide the exact clickable link:
+  • Learner Portal: [Learner Portal](https://learners.educonnects.co.in)
+  • Educator Portal: [Educator Portal](https://educators.educonnects.co.in)
 - Advisory Only: You are advisory and informational. You cannot directly execute database mutations or financial debits (e.g. do not say "I have booked your class"). Explain the exact steps the user can take.
 - Security & Privacy: Never disclose unauthorized information, admin passwords, database tokens, or other users' personal information. Never ask for or expose OTPs, passwords, or payment credentials.`;
 
@@ -281,6 +286,40 @@ export function generateFallbackResponse(
     /\b(kaise|kya|karna|karni|kare|hai|hain|hota|hoti|hoga|batao|bataiye|madad|chahiye|dhunde|khoje|puchna|shukriya|accha|theek)\b/i.test(
       query
     );
+
+  // 0. Direct Portal Link Queries
+  if (
+    query.includes("learner portal") ||
+    query.includes("learners portal") ||
+    query.includes("student portal") ||
+    query.includes("students portal") ||
+    query.includes("learner link") ||
+    query.includes("learners.educonnects.co.in")
+  ) {
+    return "You can access the EduConnects Learner Portal here:\n\n🎓 [Learner Portal](https://learners.educonnects.co.in)\n\nOn the Learner Portal, you can explore courses, join 1-on-1 and group live interactive classes with verified educators, track your learning progress, and access your enrolled study materials.";
+  }
+
+  if (
+    query.includes("educator portal") ||
+    query.includes("educators portal") ||
+    query.includes("teacher portal") ||
+    query.includes("teachers portal") ||
+    query.includes("educator link") ||
+    query.includes("educators.educonnects.co.in")
+  ) {
+    return "You can access the EduConnects Educator Portal here:\n\n👨‍🏫 [Educator Portal](https://educators.educonnects.co.in)\n\nOn the Educator Portal, educators can manage their teaching profile, schedule live 1-on-1 and group classes, create video courses, track earnings, and complete credential verification.";
+  }
+
+  if (
+    query === "portal" ||
+    query === "portals" ||
+    query.includes("portal link") ||
+    query.includes("portal links") ||
+    query.includes("where is the portal") ||
+    query.includes("access portal")
+  ) {
+    return "EduConnects provides dedicated portals for both learners and educators:\n\n- 🎓 **Learner Portal:** [Learner Portal](https://learners.educonnects.co.in)\n- 👨‍🏫 **Educator Portal:** [Educator Portal](https://educators.educonnects.co.in)\n\nClick either link above to open your respective portal!";
+  }
 
   // 1. Follow-up: "Can I join one?" / "Can I attend?" / "How do I join?"
   if (

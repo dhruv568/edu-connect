@@ -433,7 +433,7 @@ export function PremiumFooter({ showCta = false, variant }: PremiumFooterProps =
                       className="text-teal-100 hover:text-white hover:translate-x-0.5 transition-all flex items-center gap-2.5"
                     >
                       <GraduationCap className="h-3.5 w-3.5 text-[#2A8C84] shrink-0" />
-                      <span>For Learners (Portal ↗)</span>
+                      <span>Learner Portal ↗</span>
                     </a>
                   </li>
                   <li>
@@ -444,7 +444,7 @@ export function PremiumFooter({ showCta = false, variant }: PremiumFooterProps =
                       className="text-teal-100 hover:text-white hover:translate-x-0.5 transition-all flex items-center gap-2.5"
                     >
                       <Sparkles className="h-3.5 w-3.5 text-[#2A8C84] shrink-0" />
-                      <span>For Educators (Portal ↗)</span>
+                      <span>Educator Portal ↗</span>
                     </a>
                   </li>
                   <li>
