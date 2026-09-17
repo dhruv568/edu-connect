@@ -42,8 +42,8 @@ export const OFFICIAL_COMPANY_INFO: CompanyInfo = {
     "Digital business solutions, digital marketing, automation, online education, training, and technology-enabled business services.",
   registeredAddress:
     "Bard No. 8, Basundhara Colony, Chandmari, Lalitpur (UP), 284403",
-  website: "https://myprofunnels.com",
-  tagline: "Automate • Engage • Grow",
+  website: "https://educonnects.co.in",
+  tagline: "Learn • Grow • Belong",
   governingLaw: "India",
   whatsappNumber: "+91 8062181499",
   whatsappUrl: "https://wa.me/918062181499",

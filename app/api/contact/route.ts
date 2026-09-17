@@ -4,10 +4,19 @@ import { NextRequest } from "next/server";
 import { ContactSchema } from "@/schemas/auth-schemas";
 import { apiSuccess, apiBadRequest, apiError } from "@/lib/api-response";
 import { trackEvent } from "@/lib/analytics";
+import { verifyCaptchaSolution } from "@/lib/auth/captcha";
 
 export async function POST(request: NextRequest) {
   try {
     const body = await request.json();
+
+    // 1. Verify Security CAPTCHA Solution for Spam Protection
+    const captchaCheck = verifyCaptchaSolution(body.captchaToken, body.captchaAnswer);
+    if (!captchaCheck.valid) {
+      return apiBadRequest(captchaCheck.error || "Security CAPTCHA verification failed. Please try again.");
+    }
+
+    // 2. Validate Contact Form Payload
     const validated = ContactSchema.parse(body);
 
     trackEvent("contact_form_submitted", {
@@ -24,7 +33,7 @@ export async function POST(request: NextRequest) {
 
     return apiSuccess(
       { referenceId: `TICKET-${Math.floor(100000 + Math.random() * 900000)}` },
-      "Thank you for contacting EduConnects! Our support team will respond within 24 hours.",
+      "Thank you for contacting EduConnects! The EduConnects Support Team will respond to your inquiry within 24 hours.",
       201
     );
   } catch (error: any) {
