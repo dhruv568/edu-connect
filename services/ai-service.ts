@@ -145,8 +145,19 @@ Core Personality & Capabilities:
   • Contact Support: /contact or support@educonnects.co.in
 - Portals: Whenever a user asks for the "Learner Portal" or "Educator Portal" (or how to access the learner or educator portal), ALWAYS provide the exact clickable link:
   • Learner Portal: [Learner Portal](https://learners.educonnects.co.in)
-- Official Company & Legal Entity Information:
-  Whenever the user asks for company details, legal information, corporate identity, CIN, registered office, parent company, or ownership, you MUST provide these EXACT details:
+- Official Ownership, Founder & Company Information:
+  Whenever a user asks who owns EduConnects, who is the owner, founder, or creator of EduConnects, you MUST give this clear and consistent answer:
+  "EduConnects is founded and owned by Neeraj Shrivastava. EduConnects operates under Shrivastava ProFunnels Ventures Pvt Ltd."
+
+  If the user asks for more details about the owner/founder, provide the approved founder information available in the EduConnects About Us section:
+  • Neeraj Shrivastava brings over a decade of experience across education, academic leadership, technology, and entrepreneurship.
+  • Academic Background: B.Sc. in Mathematics (2002) and M.Sc. in Computer Science (2004), followed by IAS preparation in Delhi (2009–2011).
+  • Educational & Leadership Experience: Worked as an educator at Aspirant International School and Rani Lakshmibai Public School (progressing from TGT to PGT). Served as Principal at AVM Inter College, Lalitpur (2023–2024).
+  • Journey & Creation: His transition from student → teacher → academic leader → entrepreneur inspired the creation of EduConnects in 2026.
+  STRICT RULE: Do not invent or add any other personal information beyond what is stated above.
+
+  Whenever the user asks for company details, legal information, corporate identity, CIN, or registered office, you MUST provide these EXACT details:
+  • Founder & Owner: Neeraj Shrivastava
   • Company / Legal Entity: Shrivastava ProFunnels Ventures Pvt Ltd
   • CIN: U85499UP2024PTC212061
   • Registered Office: Bard No. 8, Basundhara Colony, Chandmari, Lalitpur (UP), 284403
@@ -294,7 +305,59 @@ export function generateFallbackResponse(
       query
     );
 
-  // 0a. Official Company & Legal Information Queries
+  // 0a. Owner / Founder / Creator Queries
+  if (
+    query.includes("who owns") ||
+    query.includes("who is the owner") ||
+    query.includes("who is owner") ||
+    query.includes("owner of educonnects") ||
+    query.includes("owner of this") ||
+    query.includes("who founded") ||
+    query.includes("who is the founder") ||
+    query.includes("who is founder") ||
+    query.includes("founder of educonnects") ||
+    query.includes("who created") ||
+    query.includes("who is the creator") ||
+    query.includes("who is creator") ||
+    query.includes("creator of educonnects") ||
+    query.includes("who started educonnects") ||
+    query.includes("who started this") ||
+    query === "owner" ||
+    query === "owner?" ||
+    query === "founder" ||
+    query === "founder?" ||
+    query === "creator" ||
+    query === "creator?" ||
+    query.includes("neeraj shrivastava")
+  ) {
+    const asksMoreDetails =
+      query.includes("detail") ||
+      query.includes("more") ||
+      query.includes("background") ||
+      query.includes("tell me about") ||
+      query.includes("who is neeraj") ||
+      query.includes("bio") ||
+      query.includes("history") ||
+      query.includes("experience") ||
+      query.includes("qualification") ||
+      query.includes("about the founder") ||
+      query.includes("about the owner");
+
+    if (asksMoreDetails) {
+      return (
+        "EduConnects is founded and owned by Neeraj Shrivastava. EduConnects operates under Shrivastava ProFunnels Ventures Pvt Ltd.\n\n" +
+        "**About the Founder (from EduConnects About Us):**\n" +
+        "• **Leadership & Experience:** Neeraj Shrivastava brings over a decade of experience across education, academic leadership, technology, and entrepreneurship.\n" +
+        "• **Academic Background:** B.Sc. in Mathematics (2002) and M.Sc. in Computer Science (2004), followed by IAS preparation in Delhi (2009–2011).\n" +
+        "• **Teaching & Principal Experience:** Served as an educator at Aspirant International School and Rani Lakshmibai Public School (progressing from TGT to PGT), and as Principal at AVM Inter College, Lalitpur (2023–2024).\n" +
+        "• **Journey & Vision:** His transition from student → teacher → academic leader → entrepreneur inspired the creation of EduConnects in 2026."
+      );
+    }
+
+    return "EduConnects is founded and owned by Neeraj Shrivastava. EduConnects operates under Shrivastava ProFunnels Ventures Pvt Ltd.";
+  }
+
+  // 0b. Official Company & Legal Information Queries
   if (
     query.includes("company information") ||
     query.includes("company info") ||
@@ -313,8 +376,6 @@ export function generateFallbackResponse(
     query.includes("office address") ||
     query.includes("company address") ||
     query.includes("parent company") ||
-    query.includes("who owns educonnects") ||
-    query.includes("who owns this company") ||
     query.includes("shrivastava profunnels") ||
     query.includes("company registration") ||
     query === "company" ||
@@ -323,10 +384,10 @@ export function generateFallbackResponse(
     query.includes("company name")
   ) {
     return "Here is the official company and legal information for EduConnects:\n\n" +
-      "**Shrivastava ProFunnels Ventures Pvt Ltd**\n" +
+      "**EduConnects is founded and owned by Neeraj Shrivastava. EduConnects operates under Shrivastava ProFunnels Ventures Pvt Ltd.**\n\n" +
+      "- **Legal Entity:** Shrivastava ProFunnels Ventures Pvt Ltd\n" +
       "- **CIN:** U85499UP2024PTC212061\n" +
-      "- **Registered Office:** Bard No. 8, Basundhara Colony, Chandmari, Lalitpur (UP), 284403\n\n" +
-      "EduConnects is operated by Shrivastava ProFunnels Ventures Pvt Ltd.";
+      "- **Registered Office:** Bard No. 8, Basundhara Colony, Chandmari, Lalitpur (UP), 284403";
   }
 
   // 0. Direct Portal Link Queries

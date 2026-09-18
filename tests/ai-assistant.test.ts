@@ -461,13 +461,14 @@ async function runTests() {
   // =========================================================================
   // TEST 13: Official Company and Legal Information Verification
   // =========================================================================
+  // TEST 13: Official Company and Legal Information
+  // =========================================================================
   console.log("\nTEST 13: Official Company and Legal Information");
   {
     const legalQueries = [
       "What is your company information?",
       "Can you give me your legal entity name and CIN?",
       "Where is your registered office address?",
-      "Who owns EduConnects?",
     ];
 
     for (const q of legalQueries) {
@@ -492,7 +493,56 @@ async function runTests() {
     console.log("  ✔ Official Company Information, CIN, and Registered Office strictly verified!");
   }
 
-  console.log("\n✨ All 13 EduConnects AI Assistant Tests Passed Successfully! 🎉\n");
+  // =========================================================================
+  // TEST 14: Owner / Founder / Creator Knowledge Verification across All Portals & Roles
+  // =========================================================================
+  console.log("\nTEST 14: Owner / Founder / Creator Knowledge Verification across All Portals & Roles");
+  {
+    const roles: AssistantRole[] = ["guest", "LEARNER", "EDUCATOR", "ADMIN"];
+    const ownerQueries = [
+      "Who owns EduConnects?",
+      "Who is the owner of EduConnects?",
+      "Who is the founder of EduConnects?",
+      "Who is the creator of EduConnects?",
+    ];
+
+    const expectedExactAnswer =
+      "EduConnects is founded and owned by Neeraj Shrivastava. EduConnects operates under Shrivastava ProFunnels Ventures Pvt Ltd.";
+
+    for (const role of roles) {
+      for (const q of ownerQueries) {
+        const res = await processAiChat({
+          message: q,
+          role,
+        });
+
+        assert.strictEqual(
+          res.response.trim(),
+          expectedExactAnswer,
+          `Query "${q}" for role "${role}" must return exact specified answer!`
+        );
+      }
+
+      // Test request for more details about the owner/founder
+      const detailRes = await processAiChat({
+        message: "Tell me more details about the founder Neeraj Shrivastava",
+        role,
+      });
+
+      assert.ok(
+        detailRes.response.includes("EduConnects is founded and owned by Neeraj Shrivastava. EduConnects operates under Shrivastava ProFunnels Ventures Pvt Ltd."),
+        `Detailed query for role "${role}" must start with exact answer`
+      );
+      assert.ok(
+        detailRes.response.includes("B.Sc. in Mathematics") && detailRes.response.includes("M.Sc. in Computer Science"),
+        `Detailed query for role "${role}" must include approved About Us details`
+      );
+    }
+
+    console.log("  ✔ Owner / Founder / Creator knowledge verified with 100% exact response consistency across Main, Learner, Educator, and Admin portals!");
+  }
+
+  console.log("\n✨ All 14 EduConnects AI Assistant Tests Passed Successfully! 🎉\n");
   process.exit(0);
 }
 
