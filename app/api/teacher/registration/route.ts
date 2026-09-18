@@ -416,16 +416,22 @@ export async function POST(request: NextRequest) {
 
       const orderId = `EDU_TCH_REG_${Date.now()}_${crypto.randomBytes(3).toString("hex").toUpperCase()}`;
       const amountRupees = 99.00;
+      const origin =
+        request.nextUrl?.origin ||
+        (rawHost ? `https://${rawHost}` : "https://educators.educonnects.co.in");
 
       const cfOrder = await cashfreeClient.createOrder({
         orderId,
         orderAmount: amountRupees,
         orderCurrency: "INR",
         customerDetails: {
-          customer_id: pending.id,
+          customer_id: pending.id.replace(/[^a-zA-Z0-9_-]/g, "_").slice(0, 50),
           customer_email: email,
-          customer_phone: data.phone || "9999999999",
+          customer_phone: data.phone?.replace(/[^0-9]/g, "") || "9999999999",
           customer_name: `${pending.firstName} ${pending.lastName}`.trim() || "Educator Applicant",
+        },
+        orderMeta: {
+          return_url: `${origin}/teacher/register?order_id={order_id}&step=6&email=${encodeURIComponent(email)}`,
         },
         orderNote: "EduConnects Educator Registration Fee — ₹99",
         orderTags: {
@@ -460,17 +466,47 @@ export async function POST(request: NextRequest) {
     if (action === "STEP6_VERIFY_PAYMENT") {
       const { email, orderId, cfPaymentId } = body;
       const normalizedEmail = email?.toLowerCase().trim();
-      if (!normalizedEmail || !orderId) {
+      if (!normalizedEmail && !orderId) {
         return apiBadRequest("Missing email or order identifier.");
       }
 
-      const pending = await prisma.pendingRegistration.findUnique({
-        where: { email: normalizedEmail },
-      });
+      // Lookup pending registration by email, with fallback by orderId
+      let pending = normalizedEmail
+        ? await prisma.pendingRegistration.findUnique({
+            where: { email: normalizedEmail },
+          })
+        : null;
+
+      if (!pending && orderId) {
+        pending = await prisma.pendingRegistration.findFirst({
+          where: { registrationData: { contains: orderId } },
+        });
+      }
+
+      const activeEmail = normalizedEmail || pending?.email;
+
       if (!pending) {
-        // If pending record was already deleted, check if user is already completed and active
-        const existing = await prisma.user.findUnique({
-          where: { email: normalizedEmail },
+        // If pending record was already deleted, check if user is already completed and active (idempotency)
+        const existing = await prisma.user.findFirst({
+          where: {
+            OR: [
+              ...(activeEmail ? [{ email: activeEmail }] : []),
+              ...(orderId
+                ? [
+                    {
+                      paymentTransactions: {
+                        some: {
+                          OR: [
+                            { providerOrderId: orderId },
+                            { internalReference: orderId },
+                          ],
+                        },
+                      },
+                    },
+                  ]
+                : []),
+            ],
+          },
           include: { profile: true, teacherProfile: true },
         });
         if (existing && existing.status === "ACTIVE") {
@@ -512,33 +548,66 @@ export async function POST(request: NextRequest) {
         if (pending.registrationData) data = JSON.parse(pending.registrationData);
       } catch {}
 
-      // Verify payment with Cashfree
+      // Resolve the EXACT merchant order ID created by backend:
+      // data.orderData?.orderId is the exact order_id sent during Cashfree order creation.
+      // If frontend passed cfOrderId, {order_id} placeholder, or orderId, we always use the canonical orderId so Cashfree fetch succeeds!
+      const targetOrderId = data.orderData?.orderId || orderId;
+
+      if (!targetOrderId || targetOrderId === "{order_id}") {
+        return apiBadRequest("Valid order identifier is required for payment verification.");
+      }
+
+      // Verify payment with Cashfree (Do NOT bypass verification)
       let isPaymentSuccess = false;
+      let verifiedPaymentId = cfPaymentId || "";
       let paymentMessage = "";
 
-      const isTestOrder =
-        cashfreeClient.isTestMode() ||
-        orderId.startsWith("order_mock_") ||
-        (data.orderData?.paymentSessionId && data.orderData.paymentSessionId.startsWith("session_mock_"));
-
       try {
-        const orderStatus = await cashfreeClient.fetchOrder(orderId);
-        if (orderStatus && (orderStatus.order_status === "PAID" || orderStatus.order_status === "ACTIVE")) {
-          if (orderStatus.order_status === "PAID" || isTestOrder) {
-            isPaymentSuccess = true;
+        const orderStatus = await cashfreeClient.fetchOrder(targetOrderId);
+
+        if (orderStatus && orderStatus.order_status === "PAID") {
+          isPaymentSuccess = true;
+          try {
+            const payments = await cashfreeClient.fetchOrderPayments(targetOrderId);
+            const successfulPayment = payments.find((p) => p.payment_status === "SUCCESS");
+            if (successfulPayment) {
+              verifiedPaymentId = String(successfulPayment.cf_payment_id);
+            }
+          } catch {
+            // Order is already confirmed PAID; non-fatal if payment listing fails
           }
+        } else if (orderStatus && orderStatus.order_status === "ACTIVE") {
+          // If order is active, check payments array in case payment succeeded but order status is syncing
+          try {
+            const payments = await cashfreeClient.fetchOrderPayments(targetOrderId);
+            const successfulPayment = payments.find((p) => p.payment_status === "SUCCESS");
+            if (successfulPayment) {
+              isPaymentSuccess = true;
+              verifiedPaymentId = String(successfulPayment.cf_payment_id);
+            } else {
+              paymentMessage = "Cashfree order status is ACTIVE, but no successful payment was found.";
+            }
+          } catch (pErr: any) {
+            paymentMessage = pErr.message || "Payment is still active and awaiting completion.";
+          }
+        } else {
+          paymentMessage = `Cashfree order status is ${orderStatus?.order_status || "UNKNOWN"}. Payment was not completed.`;
         }
       } catch (err: any) {
-        if (isTestOrder) {
-          isPaymentSuccess = true;
-        } else {
-          paymentMessage = err.message || "Failed to fetch order status from Cashfree.";
-        }
+        paymentMessage = err.message || "Failed to fetch order status from Cashfree.";
       }
 
       if (!isPaymentSuccess) {
         return apiBadRequest(paymentMessage || "Payment not completed or failed. Your educator account has not been activated.");
       }
+
+      // Mark payment as paid in registrationData
+      data.paid = true;
+      data.step = 6;
+      await prisma.pendingRegistration.update({
+        where: { id: pending.id },
+        data: { registrationData: JSON.stringify(data) },
+      });
 
       // Complete registration: Create or update User, Profile, TeacherProfile, and PaymentTransaction transactionally!
       const prof = data.profile || {};
@@ -624,7 +693,7 @@ export async function POST(request: NextRequest) {
         } else {
           finalUser = await tx.user.create({
             data: {
-              email: normalizedEmail,
+              email: activeEmail,
               passwordHash: pending.passwordHash,
               role: "TEACHER",
               status: "ACTIVE",
@@ -662,8 +731,8 @@ export async function POST(request: NextRequest) {
         const existingTx = await tx.paymentTransaction.findFirst({
           where: {
             OR: [
-              { providerOrderId: orderId },
-              { internalReference: orderId },
+              { providerOrderId: targetOrderId },
+              { internalReference: targetOrderId },
             ],
           },
         });
@@ -677,9 +746,9 @@ export async function POST(request: NextRequest) {
               amountPaise: 9900,
               currency: "INR",
               provider: "CASHFREE",
-              providerOrderId: orderId,
-              providerPaymentId: cfPaymentId || `cf_reg_${Date.now()}`,
-              internalReference: orderId,
+              providerOrderId: targetOrderId,
+              providerPaymentId: verifiedPaymentId || cfPaymentId || `cf_reg_${Date.now()}`,
+              internalReference: targetOrderId,
               capturedAt: now,
             },
           });
@@ -687,7 +756,7 @@ export async function POST(request: NextRequest) {
 
         // Remove from pending registrations
         await tx.pendingRegistration.deleteMany({
-          where: { email: normalizedEmail },
+          where: { email: activeEmail },
         });
 
         return finalUser;
