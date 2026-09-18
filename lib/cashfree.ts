@@ -149,8 +149,18 @@ export class CashfreeClient {
     return (
       this.env === "SANDBOX" ||
       this.appId.includes("TEST") ||
-      this.appId.includes("mock") ||
-      this.secretKey.includes("mock")
+      this.isMockCredentials()
+    );
+  }
+
+  public isMockCredentials(): boolean {
+    const app = (this.appId || "").toLowerCase();
+    const secret = (this.secretKey || "").toLowerCase();
+    return (
+      app.includes("mock") ||
+      secret.includes("mock") ||
+      app === "test_mock_app_id_123456" ||
+      secret === "mock_cashfree_secret_key_123456"
     );
   }
 
@@ -184,7 +194,7 @@ export class CashfreeClient {
     };
 
     // If in mock/offline test mode without real sandbox credentials
-    if (this.isTestMode() && (this.appId.includes("mock") || this.secretKey.includes("mock"))) {
+    if (this.isTestMode() && this.isMockCredentials()) {
       const mockSessionId = `session_mock_${crypto.randomBytes(16).toString("hex")}`;
       const mockCfOrderId = `cf_ord_${Date.now()}`;
       return {
@@ -223,7 +233,7 @@ export class CashfreeClient {
         created_at: data.created_at,
       };
     } catch (err: any) {
-      if (this.isTestMode() && (this.appId.includes("mock") || this.secretKey.includes("mock"))) {
+      if (this.isTestMode() && this.isMockCredentials()) {
         const mockSessionId = `session_mock_${crypto.randomBytes(16).toString("hex")}`;
         const mockCfOrderId = `cf_ord_${Date.now()}`;
         return {
@@ -245,7 +255,7 @@ export class CashfreeClient {
    * Fetch Cashfree Order Details by order_id
    */
   public async fetchOrder(orderId: string): Promise<CashfreeOrderResult> {
-    if (this.isTestMode() && (this.appId.includes("mock") || orderId.startsWith("order_mock_"))) {
+    if (this.isTestMode() && (this.isMockCredentials() || orderId.startsWith("order_mock_"))) {
       return {
         order_id: orderId,
         cf_order_id: `cf_${orderId}`,
@@ -277,7 +287,7 @@ export class CashfreeClient {
    * Fetch All Payments for an Order
    */
   public async fetchOrderPayments(orderId: string): Promise<CashfreePaymentEntity[]> {
-    if (this.isTestMode() && (this.appId.includes("mock") || orderId.startsWith("order_mock_"))) {
+    if (this.isTestMode() && (this.isMockCredentials() || orderId.startsWith("order_mock_"))) {
       return [
         {
           cf_payment_id: `cf_pay_mock_${Date.now()}`,
@@ -315,7 +325,7 @@ export class CashfreeClient {
       refund_speed: options.refundSpeed || "STANDARD",
     };
 
-    if (this.isTestMode() && (this.appId.includes("mock") || options.orderId.startsWith("order_mock_"))) {
+    if (this.isTestMode() && (this.isMockCredentials() || options.orderId.startsWith("order_mock_"))) {
       return {
         cf_refund_id: `cf_rfnd_${Date.now()}`,
         refund_id: options.refundId,
