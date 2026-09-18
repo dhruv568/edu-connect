@@ -39,7 +39,16 @@ async function main() {
     },
   });
 
-  const preservedUserIds = [existingAdmin?.id, existingRealEducator?.id].filter(Boolean) as string[];
+  // Check for existing dedicated test educator Dhruv Jari (dhruvjari2006@gmail.com)
+  let existingTestEducator = await prisma.user.findUnique({
+    where: { email: "dhruvjari2006@gmail.com" },
+    include: {
+      profile: true,
+      teacherProfile: true,
+    },
+  });
+
+  const preservedUserIds = [existingAdmin?.id, existingRealEducator?.id, existingTestEducator?.id].filter(Boolean) as string[];
 
   // Clean existing data while preserving admin user and real educator
   await prisma.classroomFile.deleteMany();
@@ -159,6 +168,45 @@ async function main() {
     include: { teacherProfile: true },
   });
   console.log(`✅ Real Educator Preserved/Created: ${realEducator.email}`);
+
+  // 1c. Ensure Dedicated Test Educator Account (dhruvjari2006@gmail.com) exists
+  const testEducator = await prisma.user.upsert({
+    where: { email: "dhruvjari2006@gmail.com" },
+    update: {
+      passwordHash: defaultPasswordHash,
+      role: "TEACHER",
+      status: "ACTIVE",
+      emailVerified: true,
+    },
+    create: {
+      email: "dhruvjari2006@gmail.com",
+      passwordHash: defaultPasswordHash,
+      role: "TEACHER",
+      status: "ACTIVE",
+      emailVerified: true,
+      emailVerifiedAt: now,
+      profile: {
+        create: {
+          firstName: "Dhruv",
+          lastName: "Jari",
+          bio: "Dedicated Educator Account",
+        },
+      },
+      teacherProfile: {
+        create: {
+          headline: "Verified Educator",
+          subjects: "Mathematics, Physics",
+          experienceYears: 5,
+          teachingMode: "BOTH",
+          verificationStatus: "VERIFIED",
+          verifiedAt: now,
+          isSeededProfile: false,
+        },
+      },
+    },
+    include: { teacherProfile: true },
+  });
+  console.log(`✅ Test Educator Preserved/Created: ${testEducator.email}`);
 
   // 2. Seed Verified Teacher 1: Ananya Sharma (Mathematics)
   const teacher1 = await prisma.user.create({
