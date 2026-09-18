@@ -35,7 +35,7 @@ export default function AdminCoursesModerationPage() {
   const fetchAdminCourses = async () => {
     setLoading(true);
     try {
-      const res = await fetch("/api/admin/courses");
+      const res = await fetch("/api/admin/courses?limit=100");
       const data = await res.json();
       if (data.success) {
         setCourses(data.data.courses || []);
@@ -51,7 +51,7 @@ export default function AdminCoursesModerationPage() {
     fetchAdminCourses();
   }, []);
 
-  const handleStatusChange = async (courseId: string, newStatus: string) => {
+  const handleStatusChange = async (courseId: string, newStatus: string, actionName?: string, reason?: string) => {
     setActionLoading((prev) => ({ ...prev, [courseId]: true }));
     setErrorMsg(null);
     setSuccessMsg(null);
@@ -59,7 +59,7 @@ export default function AdminCoursesModerationPage() {
       const res = await fetch(`/api/admin/courses/${courseId}/status`, {
         method: "PATCH",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ status: newStatus }),
+        body: JSON.stringify({ status: newStatus, action: actionName, reason }),
       });
       const data = await res.json();
       if (!res.ok || !data.success) {
@@ -327,15 +327,31 @@ export default function AdminCoursesModerationPage() {
                           </Link>
 
                           {c.status !== "PUBLISHED" && (
-                            <PermissionGuard permission="courses.approve">
-                              <button
-                                onClick={() => handleStatusChange(c.id, "PUBLISHED")}
-                                disabled={actionLoading[c.id]}
-                                className="px-3 py-1.5 text-xs font-bold rounded-xl bg-emerald-600 hover:bg-emerald-700 disabled:opacity-50 text-white transition-colors cursor-pointer shadow-2xs"
-                              >
-                                {actionLoading[c.id] ? "Updating..." : "Approve & Publish"}
-                              </button>
-                            </PermissionGuard>
+                            <>
+                              <PermissionGuard permission="courses.approve">
+                                <button
+                                  onClick={() => handleStatusChange(c.id, "PUBLISHED", "APPROVE")}
+                                  disabled={actionLoading[c.id]}
+                                  className="px-3 py-1.5 text-xs font-bold rounded-xl bg-emerald-600 hover:bg-emerald-700 disabled:opacity-50 text-white transition-colors cursor-pointer shadow-2xs"
+                                >
+                                  {actionLoading[c.id] ? "Updating..." : "Approve & Publish"}
+                                </button>
+                              </PermissionGuard>
+                              {c.status !== "UNPUBLISHED" && (
+                                <PermissionGuard permission="courses.reject">
+                                  <button
+                                    onClick={() => {
+                                      const reason = prompt("Reason for rejection (optional):") || "Course rejected by admin moderation.";
+                                      handleStatusChange(c.id, "UNPUBLISHED", "REJECT", reason);
+                                    }}
+                                    disabled={actionLoading[c.id]}
+                                    className="px-3 py-1.5 text-xs font-bold rounded-xl bg-rose-600 hover:bg-rose-700 disabled:opacity-50 text-white transition-colors cursor-pointer shadow-2xs"
+                                  >
+                                    {actionLoading[c.id] ? "Updating..." : "Reject"}
+                                  </button>
+                                </PermissionGuard>
+                              )}
+                            </>
                           )}
 
                           {c.status === "PUBLISHED" && (
