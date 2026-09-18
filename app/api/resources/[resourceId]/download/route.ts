@@ -13,7 +13,7 @@ export async function GET(request: NextRequest, { params }: { params: { resource
       include: {
         lesson: {
           include: {
-            section: { include: { course: true } },
+            section: { include: { course: { include: { teacher: true } } } },
           },
         },
       },
@@ -29,9 +29,21 @@ export async function GET(request: NextRequest, { params }: { params: { resource
     }
 
     const currentUserId = session.userId || session.id;
-    const courseId = resource.lesson.section.courseId;
-    const isTeacher = resource.lesson.section.course.teacherId === currentUserId;
+    const course = resource.lesson.section.course;
+    const courseId = course.id;
+    const isTeacher = course.teacher.userId === currentUserId || course.teacherId === currentUserId;
     const isAdmin = session.role === "ADMIN";
+
+    const isTeacherVerified =
+      course.teacher?.verificationStatus === "VERIFIED" ||
+      course.teacher?.verificationStatus === "APPROVED";
+
+    if (!isTeacherVerified && !isTeacher && !isAdmin) {
+      return NextResponse.json(
+        { error: "This resource is currently locked because the educator account is pending verification." },
+        { status: 403 }
+      );
+    }
 
     const enrollment = await prisma.enrollment.findUnique({
       where: {

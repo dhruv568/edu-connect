@@ -16,12 +16,15 @@ export async function GET(
     const { sessionId } = params;
     const accessCheck = await verifyRoomAccess(sessionId, session);
 
-    if (!accessCheck.liveSession) {
-      return apiError(accessCheck.reason || "Session not found.", 404);
+    if (!accessCheck.authorized || !accessCheck.liveSession) {
+      return apiError(accessCheck.reason || "Classroom access denied.", accessCheck.liveSession ? 403 : 404);
     }
 
     const liveSession = accessCheck.liveSession;
     const isTeacher = accessCheck.isTeacher || false;
+    const isTeacherVerified =
+      liveSession.teacher.verificationStatus === "VERIFIED" ||
+      liveSession.teacher.verificationStatus === "APPROVED";
 
     const teacherName = `${liveSession.teacher.user.profile?.firstName || ""} ${liveSession.teacher.user.profile?.lastName || ""}`.trim() || "Teacher";
     const teacherAvatarUrl = liveSession.teacher.user.profile?.avatarUrl || undefined;
@@ -49,8 +52,8 @@ export async function GET(
       },
       userPermissions: {
         isTeacher,
-        canStartClass: isTeacher && (liveSession.status === "SCHEDULED" || liveSession.status === "OPEN"),
-        canEndClass: isTeacher && (liveSession.status === "LIVE" || liveSession.status === "OPEN"),
+        canStartClass: isTeacher && isTeacherVerified && (liveSession.status === "SCHEDULED" || liveSession.status === "OPEN"),
+        canEndClass: isTeacher && isTeacherVerified && (liveSession.status === "LIVE" || liveSession.status === "OPEN"),
         canShareScreen: isTeacher,
         canDrawWhiteboard: isTeacher || liveSession.studentCanDraw,
         canModerate: isTeacher,

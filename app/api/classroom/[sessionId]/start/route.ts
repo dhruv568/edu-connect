@@ -30,6 +30,17 @@ export async function POST(
       return apiError("Only the assigned teacher can start this live class.", 403);
     }
 
+    const isTeacherVerified =
+      liveSession.teacher.verificationStatus === "VERIFIED" ||
+      liveSession.teacher.verificationStatus === "APPROVED";
+
+    if (!isTeacherVerified) {
+      return apiError(
+        "Your educator account is pending verification. Teaching, live classes, course publishing, and content publishing will be available after verification.",
+        403
+      );
+    }
+
     if (liveSession.status === "LIVE") {
       return apiSuccess({ status: "LIVE", actualStartAt: liveSession.actualStartAt }, "Class is already LIVE.");
     }

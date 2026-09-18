@@ -69,7 +69,7 @@ export async function verifyRoomAccess(
       if (!isSlotTeacherVerified) {
         return {
           authorized: false,
-          reason: "Educator verification is required before live classroom sessions can be hosted.",
+          reason: "Your educator account is pending verification. Teaching, live classes, course publishing, and content publishing will be available after verification.",
         };
       }
 
@@ -128,7 +128,7 @@ export async function verifyRoomAccess(
     if (!isTeacherVerified) {
       return {
         authorized: false,
-        reason: "Educator verification is required before entering or hosting live sessions.",
+        reason: "Your educator account is pending verification. Teaching, live classes, course publishing, and content publishing will be available after verification.",
         liveSession,
       };
     }
@@ -138,6 +138,18 @@ export async function verifyRoomAccess(
 
   // 3. Check Student Booking Access
   if (session.role === "STUDENT") {
+    const isTeacherVerified =
+      liveSession.teacher?.verificationStatus === "VERIFIED" ||
+      liveSession.teacher?.verificationStatus === "APPROVED";
+
+    if (!isTeacherVerified) {
+      return {
+        authorized: false,
+        reason: "This live class is currently locked because the educator account is pending verification.",
+        liveSession,
+      };
+    }
+
     const booking = await prisma.booking.findFirst({
       where: {
         liveClassSlotId: liveSession.liveClassSlotId,

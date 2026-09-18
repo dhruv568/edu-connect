@@ -32,7 +32,9 @@ export async function GET(
       include: {
         section: {
           include: {
-            course: true,
+            course: {
+              include: { teacher: true },
+            },
           },
         },
         videoAssets: true,
@@ -45,6 +47,25 @@ export async function GET(
 
     const course = lesson.section.course;
     const currentUserId = session?.userId || session?.id;
+
+    // Check teacher verification
+    const isTeacherVerified =
+      course.teacher?.verificationStatus === "VERIFIED" ||
+      course.teacher?.verificationStatus === "APPROVED";
+
+    if (!isTeacherVerified) {
+      let isTeacherOwnerOrAdmin = false;
+      if (session?.role === "ADMIN") {
+        isTeacherOwnerOrAdmin = true;
+      } else if (session?.role === "TEACHER" && currentUserId) {
+        if (course.teacher?.userId === currentUserId) {
+          isTeacherOwnerOrAdmin = true;
+        }
+      }
+      if (!isTeacherOwnerOrAdmin) {
+        return apiError("This content is currently locked because the educator account is pending verification.", 403);
+      }
+    }
 
     // 2. Authorization Check
     let isAuthorized = false;

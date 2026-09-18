@@ -75,7 +75,7 @@ export class LiveClassService {
       profile.verificationStatus === "VERIFIED" ||
       profile.verificationStatus === "APPROVED";
     if (!isVerified) {
-      throw new Error("FORBIDDEN: Educator verification is required before using this feature.");
+      throw new Error("FORBIDDEN: Your educator account is pending verification. Teaching, live classes, course publishing, and content publishing will be available after verification.");
     }
     return profile;
   }
@@ -411,7 +411,8 @@ export class LiveClassService {
    * Publish a draft live class
    */
   static async publishLiveClass(userId: string, slotId: string) {
-    const teacherId = await this.getTeacherProfileId(userId);
+    const teacher = await this.getVerifiedTeacherProfile(userId);
+    const teacherId = teacher.id;
 
     const slot = await prisma.liveClassSlot.findFirst({
       where: { id: slotId, teacherId },
@@ -665,6 +666,24 @@ export class LiveClassService {
 
     const teacherId = teacher.id;
     const rawName = `${teacher.user.profile?.firstName || ''} ${teacher.user.profile?.lastName || ''}`.trim() || "Educator";
+
+    const isVerified = teacher.verificationStatus === "VERIFIED" || teacher.verificationStatus === "APPROVED";
+    if (!isVerified) {
+      return {
+        educator: {
+          id: teacher.user.id,
+          teacherProfileId: teacher.id,
+          name: rawName,
+          headline: teacher.headline || "Educator",
+          hourlyRate: teacher.hourlyRate || 499,
+          isVerified: false,
+          isLocked: true,
+          verificationMessage: "Your educator account is pending verification. Teaching, live classes, course publishing, and content publishing will be available after verification.",
+        },
+        dates: [],
+        totalAvailableSlots: 0,
+      };
+    }
 
     const now = new Date();
     const startDate = new Date(now.getFullYear(), now.getMonth(), now.getDate());

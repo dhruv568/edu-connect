@@ -69,21 +69,26 @@ export async function GET(request: NextRequest, { params }: { params: { id: stri
       languages: user.teacherProfile.languages || "English, Hindi",
       teachingMode: user.teacherProfile.teachingMode || "ONLINE",
       verificationStatus: user.teacherProfile.verificationStatus,
-      courses: user.teacherProfile.courses,
-      liveClassSlots: user.teacherProfile.liveClassSlots.map((s) => ({
-        id: s.id,
-        title: s.title,
-        description: s.description,
-        subject: s.subject,
-        level: s.level,
-        startTime: s.startTime.toISOString(),
-        endTime: s.endTime.toISOString(),
-        durationMinutes: s.durationMinutes,
-        price: s.price,
-        maxCapacity: s.maxCapacity,
-        bookedCount: s.bookings.length,
-        isFull: s.bookings.length >= s.maxCapacity,
-      })),
+      isVerified: user.teacherProfile.verificationStatus === "VERIFIED" || user.teacherProfile.verificationStatus === "APPROVED",
+      courses: (user.teacherProfile.verificationStatus === "VERIFIED" || user.teacherProfile.verificationStatus === "APPROVED")
+        ? user.teacherProfile.courses
+        : [],
+      liveClassSlots: (user.teacherProfile.verificationStatus === "VERIFIED" || user.teacherProfile.verificationStatus === "APPROVED")
+        ? user.teacherProfile.liveClassSlots.map((s) => ({
+            id: s.id,
+            title: s.title,
+            description: s.description,
+            subject: s.subject,
+            level: s.level,
+            startTime: s.startTime.toISOString(),
+            endTime: s.endTime.toISOString(),
+            durationMinutes: s.durationMinutes,
+            price: s.price,
+            maxCapacity: s.maxCapacity,
+            bookedCount: s.bookings.length,
+            isFull: s.bookings.length >= s.maxCapacity,
+          }))
+        : [],
     };
 
     return apiSuccess({ teacher });

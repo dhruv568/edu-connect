@@ -273,7 +273,7 @@ export default function TeacherLiveClassesPage() {
   // Handle Create Class Submit
   const handleCreateSubmit = async (publishImmediate: boolean = true) => {
     if (verificationStatus !== "VERIFIED") {
-      showToast("Verification Required 🔒", "Only verified educators can create live classes.", "error");
+      showToast("Verification Required 🔒", "Your educator account is pending verification. Teaching, live classes, course publishing, and content publishing will be available after verification.", "error");
       router.push("/teacher/onboarding");
       return;
     }
@@ -301,9 +301,9 @@ export default function TeacherLiveClassesPage() {
           endTime: endDateTimeStr,
           timezone,
           classType,
-          maxCapacity: Number(maxCapacity),
-          minimumStudents: Number(minimumStudents),
-          price: Number(price),
+          maxCapacity: Number(maxCapacity) || 10,
+          minimumStudents: Number(minimumStudents) || 1,
+          price: Number(price) || 0,
           status: publishImmediate ? "SCHEDULED" : "DRAFT",
           cameraRequired,
           micRequired,
@@ -316,15 +316,14 @@ export default function TeacherLiveClassesPage() {
 
       const json = await res.json();
       if (json.success) {
-        showToast("Success", "Live class created successfully.", "success");
+        showToast("Success", "Live class slot scheduled successfully!", "success");
         setShowCreateModal(false);
-        resetForm();
         fetchLiveClassesData();
       } else {
-        showToast("Error", json.error || "Failed to create live class.", "error");
+        showToast("Error", json.error || "Failed to create live class slot.", "error");
       }
-    } catch (err: any) {
-      showToast("Error", err.message || "Failed to submit live class.", "error");
+    } catch (err) {
+      showToast("Error", "An unexpected error occurred.", "error");
     } finally {
       setSubmitting(false);
     }
@@ -332,7 +331,7 @@ export default function TeacherLiveClassesPage() {
 
   const handleStartClassroom = async (slotId: string) => {
     if (verificationStatus !== "VERIFIED") {
-      showToast("Verification Required 🔒", "Only verified educators can host live classrooms.", "error");
+      showToast("Verification Required 🔒", "Your educator account is pending verification. Teaching, live classes, course publishing, and content publishing will be available after verification.", "error");
       router.push("/teacher/onboarding");
       return;
     }
@@ -395,8 +394,8 @@ export default function TeacherLiveClassesPage() {
               <ShieldAlert className="h-5 w-5 text-amber-600 shrink-0" />
               <div>
                 <h4 className="text-xs font-black text-amber-950">Educator Verification Required for Live Classes</h4>
-                <p className="text-[11px] text-amber-800 font-medium">
-                  You must be an approved, verified educator to schedule live slots or launch interactive LiveKit classrooms.
+                <p className="text-[11px] text-amber-800 font-semibold leading-relaxed">
+                  Your educator account is pending verification. Teaching, live classes, course publishing, and content publishing will be available after verification.
                 </p>
               </div>
             </div>
@@ -633,14 +632,25 @@ export default function TeacherLiveClassesPage() {
                       </Link>
 
                       {!isCompleted && !isCancelled && (
-                        <Button
-                          onClick={() => handleStartClassroom(slot.id)}
-                          variant="primary"
-                          size="sm"
-                          leftIcon={<Play className="h-3.5 w-3.5" />}
-                        >
-                          Enter Classroom
-                        </Button>
+                        verificationStatus === "VERIFIED" ? (
+                          <Button
+                            onClick={() => handleStartClassroom(slot.id)}
+                            variant="primary"
+                            size="sm"
+                            leftIcon={<Play className="h-3.5 w-3.5" />}
+                          >
+                            Enter Classroom
+                          </Button>
+                        ) : (
+                          <Button
+                            variant="outline"
+                            size="sm"
+                            disabled
+                            className="bg-slate-100 text-slate-400 border-slate-200 cursor-not-allowed font-bold"
+                          >
+                            <Lock className="h-3.5 w-3.5 mr-1 text-slate-400" /> Locked
+                          </Button>
+                        )
                       )}
 
                       {!isCompleted && !isCancelled && (
@@ -805,14 +815,25 @@ export default function TeacherLiveClassesPage() {
                                     View Details
                                   </Button>
                                 </Link>
-                                <Button
-                                  variant="primary"
-                                  size="sm"
-                                  onClick={() => handleStartClassroom(slot.id)}
-                                  leftIcon={<Play className="h-3.5 w-3.5" />}
-                                >
-                                  Enter Classroom
-                                </Button>
+                                {verificationStatus === "VERIFIED" ? (
+                                  <Button
+                                    variant="primary"
+                                    size="sm"
+                                    onClick={() => handleStartClassroom(slot.id)}
+                                    leftIcon={<Play className="h-3.5 w-3.5" />}
+                                  >
+                                    Enter Classroom
+                                  </Button>
+                                ) : (
+                                  <Button
+                                    variant="outline"
+                                    size="sm"
+                                    disabled
+                                    className="bg-slate-100 text-slate-400 border-slate-200 cursor-not-allowed font-bold"
+                                  >
+                                    <Lock className="h-3.5 w-3.5 mr-1 text-slate-400" /> Locked
+                                  </Button>
+                                )}
                               </div>
                             </div>
                           );

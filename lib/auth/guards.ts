@@ -57,6 +57,13 @@ export async function requireStaffOrAdmin(): Promise<UserSession & { userId: str
   return requireRole(["ADMIN", "STAFF"]);
 }
 
+export const EDUCATOR_VERIFICATION_PENDING_MESSAGE =
+  "Your educator account is pending verification. Teaching, live classes, course publishing, and content publishing will be available after verification.";
+
+export function isEducatorVerified(teacherProfile?: { verificationStatus?: string | null } | null): boolean {
+  return teacherProfile?.verificationStatus === "VERIFIED" || teacherProfile?.verificationStatus === "APPROVED";
+}
+
 export async function requireVerifiedEducator(): Promise<UserSession & { userId: string; teacherProfile: any }> {
   const session = await requireRole(["EDUCATOR", "TEACHER"]);
   let teacherProfile = await prisma.teacherProfile.findUnique({
@@ -79,15 +86,10 @@ export async function requireVerifiedEducator(): Promise<UserSession & { userId:
     throw new Error("FORBIDDEN: Seeded public profile cannot access educator dashboard or privileges.");
   }
 
-  const isVerified =
-    teacherProfile.verificationStatus === "VERIFIED" ||
-    teacherProfile.verificationStatus === "APPROVED";
+  const isVerified = isEducatorVerified(teacherProfile);
 
   if (!isVerified) {
-    if (teacherProfile.verificationStatus === "PENDING") {
-      throw new Error("FORBIDDEN: Educator verification is under review. You will be notified once approved.");
-    }
-    throw new Error("FORBIDDEN: Educator verification is required before using this feature.");
+    throw new Error(`FORBIDDEN: ${EDUCATOR_VERIFICATION_PENDING_MESSAGE}`);
   }
 
   return { ...session, teacherProfile };

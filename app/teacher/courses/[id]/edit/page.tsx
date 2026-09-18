@@ -442,7 +442,7 @@ export default function TeacherCourseEditorPage() {
 
   const handlePublish = async () => {
     if (verificationStatus !== "VERIFIED") {
-      setErrorMsg("Educator verification required to publish courses. Please complete educator KYC first.");
+      setErrorMsg("Your educator account is pending verification. Teaching, live classes, course publishing, and content publishing will be available after verification.");
       router.push("/teacher/onboarding");
       return;
     }
@@ -492,8 +492,8 @@ export default function TeacherCourseEditorPage() {
           <div className="p-4 rounded-2xl bg-amber-500/10 border border-amber-500/30 text-amber-300 text-xs flex items-center justify-between gap-4">
             <div className="flex items-center gap-2.5">
               <ShieldAlert className="w-5 h-5 text-amber-400 shrink-0" />
-              <span>
-                <strong>Verification Required:</strong> You can build and preview this course, but educator verification must be approved before you can publish.
+              <span className="font-semibold leading-relaxed">
+                <strong>Verification Required:</strong> Your educator account is pending verification. Teaching, live classes, course publishing, and content publishing will be available after verification.
               </span>
             </div>
             <Link

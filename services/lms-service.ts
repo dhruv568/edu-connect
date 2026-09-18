@@ -69,6 +69,9 @@ export class LmsService {
 
     const where: any = {
       status: "PUBLISHED",
+      teacher: {
+        verificationStatus: { in: ["VERIFIED", "APPROVED"] },
+      },
     };
 
     if (params.subject && params.subject !== "all") {
@@ -232,6 +235,30 @@ export class LmsService {
 
     if (!course) return null;
 
+    const isTeacherVerified =
+      course.teacher.verificationStatus === "VERIFIED" ||
+      course.teacher.verificationStatus === "APPROVED";
+
+    if (!isTeacherVerified) {
+      let isOwnerOrAdmin = false;
+      if (userId) {
+        if (course.teacher.userId === userId) {
+          isOwnerOrAdmin = true;
+        } else {
+          const requestingUser = await prisma.user.findUnique({
+            where: { id: userId },
+            select: { role: true },
+          });
+          if (requestingUser?.role === "ADMIN") {
+            isOwnerOrAdmin = true;
+          }
+        }
+      }
+      if (!isOwnerOrAdmin) {
+        return null;
+      }
+    }
+
     let isEnrolled = false;
     let enrollmentStatus: string | null = null;
     let userProgressPercentage = 0;
@@ -385,8 +412,12 @@ export class LmsService {
     const userId = session?.userId || session?.id;
     const userRole = session?.role;
 
-    // Authorization rule check for unpublished courses
-    if (course.status !== "PUBLISHED") {
+    const isTeacherVerified =
+      course.teacher.verificationStatus === "VERIFIED" ||
+      course.teacher.verificationStatus === "APPROVED";
+
+    // Authorization rule check for unpublished or unverified educator courses
+    if (course.status !== "PUBLISHED" || !isTeacherVerified) {
       let canAccessDraft = false;
       if (userRole === "ADMIN") {
         canAccessDraft = true;
@@ -809,7 +840,7 @@ export class LmsService {
     });
 
     if (!teacher || (teacher.verificationStatus !== "VERIFIED" && teacher.verificationStatus !== "APPROVED")) {
-      throw new Error("FORBIDDEN: Educator verification is required before publishing courses.");
+      throw new Error("FORBIDDEN: Your educator account is pending verification. Teaching, live classes, course publishing, and content publishing will be available after verification.");
     }
 
     const editorData = await LmsService.getTeacherCourseEditorDetails(teacherUserId, courseId);
@@ -1586,12 +1617,36 @@ export class LmsService {
       },
       include: {
         section: {
-          include: { course: true },
+          include: {
+            course: {
+              include: { teacher: true },
+            },
+          },
         },
       },
     });
 
     if (!lesson) return { allowed: false, error: "Lesson video not found" };
+
+    const isTeacherVerified =
+      lesson.section.course.teacher?.verificationStatus === "VERIFIED" ||
+      lesson.section.course.teacher?.verificationStatus === "APPROVED";
+
+    if (!isTeacherVerified) {
+      if (userId) {
+        // Teacher owner access
+        const teacher = await prisma.teacherProfile.findUnique({ where: { userId } });
+        if (teacher && teacher.id === lesson.section.course.teacherId) {
+          return { allowed: true, lesson };
+        }
+        // Admin access
+        const user = await prisma.user.findUnique({ where: { id: userId } });
+        if (user && user.role === "ADMIN") {
+          return { allowed: true, lesson };
+        }
+      }
+      return { allowed: false, error: "This content is currently locked because the educator account is pending verification." };
+    }
 
     // Preview lessons accessible publicly
     if (lesson.isPreview) {

@@ -62,10 +62,19 @@ export class PaymentService {
 
       const course = await prisma.course.findUnique({
         where: { id: courseId },
+        include: { teacher: true },
       });
 
       if (!course || course.status !== "PUBLISHED") {
         throw new Error("NOT_FOUND: Course is unavailable for purchase.");
+      }
+
+      const isTeacherVerified =
+        course.teacher.verificationStatus === "VERIFIED" ||
+        course.teacher.verificationStatus === "APPROVED";
+
+      if (!isTeacherVerified) {
+        throw new Error("FORBIDDEN: Educator is pending verification. This course is currently locked and unavailable for purchase.");
       }
 
       // Check duplicate active enrollment
@@ -104,7 +113,7 @@ export class PaymentService {
       if (liveClassSlotId) {
         slot = await prisma.liveClassSlot.findUnique({
           where: { id: liveClassSlotId },
-          include: { bookings: true },
+          include: { bookings: true, teacher: true },
         });
       }
 
@@ -116,7 +125,7 @@ export class PaymentService {
             teacherId: reqTeacherId,
             status: { in: ["SCHEDULED", "OPEN"] },
           },
-          include: { bookings: true },
+          include: { bookings: true, teacher: true },
           orderBy: { startTime: "asc" },
         });
 
@@ -127,6 +136,14 @@ export class PaymentService {
           });
 
           if (teacher) {
+            const isTeacherVerified =
+              teacher.verificationStatus === "VERIFIED" ||
+              teacher.verificationStatus === "APPROVED";
+
+            if (!isTeacherVerified) {
+              throw new Error("FORBIDDEN: Educator is pending verification. This live class is currently locked and unavailable for booking.");
+            }
+
             const rawName = `${teacher.user.profile?.firstName || ''} ${teacher.user.profile?.lastName || ''}`.trim() || "Educator";
             let startTime = new Date(Date.now() + 24 * 60 * 60 * 1000);
             if (selectedDate && selectedSlotTime) {
@@ -149,7 +166,7 @@ export class PaymentService {
                 maxCapacity: 1,
                 status: "OPEN",
               },
-              include: { bookings: true },
+              include: { bookings: true, teacher: true },
             });
           }
         }
@@ -158,13 +175,21 @@ export class PaymentService {
       if (!slot) {
         slot = await prisma.liveClassSlot.findFirst({
           where: { status: { in: ["SCHEDULED", "OPEN"] } },
-          include: { bookings: true },
+          include: { bookings: true, teacher: true },
           orderBy: { startTime: "asc" },
         });
       }
 
       if (!slot) {
         throw new Error("BAD_REQUEST: liveClassSlotId or educatorId is required for live class booking.");
+      }
+
+      const isSlotTeacherVerified =
+        slot.teacher?.verificationStatus === "VERIFIED" ||
+        slot.teacher?.verificationStatus === "APPROVED";
+
+      if (!isSlotTeacherVerified) {
+        throw new Error("FORBIDDEN: Educator is pending verification. This live class is currently locked and unavailable for booking.");
       }
 
       if (slot.status === "CANCELLED" || slot.status === "COMPLETED") {

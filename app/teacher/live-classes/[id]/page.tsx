@@ -21,6 +21,9 @@ import {
   Shield,
   Layers,
   Sparkles,
+  Lock,
+  ShieldAlert,
+  ArrowRight,
 } from "lucide-react";
 
 export default function TeacherLiveClassDetailsPage() {
@@ -32,6 +35,7 @@ export default function TeacherLiveClassDetailsPage() {
   const [loading, setLoading] = useState(true);
   const [userName, setUserName] = useState("Educator");
   const [userEmail, setUserEmail] = useState("");
+  const [verificationStatus, setVerificationStatus] = useState<string>("PENDING");
   const [slot, setSlot] = useState<any>(null);
   const [activeTab, setActiveTab] = useState<"OVERVIEW" | "BOOKINGS" | "ATTENDANCE" | "CLASSROOM">("OVERVIEW");
 
@@ -43,6 +47,9 @@ export default function TeacherLiveClassDetailsPage() {
       if (profileJson.data) {
         setUserName(`${profileJson.data.profile.firstName} ${profileJson.data.profile.lastName}`.trim() || profileJson.data.user.email);
         setUserEmail(profileJson.data.user.email);
+        if (profileJson.data.teacherProfile) {
+          setVerificationStatus(profileJson.data.teacherProfile.verificationStatus || "PENDING");
+        }
       }
 
       const res = await fetch(`/api/teacher/live-classes/${slotId}`);
@@ -64,6 +71,12 @@ export default function TeacherLiveClassDetailsPage() {
   }, [slotId]);
 
   const handleLaunchClassroom = async () => {
+    if (verificationStatus !== "VERIFIED") {
+      showToast("Verification Required 🔒", "Your educator account is pending verification. Teaching, live classes, course publishing, and content publishing will be available after verification.", "error");
+      router.push("/teacher/onboarding");
+      return;
+    }
+
     try {
       const res = await fetch(`/api/teacher/live-classes/${slotId}/start-session`, {
         method: "POST",
@@ -83,6 +96,26 @@ export default function TeacherLiveClassDetailsPage() {
   return (
     <DashboardLayout role="TEACHER" userName={userName} userEmail={userEmail}>
       <div className="space-y-6">
+        {/* Verification Required Banner for Unverified Educators */}
+        {verificationStatus !== "VERIFIED" && (
+          <div className="p-4 rounded-2xl bg-amber-50 border border-amber-200 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 shadow-2xs">
+            <div className="flex items-center gap-3">
+              <ShieldAlert className="h-5 w-5 text-amber-600 shrink-0" />
+              <div>
+                <h4 className="text-xs font-black text-amber-950">Educator Verification Required for Live Classes</h4>
+                <p className="text-[11px] text-amber-800 font-semibold leading-relaxed">
+                  Your educator account is pending verification. Teaching, live classes, course publishing, and content publishing will be available after verification.
+                </p>
+              </div>
+            </div>
+            <Link href="/teacher/onboarding" className="shrink-0 w-full sm:w-auto">
+              <Button size="sm" variant="secondary" rightIcon={<ArrowRight className="h-3.5 w-3.5" />} className="w-full sm:w-auto text-xs font-bold bg-amber-600 text-white hover:bg-amber-700">
+                Complete Verification
+              </Button>
+            </Link>
+          </div>
+        )}
+
         {/* Top Header */}
         <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 pb-4 border-b border-slate-200">
           <div className="flex items-center gap-3">
@@ -104,14 +137,25 @@ export default function TeacherLiveClassDetailsPage() {
             </div>
           </div>
 
-          <Button
-            onClick={handleLaunchClassroom}
-            variant="primary"
-            size="md"
-            leftIcon={<Play className="h-4 w-4" />}
-          >
-            Enter Classroom
-          </Button>
+          {verificationStatus === "VERIFIED" ? (
+            <Button
+              onClick={handleLaunchClassroom}
+              variant="primary"
+              size="md"
+              leftIcon={<Play className="h-4 w-4" />}
+            >
+              Enter Classroom
+            </Button>
+          ) : (
+            <Button
+              variant="outline"
+              size="md"
+              disabled
+              className="bg-slate-100 text-slate-400 border-slate-200 cursor-not-allowed font-bold"
+            >
+              <Lock className="h-4 w-4 mr-1.5 text-slate-400" /> Locked
+            </Button>
+          )}
         </div>
 
         {loading ? (

@@ -117,8 +117,8 @@ export default function TeacherDashboardPage() {
                   <h2 className="text-xl font-bold">Verification Status: Application Under Review</h2>
                   <StatusBadge status="PENDING" />
                 </div>
-                <p className="text-xs text-amber-100 font-medium leading-relaxed">
-                  Thank You for applying. We shall verify your documents, and if they meet our policy requirements, the next round will proceed. You will be informed through our official email, WhatsApp, or via call.
+                <p className="text-xs text-amber-100 font-semibold leading-relaxed">
+                  Your educator account is pending verification. Teaching, live classes, course publishing, and content publishing will be available after verification.
                 </p>
               </div>
             </div>
@@ -146,8 +146,8 @@ export default function TeacherDashboardPage() {
                   <h2 className="text-xl font-bold">Verification Required: Complete Educator KYC</h2>
                   <StatusBadge status={data.verificationStatus} />
                 </div>
-                <p className="text-xs text-amber-100 font-medium">
-                  Complete your 5-step educator verification (personal info, qualifications, KYC ID, and bank details) to unlock course creation and live classes.
+                <p className="text-xs text-amber-100 font-semibold leading-relaxed">
+                  Your educator account is pending verification. Teaching, live classes, course publishing, and content publishing will be available after verification.
                 </p>
               </div>
             </div>
@@ -238,11 +238,17 @@ export default function TeacherDashboardPage() {
                       </p>
                     </div>
 
-                    <Link href={`/classroom/${slot.slotId}`}>
-                      <Button variant="primary" size="sm">
-                        Enter Classroom
+                    {data.verificationStatus === "VERIFIED" ? (
+                      <Link href={`/classroom/${slot.slotId}`}>
+                        <Button variant="primary" size="sm">
+                          Enter Classroom
+                        </Button>
+                      </Link>
+                    ) : (
+                      <Button variant="outline" size="sm" disabled className="bg-slate-100 text-slate-400 border-slate-200 cursor-not-allowed font-bold">
+                        <Lock className="h-3 w-3 mr-1 text-slate-400" /> Locked
                       </Button>
-                    </Link>
+                    )}
                   </div>
                 ))}
               </div>
@@ -304,11 +310,17 @@ export default function TeacherDashboardPage() {
                       </p>
                     </div>
 
-                    <Link href={`/classroom/${slot.slotId}`}>
-                      <Button variant={slot.canEnter ? "primary" : "outline"} size="sm">
-                        {slot.canEnter ? "Enter Classroom" : "View Slot"}
+                    {data.verificationStatus === "VERIFIED" ? (
+                      <Link href={`/classroom/${slot.slotId}`}>
+                        <Button variant={slot.canEnter ? "primary" : "outline"} size="sm">
+                          {slot.canEnter ? "Enter Classroom" : "View Slot"}
+                        </Button>
+                      </Link>
+                    ) : (
+                      <Button variant="outline" size="sm" disabled className="bg-slate-100 text-slate-400 border-slate-200 cursor-not-allowed font-bold">
+                        <Lock className="h-3 w-3 mr-1 text-slate-400" /> Locked
                       </Button>
-                    </Link>
+                    )}
                   </div>
                 ))}
               </div>

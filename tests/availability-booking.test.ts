@@ -68,11 +68,13 @@ async function runTests() {
     const updatedAvail = await LiveClassService.updateTeacherAvailability(testTeacherUser.id, {
       timezone: "Asia/Kolkata",
       availabilities: [
+        { dayOfWeek: 0, startTime: "09:00", endTime: "17:00", isActive: true },
         { dayOfWeek: 1, startTime: "09:00", endTime: "17:00", isActive: true },
         { dayOfWeek: 2, startTime: "09:00", endTime: "17:00", isActive: true },
         { dayOfWeek: 3, startTime: "09:00", endTime: "17:00", isActive: true },
         { dayOfWeek: 4, startTime: "09:00", endTime: "17:00", isActive: true },
         { dayOfWeek: 5, startTime: "09:00", endTime: "17:00", isActive: true },
+        { dayOfWeek: 6, startTime: "09:00", endTime: "17:00", isActive: true },
       ],
       breaks: [
         { dayOfWeek: 1, startTime: "13:00", endTime: "14:00" },

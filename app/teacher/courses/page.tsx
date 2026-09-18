@@ -93,7 +93,7 @@ export default function TeacherCoursesDashboardPage() {
   const handleCreateCourse = async (e: React.FormEvent) => {
     e.preventDefault();
     if (verificationStatus !== "VERIFIED") {
-      showToast("Verification Required 🔒", "Only verified educators can create or publish courses.", "error");
+      showToast("Verification Required 🔒", "Your educator account is pending verification. Teaching, live classes, course publishing, and content publishing will be available after verification.", "error");
       router.push("/teacher/onboarding");
       return;
     }
@@ -141,7 +141,7 @@ export default function TeacherCoursesDashboardPage() {
 
   const handlePublishToggle = async (course: any) => {
     if (verificationStatus !== "VERIFIED" && course.status !== "PUBLISHED") {
-      showToast("Verification Required 🔒", "Only verified educators can publish courses to learners.", "error");
+      showToast("Verification Required 🔒", "Your educator account is pending verification. Teaching, live classes, course publishing, and content publishing will be available after verification.", "error");
       router.push("/teacher/onboarding");
       return;
     }
@@ -176,9 +176,9 @@ export default function TeacherCoursesDashboardPage() {
             <div className="flex items-center gap-3">
               <ShieldAlert className="h-5 w-5 text-amber-600 shrink-0" />
               <div>
-                <h4 className="text-xs font-black text-amber-950">Educator Verification Required for Course Creation</h4>
-                <p className="text-[11px] text-amber-800 font-medium">
-                  You must be an approved, verified educator to build LMS courses or publish lessons to learners.
+                <h4 className="text-xs font-black text-amber-950">Educator Verification Required for Courses & Content</h4>
+                <p className="text-[11px] text-amber-800 font-semibold leading-relaxed">
+                  Your educator account is pending verification. Teaching, live classes, course publishing, and content publishing will be available after verification.
                 </p>
               </div>
             </div>
@@ -437,17 +437,26 @@ export default function TeacherCoursesDashboardPage() {
                           <Copy className="h-4 w-4" />
                         </button>
 
-                        <button
-                          onClick={() => handlePublishToggle(c)}
-                          className={`p-2 rounded-xl transition ${
-                            c.status === "PUBLISHED"
-                              ? "text-emerald-600 hover:bg-emerald-50 dark:hover:bg-emerald-950/40"
-                              : "text-slate-400 hover:text-emerald-600 hover:bg-emerald-50 dark:hover:bg-slate-800"
-                          }`}
-                          title={c.status === "PUBLISHED" ? "Unpublish Course" : "Publish Course"}
-                        >
-                          <CheckCircle2 className="h-4 w-4" />
-                        </button>
+                        {verificationStatus === "VERIFIED" ? (
+                          <button
+                            onClick={() => handlePublishToggle(c)}
+                            className={`p-2 rounded-xl transition ${
+                              c.status === "PUBLISHED"
+                                ? "text-emerald-600 hover:bg-emerald-50 dark:hover:bg-emerald-950/40"
+                                : "text-slate-400 hover:text-emerald-600 hover:bg-emerald-50 dark:hover:bg-slate-800"
+                            }`}
+                            title={c.status === "PUBLISHED" ? "Unpublish Course" : "Publish Course"}
+                          >
+                            <CheckCircle2 className="h-4 w-4" />
+                          </button>
+                        ) : (
+                          <span
+                            className="p-2 rounded-xl text-slate-300 cursor-not-allowed inline-flex items-center justify-center"
+                            title="Verification required to publish courses"
+                          >
+                            <Lock className="h-4 w-4 text-slate-400" />
+                          </span>
+                        )}
                       </div>
                     </div>
                   </div>
