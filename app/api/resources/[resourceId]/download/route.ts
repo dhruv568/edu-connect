@@ -3,6 +3,7 @@ import fs from "fs";
 import path from "path";
 import { prisma } from "@/lib/prisma";
 import { getSession } from "@/lib/auth/session";
+import { EDUCATOR_VERIFICATION_PENDING_MESSAGE } from "@/lib/auth/guards";
 
 const RESOURCES_DIR = path.join(process.cwd(), "storage", "resources");
 
@@ -40,7 +41,7 @@ export async function GET(request: NextRequest, { params }: { params: { resource
 
     if (!isTeacherVerified && !isTeacher && !isAdmin) {
       return NextResponse.json(
-        { error: "This resource is currently locked because the educator account is pending verification." },
+        { error: EDUCATOR_VERIFICATION_PENDING_MESSAGE },
         { status: 403 }
       );
     }

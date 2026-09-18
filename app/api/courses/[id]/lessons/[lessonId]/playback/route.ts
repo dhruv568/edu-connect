@@ -3,6 +3,7 @@ import { getSession } from "@/lib/auth/session";
 import { prisma } from "@/lib/prisma";
 import { generateMuxSignedPlaybackToken } from "@/lib/mux/mux-client";
 import { apiError, apiSuccess } from "@/lib/api-response";
+import { EDUCATOR_VERIFICATION_PENDING_MESSAGE } from "@/lib/auth/guards";
 
 export const dynamic = "force-dynamic";
 
@@ -63,7 +64,7 @@ export async function GET(
         }
       }
       if (!isTeacherOwnerOrAdmin) {
-        return apiError("This content is currently locked because the educator account is pending verification.", 403);
+        return apiError(EDUCATOR_VERIFICATION_PENDING_MESSAGE, 403);
       }
     }
 

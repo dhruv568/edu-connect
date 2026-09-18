@@ -3,6 +3,7 @@ import { cashfreeClient } from "@/lib/cashfree";
 import { LedgerService } from "@/services/ledger-service";
 import { RouteService } from "@/services/route-service";
 import { DEFAULT_CURRENCY, toPaise, fromPaise } from "@/lib/currency";
+import { EDUCATOR_VERIFICATION_PENDING_MESSAGE } from "@/lib/auth/guards";
 import crypto from "crypto";
 
 export interface CreateOrderParams {
@@ -65,8 +66,8 @@ export class PaymentService {
         include: { teacher: true },
       });
 
-      if (!course || course.status !== "PUBLISHED") {
-        throw new Error("NOT_FOUND: Course is unavailable for purchase.");
+      if (!course) {
+        throw new Error("NOT_FOUND: Course not found.");
       }
 
       const isTeacherVerified =
@@ -74,7 +75,11 @@ export class PaymentService {
         course.teacher.verificationStatus === "APPROVED";
 
       if (!isTeacherVerified) {
-        throw new Error("FORBIDDEN: Educator is pending verification. This course is currently locked and unavailable for purchase.");
+        throw new Error(`FORBIDDEN: ${EDUCATOR_VERIFICATION_PENDING_MESSAGE}`);
+      }
+
+      if (course.status !== "PUBLISHED") {
+        throw new Error("NOT_FOUND: Course is unavailable for purchase.");
       }
 
       // Check duplicate active enrollment
@@ -141,7 +146,7 @@ export class PaymentService {
               teacher.verificationStatus === "APPROVED";
 
             if (!isTeacherVerified) {
-              throw new Error("FORBIDDEN: Educator is pending verification. This live class is currently locked and unavailable for booking.");
+              throw new Error(`FORBIDDEN: ${EDUCATOR_VERIFICATION_PENDING_MESSAGE}`);
             }
 
             const rawName = `${teacher.user.profile?.firstName || ''} ${teacher.user.profile?.lastName || ''}`.trim() || "Educator";
@@ -189,7 +194,7 @@ export class PaymentService {
         slot.teacher?.verificationStatus === "APPROVED";
 
       if (!isSlotTeacherVerified) {
-        throw new Error("FORBIDDEN: Educator is pending verification. This live class is currently locked and unavailable for booking.");
+        throw new Error(`FORBIDDEN: ${EDUCATOR_VERIFICATION_PENDING_MESSAGE}`);
       }
 
       if (slot.status === "CANCELLED" || slot.status === "COMPLETED") {

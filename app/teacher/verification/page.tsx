@@ -170,6 +170,12 @@ export default function TeacherVerificationStatusPage() {
                 <div className="p-4 rounded-xl bg-white border border-amber-200/90 text-sm font-semibold text-amber-950 leading-relaxed shadow-2xs">
                   Thank You for applying. We shall verify your documents, and if they meet our policy requirements, the next round will proceed. You will be informed through our official email, WhatsApp, or via call.
                 </div>
+                <div className="p-3.5 rounded-xl bg-amber-500/15 border border-amber-300 text-xs font-semibold text-amber-950 leading-relaxed flex items-start gap-2.5">
+                  <AlertCircle className="w-4 h-4 text-amber-700 shrink-0 mt-0.5" />
+                  <span>
+                    Your educator account is pending verification. Teaching, live classes, course publishing, and content publishing will be available after verification.
+                  </span>
+                </div>
                 {submittedAt && (
                   <p className="text-xs font-bold text-amber-700">
                     Submitted Date: {new Date(submittedAt).toLocaleDateString()}

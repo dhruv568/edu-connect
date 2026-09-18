@@ -21,6 +21,8 @@ import {
   CheckCircle2,
   Layers,
   Sparkles,
+  Lock,
+  ShieldAlert,
 } from "lucide-react";
 
 export default function TeacherCourseDetailsPage() {
@@ -32,6 +34,7 @@ export default function TeacherCourseDetailsPage() {
   const [loading, setLoading] = useState(true);
   const [userName, setUserName] = useState("Educator");
   const [userEmail, setUserEmail] = useState("");
+  const [verificationStatus, setVerificationStatus] = useState<string>("PENDING");
   const [course, setCourse] = useState<any>(null);
   const [students, setStudents] = useState<any[]>([]);
   const [activeTab, setActiveTab] = useState<"OVERVIEW" | "CURRICULUM" | "STUDENTS" | "ANALYTICS" | "SETTINGS">("OVERVIEW");
@@ -44,6 +47,9 @@ export default function TeacherCourseDetailsPage() {
       if (profileJson.data) {
         setUserName(`${profileJson.data.profile.firstName} ${profileJson.data.profile.lastName}`.trim() || profileJson.data.user.email);
         setUserEmail(profileJson.data.user.email);
+        if (profileJson.data.profile?.verificationStatus) {
+          setVerificationStatus(profileJson.data.profile.verificationStatus);
+        }
       }
 
       const res = await fetch(`/api/teacher/courses/${courseId}`);
@@ -88,6 +94,11 @@ export default function TeacherCourseDetailsPage() {
                 <span className="px-2.5 py-0.5 text-[10px] font-bold uppercase rounded-full bg-emerald-100 text-emerald-800">
                   ● {course?.status || "DRAFT"}
                 </span>
+                {verificationStatus !== "VERIFIED" && (
+                  <span className="px-2.5 py-0.5 text-[10px] font-bold uppercase rounded-full bg-amber-100 text-amber-800 flex items-center gap-1">
+                    <Lock className="w-3 h-3" /> Publishing Locked
+                  </span>
+                )}
               </div>
               <h1 className="text-2xl font-black text-slate-900 mt-1">{course?.title || "Loading Course..."}</h1>
             </div>
@@ -106,6 +117,23 @@ export default function TeacherCourseDetailsPage() {
             </Link>
           </div>
         </div>
+
+        {verificationStatus !== "VERIFIED" && (
+          <div className="p-4 rounded-xl bg-amber-50 border border-amber-200 text-amber-900 text-xs flex items-center justify-between gap-4">
+            <div className="flex items-center gap-2.5">
+              <ShieldAlert className="w-5 h-5 text-amber-600 shrink-0" />
+              <span className="font-semibold leading-relaxed">
+                <strong>Account Pending Verification:</strong> Your educator account is pending verification. Teaching, live classes, course publishing, and content publishing will be available after verification.
+              </span>
+            </div>
+            <Link
+              href="/teacher/onboarding"
+              className="px-3 py-1.5 rounded-lg bg-amber-600 text-white font-semibold hover:bg-amber-700 transition shrink-0 whitespace-nowrap"
+            >
+              Check Verification
+            </Link>
+          </div>
+        )}
 
         {loading ? (
           <div className="h-64 bg-slate-100 rounded-2xl animate-pulse" />

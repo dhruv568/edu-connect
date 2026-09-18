@@ -60,8 +60,10 @@ export async function requireStaffOrAdmin(): Promise<UserSession & { userId: str
 export const EDUCATOR_VERIFICATION_PENDING_MESSAGE =
   "Your educator account is pending verification. Teaching, live classes, course publishing, and content publishing will be available after verification.";
 
-export function isEducatorVerified(teacherProfile?: { verificationStatus?: string | null } | null): boolean {
-  return teacherProfile?.verificationStatus === "VERIFIED" || teacherProfile?.verificationStatus === "APPROVED";
+export function isEducatorVerified(target?: { verificationStatus?: string | null } | string | null): boolean {
+  if (!target) return false;
+  const status = typeof target === "string" ? target : target?.verificationStatus;
+  return status === "VERIFIED" || status === "APPROVED";
 }
 
 export async function requireVerifiedEducator(): Promise<UserSession & { userId: string; teacherProfile: any }> {

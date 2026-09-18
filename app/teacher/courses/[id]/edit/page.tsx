@@ -1105,13 +1105,17 @@ export default function TeacherCourseEditorPage() {
                 <div className="flex items-center justify-between">
                   <h3 className="text-base font-bold text-slate-100">Publish Checklist</h3>
                   <span
-                    className={`px-2 py-0.5 text-[10px] font-bold uppercase rounded-full ${
-                      course.checklist?.isPublishable
+                    className={`px-3 py-1 text-xs font-bold rounded-full ${
+                      course.checklist?.isPublishable && verificationStatus === "VERIFIED"
                         ? "bg-emerald-500/20 text-emerald-400 border border-emerald-500/30"
                         : "bg-amber-500/20 text-amber-400 border border-amber-500/30"
                     }`}
                   >
-                    {course.checklist?.isPublishable ? "Ready to Publish" : "Pending Checks"}
+                    {course.checklist?.isPublishable && verificationStatus === "VERIFIED"
+                      ? "Ready to Publish"
+                      : verificationStatus !== "VERIFIED"
+                      ? "Verification Locked"
+                      : "Pending Checks"}
                   </span>
                 </div>
 
@@ -1130,6 +1134,15 @@ export default function TeacherCourseEditorPage() {
                       {!course.checklist.hasLessonContent && <li>Add Video or Text Content to lessons</li>}
                     </ul>
                   </div>
+                ) : verificationStatus !== "VERIFIED" ? (
+                  <div className="p-3.5 rounded-xl bg-amber-500/10 border border-amber-500/30 text-amber-300 text-xs space-y-2">
+                    <div className="font-bold flex items-center gap-1.5 text-amber-400">
+                      <Lock className="w-4 h-4 shrink-0" /> Educator Verification Pending:
+                    </div>
+                    <p className="text-[11px] text-amber-200/90">
+                      Your educator account is pending verification. Teaching, live classes, course publishing, and content publishing will be available after verification.
+                    </p>
+                  </div>
                 ) : (
                   <div className="p-3.5 rounded-xl bg-emerald-500/10 border border-emerald-500/30 text-emerald-300 text-xs font-semibold flex items-center gap-2">
                     <CheckCircle2 className="w-4 h-4 text-emerald-400 shrink-0" />
@@ -1138,6 +1151,26 @@ export default function TeacherCourseEditorPage() {
                 )}
 
                 <div className="space-y-3 text-xs text-slate-300 pt-1 border-t border-slate-800">
+                  <div className="flex items-center justify-between p-2 rounded-lg bg-slate-950/60 border border-slate-800/80">
+                    <div>
+                      <div className="font-semibold text-slate-200">Educator Verification</div>
+                      <div className="text-[10px] text-slate-400">Admin KYC verification</div>
+                    </div>
+                    <div className="flex items-center gap-2">
+                      <span
+                        className={`px-2 py-0.5 text-[9px] font-bold uppercase rounded ${
+                          verificationStatus === "VERIFIED" ? "bg-emerald-500/20 text-emerald-400" : "bg-amber-500/20 text-amber-400 animate-pulse"
+                        }`}
+                      >
+                        {verificationStatus === "VERIFIED" ? "Verified" : "Pending"}
+                      </span>
+                      {verificationStatus === "VERIFIED" ? (
+                        <CheckCircle2 className="w-4 h-4 text-emerald-400 shrink-0" />
+                      ) : (
+                        <Lock className="w-4 h-4 text-amber-400 shrink-0" />
+                      )}
+                    </div>
+                  </div>
                   {[
                     { key: "hasTitle", label: "Course Title", req: "At least 4 chars" },
                     { key: "hasDescription", label: "Course Description", req: "At least 11 chars" },
@@ -1204,15 +1237,24 @@ export default function TeacherCourseEditorPage() {
                 ) : (
                   <button
                     onClick={handlePublish}
-                    disabled={!course.checklist?.isPublishable}
+                    disabled={!course.checklist?.isPublishable || verificationStatus !== "VERIFIED"}
                     className={`flex items-center gap-2 px-6 py-2.5 text-xs font-bold rounded-xl transition shadow-lg ${
-                      course.checklist?.isPublishable
+                      course.checklist?.isPublishable && verificationStatus === "VERIFIED"
                         ? "bg-gradient-to-r from-emerald-600 to-teal-600 text-white shadow-emerald-500/30 hover:scale-105"
                         : "bg-slate-800 text-slate-500 cursor-not-allowed border border-slate-700"
                     }`}
                   >
-                    <CheckCircle2 className="w-4 h-4" />
-                    <span>Publish Course Now</span>
+                    {verificationStatus !== "VERIFIED" ? (
+                      <>
+                        <Lock className="w-4 h-4" />
+                        <span>Publish Locked (Pending Verification)</span>
+                      </>
+                    ) : (
+                      <>
+                        <CheckCircle2 className="w-4 h-4" />
+                        <span>Publish Course Now</span>
+                      </>
+                    )}
                   </button>
                 )}
               </div>

@@ -839,6 +839,8 @@ export class LiveClassService {
         hourlyRate: teacher.hourlyRate || 499,
         subjects: teacher.subjects ? teacher.subjects.split(",").map((s) => s.trim()) : ["General"],
         rating: teacher.rating || 5.0,
+        isVerified: true,
+        isLocked: false,
       },
       dates: datesResult,
     };

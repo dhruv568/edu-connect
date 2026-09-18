@@ -1,5 +1,6 @@
 import { prisma } from "@/lib/prisma";
 import { syncMuxAssetStatus } from "@/lib/mux/mux-client";
+import { EDUCATOR_VERIFICATION_PENDING_MESSAGE } from "@/lib/auth/guards";
 
 export interface CourseFilterParams {
   search?: string;
@@ -431,6 +432,9 @@ export class LmsService {
       }
 
       if (!canAccessDraft) {
+        if (!isTeacherVerified) {
+          throw new Error(`FORBIDDEN: ${EDUCATOR_VERIFICATION_PENDING_MESSAGE}`);
+        }
         throw new Error("UNAUTHORIZED: This course is not currently available for public preview.");
       }
     }
@@ -1645,7 +1649,7 @@ export class LmsService {
           return { allowed: true, lesson };
         }
       }
-      return { allowed: false, error: "This content is currently locked because the educator account is pending verification." };
+      return { allowed: false, error: EDUCATOR_VERIFICATION_PENDING_MESSAGE };
     }
 
     // Preview lessons accessible publicly
