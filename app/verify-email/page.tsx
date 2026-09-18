@@ -7,6 +7,7 @@ import { Mail, CheckCircle2, AlertCircle, RefreshCw, ArrowLeft, ShieldCheck } fr
 import { Button } from "@/components/ui/button";
 import { useToast } from "@/components/ui/toast";
 import { maskEmail } from "@/lib/auth/tokens";
+import { extractOtpDigits } from "@/lib/auth/otp-utils";
 import { BackButton } from "@/components/ui/back-button";
 import { Logo } from "@/components/brand/logo";
 
@@ -75,36 +76,69 @@ function VerifyEmailForm() {
     }
   }, [resendCooldown]);
 
-  // Distribute digits into OTP boxes starting from a given index (or 0 if 6+ digits)
+  // Distribute digits into OTP boxes starting from a given index (or 0 if 6 digits)
   const fillOtp = (text: string, startIndex = 0) => {
-    const digits = text.replace(/\D/g, "");
-    if (!digits) return;
-
+    const extracted = extractOtpDigits(text);
     setErrorMessage(null);
 
-    // If 6 or more digits (complete OTP), distribute across all 6 slots starting at index 0
-    if (digits.length >= 6) {
-      const full = digits.slice(0, 6).split("");
+    // If 6 digits (complete OTP), distribute across all 6 slots starting at index 0
+    if (extracted.length === 6) {
+      const full = extracted.split("");
       setOtp(full);
-      inputRefs.current[5]?.focus();
-      return;
+      full.forEach((d, i) => {
+        if (inputRefs.current[i]) {
+          inputRefs.current[i]!.value = d;
+        }
+      });
+      setTimeout(() => {
+        inputRefs.current[5]?.focus();
+      }, 0);
+      return full;
     }
 
     // Distribute partial digits starting from startIndex
+    const digits = text.replace(/\D/g, "");
+    if (!digits) return;
+
     const newOtp = [...otp];
     let lastFilled = startIndex;
     for (let i = 0; i < digits.length && startIndex + i < 6; i++) {
       newOtp[startIndex + i] = digits[i];
       lastFilled = startIndex + i;
+      if (inputRefs.current[startIndex + i]) {
+        inputRefs.current[startIndex + i]!.value = digits[i];
+      }
     }
     setOtp(newOtp);
     const nextTarget = Math.min(lastFilled + 1, 5);
-    inputRefs.current[nextTarget]?.focus();
+    setTimeout(() => {
+      inputRefs.current[nextTarget]?.focus();
+    }, 0);
+    return newOtp;
   };
 
   const handleOtpChange = (index: number, value: string) => {
-    const digits = value.replace(/\D/g, "");
     setErrorMessage(null);
+
+    // If input already had a digit and user pasted text (e.g. mobile paste or typing into filled box),
+    // check if the old digit was prepended or appended to a 6-digit code.
+    let cleanVal = value;
+    if (otp[index] && value.length > 1) {
+      if (value.startsWith(otp[index]) && value.length >= 7) {
+        cleanVal = value.slice(otp[index].length);
+      } else if (value.endsWith(otp[index]) && value.length >= 7) {
+        cleanVal = value.slice(0, -otp[index].length);
+      }
+    }
+
+    // Check if cleanVal contains a 6-digit OTP (autofill, mobile paste, virtual keyboard)
+    const extracted = extractOtpDigits(cleanVal);
+    if (extracted.length === 6) {
+      fillOtp(cleanVal, index);
+      return;
+    }
+
+    const digits = cleanVal.replace(/\D/g, "");
 
     // Cleared
     if (!digits) {
@@ -137,11 +171,15 @@ function VerifyEmailForm() {
       return;
     }
 
-    // Multi-digit entry from autofill, mobile SMS autofill bar, or virtual keyboard
-    fillOtp(digits, index);
+    // Multi-digit entry from partial paste or autofill
+    fillOtp(cleanVal, index);
   };
 
   const handleKeyDown = (index: number, e: React.KeyboardEvent<HTMLInputElement>) => {
+    if (e.key === "Enter") {
+      // Allow form submission on Enter
+      return;
+    }
     if (e.key === "Backspace") {
       if (otp[index]) {
         // Clear current box if it has a digit
@@ -173,13 +211,27 @@ function VerifyEmailForm() {
 
   const handlePaste = (e: React.ClipboardEvent<HTMLInputElement>, index: number) => {
     e.preventDefault();
-    const pasted = e.clipboardData.getData("text");
-    fillOtp(pasted, index);
+    const pasted =
+      e.clipboardData?.getData("text") ||
+      e.clipboardData?.getData("text/plain") ||
+      "";
+    if (pasted) {
+      fillOtp(pasted, index);
+    }
   };
 
   const handleVerifyOTP = async (e: React.FormEvent) => {
     e.preventDefault();
-    const code = otp.join("");
+    // Resolve code from state, or fallback to DOM refs if submit occurs immediately on paste
+    let code = otp.join("");
+    if (code.length !== 6) {
+      const domCode = inputRefs.current.map((el) => el?.value || "").join("");
+      if (domCode.length === 6) {
+        code = domCode;
+        setOtp(domCode.split(""));
+      }
+    }
+
     if (code.length !== 6) {
       setErrorMessage("Please enter all 6 digits of your verification code.");
       showToast("Invalid Input", "Please enter all 6 digits of the OTP code.", "error");
@@ -312,9 +364,9 @@ function VerifyEmailForm() {
                       ref={(el) => { inputRefs.current[idx] = el; }}
                       type="text"
                       inputMode="numeric"
-                      autoComplete={idx === 0 ? "one-time-code" : "off"}
+                      autoComplete="one-time-code"
                       pattern="[0-9]*"
-                      maxLength={6}
+                      maxLength={32}
                       value={digit}
                       onChange={(e) => handleOtpChange(idx, e.target.value)}
                       onKeyDown={(e) => handleKeyDown(idx, e)}
@@ -326,11 +378,21 @@ function VerifyEmailForm() {
                   ))}
                 </div>
 
+                <input
+                  type="hidden"
+                  id="complete-otp"
+                  name="otp"
+                  value={otp.join("")}
+                  data-testid="complete-otp"
+                />
+
                 <Button
                   type="submit"
                   variant="gradient"
                   className="w-full h-12 text-base font-bold"
                   isLoading={loading}
+                  data-otp={otp.join("")}
+                  data-testid="verify-otp-btn"
                 >
                   {redirectTo === "/admin"
                     ? "Verify Admin OTP & Sign In"

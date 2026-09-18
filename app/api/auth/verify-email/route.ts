@@ -5,6 +5,7 @@ import { apiSuccess, apiBadRequest, apiError } from "@/lib/api-response";
 import { getSession, setSessionCookie, encodeSession, getCookieDomain } from "@/lib/auth/session";
 import { isEducatorRole, isLearnerRole } from "@/lib/auth/roles";
 import { checkRateLimit } from "@/lib/rate-limiter";
+import { extractOtpDigits } from "@/lib/auth/otp-utils";
 
 /**
  * POST /api/auth/verify-email
@@ -24,6 +25,9 @@ export async function POST(request: NextRequest) {
       undefined;
 
     const body = await request.json();
+    if (body && typeof body.otp === "string") {
+      body.otp = extractOtpDigits(body.otp);
+    }
     const validated = VerifyOTPSchema.parse(body);
 
     const result = await AuthService.verifyOTP(validated.email, validated.otp);

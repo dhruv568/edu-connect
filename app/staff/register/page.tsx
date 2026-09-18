@@ -8,6 +8,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { BackButton } from "@/components/ui/back-button";
 import { Logo } from "@/components/brand/logo";
+import { extractOtpDigits } from "@/lib/auth/otp-utils";
 
 export default function StaffRegisterPage() {
   const router = useRouter();
@@ -219,10 +220,15 @@ export default function StaffRegisterPage() {
                 inputMode="numeric"
                 autoComplete="one-time-code"
                 value={otp}
-                onChange={(e) => setOtp(e.target.value.replace(/\D/g, "").slice(0, 6))}
+                onChange={(e) => setOtp(extractOtpDigits(e.target.value))}
+                onPaste={(e) => {
+                  e.preventDefault();
+                  const pasted = e.clipboardData?.getData("text") || "";
+                  setOtp(extractOtpDigits(pasted));
+                }}
                 placeholder="123456"
                 leftIcon={<KeyRound className="h-4 w-4" />}
-                maxLength={6}
+                maxLength={32}
                 required
                 disabled={loading}
               />

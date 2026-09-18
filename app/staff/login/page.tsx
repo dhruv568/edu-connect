@@ -8,6 +8,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { useToast } from "@/components/ui/toast";
 import { Logo } from "@/components/brand/logo";
+import { extractOtpDigits } from "@/lib/auth/otp-utils";
 import {
   ShieldCheck,
   Mail,
@@ -201,11 +202,16 @@ export default function StaffLoginPage() {
                 inputMode="numeric"
                 autoComplete="one-time-code"
                 value={otp}
-                onChange={(e) => setOtp(e.target.value.replace(/\D/g, "").slice(0, 6))}
+                onChange={(e) => setOtp(extractOtpDigits(e.target.value))}
+                onPaste={(e) => {
+                  e.preventDefault();
+                  const pasted = e.clipboardData?.getData("text") || "";
+                  setOtp(extractOtpDigits(pasted));
+                }}
                 placeholder="123456"
                 leftIcon={<KeyRound className="h-4 w-4" />}
                 className="text-center font-mono tracking-widest text-lg"
-                maxLength={6}
+                maxLength={32}
                 autoFocus
                 required
               />

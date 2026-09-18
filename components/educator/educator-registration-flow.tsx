@@ -9,6 +9,7 @@ import { GlassButton } from "@/components/glass/glass-button";
 import { Input } from "@/components/ui/input";
 import { useToast } from "@/components/ui/toast";
 import { RegistrationCaptcha } from "@/components/auth/registration-captcha";
+import { extractOtpDigits } from "@/lib/auth/otp-utils";
 import {
   GraduationCap,
   Mail,
@@ -657,9 +658,16 @@ function EducatorRegistrationFlowContent() {
             <Input
               label="6-Digit Verification Code"
               placeholder="123456"
-              maxLength={6}
+              maxLength={32}
+              inputMode="numeric"
+              autoComplete="one-time-code"
               value={state.otp}
-              onChange={(e) => setState((p) => ({ ...p, otp: e.target.value.replace(/\D/g, "") }))}
+              onChange={(e) => setState((p) => ({ ...p, otp: extractOtpDigits(e.target.value) }))}
+              onPaste={(e) => {
+                e.preventDefault();
+                const pasted = e.clipboardData?.getData("text") || "";
+                setState((p) => ({ ...p, otp: extractOtpDigits(pasted) }));
+              }}
               required
               helperText="Enter the OTP code received in your email inbox or spam folder"
             />
