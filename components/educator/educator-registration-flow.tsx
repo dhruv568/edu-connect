@@ -117,11 +117,23 @@ function EducatorRegistrationFlowContent() {
       }
     } catch {}
 
-    const orderIdParam = searchParams.get("order_id") || searchParams.get("orderId");
+    const rawOrderIdParam = searchParams.get("order_id") || searchParams.get("orderId");
     const stepParam = searchParams.get("step");
     const emailParam = searchParams.get("email");
 
-    const activeEmail = emailParam || savedState.email || "";
+    let fallbackOrderId = "";
+    let fallbackEmail = "";
+    try {
+      fallbackOrderId = localStorage.getItem("educonnects_pending_order_id") || "";
+      fallbackEmail = localStorage.getItem("educonnects_pending_email") || "";
+    } catch {}
+
+    const orderIdParam =
+      rawOrderIdParam && rawOrderIdParam !== "{order_id}"
+        ? rawOrderIdParam
+        : savedState.orderData?.orderId || fallbackOrderId || "";
+
+    const activeEmail = emailParam || savedState.email || fallbackEmail || "";
 
     if (activeEmail) {
       fetch(`/api/teacher/registration?email=${encodeURIComponent(activeEmail)}`)
@@ -139,7 +151,7 @@ function EducatorRegistrationFlowContent() {
                 firstName: d.firstName || prev.firstName,
                 lastName: d.lastName || prev.lastName,
                 phone: d.phone || prev.phone,
-                step: orderIdParam ? 6 : Math.max(prev.step, d.step || 1),
+                step: orderIdParam || stepParam === "6" ? 6 : Math.max(prev.step, d.step || 1),
                 orderData: d.orderData || prev.orderData,
               }));
             }
@@ -155,11 +167,11 @@ function EducatorRegistrationFlowContent() {
       ...prev,
       ...savedState,
       email: activeEmail || prev.email,
-      step: orderIdParam ? 6 : stepParam ? parseInt(stepParam, 10) : savedState.step || prev.step,
+      step: orderIdParam || stepParam === "6" ? 6 : stepParam ? parseInt(stepParam, 10) : savedState.step || prev.step,
     }));
 
-    if (orderIdParam) {
-      handleVerifyPayment(orderIdParam, activeEmail);
+    if (orderIdParam || (stepParam === "6" && activeEmail)) {
+      handleVerifyPayment(orderIdParam || savedState.orderData?.orderId || fallbackOrderId, activeEmail);
     }
   }, [searchParams]);
 
@@ -387,20 +399,25 @@ function EducatorRegistrationFlowContent() {
       const order = data.data;
       setState((prev) => ({ ...prev, orderData: order }));
 
+      try {
+        localStorage.setItem("educonnects_pending_order_id", order.orderId);
+        localStorage.setItem("educonnects_pending_email", state.email);
+      } catch {}
+
       const isProd = order.env === "PRODUCTION";
       const isMockSession = order.paymentSessionId?.startsWith("session_mock_");
 
       if (order.paymentSessionId && (isProd || !isMockSession)) {
         const Cashfree = await loadCashfreeSdk();
         const cashfree = Cashfree({ mode: isProd ? "production" : "sandbox" });
-        const returnUrl = `${window.location.origin}/teacher/register?order_id=${encodeURIComponent(order.cfOrderId || order.orderId)}&step=6`;
+        const returnUrl = `${window.location.origin}${window.location.pathname}?order_id=${encodeURIComponent(order.orderId)}&step=6&email=${encodeURIComponent(state.email)}`;
 
         await cashfree.checkout({
           paymentSessionId: order.paymentSessionId,
           returnUrl,
         });
       } else {
-        handleVerifyPayment(order.orderId || order.cfOrderId, state.email);
+        handleVerifyPayment(order.orderId, state.email);
       }
     } catch (err: any) {
       setState((prev) => ({
@@ -412,9 +429,30 @@ function EducatorRegistrationFlowContent() {
   };
 
   // Step 6: Verify Payment & Complete Registration
-  const handleVerifyPayment = async (orderId: string, emailOverride?: string) => {
+  const handleVerifyPayment = async (orderIdToVerify?: string, emailOverride?: string) => {
     setState((prev) => ({ ...prev, step: 6, paymentLoading: true, paymentError: null }));
-    const targetEmail = emailOverride || state.email;
+
+    let fallbackOrderId = "";
+    let fallbackEmail = "";
+    try {
+      fallbackOrderId = localStorage.getItem("educonnects_pending_order_id") || "";
+      fallbackEmail = localStorage.getItem("educonnects_pending_email") || "";
+    } catch {}
+
+    const targetEmail = emailOverride || state.email || fallbackEmail;
+    const targetOrderId =
+      orderIdToVerify && orderIdToVerify !== "{order_id}"
+        ? orderIdToVerify
+        : state.orderData?.orderId || fallbackOrderId;
+
+    if (!targetOrderId) {
+      setState((prev) => ({
+        ...prev,
+        paymentLoading: false,
+        paymentError: "Missing order reference ID. Please initiate registration checkout again.",
+      }));
+      return;
+    }
 
     try {
       const res = await fetch("/api/teacher/registration", {
@@ -423,7 +461,7 @@ function EducatorRegistrationFlowContent() {
         body: JSON.stringify({
           action: "STEP6_VERIFY_PAYMENT",
           email: targetEmail,
-          orderId,
+          orderId: targetOrderId,
         }),
       });
 
@@ -436,6 +474,8 @@ function EducatorRegistrationFlowContent() {
 
       try {
         sessionStorage.removeItem(STORAGE_KEY);
+        localStorage.removeItem("educonnects_pending_order_id");
+        localStorage.removeItem("educonnects_pending_email");
       } catch {}
 
       setTimeout(() => {
@@ -1001,11 +1041,17 @@ function EducatorRegistrationFlowContent() {
                   Review Order
                 </button>
                 <button
-                  onClick={handleInitiatePayment}
+                  onClick={() => handleVerifyPayment(state.orderData?.orderId, state.email)}
                   className="h-11 px-6 rounded-xl text-xs font-black text-white bg-[#16805B] hover:bg-[#0D5C41] flex items-center gap-2 shadow-md cursor-pointer"
                 >
                   <RotateCcw className="h-4 w-4" />
-                  <span>Retry Payment</span>
+                  <span>Retry Verification</span>
+                </button>
+                <button
+                  onClick={handleInitiatePayment}
+                  className="h-11 px-5 rounded-xl text-xs font-bold text-slate-700 bg-slate-100 hover:bg-slate-200 flex items-center gap-2 cursor-pointer"
+                >
+                  <span>New Payment Order</span>
                 </button>
               </div>
             </div>
