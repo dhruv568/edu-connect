@@ -175,8 +175,8 @@ async function runTests() {
     path.join(process.cwd(), "components/layout/dashboard-footer.tsx"),
     "utf-8"
   );
-  assert.ok(dashboardFooterContent.includes("OFFICIAL_COMPANY_INFO.legalName"), "Uses legal entity name");
-  assert.ok(dashboardFooterContent.includes("Brand Name:"), "Displays Brand Name: EduConnect");
+  assert.ok(dashboardFooterContent.includes("OFFICIAL_COMPANY_INFO.brandName"), "Uses brand name");
+  assert.ok(dashboardFooterContent.includes("All rights reserved"), "Displays All rights reserved copyright");
 
   const dashboardLayoutContent = fs.readFileSync(
     path.join(process.cwd(), "components/layout/dashboard-layout.tsx"),
