@@ -185,7 +185,7 @@ export class CashfreeClient {
 
     // If in mock/offline test mode without real sandbox credentials
     if (this.isTestMode() && (this.appId.includes("mock") || this.secretKey.includes("mock"))) {
-      const mockSessionId = `session_${crypto.randomBytes(16).toString("hex")}`;
+      const mockSessionId = `session_mock_${crypto.randomBytes(16).toString("hex")}`;
       const mockCfOrderId = `cf_ord_${Date.now()}`;
       return {
         order_id: options.orderId,
@@ -223,8 +223,8 @@ export class CashfreeClient {
         created_at: data.created_at,
       };
     } catch (err: any) {
-      if (this.isTestMode()) {
-        const mockSessionId = `session_${crypto.randomBytes(16).toString("hex")}`;
+      if (this.isTestMode() && (this.appId.includes("mock") || this.secretKey.includes("mock"))) {
+        const mockSessionId = `session_mock_${crypto.randomBytes(16).toString("hex")}`;
         const mockCfOrderId = `cf_ord_${Date.now()}`;
         return {
           order_id: options.orderId,
@@ -251,7 +251,7 @@ export class CashfreeClient {
         cf_order_id: `cf_${orderId}`,
         payment_session_id: `session_mock_${Date.now()}`,
         order_status: "PAID",
-        order_amount: 799,
+        order_amount: orderId.startsWith("EDU_TCH_REG_") ? 99 : 799,
         order_currency: DEFAULT_CURRENCY,
         customer_details: {
           customer_id: "cust_mock_123",
@@ -283,7 +283,7 @@ export class CashfreeClient {
           cf_payment_id: `cf_pay_mock_${Date.now()}`,
           order_id: orderId,
           payment_status: "SUCCESS",
-          payment_amount: 799,
+          payment_amount: orderId.startsWith("EDU_TCH_REG_") ? 99 : 799,
           payment_currency: DEFAULT_CURRENCY,
           payment_time: new Date().toISOString(),
           payment_group: "upi",
