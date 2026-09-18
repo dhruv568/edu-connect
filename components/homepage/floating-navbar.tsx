@@ -411,6 +411,26 @@ export function FloatingNavbar({ variant }: FloatingNavbarProps = {}) {
               /* LEARNER SPECIFIC NAVIGATION */
               <>
                 <Link
+                  href="/student"
+                  className={`px-3.5 py-1.5 rounded-lg transition-colors whitespace-nowrap ${
+                    pathname === "/student" || pathname === "/"
+                      ? "bg-[#3157D5] text-white font-bold shadow-xs"
+                      : "text-blue-100 hover:text-white hover:bg-[#3157D5]/50"
+                  }`}
+                >
+                  Home
+                </Link>
+                <Link
+                  href="/about"
+                  className={`px-3.5 py-1.5 rounded-lg transition-colors whitespace-nowrap ${
+                    pathname === "/about"
+                      ? "bg-[#3157D5] text-white font-bold shadow-xs"
+                      : "text-blue-100 hover:text-white hover:bg-[#3157D5]/50"
+                  }`}
+                >
+                  About Us
+                </Link>
+                <Link
                   href="/find-teachers"
                   className={`px-3.5 py-1.5 rounded-lg transition-colors whitespace-nowrap ${
                     pathname === "/find-teachers"
@@ -1022,6 +1042,28 @@ export function FloatingNavbar({ variant }: FloatingNavbarProps = {}) {
                   </>
                 ) : isLearner ? (
                   <>
+                    <Link
+                      href="/student"
+                      onClick={() => setMobileOpen(false)}
+                      className={`py-2.5 px-3.5 rounded-xl font-semibold transition-colors ${
+                        pathname === "/student" || pathname === "/"
+                          ? "bg-[#3157D5] text-white font-bold"
+                          : "text-blue-100 hover:bg-[#3157D5]/50 hover:text-white"
+                      }`}
+                    >
+                      Home
+                    </Link>
+                    <Link
+                      href="/about"
+                      onClick={() => setMobileOpen(false)}
+                      className={`py-2.5 px-3.5 rounded-xl font-semibold transition-colors ${
+                        pathname === "/about"
+                          ? "bg-[#3157D5] text-white font-bold"
+                          : "text-blue-100 hover:bg-[#3157D5]/50 hover:text-white"
+                      }`}
+                    >
+                      About Us
+                    </Link>
                     <Link
                       href="/find-teachers"
                       onClick={() => setMobileOpen(false)}
