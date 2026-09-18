@@ -20,7 +20,7 @@ function FindTeachersContent() {
   const [searchQuery, setSearchQuery] = useState(searchParams.get("search") || "");
   const [filters, setFilters] = useState<TeacherFilterState>({
     subject: searchParams.get("subject") || "all",
-    priceMax: searchParams.get("priceMax") ? Number(searchParams.get("priceMax")) : 2000,
+    priceMax: searchParams.get("priceMax") ? Number(searchParams.get("priceMax")) : 5000,
     ratingMin: searchParams.get("ratingMin") ? Number(searchParams.get("ratingMin")) : 0,
     experienceMin: 0,
     sortBy: searchParams.get("sortBy") || "recommended",
@@ -36,7 +36,7 @@ function FindTeachersContent() {
     const params = new URLSearchParams();
     if (newSearch.trim()) params.set("search", newSearch);
     if (newFilters.subject !== "all") params.set("subject", newFilters.subject);
-    if (newFilters.priceMax < 2000) params.set("priceMax", String(newFilters.priceMax));
+    if (newFilters.priceMax < 5000) params.set("priceMax", String(newFilters.priceMax));
     if (newFilters.ratingMin > 0) params.set("ratingMin", String(newFilters.ratingMin));
     if (newFilters.sortBy !== "recommended") params.set("sortBy", newFilters.sortBy);
 
@@ -51,7 +51,7 @@ function FindTeachersContent() {
         const queryParams = new URLSearchParams();
         if (searchQuery.trim()) queryParams.set("search", searchQuery);
         if (filters.subject !== "all") queryParams.set("subject", filters.subject);
-        if (filters.priceMax && filters.priceMax < 2000) queryParams.set("priceMax", String(filters.priceMax));
+        if (filters.priceMax && filters.priceMax < 5000) queryParams.set("priceMax", String(filters.priceMax));
         if (filters.ratingMin) queryParams.set("ratingMin", String(filters.ratingMin));
         if (filters.sortBy) queryParams.set("sortBy", filters.sortBy);
 
@@ -84,7 +84,7 @@ function FindTeachersContent() {
   const handleResetFilters = () => {
     const defaultFilters: TeacherFilterState = {
       subject: "all",
-      priceMax: 2000,
+      priceMax: 5000,
       ratingMin: 0,
       experienceMin: 0,
       sortBy: "recommended",

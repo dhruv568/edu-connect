@@ -3,8 +3,9 @@ export const dynamic = "force-dynamic";
 import { NextRequest } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { requireRole } from "@/lib/auth/guards";
-import { apiSuccess, apiError, handleApiError } from "@/lib/api-response";
+import { apiSuccess, apiBadRequest, apiError, handleApiError } from "@/lib/api-response";
 import { logAuditEvent } from "@/lib/audit-logger";
+import { parseHourlyRate } from "@/lib/currency";
 
 export async function PATCH(request: NextRequest) {
   try {
@@ -30,6 +31,15 @@ export async function PATCH(request: NextRequest) {
       ifscCode,
       cancelledChequeUrl,
     } = body;
+
+    let validatedHourlyRate: number | undefined = undefined;
+    if (hourlyRate !== undefined) {
+      const parsed = parseHourlyRate(hourlyRate);
+      if (parsed === null || parsed <= 0) {
+        return apiBadRequest("Hourly rate must be a valid positive amount.");
+      }
+      validatedHourlyRate = parsed;
+    }
 
     const subjectsStr = Array.isArray(subjects) ? subjects.join(", ") : subjects;
     const languagesStr = Array.isArray(languages) ? languages.join(", ") : languages;
@@ -57,7 +67,7 @@ export async function PATCH(request: NextRequest) {
         ...(subjectsStr !== undefined && { subjects: subjectsStr }),
         ...(languagesStr !== undefined && { languages: languagesStr }),
         ...(experienceYears !== undefined && { experienceYears: Number(experienceYears) }),
-        ...(hourlyRate !== undefined && { hourlyRate: Number(hourlyRate) }),
+        ...(validatedHourlyRate !== undefined && { hourlyRate: validatedHourlyRate }),
         ...(teachingMode !== undefined && { teachingMode }),
         ...(accountHolderName !== undefined && { accountHolderName }),
         ...(accountNumber !== undefined && { accountNumber }),

@@ -9,6 +9,7 @@ import { generateOTP, generateVerificationToken, hashToken, verifyTokenHash } fr
 import { EmailService } from "@/lib/email/email-service";
 import { apiSuccess, apiBadRequest, apiError } from "@/lib/api-response";
 import { encodeSession, getCookieDomain } from "@/lib/auth/session";
+import { parseHourlyRate } from "@/lib/currency";
 import { UserSession } from "@/types/auth";
 import crypto from "crypto";
 
@@ -371,13 +372,18 @@ export async function POST(request: NextRequest) {
         return apiBadRequest("Please verify your email OTP before proceeding.");
       }
 
+      const parsedHourlyRate = parseHourlyRate(hourlyRate);
+      if (!parsedHourlyRate || parsedHourlyRate <= 0) {
+        return apiBadRequest("Hourly rate must be a valid positive amount.");
+      }
+
       data.profile = {
         headline: headline?.trim() || "Independent Educator",
         subjects: subjects?.trim() || "General",
         qualifications: qualifications?.trim() || "",
         experienceYears: Number(experienceYears) || 1,
         specialization: specialization?.trim() || "",
-        hourlyRate: Number(hourlyRate) || 500,
+        hourlyRate: parsedHourlyRate,
         teachingMode: teachingMode || "ONLINE",
         languages: languages?.trim() || "English",
         bio: bio?.trim() || "",
@@ -667,7 +673,7 @@ export async function POST(request: NextRequest) {
                 headline: prof.headline || finalUser.teacherProfile.headline,
                 subjects: prof.subjects || finalUser.teacherProfile.subjects,
                 experienceYears: Number(prof.experienceYears) || finalUser.teacherProfile.experienceYears,
-                hourlyRate: Number(prof.hourlyRate) || finalUser.teacherProfile.hourlyRate,
+                hourlyRate: parseHourlyRate(prof.hourlyRate) ?? finalUser.teacherProfile.hourlyRate,
                 qualifications: prof.qualifications || finalUser.teacherProfile.qualifications,
                 languages: prof.languages || finalUser.teacherProfile.languages,
                 teachingMode: prof.teachingMode || finalUser.teacherProfile.teachingMode,
@@ -681,7 +687,7 @@ export async function POST(request: NextRequest) {
                 headline: prof.headline || "Educator",
                 subjects: prof.subjects || "Mathematics",
                 experienceYears: Number(prof.experienceYears) || 1,
-                hourlyRate: Number(prof.hourlyRate) || 500,
+                hourlyRate: parseHourlyRate(prof.hourlyRate) ?? 500,
                 qualifications: prof.qualifications || null,
                 languages: prof.languages || "English",
                 teachingMode: prof.teachingMode || "ONLINE",
@@ -711,7 +717,7 @@ export async function POST(request: NextRequest) {
                   headline: prof.headline || "Educator",
                   subjects: prof.subjects || "Mathematics",
                   experienceYears: Number(prof.experienceYears) || 1,
-                  hourlyRate: Number(prof.hourlyRate) || 500,
+                  hourlyRate: parseHourlyRate(prof.hourlyRate) ?? 500,
                   qualifications: prof.qualifications || null,
                   languages: prof.languages || "English",
                   teachingMode: prof.teachingMode || "ONLINE",

@@ -10,6 +10,7 @@ import { Input } from "@/components/ui/input";
 import { useToast } from "@/components/ui/toast";
 import { RegistrationCaptcha } from "@/components/auth/registration-captcha";
 import { extractOtpDigits } from "@/lib/auth/otp-utils";
+import { parseHourlyRate } from "@/lib/currency";
 import {
   GraduationCap,
   Mail,
@@ -53,7 +54,7 @@ interface EducatorFlowState {
   experienceYears: number;
   specialization: string;
   teachingMode: string;
-  hourlyRate: number;
+  hourlyRate: number | string;
   languages: string;
   bio: string;
   // Order & payment
@@ -324,6 +325,12 @@ function EducatorRegistrationFlowContent() {
       return;
     }
 
+    const parsedRate = parseHourlyRate(state.hourlyRate);
+    if (!parsedRate || parsedRate <= 0) {
+      showToast("Hourly Rate Required", "Please enter a valid positive hourly rate (e.g. ₹599, ₹749, ₹1,250).", "error");
+      return;
+    }
+
     setSubmittingStep(true);
     try {
       const res = await fetch("/api/teacher/registration", {
@@ -337,7 +344,7 @@ function EducatorRegistrationFlowContent() {
           qualifications: state.qualifications,
           experienceYears: state.experienceYears,
           specialization: state.specialization,
-          hourlyRate: state.hourlyRate,
+          hourlyRate: parsedRate,
           teachingMode: state.teachingMode,
           languages: state.languages,
           bio: state.bio,
@@ -796,14 +803,19 @@ function EducatorRegistrationFlowContent() {
               />
               <Input
                 label="Hourly Tutoring Rate (₹)"
-                type="number"
-                min={100}
-                max={10000}
-                step={50}
-                value={state.hourlyRate}
-                onChange={(e) => setState((p) => ({ ...p, hourlyRate: Number(e.target.value) }))}
+                type="text"
+                inputMode="decimal"
+                value={state.hourlyRate === "" ? "" : state.hourlyRate}
+                onChange={(e) => {
+                  const val = e.target.value;
+                  const cleaned = val.replace(/[₹$,\s]/g, "");
+                  if (cleaned === "" || /^\d*\.?\d*$/.test(cleaned)) {
+                    setState((p) => ({ ...p, hourlyRate: val }));
+                  }
+                }}
                 required
-                helperText="Base fee for 1-on-1 live sessions"
+                placeholder="e.g. 599, 749, 1250"
+                helperText="Set any custom hourly rate (e.g. ₹599, ₹749, ₹1,250)"
               />
               <div className="space-y-1.5">
                 <label className="block text-xs font-bold text-slate-700 uppercase tracking-wider">

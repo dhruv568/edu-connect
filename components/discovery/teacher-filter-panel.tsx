@@ -71,9 +71,9 @@ export function TeacherFilterPanel({ filters, onChange, onReset }: TeacherFilter
         </div>
         <input
           type="range"
-          min={300}
-          max={2000}
-          step={50}
+          min={100}
+          max={5000}
+          step={25}
           value={filters.priceMax}
           onChange={(e) => onChange({ ...filters, priceMax: Number(e.target.value) })}
           className="w-full accent-blue-600 cursor-pointer"

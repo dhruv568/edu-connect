@@ -35,7 +35,7 @@ export default function StudentFindTeachersPage() {
   // Search and filter states
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedSubject, setSelectedSubject] = useState("all");
-  const [maxPrice, setMaxPrice] = useState(100);
+  const [maxPrice, setMaxPrice] = useState(5000);
   const [minRating, setMinRating] = useState(0);
   const [minExperience, setMinExperience] = useState(0);
   const [sortBy, setSortBy] = useState("recommended");
@@ -67,7 +67,7 @@ export default function StudentFindTeachersPage() {
       const params = new URLSearchParams();
       if (searchQuery.trim()) params.set("search", searchQuery.trim());
       if (selectedSubject !== "all") params.set("subject", selectedSubject);
-      if (maxPrice < 100) params.set("priceMax", String(maxPrice));
+      if (maxPrice < 5000) params.set("priceMax", String(maxPrice));
       if (minRating > 0) params.set("ratingMin", String(minRating));
       if (minExperience > 0) params.set("experienceMin", String(minExperience));
       if (sortBy !== "recommended") params.set("sortBy", sortBy);
@@ -96,7 +96,7 @@ export default function StudentFindTeachersPage() {
   const handleResetFilters = () => {
     setSearchQuery("");
     setSelectedSubject("all");
-    setMaxPrice(100);
+    setMaxPrice(5000);
     setMinRating(0);
     setMinExperience(0);
     setSortBy("recommended");
@@ -247,16 +247,16 @@ export default function StudentFindTeachersPage() {
                 </div>
                 <input
                   type="range"
-                  min={20}
-                  max={100}
-                  step={5}
+                  min={100}
+                  max={5000}
+                  step={25}
                   value={maxPrice}
                   onChange={(e) => setMaxPrice(Number(e.target.value))}
                   className="w-full accent-blue-600 cursor-pointer"
                 />
                 <div className="flex justify-between text-[10px] text-slate-400 font-semibold">
-                  <span>{formatCurrency(20)}/hr</span>
-                  <span>{formatCurrency(100)}+/hr</span>
+                  <span>{formatCurrency(100)}/hr</span>
+                  <span>{formatCurrency(5000)}+/hr</span>
                 </div>
               </div>
 

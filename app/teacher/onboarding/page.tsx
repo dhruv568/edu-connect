@@ -12,7 +12,7 @@ import { useToast } from "@/components/ui/toast";
 import { DocumentViewerModal } from "@/components/shared/document-viewer-modal";
 import { BackButton } from "@/components/ui/back-button";
 import { QualificationItem, CertificateItem, DocumentItem, VerificationStatus } from "@/types/auth";
-import { formatCurrency } from "@/lib/currency";
+import { formatCurrency, parseHourlyRate } from "@/lib/currency";
 import { ProfilePhotoUploader } from "@/components/profile/profile-photo-uploader";
 import {
   CheckCircle2,
@@ -176,8 +176,9 @@ export default function TeacherOnboardingPage() {
       if (professional.experienceYears === undefined || professional.experienceYears < 0) {
         return { valid: false, reason: "Years of experience is required." };
       }
-      if (!professional.hourlyRate || professional.hourlyRate <= 0) {
-        return { valid: false, reason: "Hourly rate must be greater than ₹0." };
+      const parsedRate = parseHourlyRate(professional.hourlyRate);
+      if (!parsedRate || parsedRate <= 0) {
+        return { valid: false, reason: "Hourly rate must be a valid positive amount greater than ₹0." };
       }
       if (!qualifications || qualifications.length === 0) {
         return { valid: false, reason: "At least one Educational Qualification must be added." };
@@ -251,6 +252,7 @@ export default function TeacherOnboardingPage() {
         body: JSON.stringify({
           ...personal,
           ...professional,
+          hourlyRate: parseHourlyRate(professional.hourlyRate) ?? professional.hourlyRate,
           ...bankDetails,
         }),
       });
@@ -853,10 +855,18 @@ export default function TeacherOnboardingPage() {
                       Target Hourly Rate (₹/hr) <span className="text-rose-500">*</span>
                     </label>
                     <Input
-                      type="number"
-                      min={0}
-                      value={professional.hourlyRate}
-                      onChange={(e) => setProfessional({ ...professional, hourlyRate: Number(e.target.value) })}
+                      type="text"
+                      inputMode="decimal"
+                      value={professional.hourlyRate ?? ""}
+                      onChange={(e) => {
+                        const val = e.target.value;
+                        const cleaned = val.replace(/[₹$,\s]/g, "");
+                        if (cleaned === "" || /^\d*\.?\d*$/.test(cleaned)) {
+                          setProfessional({ ...professional, hourlyRate: val as any });
+                        }
+                      }}
+                      placeholder="e.g. 599, 749, 1250"
+                      helperText="Enter any custom hourly rate in ₹ without fixed preset limits"
                     />
                   </div>
 

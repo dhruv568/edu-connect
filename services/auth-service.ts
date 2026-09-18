@@ -7,6 +7,7 @@ import { UserRole, UserSession, VerificationResult } from "@/types/auth";
 import { logAuditEvent } from "@/lib/audit-logger";
 import { getVerificationUrl, getPasswordResetUrl } from "@/lib/app-url";
 import { getDashboardPathForRole, isEducatorRole } from "@/lib/auth/roles";
+import { parseHourlyRate } from "@/lib/currency";
 
 const getOtpExpiryMinutes = () => Number(process.env.OTP_EXPIRY_MINUTES) || 10;
 const getMaxAttempts = () => Number(process.env.OTP_MAX_ATTEMPTS) || 5;
@@ -402,7 +403,7 @@ export class AuthService {
                   headline: extra.headline || targetUser.teacherProfile.headline,
                   subjects: extra.subjects || targetUser.teacherProfile.subjects,
                   experienceYears: extra.experienceYears !== undefined ? extra.experienceYears : targetUser.teacherProfile.experienceYears,
-                  hourlyRate: extra.hourlyRate !== undefined ? extra.hourlyRate : targetUser.teacherProfile.hourlyRate,
+                  hourlyRate: parseHourlyRate(extra.hourlyRate) ?? targetUser.teacherProfile.hourlyRate,
                   qualifications: extra.qualifications || targetUser.teacherProfile.qualifications,
                   languages: extra.languages || targetUser.teacherProfile.languages,
                   teachingMode: extra.teachingMode || targetUser.teacherProfile.teachingMode,
@@ -415,7 +416,7 @@ export class AuthService {
                   headline: extra.headline || "Educator",
                   subjects: extra.subjects || "Mathematics",
                   experienceYears: extra.experienceYears || 0,
-                  hourlyRate: extra.hourlyRate || 40.0,
+                  hourlyRate: parseHourlyRate(extra.hourlyRate) ?? 500.0,
                   qualifications: extra.qualifications,
                   languages: extra.languages || "English",
                   teachingMode: extra.teachingMode || "ONLINE",
@@ -465,7 +466,7 @@ export class AuthService {
                     headline: extra.headline || "Educator",
                     subjects: extra.subjects || "Mathematics",
                     experienceYears: extra.experienceYears || 0,
-                    hourlyRate: extra.hourlyRate || 40.0,
+                    hourlyRate: parseHourlyRate(extra.hourlyRate) ?? 500.0,
                     qualifications: extra.qualifications,
                     languages: extra.languages || "English",
                     teachingMode: extra.teachingMode || "ONLINE",
@@ -717,7 +718,7 @@ export class AuthService {
                   headline: extra.headline || targetUser.teacherProfile.headline,
                   subjects: extra.subjects || targetUser.teacherProfile.subjects,
                   experienceYears: extra.experienceYears !== undefined ? extra.experienceYears : targetUser.teacherProfile.experienceYears,
-                  hourlyRate: extra.hourlyRate !== undefined ? extra.hourlyRate : targetUser.teacherProfile.hourlyRate,
+                  hourlyRate: parseHourlyRate(extra.hourlyRate) ?? targetUser.teacherProfile.hourlyRate,
                   qualifications: extra.qualifications || targetUser.teacherProfile.qualifications,
                   languages: extra.languages || targetUser.teacherProfile.languages,
                   teachingMode: extra.teachingMode || targetUser.teacherProfile.teachingMode,
@@ -730,7 +731,7 @@ export class AuthService {
                   headline: extra.headline || "Educator",
                   subjects: extra.subjects || "Mathematics",
                   experienceYears: extra.experienceYears || 0,
-                  hourlyRate: extra.hourlyRate || 40.0,
+                  hourlyRate: parseHourlyRate(extra.hourlyRate) ?? 500.0,
                   qualifications: extra.qualifications,
                   languages: extra.languages || "English",
                   teachingMode: extra.teachingMode || "ONLINE",
@@ -779,7 +780,7 @@ export class AuthService {
                     headline: extra.headline || "Educator",
                     subjects: extra.subjects || "Mathematics",
                     experienceYears: extra.experienceYears || 0,
-                    hourlyRate: extra.hourlyRate || 40.0,
+                    hourlyRate: parseHourlyRate(extra.hourlyRate) ?? 500.0,
                     qualifications: extra.qualifications,
                     languages: extra.languages || "English",
                     teachingMode: extra.teachingMode || "ONLINE",

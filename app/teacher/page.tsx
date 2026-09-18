@@ -577,27 +577,38 @@ export default function TeacherLandingPage() {
               <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
                 {/* Left: Inputs & Sliders */}
                 <div className="space-y-6">
-                  {/* Hourly Rate Slider */}
+                  {/* Hourly Rate Slider & Direct Input */}
                   <div className="space-y-2">
                     <div className="flex items-center justify-between">
                       <label className="text-xs font-bold text-slate-700 uppercase tracking-wider">
                         Live Class Hourly Rate (₹)
                       </label>
-                      <span className="text-base font-black text-[#0D5C41]">₹{hourlyRate}/hr</span>
+                      <div className="flex items-center gap-1.5">
+                        <span className="text-xs font-bold text-slate-500">₹</span>
+                        <input
+                          type="number"
+                          min={1}
+                          max={10000}
+                          value={hourlyRate}
+                          onChange={(e) => setHourlyRate(Math.max(1, Number(e.target.value) || 0))}
+                          className="w-24 px-2 py-0.5 text-sm font-black text-[#0D5C41] border border-slate-200 rounded-lg text-right outline-none focus:ring-1 focus:ring-[#16805B]"
+                        />
+                        <span className="text-xs font-bold text-slate-500">/hr</span>
+                      </div>
                     </div>
                     <input
                       type="range"
-                      min={300}
-                      max={3000}
-                      step={50}
+                      min={100}
+                      max={5000}
+                      step={1}
                       value={hourlyRate}
                       onChange={(e) => setHourlyRate(Number(e.target.value))}
                       className="w-full h-2 bg-slate-200 rounded-lg appearance-none cursor-pointer accent-[#16805B]"
                     />
                     <div className="flex justify-between text-[10px] text-slate-400 font-semibold">
-                      <span>₹300/hr</span>
-                      <span>₹1,500/hr</span>
-                      <span>₹3,000/hr</span>
+                      <span>₹100/hr</span>
+                      <span>₹2,500/hr</span>
+                      <span>₹5,000/hr</span>
                     </div>
                   </div>
 

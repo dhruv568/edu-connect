@@ -44,7 +44,7 @@ export function formatCurrency(
     return fallback;
   }
 
-  const num = typeof amount === "string" ? parseFloat(amount) : amount;
+  const num = typeof amount === "string" ? parseFloat(amount.replace(/[₹$,\s]/g, "")) : amount;
   if (isNaN(num)) {
     return fallback;
   }
@@ -62,14 +62,45 @@ export function formatCurrency(
 }
 
 /**
- * Convert Rupees to integer Paise (for Razorpay).
- * Example:
- *   599 -> 59900
- *   89.99 -> 8999
+ * Parses and validates an educator hourly rate or monetary amount.
+ * Accepts numbers or strings with optional currency symbols, commas, or spaces.
+ * Validates only that the amount is a valid positive number.
+ * Does NOT round, clamp to increments, or enforce preset ranges.
+ * 
+ * Examples:
+ *   599       -> 599
+ *   "749"     -> 749
+ *   "₹999"    -> 999
+ *   "1,250"   -> 1250
+ *   "₹2,999"  -> 2999
+ *   0         -> null (must be positive)
+ *   -50       -> null
+ */
+export function parseHourlyRate(amount: number | string | null | undefined): number | null {
+  if (amount === null || amount === undefined || amount === "") return null;
+  if (typeof amount === "number") {
+    return !isNaN(amount) && isFinite(amount) && amount > 0 ? amount : null;
+  }
+  if (typeof amount === "string") {
+    const cleaned = amount.replace(/[₹$,\s]/g, "").trim();
+    if (!cleaned) return null;
+    const num = Number(cleaned);
+    return !isNaN(num) && isFinite(num) && num > 0 ? num : null;
+  }
+  return null;
+}
+
+/**
+ * Convert Rupees to integer Paise (for Cashfree / Razorpay).
+ * Examples:
+ *   599   -> 59900
+ *   749   -> 74900
+ *   1250  -> 125000
+ *   "1,250" -> 125000
  */
 export function toPaise(rupees: number | string | null | undefined): number {
   if (rupees === null || rupees === undefined || rupees === "") return 0;
-  const num = typeof rupees === "string" ? parseFloat(rupees) : rupees;
+  const num = typeof rupees === "string" ? parseFloat(rupees.replace(/[₹$,\s]/g, "")) : rupees;
   if (isNaN(num) || num < 0) return 0;
   return Math.round(num * CURRENCY_CONFIG.subunitMultiplier);
 }
