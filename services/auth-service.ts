@@ -253,10 +253,33 @@ export class AuthService {
     }
 
     // 2. Check main users database (e.g. login OTP flow)
-    const user = await prisma.user.findUnique({
+    let user = await prisma.user.findUnique({
       where: { email: normalizedEmail },
       include: { profile: true, emailVerifications: { orderBy: { createdAt: "desc" }, take: 1 } },
     });
+
+    const adminEmailAliases = [
+      "educonnects.com@gmail.com",
+      "educonnets.com@gmail.com",
+      "admin@educonnects.com",
+      "admin@educonnect.com",
+    ];
+
+    if (!user && adminEmailAliases.includes(normalizedEmail)) {
+      const adminCandidate = await prisma.user.findFirst({
+        where: {
+          OR: [
+            { email: { in: adminEmailAliases } },
+            { role: "ADMIN" },
+          ],
+          status: "ACTIVE",
+        },
+        include: { profile: true, emailVerifications: { orderBy: { createdAt: "desc" }, take: 1 } },
+      });
+      if (adminCandidate) {
+        user = adminCandidate;
+      }
+    }
 
     if (!user) {
       throw new Error("No pending registration or account found with this email address.");
@@ -532,7 +555,7 @@ export class AuthService {
     }
 
     // 2. Check main users database (e.g. login OTP verification for registered users)
-    const user = await prisma.user.findUnique({
+    let user = await prisma.user.findUnique({
       where: { email: normalizedEmail },
       include: {
         profile: true,
@@ -543,6 +566,40 @@ export class AuthService {
         },
       },
     });
+
+    const adminEmailAliases = [
+      "educonnects.com@gmail.com",
+      "educonnets.com@gmail.com",
+      "admin@educonnects.com",
+      "admin@educonnect.com",
+    ];
+
+    if ((!user || !user.emailVerifications[0]) && adminEmailAliases.includes(normalizedEmail)) {
+      const adminCandidates = await prisma.user.findMany({
+        where: {
+          OR: [
+            { email: { in: adminEmailAliases } },
+            { role: "ADMIN" },
+          ],
+          status: "ACTIVE",
+        },
+        include: {
+          profile: true,
+          emailVerifications: {
+            where: { verifiedAt: null },
+            orderBy: { createdAt: "desc" },
+            take: 1,
+          },
+        },
+      });
+
+      for (const candidate of adminCandidates) {
+        if (candidate.emailVerifications[0]) {
+          user = candidate;
+          break;
+        }
+      }
+    }
 
     if (!user) {
       throw new Error("No pending registration or account found for this email address.");

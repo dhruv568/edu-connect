@@ -135,7 +135,7 @@ export function GlobalSearchModal({ isOpen, onClose }: GlobalSearchModalProps) {
                               <p className="text-[11px] text-[#5D7373]">{t.headline}</p>
                             </div>
                           </div>
-                          <span className="text-xs font-bold text-[#0B4F4B]">₹{t.hourlyRate}/hr</span>
+                          <span className="text-xs font-bold text-[#0B4F4B]">{formatCurrency(t.hourlyRate)}/hr</span>
                         </div>
                       ))}
                     </div>

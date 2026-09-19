@@ -97,7 +97,7 @@ function EducatorRegistrationFlowContent() {
     experienceYears: 3,
     specialization: "",
     teachingMode: "ONLINE",
-    hourlyRate: 500,
+    hourlyRate: 300,
     languages: "English, Hindi",
     bio: "",
     orderData: null,
@@ -814,8 +814,8 @@ function EducatorRegistrationFlowContent() {
                   }
                 }}
                 required
-                placeholder="e.g. 599, 749, 1250"
-                helperText="Set any custom hourly rate (e.g. ₹599, ₹749, ₹1,250)"
+                placeholder="e.g. 250, 300, 350"
+                helperText="Set an affordable hourly rate (e.g. ₹250, ₹300, ₹350)"
               />
               <div className="space-y-1.5">
                 <label className="block text-xs font-bold text-slate-700 uppercase tracking-wider">
