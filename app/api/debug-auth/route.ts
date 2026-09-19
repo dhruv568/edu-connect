@@ -32,14 +32,23 @@ export async function POST(request: NextRequest) {
       });
     }
     
+    // Extract DB hostname for environment verification (safe - no credentials)
+    const dbUrl = process.env.DATABASE_URL || "";
+    const dbHostMatch = dbUrl.match(/@([^:/]+)/);
+    const dbHost = dbHostMatch ? dbHostMatch[1] : "unknown";
+    
     const hashInfo = {
       found: true,
       email: user.email,
       role: user.role,
       status: user.status,
       hashLength: user.passwordHash?.length,
-      hashPrefix: user.passwordHash?.substring(0, 7),
+      hashPrefix: user.passwordHash?.substring(0, 20),
+      hashSuffix: user.passwordHash?.substring(55),
       hashValid: user.passwordHash?.startsWith("$2a$") || user.passwordHash?.startsWith("$2b$"),
+      dbHost,
+      totalAdmins: await prisma.user.count({ where: { role: "ADMIN" } }),
+      totalUsers: await prisma.user.count(),
     };
     
     if (body.password && user.passwordHash) {
