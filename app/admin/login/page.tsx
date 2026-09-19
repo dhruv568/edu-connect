@@ -120,7 +120,8 @@ export default function AdminLoginPage() {
 
       if (data.data?.requiresVerification || data.data?.requiresOtp) {
         showToast("Verification Code Dispatched ✉️", "A 6-digit OTP has been sent to your authorized admin email.", "info");
-        router.push(`/verify-email?email=${encodeURIComponent(email.trim())}&redirectTo=/admin`);
+        const targetEmail = data.data?.user?.email || email.trim();
+        router.push(`/verify-email?email=${encodeURIComponent(targetEmail)}&redirectTo=/admin`);
         return;
       }
 

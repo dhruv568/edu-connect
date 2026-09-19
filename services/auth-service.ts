@@ -1041,19 +1041,58 @@ export class AuthService {
 
   /**
    * Validates user credentials (email and password).
+   * Supports email normalization and admin alias resolution against authorized database records.
    */
   static async validateCredentials(email: string, password: string) {
-    const user = await prisma.user.findUnique({
-      where: { email: email.toLowerCase() },
+    const normalizedEmail = email.toLowerCase().trim();
+
+    // 1. Primary lookup by exact normalized email
+    let user = await prisma.user.findUnique({
+      where: { email: normalizedEmail },
       include: { profile: true },
     });
 
+    let isMatch = false;
+    if (user && user.passwordHash) {
+      isMatch = await verifyPassword(password, user.passwordHash);
+    }
+
+    // 2. Admin alias / legacy account resolution:
+    // If user was not found OR password didn't match, and the requested email is an admin email alias
+    const adminEmailAliases = [
+      "educonnects.com@gmail.com",
+      "educonnets.com@gmail.com",
+      "admin@educonnects.com",
+      "admin@educonnect.com",
+    ];
+
+    if ((!user || !isMatch) && adminEmailAliases.includes(normalizedEmail)) {
+      const adminCandidates = await prisma.user.findMany({
+        where: {
+          OR: [
+            { email: { in: adminEmailAliases } },
+            { role: "ADMIN" },
+          ],
+          status: "ACTIVE",
+        },
+        include: { profile: true },
+      });
+
+      for (const candidate of adminCandidates) {
+        if (candidate.id === user?.id) continue;
+        if (candidate.passwordHash && (await verifyPassword(password, candidate.passwordHash))) {
+          user = candidate;
+          isMatch = true;
+          break;
+        }
+      }
+    }
+
     if (!user) {
-      await logAuditEvent(null, "LOGIN_FAILED", { email: email.toLowerCase() });
+      await logAuditEvent(null, "LOGIN_FAILED", { email: normalizedEmail });
       throw new Error("Invalid email or password.");
     }
 
-    const isMatch = await verifyPassword(password, user.passwordHash);
     if (!isMatch) {
       await logAuditEvent(user.id, "LOGIN_FAILED", { email: user.email });
       throw new Error("Invalid email or password.");
@@ -1069,15 +1108,12 @@ export class AuthService {
    */
   static async loginUser(input: LoginInput) {
     const normalizedEmail = input.email.toLowerCase().trim();
-    const user = await prisma.user.findUnique({
-      where: { email: normalizedEmail },
-      include: { profile: true },
-    });
 
-    if (!user) {
-      await logAuditEvent(null, "LOGIN_FAILED", { email: normalizedEmail });
-      throw new Error("Invalid email or password.");
+    if (!input.password) {
+      throw new Error("Password is required.");
     }
+
+    const user = await this.validateCredentials(normalizedEmail, input.password);
 
     if (user.status !== "ACTIVE") {
       await logAuditEvent(user.id, "LOGIN_BLOCKED_INACTIVE", { email: normalizedEmail, status: user.status });
@@ -1085,16 +1121,6 @@ export class AuthService {
     }
 
     const isAdmin = user.role === "ADMIN";
-
-    if (!input.password) {
-      throw new Error(isAdmin ? "Password is required for admin authentication." : "Password is required.");
-    }
-
-    const isMatch = await verifyPassword(input.password, user.passwordHash);
-    if (!isMatch) {
-      await logAuditEvent(user.id, "LOGIN_FAILED", { email: user.email });
-      throw new Error("Invalid email or password.");
-    }
 
     // Check resend cooldown for login requests to prevent spamming OTP generation
     const cooldownSeconds = getResendCooldownSeconds();
