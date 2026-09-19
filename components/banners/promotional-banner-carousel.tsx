@@ -51,6 +51,7 @@ export function PromotionalBannerCarousel({
   const [touchStartX, setTouchStartX] = useState<number | null>(null);
   const [touchEndX, setTouchEndX] = useState<number | null>(null);
   const [loading, setLoading] = useState(!initialBanners);
+  const [imageErrorMap, setImageErrorMap] = useState<Record<string, boolean>>({});
 
   // Exclude non-public pages (admin, classroom, auth, live sessions)
   const isExcluded = useMemo(() => {
@@ -105,9 +106,22 @@ export function PromotionalBannerCarousel({
     let isMounted = true;
     const fetchBanners = async () => {
       try {
-        const res = await fetch(`/api/banners/active?placement=${siteContext}`, {
+        const queryParam = siteContext ? `?placement=${encodeURIComponent(siteContext)}` : "";
+        let res = await fetch(`/api/banners/active${queryParam}`, {
           cache: "no-store",
         });
+
+        // If relative fetch fails (e.g. reverse proxy subdomain routing issue), fallback to canonical origin
+        if (!res.ok && typeof window !== "undefined") {
+          try {
+            res = await fetch(`${window.location.origin}/api/banners/active${queryParam}`, {
+              cache: "no-store",
+            });
+          } catch {
+            // Ignore secondary error
+          }
+        }
+
         if (res.ok) {
           const json = await res.json();
           if (isMounted && json.success && Array.isArray(json.data?.banners)) {
@@ -115,7 +129,7 @@ export function PromotionalBannerCarousel({
           }
         }
       } catch (err) {
-        // Fallback silently without throwing to preserve page integrity
+        console.error("[PromotionalBannerCarousel] Failed to fetch active banners:", err);
       } finally {
         if (isMounted) setLoading(false);
       }
@@ -243,7 +257,8 @@ export function PromotionalBannerCarousel({
       dotInactive: "bg-white/35 hover:bg-white/60",
       imageGlow: "group-hover:ring-2 group-hover:ring-[#A7F3D0]/60",
     },
-  }[siteContext];
+  };
+  const currentTheme = themeStyles[siteContext] || themeStyles.MAIN;
 
   // Banner Type Icon & Label Mapping
   const getBannerTypeDetails = (type: string) => {
@@ -288,7 +303,7 @@ export function PromotionalBannerCarousel({
     >
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div
-          className={`relative rounded-3xl overflow-hidden border backdrop-blur-xl ${themeStyles.cardBg} ${themeStyles.border} ${themeStyles.shadow} transition-all duration-300`}
+          className={`relative rounded-3xl overflow-hidden border backdrop-blur-xl ${currentTheme.cardBg} ${currentTheme.border} ${currentTheme.shadow} transition-all duration-300`}
         >
           {/* Subtle Decorative Ambient Glow */}
           <div className="absolute -top-24 -right-24 w-96 h-96 bg-white/10 rounded-full blur-3xl pointer-events-none" />
@@ -309,7 +324,7 @@ export function PromotionalBannerCarousel({
                 {/* Banner Badge */}
                 <div className="flex items-center justify-center lg:justify-start gap-2 flex-wrap">
                   <span
-                    className={`inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-[11px] sm:text-xs font-black uppercase tracking-wider shadow-2xs ${themeStyles.badgeDefault}`}
+                    className={`inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-[11px] sm:text-xs font-black uppercase tracking-wider shadow-2xs ${currentTheme.badgeDefault}`}
                   >
                     <BannerIcon className="h-3.5 w-3.5" />
                     <span>{defaultTypeLabel}</span>
@@ -324,14 +339,14 @@ export function PromotionalBannerCarousel({
 
                 {/* Banner Headline */}
                 <h2
-                  className={`text-2xl sm:text-3xl lg:text-4xl font-black tracking-tight leading-tight ${themeStyles.titleColor}`}
+                  className={`text-2xl sm:text-3xl lg:text-4xl font-black tracking-tight leading-tight ${currentTheme.titleColor}`}
                 >
                   {currentBanner.title}
                 </h2>
 
                 {/* Subtitle (when not purely offer badge) */}
                 {currentBanner.subtitle && currentBanner.bannerType.toUpperCase() !== "OFFER" && (
-                  <p className={`text-sm sm:text-base font-bold ${themeStyles.subtitleColor}`}>
+                  <p className={`text-sm sm:text-base font-bold ${currentTheme.subtitleColor}`}>
                     {currentBanner.subtitle}
                   </p>
                 )}
@@ -339,7 +354,7 @@ export function PromotionalBannerCarousel({
                 {/* Description */}
                 {currentBanner.description && (
                   <p
-                    className={`text-xs sm:text-sm lg:text-base font-normal leading-relaxed line-clamp-2 sm:line-clamp-3 ${themeStyles.descColor}`}
+                    className={`text-xs sm:text-sm lg:text-base font-normal leading-relaxed line-clamp-2 sm:line-clamp-3 ${currentTheme.descColor}`}
                   >
                     {currentBanner.description}
                   </p>
@@ -351,7 +366,7 @@ export function PromotionalBannerCarousel({
                     <Link
                       href={currentBanner.ctaUrl!}
                       onClick={(e) => e.stopPropagation()}
-                      className={`inline-flex items-center gap-2 px-5 sm:px-6 py-2.5 sm:py-3 rounded-2xl text-xs sm:text-sm font-black transition-all duration-200 transform hover:scale-[1.03] active:scale-95 cursor-pointer select-none ${themeStyles.ctaBg}`}
+                      className={`inline-flex items-center gap-2 px-5 sm:px-6 py-2.5 sm:py-3 rounded-2xl text-xs sm:text-sm font-black transition-all duration-200 transform hover:scale-[1.03] active:scale-95 cursor-pointer select-none ${currentTheme.ctaBg}`}
                     >
                       <span>{currentBanner.ctaText}</span>
                       <ArrowRight className="h-4 w-4" />
@@ -371,16 +386,26 @@ export function PromotionalBannerCarousel({
                     target={currentBanner.imageClickTarget === "_blank" ? "_blank" : undefined}
                     rel={currentBanner.imageClickTarget === "_blank" ? "noopener noreferrer" : undefined}
                     aria-label={`Promotional banner: ${currentBanner.title}. Click to visit ${currentBanner.imageClickUrl}`}
-                    className={`group relative block w-full max-w-md aspect-video sm:aspect-16/9 lg:aspect-4/3 rounded-2xl overflow-hidden border border-white/20 shadow-lg cursor-pointer transition-all duration-300 transform hover:scale-[1.02] active:scale-[0.99] ${themeStyles.imageGlow}`}
+                    className={`group relative block w-full max-w-md aspect-video sm:aspect-[16/9] lg:aspect-[4/3] min-h-[190px] sm:min-h-[220px] lg:min-h-[250px] rounded-2xl overflow-hidden border border-white/20 shadow-lg cursor-pointer transition-all duration-300 transform hover:scale-[1.02] active:scale-[0.99] ${currentTheme.imageGlow}`}
                   >
                     <Image
-                      src={currentBanner.imageUrl}
+                      src={
+                        imageErrorMap[currentBanner.id || currentBanner.imageUrl]
+                          ? "/images/educonnects-owner-banner.jpeg"
+                          : currentBanner.imageUrl
+                      }
                       alt={currentBanner.title}
                       fill
                       priority={currentIndex === 0}
                       sizes="(max-width: 768px) 100vw, (max-width: 1200px) 45vw, 400px"
                       className="object-cover transition-transform duration-500 group-hover:scale-105"
-                      unoptimized={currentBanner.imageUrl.startsWith("http://") || currentBanner.imageUrl.startsWith("https://")}
+                      unoptimized={true}
+                      onError={() => {
+                        setImageErrorMap((prev) => ({
+                          ...prev,
+                          [currentBanner.id || currentBanner.imageUrl]: true,
+                        }));
+                      }}
                     />
 
                     {/* Subtle Overlay Hint indicating clickable destination */}
@@ -397,16 +422,26 @@ export function PromotionalBannerCarousel({
                   /* ========================================================= */
                   <div
                     aria-label={`Promotional banner image: ${currentBanner.title}`}
-                    className="relative w-full max-w-md aspect-video sm:aspect-16/9 lg:aspect-4/3 rounded-2xl overflow-hidden border border-white/20 shadow-lg cursor-default select-none"
+                    className="relative w-full max-w-md aspect-video sm:aspect-[16/9] lg:aspect-[4/3] min-h-[190px] sm:min-h-[220px] lg:min-h-[250px] rounded-2xl overflow-hidden border border-white/20 shadow-lg cursor-default select-none"
                   >
                     <Image
-                      src={currentBanner.imageUrl}
+                      src={
+                        imageErrorMap[currentBanner.id || currentBanner.imageUrl]
+                          ? "/images/educonnects-owner-banner.jpeg"
+                          : currentBanner.imageUrl
+                      }
                       alt={currentBanner.title}
                       fill
                       priority={currentIndex === 0}
                       sizes="(max-width: 768px) 100vw, (max-width: 1200px) 45vw, 400px"
                       className="object-cover"
-                      unoptimized={currentBanner.imageUrl.startsWith("http://") || currentBanner.imageUrl.startsWith("https://")}
+                      unoptimized={true}
+                      onError={() => {
+                        setImageErrorMap((prev) => ({
+                          ...prev,
+                          [currentBanner.id || currentBanner.imageUrl]: true,
+                        }));
+                      }}
                     />
                   </div>
                 )}
@@ -424,7 +459,7 @@ export function PromotionalBannerCarousel({
                   prevSlide();
                 }}
                 aria-label="Previous promotional slide"
-                className={`absolute left-3 top-1/2 -translate-y-1/2 z-20 p-2 sm:p-2.5 rounded-full border backdrop-blur-md transition-all duration-200 cursor-pointer shadow-md focus:outline-none focus:ring-2 ${themeStyles.arrowBg}`}
+                className={`absolute left-3 top-1/2 -translate-y-1/2 z-20 p-2 sm:p-2.5 rounded-full border backdrop-blur-md transition-all duration-200 cursor-pointer shadow-md focus:outline-none focus:ring-2 ${currentTheme.arrowBg}`}
               >
                 <ChevronLeft className="h-4 w-4 sm:h-5 sm:w-5" />
               </button>
@@ -436,7 +471,7 @@ export function PromotionalBannerCarousel({
                   nextSlide();
                 }}
                 aria-label="Next promotional slide"
-                className={`absolute right-3 top-1/2 -translate-y-1/2 z-20 p-2 sm:p-2.5 rounded-full border backdrop-blur-md transition-all duration-200 cursor-pointer shadow-md focus:outline-none focus:ring-2 ${themeStyles.arrowBg}`}
+                className={`absolute right-3 top-1/2 -translate-y-1/2 z-20 p-2 sm:p-2.5 rounded-full border backdrop-blur-md transition-all duration-200 cursor-pointer shadow-md focus:outline-none focus:ring-2 ${currentTheme.arrowBg}`}
               >
                 <ChevronRight className="h-4 w-4 sm:h-5 sm:w-5" />
               </button>
@@ -462,7 +497,7 @@ export function PromotionalBannerCarousel({
                     goToSlide(idx);
                   }}
                   className={`h-1.5 rounded-full transition-all duration-300 cursor-pointer ${
-                    idx === currentIndex ? themeStyles.dotActive : `w-2 ${themeStyles.dotInactive}`
+                    idx === currentIndex ? currentTheme.dotActive : `w-2 ${currentTheme.dotInactive}`
                   }`}
                 />
               ))}

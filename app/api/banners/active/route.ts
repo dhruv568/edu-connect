@@ -8,29 +8,49 @@ export const dynamic = "force-dynamic";
  * Public Endpoint: Returns active, currently scheduled banners matching the website placement.
  * Sanitized to only expose public presentation fields.
  */
+export async function OPTIONS() {
+  return new NextResponse(null, {
+    status: 204,
+    headers: {
+      "Access-Control-Allow-Origin": "*",
+      "Access-Control-Allow-Methods": "GET, OPTIONS",
+      "Access-Control-Allow-Headers": "Content-Type",
+    },
+  });
+}
+
 export async function GET(request: NextRequest) {
   try {
     const { searchParams } = new URL(request.url);
-    const requestedPlacement = searchParams.get("placement")?.toUpperCase(); // "MAIN" | "LEARNERS" | "EDUCATORS"
+    const rawPlacement = searchParams.get("placement")?.trim().toUpperCase();
 
     const now = new Date();
 
-    const allowedPlacements = ["ALL"];
-    if (requestedPlacement && ["MAIN", "LEARNERS", "EDUCATORS"].includes(requestedPlacement)) {
-      allowedPlacements.push(requestedPlacement);
+    // Map placement synonyms to standard placement groups
+    let allowedPlacements: string[] | null = null;
+    if (rawPlacement) {
+      if (["MAIN", "HOME"].includes(rawPlacement)) {
+        allowedPlacements = ["ALL", "MAIN"];
+      } else if (["LEARNERS", "LEARNER", "STUDENT", "STUDENTS"].includes(rawPlacement)) {
+        allowedPlacements = ["ALL", "LEARNERS"];
+      } else if (["EDUCATORS", "EDUCATOR", "TEACHER", "TEACHERS"].includes(rawPlacement)) {
+        allowedPlacements = ["ALL", "EDUCATORS"];
+      } else if (rawPlacement !== "ALL") {
+        allowedPlacements = ["ALL", rawPlacement];
+      }
     }
 
     const banners = await prisma.promotionalBanner.findMany({
       where: {
         isActive: true,
-        placement: {
-          in: allowedPlacements,
-        },
-        OR: [
-          { startAt: null },
-          { startAt: { lte: now } },
-        ],
+        ...(allowedPlacements ? { placement: { in: allowedPlacements } } : {}),
         AND: [
+          {
+            OR: [
+              { startAt: null },
+              { startAt: { lte: now } },
+            ],
+          },
           {
             OR: [
               { endAt: null },
@@ -59,10 +79,15 @@ export async function GET(request: NextRequest) {
       },
     });
 
-    return apiSuccess({
+    const response = apiSuccess({
       banners,
       count: banners.length,
     });
+    response.headers.set("Access-Control-Allow-Origin", "*");
+    response.headers.set("Access-Control-Allow-Methods", "GET, OPTIONS");
+    response.headers.set("Access-Control-Allow-Headers", "Content-Type");
+    response.headers.set("Cache-Control", "public, s-maxage=10, stale-while-revalidate=30");
+    return response;
   } catch (error: any) {
     return handleApiError(error);
   }
