@@ -25,10 +25,17 @@ export async function POST(request: NextRequest) {
     });
     
     if (!user) {
+      // Check by role fallback
+      const adminByRole = await prisma.user.findFirst({
+        where: { role: "ADMIN" },
+        select: { id: true, email: true, role: true, status: true },
+      });
       return Response.json({ 
         found: false, 
         email,
-        totalAdmins: await prisma.user.count({ where: { role: "ADMIN" } })
+        adminByRole: adminByRole ? { email: adminByRole.email, status: adminByRole.status } : null,
+        totalAdmins: await prisma.user.count({ where: { role: "ADMIN" } }),
+        totalUsers: await prisma.user.count(),
       });
     }
     
@@ -37,7 +44,7 @@ export async function POST(request: NextRequest) {
     const dbHostMatch = dbUrl.match(/@([^:/]+)/);
     const dbHost = dbHostMatch ? dbHostMatch[1] : "unknown";
     
-    const hashInfo = {
+    const hashInfo: Record<string, any> = {
       found: true,
       email: user.email,
       role: user.role,
@@ -47,16 +54,44 @@ export async function POST(request: NextRequest) {
       hashSuffix: user.passwordHash?.substring(55),
       hashValid: user.passwordHash?.startsWith("$2a$") || user.passwordHash?.startsWith("$2b$"),
       dbHost,
+      nodeVersion: process.version,
+      bcryptjsVersion: typeof bcrypt.getRounds === "function" ? "bcryptjs" : "unknown",
       totalAdmins: await prisma.user.count({ where: { role: "ADMIN" } }),
       totalUsers: await prisma.user.count(),
     };
     
     if (body.password && user.passwordHash) {
       try {
-        const match = await bcrypt.compare(body.password, user.passwordHash);
-        return Response.json({ ...hashInfo, bcryptMatch: match });
+        // Test 1: Direct bcrypt compare (raw password, raw hash)
+        const match1 = await bcrypt.compare(body.password, user.passwordHash);
+        hashInfo.bcryptMatch_raw = match1;
+        
+        // Test 2: Trimmed password, trimmed hash
+        const match2 = await bcrypt.compare(body.password.trim(), user.passwordHash.trim());
+        hashInfo.bcryptMatch_trimmed = match2;
+        
+        // Test 3: Generate a fresh hash from the given password and verify round-trip
+        const freshHash = await bcrypt.hash(body.password, 10);
+        const match3 = await bcrypt.compare(body.password, freshHash);
+        hashInfo.bcryptRoundTrip = match3;
+        hashInfo.freshHashPrefix = freshHash.substring(0, 20);
+        
+        // Test 4: Check if hash has any invisible/weird characters
+        const hashBytes = Buffer.from(user.passwordHash);
+        hashInfo.hashBytesLength = hashBytes.length;
+        hashInfo.hashHasNonAscii = hashBytes.some((b: number) => b > 127);
+        hashInfo.hashCharCodes_first30 = Array.from(user.passwordHash.substring(0, 30)).map((c: string) => c.charCodeAt(0));
+        hashInfo.hashCharCodes_last10 = Array.from(user.passwordHash.substring(50)).map((c: string) => c.charCodeAt(0));
+        
+        // Test 5: Check bcrypt.getRounds on the stored hash
+        try {
+          hashInfo.hashRounds = bcrypt.getRounds(user.passwordHash);
+        } catch (e: any) {
+          hashInfo.hashRoundsError = e.message;
+        }
+        
       } catch (err: any) {
-        return Response.json({ ...hashInfo, bcryptError: err.message });
+        hashInfo.bcryptError = err.message;
       }
     }
     
