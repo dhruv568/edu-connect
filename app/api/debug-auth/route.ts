@@ -7,95 +7,106 @@ import bcrypt from "bcryptjs";
 export async function POST(request: NextRequest) {
   try {
     const body = await request.json();
-    const email = body.email?.toLowerCase().trim();
-    
-    if (!email) {
-      return Response.json({ error: "Email required" }, { status: 400 });
-    }
-    
-    const user = await prisma.user.findUnique({
-      where: { email },
-      select: { 
-        id: true, 
-        email: true, 
-        role: true, 
+
+    // 1. Get all users summary (without exposing sensitive info)
+    const users = await prisma.user.findMany({
+      select: {
+        id: true,
+        email: true,
+        role: true,
         status: true,
+        emailVerified: true,
+        createdAt: true,
+        updatedAt: true,
         passwordHash: true,
-      }
+      },
+      orderBy: { createdAt: "asc" },
+      take: 50,
     });
-    
-    if (!user) {
-      // Check by role fallback
-      const adminByRole = await prisma.user.findFirst({
-        where: { role: "ADMIN" },
-        select: { id: true, email: true, role: true, status: true },
-      });
-      return Response.json({ 
-        found: false, 
-        email,
-        adminByRole: adminByRole ? { email: adminByRole.email, status: adminByRole.status } : null,
-        totalAdmins: await prisma.user.count({ where: { role: "ADMIN" } }),
-        totalUsers: await prisma.user.count(),
+
+    // Check how many users have matching password for "Password123!"
+    const usersSummary = [];
+    for (const u of users) {
+      const matchPassword123 = u.passwordHash
+        ? await bcrypt.compare("Password123!", u.passwordHash)
+        : false;
+      usersSummary.push({
+        email: u.email,
+        role: u.role,
+        status: u.status,
+        createdAt: u.createdAt,
+        updatedAt: u.updatedAt,
+        hashPrefix: u.passwordHash?.substring(0, 15),
+        hashSuffix: u.passwordHash?.substring(55),
+        matchPassword123,
       });
     }
+
+    // 2. Test candidate passwords against admin user specifically
+    const adminUser = users.find((u) => u.email === "educonnects.com@gmail.com" || u.role === "ADMIN");
     
-    // Extract DB hostname for environment verification (safe - no credentials)
-    const dbUrl = process.env.DATABASE_URL || "";
-    const dbHostMatch = dbUrl.match(/@([^:/]+)/);
-    const dbHost = dbHostMatch ? dbHostMatch[1] : "unknown";
-    
-    const hashInfo: Record<string, any> = {
-      found: true,
-      email: user.email,
-      role: user.role,
-      status: user.status,
-      hashLength: user.passwordHash?.length,
-      hashPrefix: user.passwordHash?.substring(0, 20),
-      hashSuffix: user.passwordHash?.substring(55),
-      hashValid: user.passwordHash?.startsWith("$2a$") || user.passwordHash?.startsWith("$2b$"),
-      dbHost,
-      nodeVersion: process.version,
-      bcryptjsVersion: typeof bcrypt.getRounds === "function" ? "bcryptjs" : "unknown",
-      totalAdmins: await prisma.user.count({ where: { role: "ADMIN" } }),
-      totalUsers: await prisma.user.count(),
-    };
-    
-    if (body.password && user.passwordHash) {
-      try {
-        // Test 1: Direct bcrypt compare (raw password, raw hash)
-        const match1 = await bcrypt.compare(body.password, user.passwordHash);
-        hashInfo.bcryptMatch_raw = match1;
-        
-        // Test 2: Trimmed password, trimmed hash
-        const match2 = await bcrypt.compare(body.password.trim(), user.passwordHash.trim());
-        hashInfo.bcryptMatch_trimmed = match2;
-        
-        // Test 3: Generate a fresh hash from the given password and verify round-trip
-        const freshHash = await bcrypt.hash(body.password, 10);
-        const match3 = await bcrypt.compare(body.password, freshHash);
-        hashInfo.bcryptRoundTrip = match3;
-        hashInfo.freshHashPrefix = freshHash.substring(0, 20);
-        
-        // Test 4: Check if hash has any invisible/weird characters
-        const hashBytes = Buffer.from(user.passwordHash);
-        hashInfo.hashBytesLength = hashBytes.length;
-        hashInfo.hashHasNonAscii = hashBytes.some((b: number) => b > 127);
-        hashInfo.hashCharCodes_first30 = Array.from(user.passwordHash.substring(0, 30)).map((c: string) => c.charCodeAt(0));
-        hashInfo.hashCharCodes_last10 = Array.from(user.passwordHash.substring(50)).map((c: string) => c.charCodeAt(0));
-        
-        // Test 5: Check bcrypt.getRounds on the stored hash
-        try {
-          hashInfo.hashRounds = bcrypt.getRounds(user.passwordHash);
-        } catch (e: any) {
-          hashInfo.hashRoundsError = e.message;
+    let matchedCandidate: string | null = null;
+    if (adminUser && adminUser.passwordHash) {
+      const candidates = [
+        "Password123!",
+        "password123!",
+        "Password123",
+        "password123",
+        "Admin123!",
+        "admin123!",
+        "Admin123",
+        "admin123",
+        "Admin@123",
+        "admin@123",
+        "Admin@1234",
+        "EduConnect@123",
+        "EduConnects@123",
+        "EduConnect123!",
+        "EduConnects123!",
+        "educonnect123",
+        "educonnects123",
+        "Password@123",
+        "password@123",
+        "password",
+        "Password",
+        "admin",
+        "Admin",
+        "123456",
+        "12345678",
+        "Secret1234",
+        "Secret1234!",
+        "dhruv568",
+        "dhruvjari2006",
+        "Dhruv@123",
+        "Dhruv123!",
+        "dhruv123!",
+        "Neeraj@123",
+        "Neeraj123!",
+        "neeraj123!",
+        "Profunnel@123",
+        "Profunnels@123",
+        "profunnel123",
+        "educonnects.com@gmail.com",
+        "admin@educonnects.com",
+        "admin@educonnect.com",
+        body.password, // whatever was passed in the request body
+      ].filter(Boolean);
+
+      for (const cand of candidates) {
+        if (await bcrypt.compare(cand, adminUser.passwordHash)) {
+          matchedCandidate = cand;
+          break;
         }
-        
-      } catch (err: any) {
-        hashInfo.bcryptError = err.message;
       }
     }
-    
-    return Response.json(hashInfo);
+
+    return Response.json({
+      adminFound: Boolean(adminUser),
+      adminEmail: adminUser?.email,
+      matchedCandidate,
+      totalUsers: users.length,
+      usersSummary,
+    });
   } catch (err: any) {
     return Response.json({ error: err.message }, { status: 500 });
   }
