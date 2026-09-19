@@ -13,8 +13,8 @@ export function HowItWorksSection() {
     },
     {
       number: "02",
-      title: "Find the Right Learning Experience",
-      desc: "Discover verified educators, pre-recorded video courses or interactive live sessions that fit your budget & schedule.",
+      title: "Find the Right Educator",
+      desc: "Discover verified educators who match your goals, subject, budget, and schedule. Connect with the right educator for personalized 1-on-1 learning.",
       icon: Compass,
     },
     {
