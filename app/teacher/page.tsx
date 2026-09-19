@@ -4,6 +4,7 @@ import React, { useState, useEffect } from "react";
 import Link from "next/link";
 import { motion, AnimatePresence } from "framer-motion";
 import { FloatingNavbar } from "@/components/homepage/floating-navbar";
+import { PromotionalBannerCarousel } from "@/components/banners/promotional-banner-carousel";
 import { PremiumFooter } from "@/components/homepage/premium-footer";
 import { EducatorHeroSlideshow } from "@/components/homepage/educator-hero-slideshow";
 import { GlassCard } from "@/components/glass/glass-card";
@@ -221,6 +222,9 @@ export default function TeacherLandingPage() {
       <FloatingNavbar variant="teacher" />
 
       <main className="flex-1">
+        {/* Global Promotional Banner Carousel */}
+        <PromotionalBannerCarousel placement="EDUCATORS" />
+
         {/* ========================================================================= */}
         {/* 1. HERO SECTION WITH BACKGROUND SLIDESHOW */}
         {/* ========================================================================= */}

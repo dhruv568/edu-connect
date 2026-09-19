@@ -1096,6 +1096,33 @@ model Offer {
   @@map("offers")
 }
 
+model PromotionalBanner {
+  id               String    @id @default(uuid())
+  title            String
+  subtitle         String?
+  description      String?
+  bannerType       String    @default("OFFER") // OFFER | PROMOTION | ANNOUNCEMENT | COURSE_PROMOTION | EVENT | GENERAL
+  imageUrl         String
+  imageClickUrl    String?
+  imageClickTarget String    @default("_self") // _self | _blank
+  ctaText          String?
+  ctaUrl           String?
+  placement        String    @default("ALL") // ALL | MAIN | LEARNERS | EDUCATORS
+  displayOrder     Int       @default(0)
+  startAt          DateTime?
+  endAt            DateTime?
+  isActive         Boolean   @default(true)
+  createdAt        DateTime  @default(now())
+  updatedAt        DateTime  @updatedAt
+
+  @@index([isActive])
+  @@index([placement])
+  @@index([startAt])
+  @@index([endAt])
+  @@index([displayOrder])
+  @@map("promotional_banners")
+}
+
 model TrainingProgram {
   id           String               @id @default(uuid())
   slug         String               @unique @default("15-day-educator-training")

@@ -2,6 +2,7 @@
 
 import React from "react";
 import { FloatingNavbar } from "@/components/homepage/floating-navbar";
+import { PromotionalBannerCarousel } from "@/components/banners/promotional-banner-carousel";
 import { HeroSection } from "@/components/homepage/hero-section";
 import { WhoIsItForSection } from "@/components/homepage/who-is-it-for-section";
 import { BrandVisionSection } from "@/components/homepage/brand-vision-section";
@@ -22,6 +23,9 @@ export default function EduConnectsHomePage() {
       <FloatingNavbar />
 
       <main className="flex-1">
+        {/* Global Promotional Banner Carousel */}
+        <PromotionalBannerCarousel placement="MAIN" />
+
         {/* 2. Clear Hero Section */}
         <HeroSection />
 

@@ -253,6 +253,7 @@ export function DashboardLayout({ role, userName, userEmail, children }: Dashboa
       id: "promotions",
       title: "MARKETING & OFFERS",
       items: [
+        { label: "Promotional Banners", icon: Sparkles, href: "/admin/banners" },
         { label: "Global Offers", icon: Tag, href: "/admin/offers" },
       ],
     },

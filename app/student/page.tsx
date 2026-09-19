@@ -7,6 +7,7 @@ import { motion, AnimatePresence } from "framer-motion";
 import photo2 from "@/photo2.jpeg";
 import photo3 from "@/photo3.jpeg";
 import { FloatingNavbar } from "@/components/homepage/floating-navbar";
+import { PromotionalBannerCarousel } from "@/components/banners/promotional-banner-carousel";
 import { PremiumFooter } from "@/components/homepage/premium-footer";
 import { LearnerHeroSlideshow } from "@/components/homepage/learner-hero-slideshow";
 import { GlassCard } from "@/components/glass/glass-card";
@@ -374,6 +375,9 @@ export default function StudentLandingPage() {
       <FloatingNavbar variant="student" />
 
       <main className="flex-1">
+        {/* Global Promotional Banner Carousel */}
+        <PromotionalBannerCarousel placement="LEARNERS" />
+
         {/* ========================================================================= */}
         <section className="relative pt-32 sm:pt-36 lg:pt-44 pb-20 lg:pb-28 overflow-hidden bg-[#F3F6FF]">
           <LearnerHeroSlideshow />
