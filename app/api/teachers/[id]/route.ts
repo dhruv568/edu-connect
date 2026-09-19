@@ -63,7 +63,7 @@ export async function GET(request: NextRequest, { params }: { params: { id: stri
       headline: user.teacherProfile.headline || "Senior Educator",
       subjects: user.teacherProfile.subjects ? user.teacherProfile.subjects.split(",").map((s) => s.trim()) : [],
       experienceYears: user.teacherProfile.experienceYears,
-      hourlyRate: user.teacherProfile.hourlyRate || 750.0,
+      hourlyRate: user.teacherProfile.hourlyRate || 300.0,
       rating: user.teacherProfile.rating,
       location: user.teacherProfile.location || "India",
       languages: user.teacherProfile.languages || "English, Hindi",

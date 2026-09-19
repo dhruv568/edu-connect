@@ -37,6 +37,9 @@ async function runCustomRateTests() {
   console.log("📋 1. Testing parseHourlyRate with custom educator amounts...");
 
   // Plain integers
+  assert(parseHourlyRate(250) === 250, "Integer 250 accepted as exact 250");
+  assert(parseHourlyRate(300) === 300, "Integer 300 accepted as exact 300");
+  assert(parseHourlyRate(350) === 350, "Integer 350 accepted as exact 350");
   assert(parseHourlyRate(599) === 599, "Integer 599 accepted as exact 599");
   assert(parseHourlyRate(749) === 749, "Integer 749 accepted as exact 749");
   assert(parseHourlyRate(999) === 999, "Integer 999 accepted as exact 999");

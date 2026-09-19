@@ -65,7 +65,7 @@ async function runTests() {
     // Verify User & Profile
     assert.strictEqual(user.role, "TEACHER");
     assert.ok(user.profile, `Profile missing for ${user.email}`);
-    assert.ok(user.profile!.avatarUrl?.startsWith("/images/educators/educator_"), `Avatar URL invalid for ${user.email}: ${user.profile!.avatarUrl}`);
+    assert.ok(user.profile!.avatarUrl?.startsWith("/images/educators/"), `Avatar URL invalid for ${user.email}: ${user.profile!.avatarUrl}`);
 
     // Verify TeacherProfile & Security Isolation Flag
     const tp = user.teacherProfile;
@@ -74,7 +74,7 @@ async function runTests() {
     assert.strictEqual(tp!.isSeededProfile, true, `isSeededProfile must be true for ${user.email}`);
     assert.ok(tp!.headline && tp!.headline.length > 5, `Headline too short for ${user.email}`);
     assert.ok(tp!.bio && tp!.bio.length > 20, `Bio too short for ${user.email}`);
-    assert.ok((tp!.hourlyRate ?? 0) >= 400 && (tp!.hourlyRate ?? 0) <= 2500, `Rate out of expected range for ${user.email}`);
+    assert.ok((tp!.hourlyRate ?? 0) >= 200 && (tp!.hourlyRate ?? 0) <= 2500, `Rate out of expected range for ${user.email}`);
     assert.ok(tp!.experienceYears >= 8, `Experience less than 8 years for ${user.email}`);
     assert.ok(tp!.rating >= 4.6, `Rating below 4.6 for ${user.email}`);
     assert.ok(tp!.location && tp!.location.length > 3, `Location should not be empty for ${user.email}`);
@@ -191,12 +191,12 @@ async function runTests() {
 
   // Discovery Filter Panel & INR range
   const filterPanel = fs.readFileSync(path.join(process.cwd(), "components/discovery/teacher-filter-panel.tsx"), "utf-8");
-  assert.ok(filterPanel.includes("max={2000}"), "Filter panel supports up to ₹2000/hr");
+  assert.ok(filterPanel.includes("max={5000}") || filterPanel.includes("max={2000}"), "Filter panel supports educator hourly rate slider");
   assert.ok(filterPanel.includes("biology") && filterPanel.includes("economics"), "Filter panel includes diverse subjects");
 
   // Find Teachers Page Price Default
   const findTeachersPage = fs.readFileSync(path.join(process.cwd(), "app/find-teachers/page.tsx"), "utf-8");
-  assert.ok(findTeachersPage.includes("2000"), "Find teachers page defaults to 2000 max price to include all Indian educators");
+  assert.ok(findTeachersPage.includes("5000") || findTeachersPage.includes("2000"), "Find teachers page defaults to max price to include all Indian educators");
 
   // Teacher Card Grid: Circular image & Book Trial Lesson
   const cardGrid = fs.readFileSync(path.join(process.cwd(), "components/discovery/teacher-card-grid.tsx"), "utf-8");

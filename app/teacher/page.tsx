@@ -47,7 +47,7 @@ export default function TeacherLandingPage() {
   const [userSession, setUserSession] = useState<UserSession | null>(null);
 
   // Interactive Earnings Calculator State
-  const [hourlyRate, setHourlyRate] = useState(800);
+  const [hourlyRate, setHourlyRate] = useState(300);
   const [hoursPerWeek, setHoursPerWeek] = useState(12);
   const [coursesSoldPerMonth, setCoursesSoldPerMonth] = useState(10);
   const [courseAvgPrice, setCourseAvgPrice] = useState(1499);

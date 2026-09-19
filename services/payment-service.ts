@@ -166,7 +166,7 @@ export class PaymentService {
                 teacherId: teacher.id,
                 startTime,
                 endTime,
-                price: teacher.hourlyRate || 499,
+                price: teacher.hourlyRate || 300,
                 classType: "ONE_TO_ONE",
                 maxCapacity: 1,
                 status: "OPEN",

@@ -48,7 +48,7 @@ export default function HowItWorksPage() {
               Physics STEM
             </span>
             <span className="px-2 py-0.5 rounded-md bg-slate-800 text-slate-300 font-semibold text-[10px]">
-              ₹400 - ₹600/hr
+              ₹250 - ₹350/hr
             </span>
             <span className="px-2 py-0.5 rounded-md bg-emerald-600/20 text-emerald-300 font-semibold text-[10px]">
               ★ 4.9+ Rated

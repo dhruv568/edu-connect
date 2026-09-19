@@ -60,7 +60,7 @@ export async function GET(request: NextRequest) {
         headline: tp.headline || "Senior Educator",
         subjects: tp.subjects ? tp.subjects.split(",").map((s) => s.trim()) : [],
         experienceYears: tp.experienceYears,
-        hourlyRate: tp.hourlyRate || 750.0,
+        hourlyRate: tp.hourlyRate || 300.0,
         rating: tp.rating,
         location: tp.location || "India",
         verificationStatus: tp.verificationStatus,

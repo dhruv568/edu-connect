@@ -71,7 +71,7 @@ export default function TeacherOnboardingPage() {
     headline: "",
     subjects: ["Mathematics", "Physics"],
     experienceYears: 5,
-    hourlyRate: 500,
+    hourlyRate: 300,
     languages: ["English"],
     teachingMode: "ONLINE",
     verificationStatus: "PENDING" as VerificationStatus,
@@ -865,7 +865,7 @@ export default function TeacherOnboardingPage() {
                           setProfessional({ ...professional, hourlyRate: val as any });
                         }
                       }}
-                      placeholder="e.g. 599, 749, 1250"
+                      placeholder="e.g. 250, 300, 350"
                       helperText="Enter any custom hourly rate in ₹ without fixed preset limits"
                     />
                   </div>

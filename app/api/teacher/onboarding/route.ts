@@ -89,7 +89,7 @@ export async function GET(request: NextRequest) {
         headline: tp.headline || "",
         subjects: tp.subjects ? tp.subjects.split(",").map((s) => s.trim()) : [],
         experienceYears: tp.experienceYears,
-        hourlyRate: tp.hourlyRate || 40,
+        hourlyRate: tp.hourlyRate || 300,
         languages: tp.languages ? tp.languages.split(",").map((s) => s.trim()) : ["English"],
         teachingMode: tp.teachingMode || "ONLINE",
         accountHolderName: tp.accountHolderName || "",

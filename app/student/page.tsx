@@ -275,7 +275,7 @@ export default function StudentLandingPage() {
       avatarUrl: "/images/educators/educator_05.jpg",
       subjects: ["Calculus", "Algebra", "JEE Advanced"],
       experienceYears: 12,
-      hourlyRate: 850,
+      hourlyRate: 350,
       rating: 4.98,
     },
     {
@@ -285,7 +285,7 @@ export default function StudentLandingPage() {
       avatarUrl: "/images/educators/anuradha-sengupta.jpg",
       subjects: ["Physics", "Mechanics", "Electrostatics"],
       experienceYears: 9,
-      hourlyRate: 750,
+      hourlyRate: 300,
       rating: 4.95,
     },
     {
@@ -295,7 +295,7 @@ export default function StudentLandingPage() {
       avatarUrl: "/images/educators/educator_07.jpg",
       subjects: ["Python", "Algorithms", "Web Dev"],
       experienceYears: 8,
-      hourlyRate: 900,
+      hourlyRate: 350,
       rating: 4.96,
     },
     {
@@ -305,7 +305,7 @@ export default function StudentLandingPage() {
       avatarUrl: "/images/educators/educator_08.jpg",
       subjects: ["Chemistry", "Organic Synthesis", "CBSE 12th"],
       experienceYears: 7,
-      hourlyRate: 700,
+      hourlyRate: 250,
       rating: 4.92,
     },
   ];
@@ -744,7 +744,7 @@ export default function StudentLandingPage() {
                         </span>
                       </div>
                       <div className="font-black text-slate-900">
-                        {formatCurrency(teacher.hourlyRate || 800)}
+                        {formatCurrency(teacher.hourlyRate || 300)}
                         <span className="text-[10px] text-slate-500 font-normal">/hr</span>
                       </div>
                     </div>
