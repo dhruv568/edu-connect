@@ -117,7 +117,7 @@ export function WhoIsItForSection() {
                     FOR EDUCATORS
                   </span>
                   <h3 className="text-xl sm:text-2xl font-black text-[#102A2A]">
-                    Teach. Connect. Grow.
+                    Connect. Teach. Grow.
                   </h3>
                 </div>
               </div>

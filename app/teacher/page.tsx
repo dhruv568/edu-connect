@@ -248,7 +248,7 @@ export default function TeacherLandingPage() {
                 </div>
 
                 <h1 className="text-4xl sm:text-5xl lg:text-6xl font-black text-slate-900 tracking-tight leading-[1.15]">
-                  <span className="block">Teach. Connect. Grow.</span>
+                  <span className="block">Connect. Teach. Grow.</span>
                   <span className="block text-2xl sm:text-3xl lg:text-4xl font-bold text-slate-700 mt-2 sm:mt-2.5">
                     Turn Knowledge Into
                   </span>
