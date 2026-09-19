@@ -10,27 +10,27 @@ interface LearnerSlide {
 
 const LEARNER_SLIDES: LearnerSlide[] = [
   {
-    url: "https://images.unsplash.com/photo-1522202176988-66273c2fd55f?w=1600&auto=format&fit=crop&q=80",
+    url: "/images/learner-hero.jpeg",
     alt: "Personalized 1-on-1 learning with interactive mentor support",
     theme: "Personalized Learning",
   },
   {
-    url: "https://images.unsplash.com/photo-1434030216411-0b793f4b4173?w=1600&auto=format&fit=crop&q=80",
+    url: "/images/learner-hero.jpeg",
     alt: "Structured exam preparation and strategic practice for learners",
     theme: "Exam Preparation",
   },
   {
-    url: "https://images.unsplash.com/photo-1577896851231-70ef18881754?w=1600&auto=format&fit=crop&q=80",
+    url: "/images/learner-hero.jpeg",
     alt: "Finding the right verified educator for your academic goals",
     theme: "Finding the Right Educator",
   },
   {
-    url: "https://images.unsplash.com/photo-1501504905252-473c47e087f8?w=1600&auto=format&fit=crop&q=80",
+    url: "/images/learner-hero.jpeg",
     alt: "Building in-demand coding, analytical, and digital skills",
     theme: "Skill Development",
   },
   {
-    url: "https://images.unsplash.com/photo-1523240795612-9a054b0db644?w=1600&auto=format&fit=crop&q=80",
+    url: "/images/learner-hero.jpeg",
     alt: "Celebrating academic milestones, top exam percentiles, and learning growth",
     theme: "Learn and Grow",
   },
