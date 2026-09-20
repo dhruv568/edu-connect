@@ -882,7 +882,13 @@ function AboutContent({ initialTheme }: AboutContentProps = {}) {
             </Link>
             <Link href={themeMode === "learner" ? "/courses" : "/register/teacher"}>
               <GlassButton
-                variant="primary"
+                variant={
+                  themeMode === "learner"
+                    ? "learner"
+                    : themeMode === "educator"
+                    ? "educator"
+                    : "primary"
+                }
                 size="lg"
                 className="border border-white/40 text-white hover:bg-white/10 font-bold"
               >
