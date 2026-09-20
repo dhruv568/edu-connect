@@ -12,18 +12,18 @@ export function WhyEduConnectsSection() {
     },
     {
       icon: Calendar,
-      title: "Flexible Learning",
-      desc: "Choose learning options that fit seamlessly into your personal schedule — from 1-on-1 tutoring to self-paced video courses.",
+      title: "Flexible Timing",
+      desc: "Choose learning sessions that fit your schedule, with flexible timings for 1-on-1 classes and self-paced learning.",
     },
     {
       icon: UserCheck,
-      title: "Educator Connection",
-      desc: "Connect directly with verified subject educators without rigid annual locks or opaque intermediary agencies.",
+      title: "Verified Educators",
+      desc: "Learn from verified educators with subject expertise and practical knowledge.",
     },
     {
       icon: HeartHandshake,
-      title: "One Learning Community",
-      desc: "Learn, connect, track your progress, and grow inside a clean, modern, and transparent educational ecosystem.",
+      title: "Track Your Progress",
+      desc: "Monitor your learning, complete lessons, and stay on track toward your academic goals.",
     },
   ];
 
