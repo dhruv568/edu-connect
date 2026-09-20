@@ -2,6 +2,7 @@ import { prisma } from "@/lib/prisma";
 import { AuditLogger } from "@/lib/audit-logger";
 import { DEFAULT_CURRENCY } from "@/lib/currency";
 import { OFFICIAL_COMPANY_INFO } from "@/lib/company";
+import { PaymentService } from "@/services/payment-service";
 
 export interface UserFilterOptions {
   search?: string;
@@ -792,8 +793,16 @@ export class AdminService {
     const skip = (page - 1) * limit;
 
     const where: any = {};
-    if (options.status) {
-      where.status = options.status;
+    if (options.status && options.status !== "ALL") {
+      if (options.status === "PENDING" || options.status === "REFUND_REQUESTED") {
+        where.status = { in: ["PENDING", "REFUND_REQUESTED"] };
+      } else if (options.status === "REFUNDED" || options.status === "APPROVED") {
+        where.status = { in: ["APPROVED", "REFUNDED"] };
+      } else if (options.status === "REJECTED" || options.status === "REFUND_FAILED") {
+        where.status = { in: ["REJECTED", "REFUND_FAILED"] };
+      } else {
+        where.status = options.status;
+      }
     }
 
     const [total, refunds] = await Promise.all([
@@ -814,9 +823,12 @@ export class AdminService {
           transaction: {
             select: {
               id: true,
+              internalReference: true,
+              providerOrderId: true,
               providerPaymentId: true,
               type: true,
               amountPaise: true,
+              status: true,
             },
           },
         },
@@ -827,7 +839,10 @@ export class AdminService {
       refunds: refunds.map((r) => ({
         id: r.id,
         transactionId: r.transactionId,
+        internalReference: r.transaction.internalReference,
+        providerOrderId: r.transaction.providerOrderId,
         providerPaymentId: r.transaction.providerPaymentId,
+        transactionStatus: r.transaction.status,
         providerRefundId: r.providerRefundId,
         amountRupees: r.amountPaise / 100,
         reason: r.reason,
@@ -857,18 +872,18 @@ export class AdminService {
       throw new Error("NOT_FOUND: Refund request not found.");
     }
 
-    if (refund.status === "REFUNDED" || refund.status === "REFUND_FAILED") {
+    if (refund.status === "REFUNDED" || refund.status === "REFUND_FAILED" || refund.status === "REJECTED") {
       throw new Error(`VALIDATION_ERROR: Refund is already ${refund.status.toLowerCase()}.`);
     }
 
     if (action === "REJECT") {
-      if (!reason) throw new Error("VALIDATION_ERROR: Rejection reason is required.");
+      if (!reason || !reason.trim()) throw new Error("VALIDATION_ERROR: Rejection reason is required.");
       const updated = await prisma.refund.update({
         where: { id: refundId },
         data: {
-          status: "REFUND_FAILED",
+          status: "REJECTED",
           approvedBy: adminId,
-          reason: `Rejected by Admin: ${reason}`,
+          reason: `Rejected by Admin: ${reason.trim()}`,
         },
       });
 
@@ -881,39 +896,27 @@ export class AdminService {
       return updated;
     }
 
-    const updatedRefund = await prisma.refund.update({
-      where: { id: refundId },
-      data: {
-        status: "REFUNDED",
-        approvedBy: adminId,
-        providerRefundId: `rfnd_mock_${Date.now()}`,
-      },
-    });
-
-    await prisma.paymentTransaction.update({
-      where: { id: refund.transactionId },
-      data: { status: "REFUNDED" },
-    });
-
-    await prisma.financialLedgerEntry.create({
-      data: {
-        transactionId: refund.transactionId,
-        type: "REFUND",
-        amountPaise: refund.amountPaise,
-        currency: DEFAULT_CURRENCY,
-        direction: "DEBIT",
-        status: "COMPLETED",
-        description: `Refund approved by Admin for transaction ${refund.transactionId}`,
-      },
+    // APPROVE: Execute live Cashfree refund and access revocation via PaymentService
+    const processedRefund = await PaymentService.processRefund({
+      transactionId: refund.transactionId,
+      requestedBy: adminId,
+      reason: reason || refund.reason || "Approved by Admin",
+      isAdmin: true,
+      existingRefundId: refund.id,
     });
 
     await AuditLogger.log({
       userId: adminId,
       event: "ADMIN_REFUND_APPROVED",
-      metadata: { refundId, transactionId: refund.transactionId, amountPaise: refund.amountPaise },
+      metadata: {
+        refundId,
+        transactionId: refund.transactionId,
+        amountPaise: refund.amountPaise,
+        providerRefundId: processedRefund.providerRefundId,
+      },
     });
 
-    return updatedRefund;
+    return processedRefund;
   }
 
   // =========================================================================

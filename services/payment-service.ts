@@ -30,11 +30,20 @@ export interface VerifyPaymentParams {
   razorpaySignature?: string;
 }
 
+export interface RequestRefundParams {
+  transactionId: string;
+  requestedBy: string;
+  reason: string;
+  notes?: string;
+  isAdmin?: boolean;
+}
+
 export interface ProcessRefundParams {
   transactionId: string;
   requestedBy: string;
   reason?: string;
   isAdmin?: boolean;
+  existingRefundId?: string;
 }
 
 export class PaymentService {
@@ -744,10 +753,76 @@ export class PaymentService {
   }
 
   /**
+   * Request Refund (Moderated learner flow - creates PENDING refund record)
+   */
+  static async requestRefund(params: RequestRefundParams) {
+    const { transactionId, requestedBy, reason, notes, isAdmin } = params;
+
+    const transaction = await prisma.paymentTransaction.findUnique({
+      where: { id: transactionId },
+    });
+
+    if (!transaction) {
+      throw new Error("NOT_FOUND: Transaction record not found.");
+    }
+
+    if (!isAdmin && transaction.userId !== requestedBy) {
+      throw new Error("FORBIDDEN: You can only request refunds for your own transactions.");
+    }
+
+    if (transaction.status !== "CAPTURED") {
+      throw new Error(
+        `INVALID_STATE: Only captured payments can be refunded (current: ${transaction.status}).`
+      );
+    }
+
+    // Check if there is an existing pending, requested, or approved refund request
+    const pendingRefund = await prisma.refund.findFirst({
+      where: {
+        transactionId,
+        status: { in: ["PENDING", "REFUND_REQUESTED", "APPROVED"] },
+      },
+    });
+
+    if (pendingRefund) {
+      throw new Error("CONFLICT: A refund request is already pending review for this purchase.");
+    }
+
+    const completedRefund = await prisma.refund.findFirst({
+      where: {
+        transactionId,
+        status: "REFUNDED",
+      },
+    });
+
+    if (completedRefund) {
+      throw new Error("CONFLICT: This transaction has already been refunded.");
+    }
+
+    const fullReason = notes && notes.trim()
+      ? `${reason.trim()} - Details: ${notes.trim()}`
+      : reason.trim();
+
+    // Create the refund request with status PENDING
+    const refundRecord = await prisma.refund.create({
+      data: {
+        transactionId: transaction.id,
+        amountPaise: transaction.amountPaise,
+        currency: transaction.currency,
+        reason: fullReason,
+        status: "PENDING",
+        requestedBy,
+      },
+    });
+
+    return refundRecord;
+  }
+
+  /**
    * Process Refund Request via Cashfree
    */
   static async processRefund(params: ProcessRefundParams) {
-    const { transactionId, requestedBy, reason, isAdmin } = params;
+    const { transactionId, requestedBy, reason, isAdmin, existingRefundId } = params;
 
     const transaction = await prisma.paymentTransaction.findUnique({
       where: { id: transactionId },
@@ -794,19 +869,42 @@ export class PaymentService {
       }
     }
 
-    // Create Refund log
-    const refundRecord = await prisma.refund.create({
-      data: {
-        transactionId: transaction.id,
-        providerRefundId,
-        amountPaise: transaction.amountPaise,
-        currency: transaction.currency,
-        reason: reason || "Refund approved",
-        status: "REFUNDED",
-        requestedBy,
-        approvedBy: isAdmin ? requestedBy : null,
-      },
-    });
+    // Find existing pending or matching refund if exists
+    let refundRecord;
+    const targetRefundId = existingRefundId || (
+      await prisma.refund.findFirst({
+        where: {
+          transactionId: transaction.id,
+          status: { in: ["PENDING", "REFUND_REQUESTED", "APPROVED"] },
+        },
+      })
+    )?.id;
+
+    if (targetRefundId) {
+      refundRecord = await prisma.refund.update({
+        where: { id: targetRefundId },
+        data: {
+          providerRefundId,
+          status: "REFUNDED",
+          approvedBy: requestedBy,
+          reason: reason || undefined,
+        },
+      });
+    } else {
+      // Create Refund log
+      refundRecord = await prisma.refund.create({
+        data: {
+          transactionId: transaction.id,
+          providerRefundId,
+          amountPaise: transaction.amountPaise,
+          currency: transaction.currency,
+          reason: reason || "Refund approved",
+          status: "REFUNDED",
+          requestedBy,
+          approvedBy: isAdmin ? requestedBy : null,
+        },
+      });
+    }
 
     // Update Transaction status
     await prisma.paymentTransaction.update({

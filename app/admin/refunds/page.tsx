@@ -35,9 +35,9 @@ export default function AdminRefundsPage() {
 
   const statusTabs = [
     { label: "All Refunds", value: "ALL" },
-    { label: "Pending Review", value: "REFUND_REQUESTED", badge: "Action" },
+    { label: "Pending Review", value: "PENDING", badge: "Action" },
     { label: "Approved / Refunded", value: "REFUNDED" },
-    { label: "Rejected / Failed", value: "REFUND_FAILED" },
+    { label: "Rejected", value: "REJECTED" },
   ];
 
   useEffect(() => {
@@ -183,9 +183,9 @@ export default function AdminRefundsPage() {
               className="h-10 px-3 bg-slate-100 border-none rounded-2xl text-xs font-bold text-slate-700 outline-none"
             >
               <option value="ALL">ALL REFUND STATUSES</option>
-              <option value="REFUND_REQUESTED">PENDING REVIEW</option>
+              <option value="PENDING">PENDING REVIEW</option>
               <option value="REFUNDED">APPROVED / REFUNDED</option>
-              <option value="REFUND_FAILED">REJECTED / FAILED</option>
+              <option value="REJECTED">REJECTED</option>
             </select>
           </div>
         </Card>
@@ -231,7 +231,7 @@ export default function AdminRefundsPage() {
                       </td>
                       <td className="p-4 text-slate-500 font-medium">{new Date(ref.createdAt).toLocaleDateString("en-IN")}</td>
                       <td className="p-4 text-right">
-                        {ref.status === "REFUND_REQUESTED" && (
+                        {(ref.status === "PENDING" || ref.status === "REFUND_REQUESTED") && (
                           <button
                             onClick={() => setSelectedRefund(ref)}
                             className="px-3 py-1.5 rounded-xl bg-amber-50 hover:bg-amber-100 text-amber-900 border border-amber-200 text-xs font-bold inline-flex items-center gap-1 transition-colors cursor-pointer"
@@ -294,6 +294,9 @@ export default function AdminRefundsPage() {
                 <div className="p-3 bg-slate-50 rounded-xl space-y-1">
                   <div><strong>Refund Amount:</strong> <span className="font-bold text-emerald-600">{formatCurrency(selectedRefund.amountRupees)}</span></div>
                   <div><strong>Requester:</strong> {selectedRefund.requestedBy}</div>
+                  {selectedRefund.internalReference && <div><strong>Order Ref:</strong> <span className="font-mono">{selectedRefund.internalReference}</span></div>}
+                  {selectedRefund.providerOrderId && <div><strong>Gateway Order ID:</strong> <span className="font-mono">{selectedRefund.providerOrderId}</span></div>}
+                  {selectedRefund.providerPaymentId && <div><strong>Gateway Payment ID:</strong> <span className="font-mono">{selectedRefund.providerPaymentId}</span></div>}
                   <div><strong>Reason:</strong> {selectedRefund.reason || "No reason specified"}</div>
                   <div><strong>Requested:</strong> {new Date(selectedRefund.createdAt).toLocaleString("en-IN")}</div>
                 </div>
