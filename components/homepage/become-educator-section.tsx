@@ -2,7 +2,7 @@
 
 import React from "react";
 import Link from "next/link";
-import { ArrowRight, CheckCircle2, Award, BookOpen, Video, TrendingUp } from "lucide-react";
+import { ArrowRight, CheckCircle2, Award, BookOpen, Video, TrendingUp, Star, Quote } from "lucide-react";
 import { GlassButton } from "@/components/glass/glass-button";
 
 export function BecomeEducatorSection() {
@@ -60,8 +60,43 @@ export function BecomeEducatorSection() {
               </div>
             </div>
 
-            {/* Right Graphics Badge */}
-            <div className="lg:col-span-5">
+            {/* Right Column Graphics */}
+            <div className="lg:col-span-5 space-y-4">
+              {/* Teacher Testimonial Card */}
+              <div className="p-5 sm:p-6 rounded-3xl bg-[#083F3D] border border-[#1B6863] shadow-xl space-y-3.5 text-left relative backdrop-blur-sm">
+                <div className="flex items-start justify-between gap-3">
+                  <div className="flex items-center gap-3 min-w-0">
+                    <img
+                      src="/images/educators/kavita-deshmukh.jpg"
+                      alt="Dr. Kavita Deshmukh"
+                      className="w-11 h-11 rounded-2xl object-cover object-top ring-2 ring-[#2A8C84]/40 shadow-md shrink-0"
+                    />
+                    <div className="min-w-0">
+                      <h4 className="text-sm font-black text-white leading-tight truncate">Dr. Kavita Deshmukh</h4>
+                      <p className="text-xs text-teal-100/70 font-medium truncate">Senior Mathematics Educator</p>
+                    </div>
+                  </div>
+
+                  <div className="p-2.5 rounded-2xl bg-[#0F5C5A] text-[#F2C14E] shrink-0 shadow-inner">
+                    <Quote className="h-4 w-4" />
+                  </div>
+                </div>
+
+                <p className="text-xs sm:text-[13px] text-teal-100/90 leading-relaxed italic">
+                  &ldquo;Teaching on EduConnects gave me 100% curriculum autonomy and dependable automated payouts. My live problem-solving batches fill up within days.&rdquo;
+                </p>
+
+                <div className="flex items-center justify-between pt-2 border-t border-[#1B6863]/60 text-xs">
+                  <div className="flex items-center gap-1 text-[#F2C14E]">
+                    {Array.from({ length: 5 }).map((_, i) => (
+                      <Star key={i} className="h-3.5 w-3.5 fill-[#F2C14E]" />
+                    ))}
+                  </div>
+                  <span className="text-[11px] font-bold text-teal-200">5.0 Verified Educator</span>
+                </div>
+              </div>
+
+              {/* Full IP Ownership Card */}
               <div className="p-6 rounded-3xl bg-[#083F3D] border border-[#1B6863] shadow-xl space-y-4 text-left">
                 <div className="flex items-center gap-3">
                   <div className="p-3 rounded-2xl bg-[#0F5C5A] text-[#F2C14E]">
