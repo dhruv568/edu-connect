@@ -148,13 +148,13 @@ export function PromotionalBannerCarousel({
     setCurrentIndex(index);
   };
 
-  // 10-second autoplay with pause on hover
+  // 3-second autoplay with pause on hover
   useEffect(() => {
     if (total <= 1 || isHovered) return;
 
     const interval = setInterval(() => {
       nextSlide();
-    }, 10000); // 10 seconds
+    }, 3000); // 3 seconds
 
     return () => clearInterval(interval);
   }, [total, isHovered, nextSlide]);
