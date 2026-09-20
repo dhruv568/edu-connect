@@ -25,62 +25,385 @@ import {
   Star,
 } from "lucide-react";
 
-export default function AboutPage() {
-  const [themeMode, setThemeMode] = useState<"educator" | "main">(() => {
-    if (typeof window !== "undefined") {
-      const hostname = window.location.hostname.toLowerCase();
-      const params = new URLSearchParams(window.location.search);
-      const themeParam = params.get("theme") || params.get("site");
-      if (themeParam === "educator" || themeParam === "educators" || themeParam === "teacher") {
-        return "educator";
-      }
-      if (themeParam === "main" || themeParam === "default") {
-        return "main";
+type AboutThemeMode = "main" | "learner" | "educator";
+
+interface AboutThemeConfig {
+  containerBg: string;
+  blob1Bg: string;
+  blob2Bg: string;
+  badge: {
+    bg: string;
+    border: string;
+    text: string;
+    icon: string;
+  };
+  headingGradient: string;
+  heroText: string;
+  statsCard: {
+    border: string;
+    hoverBorder: string;
+    numberText: string;
+  };
+  founder: {
+    border: string;
+    gradientVia: string;
+    radialColor: string;
+    portraitBorder: string;
+    badgeBg: string;
+    badgeBorder: string;
+    badgeText: string;
+    leadershipBadge: string;
+    subtitleText: string;
+    highlightBox: string;
+    highlightText: string;
+    visionCardBorder: string;
+    visionIconBg: string;
+    visionIconText: string;
+    taglineBorder: string;
+    taglineText: string;
+  };
+  interactivePedagogyTag: string;
+  philosophyBadge: string;
+  cardBorder: string;
+  pillars: {
+    pillar1: { bg: string; text: string };
+    pillar2: { bg: string; text: string };
+    pillar3: { bg: string; text: string };
+  };
+  trustBadge: {
+    bg: string;
+    text: string;
+  };
+  verification: {
+    stage1: string;
+    stage2: string;
+    stage3: string;
+    stage4: string;
+    badgeText: string;
+    checkIcon: string;
+  };
+  faculty: {
+    ring: string;
+    subjectText: string;
+  };
+  ctaBanner: {
+    bg: string;
+    border: string;
+    subtitle: string;
+    primaryBtnText: string;
+    primaryBtnHover: string;
+  };
+  navbarVariant: "default" | "student" | "teacher";
+  footerVariant: "default" | "student" | "teacher";
+}
+
+const THEME_CONFIGS: Record<AboutThemeMode, AboutThemeConfig> = {
+  main: {
+    containerBg: "bg-[#F2FAF8]/40",
+    blob1Bg: "bg-[#0F5C5A]/10",
+    blob2Bg: "bg-[#16706E]/10",
+    badge: {
+      bg: "bg-[#E6F0EF]",
+      border: "border-[#DCE5E4]",
+      text: "text-[#0F5C5A]",
+      icon: "text-[#0F5C5A]",
+    },
+    headingGradient: "bg-gradient-to-r from-[#0F5C5A] via-[#16706E] to-[#083F3D] bg-clip-text text-transparent",
+    heroText: "text-slate-600 font-normal",
+    statsCard: {
+      border: "border-[#DCE5E4]/80",
+      hoverBorder: "hover:border-[#0F5C5A]/30",
+      numberText: "text-[#0F5C5A]",
+    },
+    founder: {
+      border: "border-teal-500/20",
+      gradientVia: "via-[#06302E]/90",
+      radialColor: "rgba(15,92,90,0.25)",
+      portraitBorder: "border-teal-400/40",
+      badgeBg: "bg-teal-950/80",
+      badgeBorder: "border-teal-400/30",
+      badgeText: "text-teal-300",
+      leadershipBadge: "bg-teal-500/20 border-teal-400/40 text-teal-200",
+      subtitleText: "text-teal-100",
+      highlightBox: "bg-teal-950/60 border-teal-400/30",
+      highlightText: "text-teal-200",
+      visionCardBorder: "border-teal-400/20",
+      visionIconBg: "bg-teal-500/20",
+      visionIconText: "text-teal-300",
+      taglineBorder: "border-teal-500/30",
+      taglineText: "text-teal-200",
+    },
+    interactivePedagogyTag: "text-teal-300",
+    philosophyBadge: "text-[#0F5C5A]",
+    cardBorder: "border-[#DCE5E4]/80 hover:border-[#0F5C5A]/30",
+    pillars: {
+      pillar1: { bg: "bg-[#E6F0EF]", text: "text-[#0F5C5A]" },
+      pillar2: { bg: "bg-[#EAF5F4]", text: "text-[#16706E]" },
+      pillar3: { bg: "bg-[#E6F0EF]", text: "text-[#083F3D]" },
+    },
+    trustBadge: {
+      bg: "bg-[#E6F0EF]",
+      text: "text-[#0F5C5A]",
+    },
+    verification: {
+      stage1: "text-[#0F5C5A] bg-[#E6F0EF] border-[#DCE5E4]",
+      stage2: "text-[#16706E] bg-[#EAF5F4] border-[#CDE5E3]",
+      stage3: "text-[#0F5C5A] bg-[#E6F0EF] border-[#DCE5E4]",
+      stage4: "text-[#083F3D] bg-slate-100 border-slate-200",
+      badgeText: "text-[#0F5C5A]",
+      checkIcon: "text-teal-600",
+    },
+    faculty: {
+      ring: "ring-[#0F5C5A]/25",
+      subjectText: "text-[#0F5C5A]",
+    },
+    ctaBanner: {
+      bg: "bg-gradient-to-r from-[#083F3D] via-[#0F5C5A] to-[#083F3D]",
+      border: "border-[#1B6863]/40",
+      subtitle: "text-teal-100",
+      primaryBtnText: "text-[#083F3D]",
+      primaryBtnHover: "hover:bg-teal-50",
+    },
+    navbarVariant: "default",
+    footerVariant: "default",
+  },
+  educator: {
+    containerBg: "bg-[#F0FAF5]/40",
+    blob1Bg: "bg-[#16805B]/10",
+    blob2Bg: "bg-[#35A979]/10",
+    badge: {
+      bg: "bg-[#E6F7F0]",
+      border: "border-[#A7F3D0]",
+      text: "text-[#0D5C41]",
+      icon: "text-[#16805B]",
+    },
+    headingGradient: "bg-gradient-to-r from-[#16805B] via-[#0D5C41] to-[#16805B] bg-clip-text text-transparent",
+    heroText: "text-slate-700 font-normal",
+    statsCard: {
+      border: "border-[#A7F3D0]/60",
+      hoverBorder: "hover:border-[#16805B]/40",
+      numberText: "text-[#16805B]",
+    },
+    founder: {
+      border: "border-emerald-500/20",
+      gradientVia: "via-emerald-950/85",
+      radialColor: "rgba(22,128,91,0.25)",
+      portraitBorder: "border-emerald-400/40",
+      badgeBg: "bg-emerald-950/80",
+      badgeBorder: "border-emerald-400/30",
+      badgeText: "text-emerald-300",
+      leadershipBadge: "bg-emerald-500/20 border-emerald-400/40 text-emerald-200",
+      subtitleText: "text-emerald-100",
+      highlightBox: "bg-emerald-950/60 border-emerald-400/30",
+      highlightText: "text-emerald-200",
+      visionCardBorder: "border-emerald-400/20",
+      visionIconBg: "bg-emerald-500/20",
+      visionIconText: "text-emerald-300",
+      taglineBorder: "border-emerald-500/30",
+      taglineText: "text-emerald-200",
+    },
+    interactivePedagogyTag: "text-emerald-400",
+    philosophyBadge: "text-[#16805B]",
+    cardBorder: "border-[#A7F3D0]/60 hover:border-[#16805B]/30",
+    pillars: {
+      pillar1: { bg: "bg-[#E6F7F0]", text: "text-[#16805B]" },
+      pillar2: { bg: "bg-[#E8F8F2]", text: "text-[#0D5C41]" },
+      pillar3: { bg: "bg-[#E6F7F0]", text: "text-[#35A979]" },
+    },
+    trustBadge: {
+      bg: "bg-[#E6F7F0]",
+      text: "text-[#16805B]",
+    },
+    verification: {
+      stage1: "text-[#16805B] bg-[#E6F7F0] border-[#A7F3D0]",
+      stage2: "text-[#0D5C41] bg-[#E8F8F2] border-[#A7F3D0]",
+      stage3: "text-[#16805B] bg-[#E6F7F0] border-[#A7F3D0]",
+      stage4: "text-[#0D5C41] bg-slate-100 border-slate-200",
+      badgeText: "text-[#16805B]",
+      checkIcon: "text-emerald-500",
+    },
+    faculty: {
+      ring: "ring-[#16805B]/25",
+      subjectText: "text-[#16805B]",
+    },
+    ctaBanner: {
+      bg: "bg-gradient-to-r from-[#0D5C41] via-[#16805B] to-[#0D5C41]",
+      border: "border-[#16805B]/40",
+      subtitle: "text-emerald-100",
+      primaryBtnText: "text-[#0D5C41]",
+      primaryBtnHover: "hover:bg-emerald-50",
+    },
+    navbarVariant: "teacher",
+    footerVariant: "teacher",
+  },
+  learner: {
+    containerBg: "bg-[#F3F6FF]/40",
+    blob1Bg: "bg-[#2563EB]/10",
+    blob2Bg: "bg-[#4F46E5]/10",
+    badge: {
+      bg: "bg-[#EFF6FF]",
+      border: "border-[#BFDBFE]",
+      text: "text-[#1D4ED8]",
+      icon: "text-[#2563EB]",
+    },
+    headingGradient: "bg-gradient-to-r from-[#2563EB] via-[#4F46E5] to-[#1D4ED8] bg-clip-text text-transparent",
+    heroText: "text-slate-600 font-normal",
+    statsCard: {
+      border: "border-blue-200/80",
+      hoverBorder: "hover:border-blue-500/40",
+      numberText: "text-[#2563EB]",
+    },
+    founder: {
+      border: "border-blue-500/20",
+      gradientVia: "via-[#111C44]/90",
+      radialColor: "rgba(37,99,235,0.25)",
+      portraitBorder: "border-blue-400/40",
+      badgeBg: "bg-blue-950/80",
+      badgeBorder: "border-blue-400/30",
+      badgeText: "text-blue-300",
+      leadershipBadge: "bg-blue-500/20 border-blue-400/40 text-blue-200",
+      subtitleText: "text-blue-100",
+      highlightBox: "bg-blue-950/60 border-blue-400/30",
+      highlightText: "text-blue-200",
+      visionCardBorder: "border-blue-400/20",
+      visionIconBg: "bg-blue-500/20",
+      visionIconText: "text-blue-300",
+      taglineBorder: "border-blue-500/30",
+      taglineText: "text-blue-200",
+    },
+    interactivePedagogyTag: "text-blue-400",
+    philosophyBadge: "text-[#2563EB]",
+    cardBorder: "border-blue-200/80 hover:border-blue-500/30",
+    pillars: {
+      pillar1: { bg: "bg-[#EFF6FF]", text: "text-[#2563EB]" },
+      pillar2: { bg: "bg-[#EEF2FF]", text: "text-[#4F46E5]" },
+      pillar3: { bg: "bg-[#EFF6FF]", text: "text-[#1D4ED8]" },
+    },
+    trustBadge: {
+      bg: "bg-[#EFF6FF]",
+      text: "text-[#2563EB]",
+    },
+    verification: {
+      stage1: "text-[#2563EB] bg-[#EFF6FF] border-[#BFDBFE]",
+      stage2: "text-[#4F46E5] bg-[#EEF2FF] border-[#C7D2FE]",
+      stage3: "text-[#2563EB] bg-[#EFF6FF] border-[#BFDBFE]",
+      stage4: "text-[#1E3A8A] bg-slate-100 border-slate-200",
+      badgeText: "text-[#2563EB]",
+      checkIcon: "text-blue-600",
+    },
+    faculty: {
+      ring: "ring-[#2563EB]/25",
+      subjectText: "text-[#2563EB]",
+    },
+    ctaBanner: {
+      bg: "bg-gradient-to-r from-[#1E3185] via-[#243B9B] to-[#1E3185]",
+      border: "border-[#3157D5]/40",
+      subtitle: "text-blue-100",
+      primaryBtnText: "text-[#1E3185]",
+      primaryBtnHover: "hover:bg-blue-50",
+    },
+    navbarVariant: "student",
+    footerVariant: "student",
+  },
+};
+
+function detectTheme(): AboutThemeMode {
+  if (typeof window === "undefined") return "main";
+
+  const params = new URLSearchParams(window.location.search);
+  const themeParam = (
+    params.get("theme") ||
+    params.get("site") ||
+    params.get("role") ||
+    params.get("portal") ||
+    ""
+  ).toLowerCase();
+
+  if (["learner", "learners", "student", "students"].includes(themeParam)) {
+    return "learner";
+  }
+  if (["educator", "educators", "teacher", "teachers"].includes(themeParam)) {
+    return "educator";
+  }
+  if (["main", "default", "home"].includes(themeParam)) {
+    return "main";
+  }
+
+  const hostname = window.location.hostname.toLowerCase();
+  if (
+    hostname.startsWith("learners.") ||
+    hostname.startsWith("learner.") ||
+    hostname.startsWith("students.") ||
+    hostname.startsWith("student.")
+  ) {
+    return "learner";
+  }
+  if (
+    hostname.startsWith("educators.") ||
+    hostname.startsWith("educator.") ||
+    hostname.startsWith("teachers.") ||
+    hostname.startsWith("teacher.")
+  ) {
+    return "educator";
+  }
+
+  if (typeof document !== "undefined" && document.referrer) {
+    try {
+      const refUrl = new URL(document.referrer);
+      const refHost = refUrl.hostname.toLowerCase();
+      const refPath = refUrl.pathname.toLowerCase();
+      if (
+        refHost.startsWith("learners.") ||
+        refHost.startsWith("learner.") ||
+        refHost.startsWith("students.") ||
+        refHost.startsWith("student.") ||
+        refPath.startsWith("/student") ||
+        refPath.startsWith("/exam")
+      ) {
+        return "learner";
       }
       if (
-        hostname.startsWith("educators.") ||
-        hostname.startsWith("educator.") ||
-        hostname.startsWith("teachers.") ||
-        hostname.startsWith("teacher.") ||
-        hostname === "educators.educonnects.co.in"
+        refHost.startsWith("educators.") ||
+        refHost.startsWith("educator.") ||
+        refHost.startsWith("teachers.") ||
+        refHost.startsWith("teacher.") ||
+        refPath.startsWith("/teacher")
       ) {
         return "educator";
       }
+    } catch {
+      // Ignore invalid referrer URL
     }
-    return "main";
+  }
+
+  return "main";
+}
+
+interface AboutContentProps {
+  initialTheme?: AboutThemeMode;
+}
+
+function AboutContent({ initialTheme }: AboutContentProps = {}) {
+  const [themeMode, setThemeMode] = useState<AboutThemeMode>(() => {
+    if (initialTheme) return initialTheme;
+    return detectTheme();
   });
 
   useEffect(() => {
+    if (initialTheme) {
+      setThemeMode(initialTheme);
+      return;
+    }
     const updateTheme = () => {
-      if (typeof window !== "undefined") {
-        const hostname = window.location.hostname.toLowerCase();
-        const params = new URLSearchParams(window.location.search);
-        const themeParam = params.get("theme") || params.get("site");
-
-        if (themeParam === "educator" || themeParam === "educators" || themeParam === "teacher") {
-          setThemeMode("educator");
-        } else if (themeParam === "main" || themeParam === "default") {
-          setThemeMode("main");
-        } else if (
-          hostname.startsWith("educators.") ||
-          hostname.startsWith("educator.") ||
-          hostname.startsWith("teachers.") ||
-          hostname.startsWith("teacher.") ||
-          hostname === "educators.educonnects.co.in"
-        ) {
-          setThemeMode("educator");
-        } else {
-          setThemeMode("main");
-        }
-      }
+      setThemeMode(detectTheme());
     };
 
     updateTheme();
     window.addEventListener("popstate", updateTheme);
     return () => window.removeEventListener("popstate", updateTheme);
-  }, []);
+  }, [initialTheme]);
 
-  const isEducator = themeMode === "educator";
+  const theme = THEME_CONFIGS[themeMode] || THEME_CONFIGS.main;
 
   const stats = [
     { label: "Active Students", value: "15,000+", sub: "Enrolled globally" },
@@ -95,36 +418,28 @@ export default function AboutPage() {
       title: "Academic Audit",
       desc: "Every educator's university degrees, STEM certifications, and institutional background are verified.",
       icon: FileCheck,
-      color: isEducator
-        ? "text-[#16805B] bg-[#E6F7F0] border-[#A7F3D0]"
-        : "text-[#0F5C5A] bg-[#E6F0EF] border-[#DCE5E4]",
+      color: theme.verification.stage1,
     },
     {
       num: "02",
       title: "Pedagogy Screening",
       desc: "Educators conduct a live mock teaching session to evaluate conceptual clarity and student empathy.",
       icon: Video,
-      color: isEducator
-        ? "text-[#0D5C41] bg-[#E8F8F2] border-[#A7F3D0]"
-        : "text-[#16706E] bg-[#EAF5F4] border-[#CDE5E3]",
+      color: theme.verification.stage2,
     },
     {
       num: "03",
       title: "Hardware & AV Check",
       desc: "Instructors must pass high-definition audio, digital pen tablet, and fiber-connection tests.",
       icon: Headphones,
-      color: isEducator
-        ? "text-[#16805B] bg-[#E6F7F0] border-[#A7F3D0]"
-        : "text-[#0F5C5A] bg-[#E6F0EF] border-[#DCE5E4]",
+      color: theme.verification.stage3,
     },
     {
       num: "04",
       title: "Continuous Governance",
       desc: "Student ratings are monitored live, with escrow payouts held until session completion.",
       icon: ShieldCheck,
-      color: isEducator
-        ? "text-[#0D5C41] bg-slate-100 border-slate-200"
-        : "text-[#083F3D] bg-slate-100 border-slate-200",
+      color: theme.verification.stage4,
     },
   ];
 
@@ -160,30 +475,26 @@ export default function AboutPage() {
 
   return (
     <div
-      data-theme={isEducator ? "educator" : "main"}
-      className={`min-h-screen flex flex-col ${
-        isEducator ? "bg-[#F0FAF5]/40" : "bg-[#F2FAF8]/40"
-      } relative overflow-hidden font-sans transition-colors duration-200`}
+      data-theme={themeMode}
+      className={`min-h-screen flex flex-col ${theme.containerBg} relative overflow-hidden font-sans transition-colors duration-200`}
     >
       {/* Background Decorative Ambient Blobs */}
       <div
-        className={`liquid-blob-1 top-20 left-1/4 pointer-events-none ${
-          isEducator ? "bg-[#16805B]/10" : "bg-[#0F5C5A]/10"
-        }`}
+        className={`liquid-blob-1 top-20 left-1/4 pointer-events-none ${theme.blob1Bg}`}
       />
       <div
-        className={`liquid-blob-2 top-1/2 right-10 pointer-events-none ${
-          isEducator ? "bg-[#35A979]/10" : "bg-[#16706E]/10"
-        }`}
+        className={`liquid-blob-2 top-1/2 right-10 pointer-events-none ${theme.blob2Bg}`}
       />
 
-      <FloatingNavbar variant={isEducator ? "teacher" : "default"} />
+      <FloatingNavbar variant={theme.navbarVariant} />
 
       <main className="flex-1 pt-32 pb-24 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 w-full space-y-24 relative z-10">
         {/* ========================================================================= */}
         {/* 1. ABOUT THE FOUNDER SECTION (FIRST SECTION BEFORE ALL EXISTING CONTENT) */}
         {/* ========================================================================= */}
-        <section className="relative rounded-3xl overflow-hidden shadow-2xl border border-emerald-500/20 bg-slate-950">
+        <section
+          className={`relative rounded-3xl overflow-hidden shadow-2xl border ${theme.founder.border} bg-slate-950`}
+        >
           {/* Banner Background with Subtle Gradient Overlay */}
           <div className="absolute inset-0 -z-0">
             <img
@@ -191,15 +502,24 @@ export default function AboutPage() {
               alt="EduConnects Banner"
               className="w-full h-full object-cover object-center filter brightness-[0.45] scale-105 transition-transform duration-700 hover:scale-100"
             />
-            <div className="absolute inset-0 bg-gradient-to-r from-slate-950/95 via-emerald-950/85 to-slate-950/95" />
-            <div className="absolute inset-0 bg-[radial-gradient(circle_at_top_right,rgba(22,128,91,0.25),transparent_50%)]" />
+            <div
+              className={`absolute inset-0 bg-gradient-to-r from-slate-950/95 ${theme.founder.gradientVia} to-slate-950/95`}
+            />
+            <div
+              className="absolute inset-0"
+              style={{
+                backgroundImage: `radial-gradient(circle at top right, ${theme.founder.radialColor}, transparent 50%)`,
+              }}
+            />
           </div>
 
           <div className="relative z-10 p-6 sm:p-10 lg:p-14 text-white">
             <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-12 items-center">
               {/* Founder Portrait Column */}
               <div className="lg:col-span-5 flex flex-col items-center text-center">
-                <div className="relative w-full max-w-[320px] sm:max-w-[360px] aspect-[4/5] rounded-3xl overflow-hidden shadow-2xl border-4 border-emerald-400/40 bg-slate-900 group">
+                <div
+                  className={`relative w-full max-w-[320px] sm:max-w-[360px] aspect-[4/5] rounded-3xl overflow-hidden shadow-2xl border-4 ${theme.founder.portraitBorder} bg-slate-900 group`}
+                >
                   <img
                     src="/images/educonnect-owner-photo.jpeg"
                     alt="Neeraj Shrivastava - Founder of EduConnects"
@@ -207,7 +527,9 @@ export default function AboutPage() {
                   />
                   <div className="absolute inset-0 bg-gradient-to-t from-slate-950/90 via-slate-950/20 to-transparent" />
                   <div className="absolute bottom-4 left-4 right-4 text-left">
-                    <span className="inline-block text-[10px] font-extrabold uppercase tracking-wider text-emerald-300 bg-emerald-950/80 px-2.5 py-0.5 rounded-full border border-emerald-400/30 mb-1">
+                    <span
+                      className={`inline-block text-[10px] font-extrabold uppercase tracking-wider ${theme.founder.badgeText} ${theme.founder.badgeBg} px-2.5 py-0.5 rounded-full border ${theme.founder.badgeBorder} mb-1`}
+                    >
                       Founder & Academic Leader
                     </span>
                     <div className="text-lg sm:text-xl font-black text-white">Neeraj Shrivastava</div>
@@ -219,8 +541,10 @@ export default function AboutPage() {
               {/* Founder Narrative & Vision/Mission Column */}
               <div className="lg:col-span-7 space-y-6">
                 <div className="space-y-3">
-                  <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-emerald-500/20 border border-emerald-400/40 text-emerald-200 text-xs font-bold uppercase tracking-wider">
-                    <GraduationCap className="h-3.5 w-3.5 text-emerald-400" />
+                  <div
+                    className={`inline-flex items-center gap-2 px-3 py-1 rounded-full ${theme.founder.leadershipBadge} text-xs font-bold uppercase tracking-wider`}
+                  >
+                    <GraduationCap className="h-3.5 w-3.5" />
                     <span>Leadership & Vision</span>
                   </div>
 
@@ -228,7 +552,9 @@ export default function AboutPage() {
                     About the Founder
                   </h2>
 
-                  <p className="text-base sm:text-lg font-medium text-emerald-100 leading-relaxed">
+                  <p
+                    className={`text-base sm:text-lg font-medium ${theme.founder.subtitleText} leading-relaxed`}
+                  >
                     Neeraj Shrivastava, Founder of EduConnects, brings over a decade of experience across education, academic leadership, technology and entrepreneurship.
                   </p>
 
@@ -236,16 +562,22 @@ export default function AboutPage() {
                     His journey began with B.Sc. in Mathematics (2002) and M.Sc. in Computer Science (2004). After preparing for the IAS in Delhi (2009–2011), he dedicated himself to education, working as a teacher at Aspirant International School and later at Rani Lakshmibai Public School, where he progressed from TGT to PGT. In 2023–24, he served as Principal at AVM Inter College, Lalitpur.
                   </p>
 
-                  <div className="p-3.5 sm:p-4 rounded-2xl bg-emerald-950/60 border border-emerald-400/30 text-xs sm:text-sm font-semibold text-emerald-200 leading-relaxed">
+                  <div
+                    className={`p-3.5 sm:p-4 rounded-2xl ${theme.founder.highlightBox} text-xs sm:text-sm font-semibold ${theme.founder.highlightText} leading-relaxed`}
+                  >
                     His transition from student → teacher → academic leader → entrepreneur inspired the creation of EduConnects in 2026.
                   </div>
                 </div>
 
                 {/* Our Vision & Our Mission Cards */}
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 pt-2">
-                  <div className="p-4 sm:p-5 rounded-2xl bg-white/10 border border-emerald-400/20 backdrop-blur-md space-y-2">
+                  <div
+                    className={`p-4 sm:p-5 rounded-2xl bg-white/10 border ${theme.founder.visionCardBorder} backdrop-blur-md space-y-2`}
+                  >
                     <div className="flex items-center gap-2">
-                      <div className="p-1.5 rounded-lg bg-emerald-500/20 text-emerald-300">
+                      <div
+                        className={`p-1.5 rounded-lg ${theme.founder.visionIconBg} ${theme.founder.visionIconText}`}
+                      >
                         <Target className="h-4 w-4" />
                       </div>
                       <h3 className="text-base sm:text-lg font-black text-white">
@@ -257,9 +589,13 @@ export default function AboutPage() {
                     </p>
                   </div>
 
-                  <div className="p-4 sm:p-5 rounded-2xl bg-white/10 border border-emerald-400/20 backdrop-blur-md space-y-2">
+                  <div
+                    className={`p-4 sm:p-5 rounded-2xl bg-white/10 border ${theme.founder.visionCardBorder} backdrop-blur-md space-y-2`}
+                  >
                     <div className="flex items-center gap-2">
-                      <div className="p-1.5 rounded-lg bg-emerald-500/20 text-emerald-300">
+                      <div
+                        className={`p-1.5 rounded-lg ${theme.founder.visionIconBg} ${theme.founder.visionIconText}`}
+                      >
                         <Heart className="h-4 w-4" />
                       </div>
                       <h3 className="text-base sm:text-lg font-black text-white">
@@ -273,7 +609,9 @@ export default function AboutPage() {
                 </div>
 
                 {/* Tagline */}
-                <div className="pt-3 border-t border-emerald-500/30 flex items-center justify-between flex-wrap gap-2 text-xs sm:text-sm font-bold text-emerald-200">
+                <div
+                  className={`pt-3 border-t ${theme.founder.taglineBorder} flex items-center justify-between flex-wrap gap-2 text-xs sm:text-sm font-bold ${theme.founder.taglineText}`}
+                >
                   <span>EduConnects — Connecting Education. Creating Opportunities.</span>
                 </div>
               </div>
@@ -284,35 +622,19 @@ export default function AboutPage() {
         {/* Hero Section */}
         <div className="text-center max-w-3xl mx-auto space-y-4">
           <div
-            className={`inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full text-xs font-bold uppercase tracking-wider shadow-2xs ${
-              isEducator
-                ? "bg-[#E6F7F0] border border-[#A7F3D0] text-[#0D5C41]"
-                : "bg-[#E6F0EF] border border-[#DCE5E4] text-[#0F5C5A]"
-            }`}
+            className={`inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full text-xs font-bold uppercase tracking-wider shadow-2xs ${theme.badge.bg} ${theme.badge.border} ${theme.badge.text}`}
           >
-            <Sparkles
-              className={`h-3.5 w-3.5 ${
-                isEducator ? "text-[#16805B]" : "text-[#0F5C5A]"
-              }`}
-            />
+            <Sparkles className={`h-3.5 w-3.5 ${theme.badge.icon}`} />
             <span>The EduConnects Vision</span>
           </div>
           <h1 className="text-4xl sm:text-5xl lg:text-6xl font-black text-slate-900 tracking-tight leading-tight">
             Connecting Education for{" "}
-            <span
-              className={
-                isEducator
-                  ? "bg-gradient-to-r from-[#16805B] via-[#0D5C41] to-[#16805B] bg-clip-text text-transparent"
-                  : "bg-gradient-to-r from-[#0F5C5A] via-[#16706E] to-[#083F3D] bg-clip-text text-transparent"
-              }
-            >
+            <span className={theme.headingGradient}>
               Every Curious Learner
             </span>
           </h1>
           <p
-            className={`text-base sm:text-lg ${
-              isEducator ? "text-slate-700 font-normal" : "text-slate-600 font-normal"
-            } leading-relaxed max-w-2xl mx-auto`}
+            className={`text-base sm:text-lg ${theme.heroText} leading-relaxed max-w-2xl mx-auto`}
           >
             EduConnects is built on the conviction that transparent flexible learning models, certified educators, and real-time interactive classrooms unlock academic excellence.
           </p>
@@ -323,16 +645,10 @@ export default function AboutPage() {
           {stats.map((s, idx) => (
             <GlassCard
               key={idx}
-              className={`p-6 text-center space-y-1 border-2 bg-white/90 shadow-xs transition-all ${
-                isEducator
-                  ? "border-[#A7F3D0]/60 hover:border-[#16805B]/40"
-                  : "border-[#DCE5E4]/80 hover:border-[#0F5C5A]/30"
-              }`}
+              className={`p-6 text-center space-y-1 border-2 bg-white/90 shadow-xs transition-all ${theme.statsCard.border} ${theme.statsCard.hoverBorder}`}
             >
               <div
-                className={`text-3xl sm:text-4xl font-black ${
-                  isEducator ? "text-[#16805B]" : "text-[#0F5C5A]"
-                }`}
+                className={`text-3xl sm:text-4xl font-black ${theme.statsCard.numberText}`}
               >
                 {s.value}
               </div>
@@ -357,9 +673,7 @@ export default function AboutPage() {
               <div className="absolute inset-0 bg-gradient-to-t from-slate-950/80 via-transparent to-transparent" />
               <div className="absolute bottom-6 left-6 right-6 text-white space-y-1">
                 <span
-                  className={`text-xs font-extrabold uppercase tracking-wider ${
-                    isEducator ? "text-emerald-400" : "text-teal-300"
-                  }`}
+                  className={`text-xs font-extrabold uppercase tracking-wider ${theme.interactivePedagogyTag}`}
                 >
                   Interactive Pedagogy
                 </span>
@@ -373,9 +687,7 @@ export default function AboutPage() {
             {/* Floating Trust Chip */}
             <div className="absolute -top-4 -right-4 bg-white p-3.5 rounded-2xl shadow-xl border border-slate-100 hidden sm:flex items-center gap-3">
               <div
-                className={`p-2.5 rounded-xl ${
-                  isEducator ? "bg-[#E6F7F0] text-[#16805B]" : "bg-[#E6F0EF] text-[#0F5C5A]"
-                }`}
+                className={`p-2.5 rounded-xl ${theme.trustBadge.bg} ${theme.trustBadge.text}`}
               >
                 <ShieldCheck className="h-6 w-6" />
               </div>
@@ -390,9 +702,7 @@ export default function AboutPage() {
           <div className="lg:col-span-6 space-y-6">
             <div className="space-y-3">
               <span
-                className={`text-xs font-extrabold uppercase tracking-widest ${
-                  isEducator ? "text-[#16805B]" : "text-[#0F5C5A]"
-                }`}
+                className={`text-xs font-extrabold uppercase tracking-widest ${theme.philosophyBadge}`}
               >
                 Our Core Philosophy
               </span>
@@ -406,16 +716,10 @@ export default function AboutPage() {
 
             <div className="space-y-4">
               <div
-                className={`flex items-start gap-4 p-4 rounded-2xl bg-white border ${
-                  isEducator ? "border-[#A7F3D0]/60" : "border-[#DCE5E4]/80"
-                } shadow-xs`}
+                className={`flex items-start gap-4 p-4 rounded-2xl bg-white border ${theme.cardBorder} shadow-xs`}
               >
                 <div
-                  className={`p-2.5 rounded-xl shrink-0 ${
-                    isEducator
-                      ? "bg-[#E6F7F0] text-[#16805B]"
-                      : "bg-[#E6F0EF] text-[#0F5C5A]"
-                  }`}
+                  className={`p-2.5 rounded-xl shrink-0 ${theme.pillars.pillar1.bg} ${theme.pillars.pillar1.text}`}
                 >
                   <Target className="h-5 w-5" />
                 </div>
@@ -428,16 +732,10 @@ export default function AboutPage() {
               </div>
 
               <div
-                className={`flex items-start gap-4 p-4 rounded-2xl bg-white border ${
-                  isEducator ? "border-[#A7F3D0]/60" : "border-[#DCE5E4]/80"
-                } shadow-xs`}
+                className={`flex items-start gap-4 p-4 rounded-2xl bg-white border ${theme.cardBorder} shadow-xs`}
               >
                 <div
-                  className={`p-2.5 rounded-xl shrink-0 ${
-                    isEducator
-                      ? "bg-[#E8F8F2] text-[#0D5C41]"
-                      : "bg-[#EAF5F4] text-[#16706E]"
-                  }`}
+                  className={`p-2.5 rounded-xl shrink-0 ${theme.pillars.pillar2.bg} ${theme.pillars.pillar2.text}`}
                 >
                   <Video className="h-5 w-5" />
                 </div>
@@ -450,16 +748,10 @@ export default function AboutPage() {
               </div>
 
               <div
-                className={`flex items-start gap-4 p-4 rounded-2xl bg-white border ${
-                  isEducator ? "border-[#A7F3D0]/60" : "border-[#DCE5E4]/80"
-                } shadow-xs`}
+                className={`flex items-start gap-4 p-4 rounded-2xl bg-white border ${theme.cardBorder} shadow-xs`}
               >
                 <div
-                  className={`p-2.5 rounded-xl shrink-0 ${
-                    isEducator
-                      ? "bg-[#E6F7F0] text-[#35A979]"
-                      : "bg-[#E6F0EF] text-[#083F3D]"
-                  }`}
+                  className={`p-2.5 rounded-xl shrink-0 ${theme.pillars.pillar3.bg} ${theme.pillars.pillar3.text}`}
                 >
                   <Award className="h-5 w-5" />
                 </div>
@@ -478,9 +770,7 @@ export default function AboutPage() {
         <div className="space-y-8">
           <div className="text-center max-w-2xl mx-auto space-y-2">
             <span
-              className={`text-xs font-extrabold uppercase tracking-widest ${
-                isEducator ? "text-[#16805B]" : "text-[#0F5C5A]"
-              }`}
+              className={`text-xs font-extrabold uppercase tracking-widest ${theme.philosophyBadge}`}
             >
               Quality Assurance
             </span>
@@ -498,11 +788,7 @@ export default function AboutPage() {
               return (
                 <GlassCard
                   key={stage.num}
-                  className={`p-6 space-y-4 border-2 bg-white/90 shadow-xs flex flex-col justify-between transition-all ${
-                    isEducator
-                      ? "border-[#A7F3D0]/60 hover:border-[#16805B]/30"
-                      : "border-[#DCE5E4]/80 hover:border-[#0F5C5A]/30"
-                  }`}
+                  className={`p-6 space-y-4 border-2 bg-white/90 shadow-xs flex flex-col justify-between transition-all ${theme.cardBorder}`}
                 >
                   <div className="space-y-3">
                     <div className="flex items-center justify-between">
@@ -515,15 +801,9 @@ export default function AboutPage() {
                     <p className="text-xs text-slate-600 leading-relaxed">{stage.desc}</p>
                   </div>
                   <div
-                    className={`pt-2 flex items-center gap-1.5 text-[11px] font-bold ${
-                      isEducator ? "text-[#16805B]" : "text-[#0F5C5A]"
-                    }`}
+                    className={`pt-2 flex items-center gap-1.5 text-[11px] font-bold ${theme.verification.badgeText}`}
                   >
-                    <CheckCircle2
-                      className={`h-3.5 w-3.5 ${
-                        isEducator ? "text-emerald-500" : "text-teal-600"
-                      }`}
-                    />
+                    <CheckCircle2 className={`h-3.5 w-3.5 ${theme.verification.checkIcon}`} />
                     Audit Mandatory
                   </div>
                 </GlassCard>
@@ -536,9 +816,7 @@ export default function AboutPage() {
         <div className="space-y-8">
           <div className="text-center max-w-2xl mx-auto space-y-2">
             <span
-              className={`text-xs font-extrabold uppercase tracking-widest ${
-                isEducator ? "text-[#16805B]" : "text-[#0F5C5A]"
-              }`}
+              className={`text-xs font-extrabold uppercase tracking-widest ${theme.philosophyBadge}`}
             >
               Faculty Spotlight
             </span>
@@ -554,27 +832,17 @@ export default function AboutPage() {
             {facultySpotlight.map((f, idx) => (
               <GlassCard
                 key={idx}
-                className={`p-6 space-y-4 border-2 bg-white/90 shadow-xs transition-all ${
-                  isEducator
-                    ? "border-[#A7F3D0]/60 hover:border-[#16805B]/30"
-                    : "border-[#DCE5E4]/80 hover:border-[#0F5C5A]/30"
-                }`}
+                className={`p-6 space-y-4 border-2 bg-white/90 shadow-xs transition-all ${theme.cardBorder}`}
               >
                 <div className="flex items-center gap-4">
                   <img
                     src={f.avatar}
                     alt={f.name}
-                    className={`w-16 h-16 rounded-full object-cover ring-4 ${
-                      isEducator ? "ring-[#16805B]/25" : "ring-[#0F5C5A]/25"
-                    }`}
+                    className={`w-16 h-16 rounded-full object-cover ring-4 ${theme.faculty.ring}`}
                   />
                   <div>
                     <h3 className="text-base font-bold text-slate-900">{f.name}</h3>
-                    <p
-                      className={`text-xs font-semibold ${
-                        isEducator ? "text-[#16805B]" : "text-[#0F5C5A]"
-                      }`}
-                    >
+                    <p className={`text-xs font-semibold ${theme.faculty.subjectText}`}>
                       {f.subject}
                     </p>
                     <p className="text-[11px] text-slate-500">{f.credential}</p>
@@ -594,19 +862,11 @@ export default function AboutPage() {
 
         {/* Call to Action Banner */}
         <div
-          className={`p-8 sm:p-12 rounded-3xl text-white flex flex-col md:flex-row items-center justify-between gap-6 shadow-2xl transition-all ${
-            isEducator
-              ? "bg-gradient-to-r from-[#0D5C41] via-[#16805B] to-[#0D5C41] border border-[#16805B]/40"
-              : "bg-gradient-to-r from-[#083F3D] via-[#0F5C5A] to-[#083F3D] border border-[#1B6863]/40"
-          }`}
+          className={`p-8 sm:p-12 rounded-3xl text-white flex flex-col md:flex-row items-center justify-between gap-6 shadow-2xl transition-all ${theme.ctaBanner.bg} ${theme.ctaBanner.border}`}
         >
           <div className="space-y-2 text-center md:text-left">
             <h3 className="text-2xl sm:text-3xl font-black">Ready to begin your learning journey?</h3>
-            <p
-              className={`text-sm max-w-lg ${
-                isEducator ? "text-emerald-100" : "text-teal-100"
-              }`}
-            >
+            <p className={`text-sm max-w-lg ${theme.ctaBanner.subtitle}`}>
               Explore hundreds of verified tutors or book a trial demo session with zero commitment today.
             </p>
           </div>
@@ -615,30 +875,29 @@ export default function AboutPage() {
               <GlassButton
                 variant="secondary"
                 size="lg"
-                className={`bg-white ${
-                  isEducator
-                    ? "text-[#0D5C41] hover:bg-emerald-50"
-                    : "text-[#083F3D] hover:bg-teal-50"
-                } font-bold shadow-md`}
+                className={`bg-white ${theme.ctaBanner.primaryBtnText} ${theme.ctaBanner.primaryBtnHover} font-bold shadow-md`}
               >
                 Explore Teachers
               </GlassButton>
             </Link>
-            <Link href="/register/teacher">
+            <Link href={themeMode === "learner" ? "/courses" : "/register/teacher"}>
               <GlassButton
                 variant="primary"
                 size="lg"
                 className="border border-white/40 text-white hover:bg-white/10 font-bold"
               >
-                Apply to Teach
+                {themeMode === "learner" ? "Explore Courses" : "Apply to Teach"}
               </GlassButton>
             </Link>
           </div>
         </div>
       </main>
 
-      <PremiumFooter variant={isEducator ? "teacher" : "default"} />
+      <PremiumFooter variant={theme.footerVariant} />
     </div>
   );
 }
 
+export default function AboutPage() {
+  return <AboutContent />;
+}
