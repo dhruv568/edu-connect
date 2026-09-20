@@ -167,17 +167,20 @@ export function generateVerificationEmailHtml(params: EmailTemplateParams): stri
               <p style="margin: 0 0 4px 0; font-weight: 700; color: #1e293b; font-size: 13px;">
                 &copy; 2026 EduConnects
               </p>
+              <p style="margin: 0 0 2px 0; color: #64748b;">
+                Powered by MyProFunnels Ventures
+              </p>
+              <p style="margin: 0 0 4px 0; color: #64748b;">
+                Registered Business: Shrivastava ProFunnels Ventures Pvt Ltd
+              </p>
               <p style="margin: 0 0 4px 0; font-weight: 600; color: #475569;">
                 Office Address
               </p>
               <p style="margin: 0 0 2px 0; color: #64748b;">
-                Powered by MyProFunnels Ventures
-              </p>
-              <p style="margin: 0 0 2px 0; color: #64748b;">
-                Registered Business: Shrivastava ProFunnels Ventures Pvt Ltd
+                Civil Lines, Lalitpur, Uttar Pradesh, India
               </p>
               <p style="margin: 0; color: #64748b;">
-                Civil Lines, Lalitpur, Uttar Pradesh 284403
+                Pin: 284403
               </p>
             </td>
           </tr>
