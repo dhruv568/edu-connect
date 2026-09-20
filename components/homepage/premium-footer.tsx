@@ -727,7 +727,7 @@ export function PremiumFooter({ showCta = false, variant }: PremiumFooterProps =
                     : "text-teal-100"
                 } leading-relaxed font-normal`}
               >
-                Secure online payments in INR (₹).
+                Secure online payments.
               </p>
             </div>
           </div>

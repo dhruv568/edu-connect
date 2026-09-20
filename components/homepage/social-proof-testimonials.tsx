@@ -112,11 +112,11 @@ export function SocialProofTestimonials(_props: SocialProofTestimonialsProps = {
         {/* Supporting Achievement Image Showcase */}
         <div className="max-w-4xl mx-auto rounded-3xl overflow-hidden border border-[#DCE5E4] shadow-md bg-white">
           <div className="grid grid-cols-1 md:grid-cols-12 items-center">
-            <div className="md:col-span-5 h-48 sm:h-56 md:h-full min-h-[220px] relative overflow-hidden bg-[#F2FAF8]">
+            <div className="md:col-span-5 self-stretch relative overflow-hidden bg-[#F2FAF8] flex items-center justify-center p-3 sm:p-4 md:p-3.5">
               <img
                 src="/images/learner-hero.jpeg"
                 alt="Learners celebrating academic success and milestones"
-                className="w-full h-full object-cover object-center"
+                className="w-full h-auto max-h-full object-contain object-center rounded-xl sm:rounded-2xl"
               />
             </div>
             <div className="md:col-span-7 p-6 sm:p-8 space-y-2.5 text-left">
