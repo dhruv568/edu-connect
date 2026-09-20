@@ -18,6 +18,7 @@ import {
 
 interface ActiveOffer {
   id: string;
+  code?: string | null;
   title: string;
   description: string | null;
   discountText: string | null;
@@ -358,13 +359,22 @@ export function GlobalOfferBanner() {
                 EduConnects Verified Offer
               </span>
 
-              <Link
-                href={offer.ctaLink || "/courses"}
-                className={`px-4 py-1.5 rounded-xl text-xs font-bold transition-all transform hover:scale-[1.03] active:scale-95 flex items-center gap-1.5 cursor-pointer shadow-md ${themeStyles.ctaBg}`}
-              >
-                <span>{offer.ctaText || "Claim Offer"}</span>
-                <ArrowRight className="h-3.5 w-3.5" />
-              </Link>
+              {(() => {
+                let targetHref = offer.ctaLink || "/courses";
+                if (offer.code && !targetHref.includes("offer=") && !targetHref.includes("code=")) {
+                  const sep = targetHref.includes("?") ? "&" : "?";
+                  targetHref = `${targetHref}${sep}offer=${encodeURIComponent(offer.code)}`;
+                }
+                return (
+                  <Link
+                    href={targetHref}
+                    className={`px-4 py-1.5 rounded-xl text-xs font-bold transition-all transform hover:scale-[1.03] active:scale-95 flex items-center gap-1.5 cursor-pointer shadow-md ${themeStyles.ctaBg}`}
+                  >
+                    <span>{offer.ctaText || "Claim Offer"}</span>
+                    <ArrowRight className="h-3.5 w-3.5" />
+                  </Link>
+                );
+              })()}
             </div>
           </motion.div>
         )}

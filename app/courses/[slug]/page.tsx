@@ -117,7 +117,13 @@ export default function CourseDetailPage() {
         } else {
           setEnrollMsg("Redirecting to Payment Gateway...");
           setTimeout(() => {
-            router.push(`/payment/checkout?type=COURSE_ENROLLMENT&courseId=${course.id}`);
+            let offerQuery = "";
+            if (typeof window !== "undefined") {
+              const urlParams = new URLSearchParams(window.location.search);
+              const offerParam = urlParams.get("offer") || urlParams.get("code") || urlParams.get("coupon");
+              if (offerParam) offerQuery = `&offer=${encodeURIComponent(offerParam)}`;
+            }
+            router.push(`/payment/checkout?type=COURSE_ENROLLMENT&courseId=${course.id}${offerQuery}`);
           }, 800);
         }
       } else {

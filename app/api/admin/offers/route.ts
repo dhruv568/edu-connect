@@ -53,10 +53,28 @@ export async function POST(request: NextRequest) {
 
     const description = body.description?.trim() || null;
     const discountText = body.discountText?.trim() || null;
+    const code = body.code?.trim()?.toUpperCase() || null;
+    const discountType = body.discountType?.trim()?.toUpperCase() === "FIXED" ? "FIXED" : "PERCENTAGE";
+    const discountValue = body.discountValue !== undefined && body.discountValue !== null ? Number(body.discountValue) : 0;
+    const minOrderAmount = body.minOrderAmount ? Number(body.minOrderAmount) : null;
+    const maxDiscount = body.maxDiscount ? Number(body.maxDiscount) : null;
+    const usageLimit = body.usageLimit ? parseInt(body.usageLimit, 10) : null;
     const ctaText = body.ctaText?.trim() || "Explore Now";
     const ctaLink = body.ctaLink?.trim() || "/courses";
     const targetAudience = body.targetAudience?.trim() || "ALL"; // ALL | MAIN | LEARNERS | EDUCATORS
     const isActive = body.isActive !== undefined ? Boolean(body.isActive) : true;
+
+    if (code) {
+      const existingWithCode = await prisma.offer.findUnique({
+        where: { code },
+      });
+      if (existingWithCode) {
+        return NextResponse.json(
+          { success: false, error: `An offer with code "${code}" already exists.` },
+          { status: 400 }
+        );
+      }
+    }
 
     const startDate = body.startDate ? new Date(body.startDate) : null;
     const endDate = body.endDate ? new Date(body.endDate) : null;
@@ -87,6 +105,12 @@ export async function POST(request: NextRequest) {
         title,
         description,
         discountText,
+        code,
+        discountType,
+        discountValue,
+        minOrderAmount,
+        maxDiscount,
+        usageLimit,
         ctaText,
         ctaLink,
         startDate,
@@ -107,7 +131,24 @@ export async function PUT(request: NextRequest) {
   try {
     await requireRole(["ADMIN"]);
     const body = await request.json();
-    const { id, title, description, discountText, ctaText, ctaLink, startDate, endDate, isActive, targetAudience } = body;
+    const {
+      id,
+      title,
+      description,
+      discountText,
+      code,
+      discountType,
+      discountValue,
+      minOrderAmount,
+      maxDiscount,
+      usageLimit,
+      ctaText,
+      ctaLink,
+      startDate,
+      endDate,
+      isActive,
+      targetAudience,
+    } = body;
 
     if (!id) {
       return NextResponse.json(
@@ -122,6 +163,19 @@ export async function PUT(request: NextRequest) {
         { success: false, error: "Offer title is required." },
         { status: 400 }
       );
+    }
+
+    const trimmedCode = code?.trim()?.toUpperCase() || null;
+    if (trimmedCode) {
+      const existingWithCode = await prisma.offer.findFirst({
+        where: { code: trimmedCode, NOT: { id } },
+      });
+      if (existingWithCode) {
+        return NextResponse.json(
+          { success: false, error: `An offer with code "${trimmedCode}" already exists.` },
+          { status: 400 }
+        );
+      }
     }
 
     const parsedStartDate = startDate ? new Date(startDate) : null;
@@ -154,6 +208,12 @@ export async function PUT(request: NextRequest) {
         title: trimmedTitle,
         description: description?.trim() || null,
         discountText: discountText?.trim() || null,
+        code: trimmedCode,
+        discountType: discountType?.trim()?.toUpperCase() === "FIXED" ? "FIXED" : "PERCENTAGE",
+        discountValue: discountValue !== undefined && discountValue !== null ? Number(discountValue) : 0,
+        minOrderAmount: minOrderAmount ? Number(minOrderAmount) : null,
+        maxDiscount: maxDiscount ? Number(maxDiscount) : null,
+        usageLimit: usageLimit ? parseInt(usageLimit, 10) : null,
         ctaText: ctaText?.trim() || "Explore Now",
         ctaLink: ctaLink?.trim() || "/courses",
         targetAudience: targetAudience?.trim() || "ALL",

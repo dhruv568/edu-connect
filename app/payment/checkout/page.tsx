@@ -1,9 +1,18 @@
 "use client";
 
-import React, { useState, useEffect, Suspense } from "react";
+import React, { useState, useEffect, useCallback, Suspense } from "react";
 import { useSearchParams, useRouter } from "next/navigation";
 import Link from "next/link";
-import { Lock, ShieldCheck, CheckCircle2, AlertCircle, ArrowLeft, CreditCard, Sparkles } from "lucide-react";
+import {
+  Lock,
+  ShieldCheck,
+  CheckCircle2,
+  AlertCircle,
+  CreditCard,
+  Sparkles,
+  Tag,
+  X,
+} from "lucide-react";
 import { formatPaise } from "@/lib/currency";
 import { BackButton } from "@/components/ui/back-button";
 
@@ -15,16 +24,27 @@ function CheckoutContent() {
   const courseId = searchParams.get("courseId");
   const educatorId = searchParams.get("educatorId");
   const slotId = searchParams.get("slotId");
+  const urlOffer =
+    searchParams.get("offer") ||
+    searchParams.get("code") ||
+    searchParams.get("coupon") ||
+    "";
 
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [orderData, setOrderData] = useState<any>(null);
   const [processing, setProcessing] = useState(false);
 
-  useEffect(() => {
-    async function initOrder() {
-      setLoading(true);
+  // Coupon / Offer state
+  const [inputCode, setInputCode] = useState(urlOffer.toUpperCase());
+  const [appliedCode, setAppliedCode] = useState(urlOffer.toUpperCase());
+  const [validatingOffer, setValidatingOffer] = useState(false);
+  const [offerError, setOfferError] = useState<string | null>(null);
+
+  const fetchOrder = useCallback(
+    async (codeToApply?: string) => {
       setError(null);
+      setOfferError(null);
       try {
         let activeCourseId = courseId;
         if (!activeCourseId && educatorId && type === "COURSE_ENROLLMENT") {
@@ -50,6 +70,8 @@ function CheckoutContent() {
           throw new Error("BAD_REQUEST: liveClassSlotId is required for live class booking.");
         }
 
+        const effectiveOfferCode = codeToApply !== undefined ? codeToApply : appliedCode;
+
         const res = await fetch("/api/payments/create-order", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
@@ -57,11 +79,20 @@ function CheckoutContent() {
             type,
             courseId: activeCourseId || undefined,
             liveClassSlotId: slotId || undefined,
+            offerCode: effectiveOfferCode?.trim() || undefined,
           }),
         });
 
         const data = await res.json();
         if (!res.ok) {
+          // If code was rejected, provide specific offer error if relevant
+          if (effectiveOfferCode && (data.error?.includes("offer") || data.error?.includes("OFFER") || data.error?.includes("NOT_FOUND"))) {
+            setOfferError(data.error || "Invalid or expired offer code.");
+            // Re-fetch without code if the user tried applying an invalid code
+            if (codeToApply) {
+              return;
+            }
+          }
           throw new Error(data.error || "Failed to initialize payment order.");
         }
 
@@ -72,20 +103,52 @@ function CheckoutContent() {
         }
 
         setOrderData(data.data);
+        if (data.data.appliedOffer?.code) {
+          setAppliedCode(data.data.appliedOffer.code);
+          setInputCode(data.data.appliedOffer.code);
+        } else if (codeToApply === "") {
+          setAppliedCode("");
+          setInputCode("");
+        }
       } catch (err: any) {
         setError(err.message || "Could not initialize checkout.");
       } finally {
         setLoading(false);
+        setValidatingOffer(false);
       }
-    }
+    },
+    [type, courseId, educatorId, slotId, appliedCode, router]
+  );
 
+  useEffect(() => {
     if (courseId || educatorId || slotId) {
-      initOrder();
+      setLoading(true);
+      fetchOrder(urlOffer.toUpperCase());
     } else {
       setError("BAD_REQUEST: courseId is required for course enrollment.");
       setLoading(false);
     }
-  }, [type, courseId, educatorId, slotId, router]);
+  }, [courseId, educatorId, slotId, urlOffer]); // eslint-disable-line react-hooks/exhaustive-deps
+
+  const handleApplyOffer = async (codeOverride?: string) => {
+    const code = (codeOverride !== undefined ? codeOverride : inputCode).trim().toUpperCase();
+    if (!code) {
+      setOfferError("Please enter an offer code.");
+      return;
+    }
+
+    setValidatingOffer(true);
+    setOfferError(null);
+    await fetchOrder(code);
+  };
+
+  const handleRemoveOffer = async () => {
+    setValidatingOffer(true);
+    setOfferError(null);
+    setAppliedCode("");
+    setInputCode("");
+    await fetchOrder("");
+  };
 
   const loadCashfreeSdk = (): Promise<any> => {
     return new Promise((resolve, reject) => {
@@ -120,7 +183,9 @@ function CheckoutContent() {
       if (orderData.paymentSessionId && (isProd || !isMockSession)) {
         const Cashfree = await loadCashfreeSdk();
         const cashfree = Cashfree({ mode: isProd ? "production" : "sandbox" });
-        const returnUrl = `${window.location.origin}/payment/success?order_id=${encodeURIComponent(orderData.cfOrderId || orderData.internalReference)}`;
+        const returnUrl = `${window.location.origin}/payment/success?order_id=${encodeURIComponent(
+          orderData.cfOrderId || orderData.internalReference
+        )}`;
 
         await cashfree.checkout({
           paymentSessionId: orderData.paymentSessionId,
@@ -153,7 +218,7 @@ function CheckoutContent() {
   };
 
   return (
-    <div className="min-h-screen bg-slate-950 text-slate-100 flex flex-col justify-center items-center p-4 relative overflow-hidden">
+    <div className="min-h-screen bg-slate-950 text-slate-100 flex flex-col justify-center items-center p-4 relative overflow-hidden font-sans">
       {/* Background Gradients */}
       <div className="absolute top-1/4 left-1/2 -translate-x-1/2 w-[600px] h-[600px] bg-blue-600/10 blur-[140px] rounded-full pointer-events-none" />
       <div className="absolute bottom-10 right-10 w-[400px] h-[400px] bg-purple-600/10 blur-[120px] rounded-full pointer-events-none" />
@@ -169,9 +234,9 @@ function CheckoutContent() {
         {loading ? (
           <div className="p-8 rounded-3xl bg-slate-900/60 border border-slate-800 backdrop-blur-xl text-center space-y-4 shadow-2xl">
             <div className="w-12 h-12 border-4 border-blue-500/30 border-t-blue-500 rounded-full animate-spin mx-auto" />
-            <p className="text-sm font-medium text-slate-300">Creating secure Cashfree checkout...</p>
+            <p className="text-sm font-medium text-slate-300">Preparing secure Cashfree checkout...</p>
           </div>
-        ) : error ? (
+        ) : error && !orderData ? (
           <div className="p-8 rounded-3xl bg-red-950/40 border border-red-900/50 backdrop-blur-xl text-center space-y-4 shadow-2xl">
             <div className="w-12 h-12 rounded-full bg-red-500/20 text-red-400 flex items-center justify-center mx-auto">
               <AlertCircle className="w-6 h-6" />
@@ -180,13 +245,13 @@ function CheckoutContent() {
             <p className="text-xs text-red-300/80 leading-relaxed">{error}</p>
             <button
               onClick={() => window.location.reload()}
-              className="w-full py-3 bg-red-600 hover:bg-red-500 text-white font-semibold rounded-xl text-sm transition-all"
+              className="w-full py-3 bg-red-600 hover:bg-red-500 text-white font-semibold rounded-xl text-sm transition-all cursor-pointer"
             >
               Try Payment Again
             </button>
           </div>
         ) : orderData ? (
-          <div className="rounded-3xl bg-slate-900/70 border border-slate-800/80 backdrop-blur-xl p-8 shadow-2xl space-y-6">
+          <div className="rounded-3xl bg-slate-900/70 border border-slate-800/80 backdrop-blur-xl p-6 sm:p-8 shadow-2xl space-y-6">
             {/* Header */}
             <div className="text-center space-y-2">
               <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-blue-500/10 text-blue-400 text-xs font-semibold border border-blue-500/20">
@@ -194,6 +259,77 @@ function CheckoutContent() {
               </div>
               <h1 className="text-2xl font-bold text-white tracking-tight">Complete Checkout</h1>
               <p className="text-xs text-slate-400">Review purchase details and pay securely</p>
+            </div>
+
+            {/* Offer / Coupon Section */}
+            <div className="p-4 rounded-2xl bg-slate-950/70 border border-slate-800/80 space-y-2.5">
+              <div className="flex items-center justify-between">
+                <span className="text-xs font-bold text-slate-300 flex items-center gap-1.5">
+                  <Tag className="w-3.5 h-3.5 text-blue-400" /> Apply Offer / Coupon
+                </span>
+                {orderData.appliedOffer && (
+                  <button
+                    type="button"
+                    onClick={handleRemoveOffer}
+                    disabled={validatingOffer}
+                    className="text-[11px] text-red-400 hover:text-red-300 font-semibold cursor-pointer transition-colors"
+                  >
+                    Remove
+                  </button>
+                )}
+              </div>
+
+              {!orderData.appliedOffer ? (
+                <div className="flex gap-2">
+                  <input
+                    type="text"
+                    placeholder="Enter code, e.g. 900FF"
+                    value={inputCode}
+                    onChange={(e) => {
+                      setInputCode(e.target.value.toUpperCase());
+                      setOfferError(null);
+                    }}
+                    onKeyDown={(e) => {
+                      if (e.key === "Enter") {
+                        e.preventDefault();
+                        handleApplyOffer();
+                      }
+                    }}
+                    className="flex-1 bg-slate-900 border border-slate-700/80 rounded-xl px-3 py-2 text-xs text-white placeholder-slate-500 font-mono tracking-wider uppercase focus:outline-none focus:border-blue-500 transition-colors"
+                  />
+                  <button
+                    type="button"
+                    onClick={() => handleApplyOffer()}
+                    disabled={!inputCode.trim() || validatingOffer}
+                    className="px-4 py-2 bg-blue-600 hover:bg-blue-500 disabled:opacity-40 disabled:hover:bg-blue-600 text-white text-xs font-bold rounded-xl transition-all flex items-center gap-1.5 cursor-pointer"
+                  >
+                    {validatingOffer ? (
+                      <div className="w-3.5 h-3.5 border-2 border-white/30 border-t-white rounded-full animate-spin" />
+                    ) : (
+                      "Apply"
+                    )}
+                  </button>
+                </div>
+              ) : (
+                <div className="flex items-center justify-between p-2.5 rounded-xl bg-emerald-950/40 border border-emerald-700/40 text-emerald-300 text-xs">
+                  <div className="flex items-center gap-2">
+                    <CheckCircle2 className="w-4 h-4 text-emerald-400 shrink-0" />
+                    <div>
+                      <span className="font-mono font-bold tracking-wider">{orderData.appliedOffer.code}</span>
+                      <span className="ml-1.5 text-[11px] text-emerald-300/80">Applied!</span>
+                    </div>
+                  </div>
+                  <span className="text-[11px] font-bold text-emerald-400">
+                    - {formatPaise(orderData.appliedOffer.discountAmountPaise)}
+                  </span>
+                </div>
+              )}
+
+              {offerError && (
+                <p className="text-xs text-red-400 flex items-center gap-1 pt-1 font-medium">
+                  <AlertCircle className="w-3.5 h-3.5 shrink-0" /> {offerError}
+                </p>
+              )}
             </div>
 
             {/* Price Breakdown */}
@@ -206,8 +342,34 @@ function CheckoutContent() {
                 <span className="text-slate-400">Payment Gateway</span>
                 <span className="text-xs font-semibold text-slate-300">Cashfree Payments</span>
               </div>
+
+              {orderData.appliedOffer && (
+                <>
+                  <div className="flex justify-between items-center text-sm">
+                    <span className="text-slate-400">Original Price</span>
+                    <span className="text-sm line-through text-slate-500 font-medium">
+                      {formatPaise(orderData.appliedOffer.originalAmountPaise)}
+                    </span>
+                  </div>
+                  <div className="flex justify-between items-center text-sm text-emerald-400 font-medium">
+                    <span className="flex items-center gap-1.5">
+                      <Tag className="w-3.5 h-3.5" />
+                      Discount ({orderData.appliedOffer.code})
+                    </span>
+                    <span className="font-bold">- {formatPaise(orderData.appliedOffer.discountAmountPaise)}</span>
+                  </div>
+                </>
+              )}
+
               <div className="border-t border-slate-800/80 pt-3 flex justify-between items-center">
-                <span className="text-base font-semibold text-white">Total Amount</span>
+                <div>
+                  <span className="text-base font-semibold text-white">Final Payable</span>
+                  {orderData.appliedOffer && (
+                    <span className="block text-[10px] text-emerald-400 font-semibold">
+                      {orderData.appliedOffer.summaryText}
+                    </span>
+                  )}
+                </div>
                 <span className="text-2xl font-extrabold text-blue-400">
                   {formatPaise(orderData.amountPaise)}
                 </span>
@@ -227,17 +389,19 @@ function CheckoutContent() {
             {/* CTA Button */}
             <button
               onClick={handlePay}
-              disabled={processing}
-              className="w-full py-4 bg-gradient-to-r from-blue-600 via-indigo-600 to-purple-600 hover:from-blue-500 hover:to-purple-500 text-white font-bold rounded-2xl shadow-lg shadow-blue-500/25 flex items-center justify-center gap-2 text-base transition-all disabled:opacity-50"
+              disabled={processing || validatingOffer}
+              className="w-full py-4 bg-gradient-to-r from-blue-600 via-indigo-600 to-purple-600 hover:from-blue-500 hover:to-purple-500 text-white font-bold rounded-2xl shadow-lg shadow-blue-500/25 flex items-center justify-center gap-2 text-base transition-all disabled:opacity-50 cursor-pointer"
             >
               {processing ? (
                 <>
                   <div className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin" />
-                  Confirming Payment...
+                  Launching Cashfree Payment...
                 </>
               ) : (
                 <>
-                  <CreditCard className="w-5 h-5" /> {type === "LIVE_CLASS_BOOKING" ? "Book Now" : "Pay Now"} ({formatPaise(orderData.amountPaise)})
+                  <CreditCard className="w-5 h-5" />{" "}
+                  {type === "LIVE_CLASS_BOOKING" ? "Book & Pay" : "Pay Now"} (
+                  {formatPaise(orderData.amountPaise)})
                 </>
               )}
             </button>
@@ -250,7 +414,13 @@ function CheckoutContent() {
 
 export default function CheckoutPage() {
   return (
-    <Suspense fallback={<div className="min-h-screen bg-slate-950 flex items-center justify-center text-slate-400 text-sm">Loading checkout...</div>}>
+    <Suspense
+      fallback={
+        <div className="min-h-screen bg-slate-950 flex items-center justify-center text-slate-400 text-sm">
+          Loading checkout...
+        </div>
+      }
+    >
       <CheckoutContent />
     </Suspense>
   );

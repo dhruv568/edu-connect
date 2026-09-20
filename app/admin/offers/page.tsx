@@ -27,9 +27,16 @@ import {
 
 export interface Offer {
   id: string;
+  code?: string | null;
   title: string;
   description: string | null;
   discountText: string | null;
+  discountType?: string;
+  discountValue?: number;
+  minOrderAmount?: number | null;
+  maxDiscount?: number | null;
+  usageLimit?: number | null;
+  usedCount?: number;
   ctaText: string | null;
   ctaLink: string | null;
   startDate: string | null;
@@ -57,8 +64,13 @@ export default function AdminOffersPage() {
 
   // Form inputs
   const [formTitle, setFormTitle] = useState("");
+  const [formCode, setFormCode] = useState("");
   const [formDescription, setFormDescription] = useState("");
   const [formDiscountText, setFormDiscountText] = useState("");
+  const [formDiscountType, setFormDiscountType] = useState<"PERCENTAGE" | "FIXED">("PERCENTAGE");
+  const [formDiscountValue, setFormDiscountValue] = useState<number | string>("");
+  const [formUsageLimit, setFormUsageLimit] = useState<number | string>("");
+  const [formMinOrderAmount, setFormMinOrderAmount] = useState<number | string>("");
   const [formCtaText, setFormCtaText] = useState("Explore Now");
   const [formCtaLink, setFormCtaLink] = useState("/courses");
   const [formStartDate, setFormStartDate] = useState("");
@@ -124,8 +136,13 @@ export default function AdminOffersPage() {
   const handleOpenCreate = () => {
     setEditingOffer(null);
     setFormTitle("");
+    setFormCode("");
     setFormDescription("");
     setFormDiscountText("");
+    setFormDiscountType("PERCENTAGE");
+    setFormDiscountValue("");
+    setFormUsageLimit("");
+    setFormMinOrderAmount("");
     setFormCtaText("Explore Now");
     setFormCtaLink("/courses");
     setFormStartDate("");
@@ -139,8 +156,13 @@ export default function AdminOffersPage() {
   const handleOpenEdit = (offer: Offer) => {
     setEditingOffer(offer);
     setFormTitle(offer.title);
+    setFormCode(offer.code || "");
     setFormDescription(offer.description || "");
     setFormDiscountText(offer.discountText || "");
+    setFormDiscountType((offer.discountType as any) || "PERCENTAGE");
+    setFormDiscountValue(offer.discountValue !== undefined && offer.discountValue !== null ? offer.discountValue : "");
+    setFormUsageLimit(offer.usageLimit !== null && offer.usageLimit !== undefined ? offer.usageLimit : "");
+    setFormMinOrderAmount(offer.minOrderAmount !== null && offer.minOrderAmount !== undefined ? offer.minOrderAmount : "");
     setFormCtaText(offer.ctaText || "Explore Now");
     setFormCtaLink(offer.ctaLink || "/courses");
     setFormStartDate(offer.startDate ? offer.startDate.slice(0, 16) : "");
@@ -167,8 +189,13 @@ export default function AdminOffersPage() {
     try {
       const payload = {
         title: formTitle.trim(),
+        code: formCode.trim().toUpperCase() || null,
         description: formDescription.trim() || null,
         discountText: formDiscountText.trim() || null,
+        discountType: formDiscountType,
+        discountValue: formDiscountValue !== "" ? Number(formDiscountValue) : 0,
+        usageLimit: formUsageLimit !== "" ? parseInt(String(formUsageLimit), 10) : null,
+        minOrderAmount: formMinOrderAmount !== "" ? Number(formMinOrderAmount) : null,
         ctaText: formCtaText.trim() || "Explore Now",
         ctaLink: formCtaLink.trim() || "/courses",
         startDate: formStartDate ? new Date(formStartDate).toISOString() : null,
@@ -435,14 +462,36 @@ export default function AdminOffersPage() {
                         </td>
 
                         <td className="py-3.5 px-4">
-                          {offer.discountText ? (
-                            <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-lg text-[10px] font-black uppercase tracking-wider bg-amber-50 text-amber-800 border border-amber-200/70">
-                              <Flame className="h-3 w-3 text-amber-600" />
-                              <span>{offer.discountText}</span>
-                            </span>
-                          ) : (
-                            <span className="text-slate-400 text-[11px]">—</span>
-                          )}
+                          <div className="space-y-1">
+                            {offer.discountText ? (
+                              <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-lg text-[10px] font-black uppercase tracking-wider bg-amber-50 text-amber-800 border border-amber-200/70">
+                                <Flame className="h-3 w-3 text-amber-600" />
+                                <span>{offer.discountText}</span>
+                              </span>
+                            ) : (
+                              <span className="text-slate-400 text-[11px]">—</span>
+                            )}
+                            {offer.code && (
+                              <div className="flex items-center gap-1 font-mono text-[11px] font-bold text-blue-700">
+                                <Tag className="h-3 w-3 text-blue-600" />
+                                <span>CODE: {offer.code}</span>
+                                {offer.discountValue ? (
+                                  <span className="text-slate-500 font-sans font-normal text-[10px]">
+                                    ({offer.discountType === "FIXED" ? `₹${offer.discountValue} OFF` : `${offer.discountValue}% OFF`})
+                                  </span>
+                                ) : null}
+                              </div>
+                            )}
+                            {offer.usageLimit !== null && offer.usageLimit !== undefined ? (
+                              <div className="text-[10px] text-slate-500 font-sans">
+                                Uses: {offer.usedCount || 0} / {offer.usageLimit}
+                              </div>
+                            ) : offer.usedCount ? (
+                              <div className="text-[10px] text-slate-500 font-sans">
+                                Uses: {offer.usedCount}
+                              </div>
+                            ) : null}
+                          </div>
                         </td>
 
                         <td className="py-3.5 px-4">
@@ -574,11 +623,88 @@ export default function AdminOffersPage() {
                     </label>
                     <input
                       type="text"
-                      placeholder="e.g. FLAT 50% OFF, CODE: OPEN50"
+                      placeholder="e.g. FLAT 90% OFF (CODE: 900FF)"
                       value={formDiscountText}
                       onChange={(e) => setFormDiscountText(e.target.value)}
                       className="w-full h-10 px-3 text-xs bg-slate-50 border border-slate-200 rounded-xl text-slate-900 outline-none focus:ring-2 focus:ring-teal-500/20 font-medium"
                     />
+                  </div>
+
+                  {/* Promo / Coupon Code */}
+                  <div className="space-y-1.5">
+                    <label className="block text-xs font-bold text-slate-700 uppercase tracking-wider">
+                      Offer / Coupon Code (Optional)
+                    </label>
+                    <input
+                      type="text"
+                      placeholder="e.g. 900FF, EDU40, FLAT50"
+                      value={formCode}
+                      onChange={(e) => setFormCode(e.target.value.toUpperCase())}
+                      className="w-full h-10 px-3 text-xs bg-slate-50 border border-slate-200 rounded-xl text-slate-900 outline-none focus:ring-2 focus:ring-teal-500/20 font-mono font-bold tracking-wider"
+                    />
+                  </div>
+
+                  {/* Discount Calculation Type & Value */}
+                  <div className="grid grid-cols-2 gap-3">
+                    <div className="space-y-1.5">
+                      <label className="block text-xs font-bold text-slate-700 uppercase tracking-wider">
+                        Discount Type
+                      </label>
+                      <select
+                        value={formDiscountType}
+                        onChange={(e) => setFormDiscountType(e.target.value as any)}
+                        className="w-full h-10 px-3 text-xs bg-slate-50 border border-slate-200 rounded-xl text-slate-900 outline-none focus:ring-2 focus:ring-teal-500/20 font-medium cursor-pointer"
+                      >
+                        <option value="PERCENTAGE">Percentage (%)</option>
+                        <option value="FIXED">Fixed Amount (₹)</option>
+                      </select>
+                    </div>
+
+                    <div className="space-y-1.5">
+                      <label className="block text-xs font-bold text-slate-700 uppercase tracking-wider">
+                        {formDiscountType === "PERCENTAGE" ? "Discount (%)" : "Discount (₹)"}
+                      </label>
+                      <input
+                        type="number"
+                        min="0"
+                        max={formDiscountType === "PERCENTAGE" ? 100 : undefined}
+                        placeholder={formDiscountType === "PERCENTAGE" ? "e.g. 90 for 90%" : "e.g. 500 for ₹500"}
+                        value={formDiscountValue}
+                        onChange={(e) => setFormDiscountValue(e.target.value)}
+                        className="w-full h-10 px-3 text-xs bg-slate-50 border border-slate-200 rounded-xl text-slate-900 outline-none focus:ring-2 focus:ring-teal-500/20 font-medium"
+                      />
+                    </div>
+                  </div>
+
+                  {/* Usage Limit & Min Purchase */}
+                  <div className="grid grid-cols-2 gap-3">
+                    <div className="space-y-1.5">
+                      <label className="block text-xs font-bold text-slate-700 uppercase tracking-wider">
+                        Usage Limit (Optional)
+                      </label>
+                      <input
+                        type="number"
+                        min="1"
+                        placeholder="e.g. 100 (Blank = Unlimited)"
+                        value={formUsageLimit}
+                        onChange={(e) => setFormUsageLimit(e.target.value)}
+                        className="w-full h-10 px-3 text-xs bg-slate-50 border border-slate-200 rounded-xl text-slate-900 outline-none focus:ring-2 focus:ring-teal-500/20 font-medium"
+                      />
+                    </div>
+
+                    <div className="space-y-1.5">
+                      <label className="block text-xs font-bold text-slate-700 uppercase tracking-wider">
+                        Min Order Amount (₹)
+                      </label>
+                      <input
+                        type="number"
+                        min="0"
+                        placeholder="e.g. 499 (Blank = None)"
+                        value={formMinOrderAmount}
+                        onChange={(e) => setFormMinOrderAmount(e.target.value)}
+                        className="w-full h-10 px-3 text-xs bg-slate-50 border border-slate-200 rounded-xl text-slate-900 outline-none focus:ring-2 focus:ring-teal-500/20 font-medium"
+                      />
+                    </div>
                   </div>
 
                   {/* Target Website */}

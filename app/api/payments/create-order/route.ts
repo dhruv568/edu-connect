@@ -8,7 +8,7 @@ export async function POST(request: NextRequest) {
     const session = await requireRole(["STUDENT"]);
     const body = await request.json();
 
-    const { type, courseId, liveClassSlotId, teacherId, educatorId, selectedDate, selectedSlotTime } = body;
+    const { type, courseId, liveClassSlotId, teacherId, educatorId, selectedDate, selectedSlotTime, offerCode } = body;
 
     const result = await PaymentService.createPaymentOrder({
       userId: session.userId,
@@ -18,6 +18,7 @@ export async function POST(request: NextRequest) {
       teacherId: teacherId || educatorId,
       selectedDate,
       selectedSlotTime,
+      offerCode,
     });
 
     return apiSuccess(result);

@@ -1080,9 +1080,16 @@ model AiMessage {
 
 model Offer {
   id             String    @id @default(uuid())
+  code           String?   @unique // e.g. "900FF", "EDU40"
   title          String
   description    String?
   discountText   String?   // e.g. "FLAT 40% OFF", "USE CODE: EDU40"
+  discountType   String    @default("PERCENTAGE") // PERCENTAGE | FIXED
+  discountValue  Float     @default(0) // e.g. 90 (for 90%) or 500 (for ₹500)
+  minOrderAmount Float?    // Minimum order value in ₹
+  maxDiscount    Float?    // Maximum discount cap in ₹
+  usageLimit     Int?      // Maximum redemptions allowed
+  usedCount      Int       @default(0) // Current number of redemptions
   ctaText        String?   @default("Explore Now")
   ctaLink        String?   @default("/courses")
   startDate      DateTime?
@@ -1092,6 +1099,7 @@ model Offer {
   createdAt      DateTime  @default(now())
   updatedAt      DateTime  @updatedAt
 
+  @@index([code])
   @@index([isActive, startDate, endDate])
   @@map("offers")
 }

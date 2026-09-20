@@ -5,6 +5,7 @@ import { RouteService } from "@/services/route-service";
 import { DEFAULT_CURRENCY, toPaise, fromPaise } from "@/lib/currency";
 import { EDUCATOR_VERIFICATION_PENDING_MESSAGE } from "@/lib/auth/guards";
 import crypto from "crypto";
+import { OfferService } from "@/services/offer-service";
 
 export interface CreateOrderParams {
   userId: string;
@@ -14,6 +15,7 @@ export interface CreateOrderParams {
   teacherId?: string;
   selectedDate?: string;
   selectedSlotTime?: string;
+  offerCode?: string;
 }
 
 export interface VerifyPaymentParams {
@@ -243,10 +245,33 @@ export class PaymentService {
       throw new Error("BAD_REQUEST: Invalid payment type specified.");
     }
 
+    const originalAmountPaise = amountPaise;
+    let discountAmountPaise = 0;
+    let appliedOffer: any = null;
+
+    if (params.offerCode && params.offerCode.trim() && amountPaise > 0) {
+      appliedOffer = await OfferService.validateOfferCode(
+        params.offerCode,
+        amountPaise,
+        {
+          userId,
+          courseId: refCourseId || undefined,
+          liveClassSlotId: refSlotId || undefined,
+          targetAudience: "LEARNERS",
+        }
+      );
+
+      discountAmountPaise = appliedOffer.discountAmountPaise;
+      amountPaise = appliedOffer.finalAmountPaise;
+    }
+
     const internalReference = `EDU_${type}_${Date.now()}_${crypto.randomBytes(4).toString("hex").toUpperCase()}`;
 
-    // Handle FREE Products (price === 0)
+    // Handle FREE Products (price === 0 or 100% discount)
     if (amountPaise === 0) {
+      if (appliedOffer?.offerId) {
+        await OfferService.incrementOfferUsage(appliedOffer.offerId);
+      }
       if (type === "COURSE_ENROLLMENT" && refCourseId) {
         const enrollment = await prisma.enrollment.upsert({
           where: { studentId_courseId: { studentId: userId, courseId: refCourseId } },
@@ -349,6 +374,15 @@ export class PaymentService {
       },
     });
 
+    const orderNotes = JSON.stringify({
+      offerId: appliedOffer?.offerId || null,
+      offerCode: appliedOffer?.code || null,
+      originalAmountPaise,
+      discountAmountPaise,
+      discountType: appliedOffer?.discountType || null,
+      discountValue: appliedOffer?.discountValue || null,
+    });
+
     // Create DB records with provider: "CASHFREE"
     const orderRecord = await prisma.paymentOrder.create({
       data: {
@@ -363,6 +397,7 @@ export class PaymentService {
         currency: DEFAULT_CURRENCY,
         status: "CREATED",
         receipt,
+        notes: orderNotes,
       },
     });
 
@@ -394,6 +429,17 @@ export class PaymentService {
       currency: DEFAULT_CURRENCY,
       internalReference,
       transactionId: transactionRecord.id,
+      appliedOffer: appliedOffer
+        ? {
+            offerId: appliedOffer.offerId,
+            code: appliedOffer.code,
+            discountAmountPaise,
+            discountAmountRupees: fromPaise(discountAmountPaise),
+            originalAmountPaise,
+            originalAmountRupees: fromPaise(originalAmountPaise),
+            summaryText: appliedOffer.summaryText,
+          }
+        : null,
     };
   }
 
@@ -431,6 +477,7 @@ export class PaymentService {
         course: true,
         liveClassSlot: true,
         user: { include: { profile: true } },
+        order: true,
       },
     });
 
@@ -512,6 +559,16 @@ export class PaymentService {
         where: { id: transaction.orderId },
         data: { status: "CAPTURED" },
       });
+    }
+
+    // Increment offer usage if an offer was applied
+    if (transaction.order?.notes) {
+      try {
+        const parsedNotes = JSON.parse(transaction.order.notes);
+        if (parsedNotes?.offerId) {
+          await OfferService.incrementOfferUsage(parsedNotes.offerId);
+        }
+      } catch {}
     }
 
     let enrollmentId: string | undefined;
