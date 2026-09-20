@@ -228,7 +228,7 @@ export function PromotionalBannerCarousel({
       onTouchEnd={handleTouchEnd}
     >
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="relative w-full rounded-2xl sm:rounded-3xl overflow-hidden border border-slate-200/60 dark:border-slate-800/60 shadow-xl bg-slate-900/5 aspect-[16/8] sm:aspect-[21/8] md:aspect-[24/8] lg:aspect-[3/1] min-h-[160px] max-h-[440px]">
+        <div className="relative w-full max-w-[800px] mx-auto rounded-2xl sm:rounded-3xl overflow-hidden border border-slate-200/60 dark:border-slate-800/60 shadow-xl bg-slate-900/5 aspect-[4/1]">
           {/* Animated Slide Transition */}
           <AnimatePresence mode="wait">
             <motion.div
@@ -253,7 +253,7 @@ export function PromotionalBannerCarousel({
                     fill
                     priority={currentIndex === 0}
                     sizes="(max-width: 640px) 100vw, (max-width: 1024px) 95vw, 1280px"
-                    className="object-cover w-full h-full"
+                    className="object-contain w-full h-full"
                     unoptimized={true}
                     onError={() => {
                       setImageErrorMap((prev) => ({
@@ -274,7 +274,7 @@ export function PromotionalBannerCarousel({
                     fill
                     priority={currentIndex === 0}
                     sizes="(max-width: 640px) 100vw, (max-width: 1024px) 95vw, 1280px"
-                    className="object-cover w-full h-full"
+                    className="object-contain w-full h-full"
                     unoptimized={true}
                     onError={() => {
                       setImageErrorMap((prev) => ({
