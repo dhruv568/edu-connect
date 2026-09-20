@@ -252,7 +252,7 @@ export default function CourseDetailPage() {
             {/* Right Sticky Desktop Enrollment Card */}
             <div className="lg:col-span-1">
               <div className="p-6 rounded-2xl bg-slate-900 border border-slate-800 shadow-2xl shadow-blue-500/10 space-y-6 sticky top-28">
-                <div className="relative aspect-video rounded-xl overflow-hidden bg-slate-950">
+                <div className="relative aspect-video max-h-44 sm:max-h-48 w-full rounded-xl overflow-hidden bg-slate-950">
                   <img
                     src={course.thumbnailUrl || "https://images.unsplash.com/photo-1516321318423-f06f85e504b3?w=600&auto=format&fit=crop&q=80"}
                     alt={course.title}

@@ -471,18 +471,18 @@ export default function StudentLandingPage() {
 
               {/* Hero Right Column: Photo 2 Learner Experience Showcase Card */}
               <div className="lg:col-span-5 relative">
-                <div className="relative mx-auto max-w-md lg:max-w-none">
+                <div className="relative mx-auto max-w-sm sm:max-w-md lg:max-w-[400px]">
                   {/* Subtle Indigo/Blue Glow Backdrop */}
                   <div className="absolute -inset-2 bg-gradient-to-tr from-blue-600/20 via-indigo-500/20 to-sky-400/20 rounded-[2.2rem] blur-xl -z-10" />
 
                   {/* Main Card Graphic Preserving 1:1 Aspect Ratio */}
                   <div className="p-3 sm:p-4 rounded-3xl bg-white border-2 border-white/80 shadow-2xl space-y-3 relative overflow-hidden backdrop-blur-md">
-                    <div className="relative aspect-square w-full rounded-2xl overflow-hidden bg-slate-50 border border-slate-200/80">
+                    <div className="relative aspect-square w-full max-h-[320px] sm:max-h-[340px] max-w-[340px] mx-auto rounded-2xl overflow-hidden bg-slate-50 border border-slate-200/80">
                       <Image
                         src={photo2}
                         alt="Find the Right Educator for a Brighter Future - EduConnects Learner Experience"
                         priority
-                        sizes="(max-width: 768px) 100vw, (max-width: 1200px) 45vw, 520px"
+                        sizes="(max-width: 768px) 100vw, (max-width: 1200px) 45vw, 400px"
                         className="w-full h-full object-contain"
                       />
                     </div>
