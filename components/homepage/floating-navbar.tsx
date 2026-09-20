@@ -561,27 +561,9 @@ export function FloatingNavbar({ variant }: FloatingNavbarProps = {}) {
           </nav>
 
           {/* ========================================================================= */}
-          {/* 3. RIGHT: ROLE-AWARE ACTION CLUSTER & RESPONSIVE BADGE */}
+          {/* 3. RIGHT: ROLE-AWARE ACTION CLUSTER */}
           {/* ========================================================================= */}
           <div className="flex items-center gap-2 sm:gap-3 shrink-0">
-            {/* Provided Right-Side Badge (Educator Portal) */}
-            {isEducator && (
-              <Link
-                href="/courses"
-                className="flex items-center shrink-0 transition-transform duration-150 hover:scale-[1.03] active:scale-95 focus:outline-none focus-visible:ring-2 focus-visible:ring-white/40"
-                aria-label="Explore Courses"
-              >
-                <Image
-                  src="/images/header-right-badge.png"
-                  alt="Explore Courses"
-                  width={140}
-                  height={36}
-                  priority
-                  className="h-7 sm:h-8 md:h-8.5 w-auto object-contain drop-shadow-xs"
-                />
-              </Link>
-            )}
-
             {isLearner ? (
               /* ========================================================================= */
               /* 3A. LEARNER RIGHT ACTION CLUSTER (INDEPENDENT, CLEAN, STRICT ORDER) */
