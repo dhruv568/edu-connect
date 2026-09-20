@@ -29,7 +29,7 @@ export function SocialProofTestimonials(_props: SocialProofTestimonialsProps = {
       id: 1,
       name: "Arjun Mehta",
       role: "12th Grade CBSE STEM",
-      avatar: "https://images.unsplash.com/photo-1539571696357-5a69c17a67c6?w=150&auto=format&fit=crop&q=80",
+      avatar: "/images/educators/male-1.jpg",
       model: "LIVE",
       modelLabel: "Live Class Slots",
       badgeVariant: "indigo" as const,
@@ -44,7 +44,7 @@ export function SocialProofTestimonials(_props: SocialProofTestimonialsProps = {
       id: 2,
       name: "Priya Sharma",
       role: "NEET Medical Aspirant",
-      avatar: "https://images.unsplash.com/photo-1517841905240-472988babdf9?w=150&auto=format&fit=crop&q=80",
+      avatar: "/images/educators/female-1.jpg",
       model: "DEMO",
       modelLabel: "1-on-1 Demo Session",
       badgeVariant: "blue" as const,
@@ -59,7 +59,7 @@ export function SocialProofTestimonials(_props: SocialProofTestimonialsProps = {
       id: 3,
       name: "David Chen",
       role: "College Freshman & Coder",
-      avatar: "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=150&auto=format&fit=crop&q=80",
+      avatar: "/images/educators/male-2.jpg",
       model: "LMS",
       modelLabel: "Pre-recorded LMS Course",
       badgeVariant: "emerald" as const,
@@ -74,7 +74,7 @@ export function SocialProofTestimonials(_props: SocialProofTestimonialsProps = {
       id: 4,
       name: "Ananya Verma",
       role: "10th ICSE Board Topper",
-      avatar: "https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=150&auto=format&fit=crop&q=80",
+      avatar: "/images/educators/female-2.jpg",
       model: "LIVE",
       modelLabel: "Live Class Slots",
       badgeVariant: "indigo" as const,
@@ -114,7 +114,7 @@ export function SocialProofTestimonials(_props: SocialProofTestimonialsProps = {
           <div className="grid grid-cols-1 md:grid-cols-12 items-center">
             <div className="md:col-span-5 h-48 sm:h-56 md:h-full min-h-[220px] relative overflow-hidden bg-[#F2FAF8]">
               <img
-                src="https://images.unsplash.com/photo-1523240795612-9a054b0db644?w=800&auto=format&fit=crop&q=80"
+                src="/images/learner-hero.jpeg"
                 alt="Learners celebrating academic success and milestones"
                 className="w-full h-full object-cover object-center"
               />

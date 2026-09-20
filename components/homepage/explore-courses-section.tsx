@@ -1,155 +1,98 @@
 "use client";
 
-import React, { useState, useEffect } from "react";
+import React from "react";
 import Link from "next/link";
-import { ArrowRight, BookOpen, Clock, Tag } from "lucide-react";
+import { ArrowRight, Video, BookOpen, CheckCircle2 } from "lucide-react";
 import { GlassButton } from "@/components/glass/glass-button";
 
-interface CourseData {
-  id: string;
-  slug: string;
-  title: string;
-  thumbnailUrl?: string;
-  category?: string;
-  level?: string;
-  price?: number;
-  teacher?: {
-    name?: string;
-  };
-}
-
 export function ExploreCoursesSection() {
-  const [courses, setCourses] = useState<CourseData[]>([]);
-  const [loading, setLoading] = useState(true);
-
-  useEffect(() => {
-    async function fetchCourses() {
-      try {
-        const res = await fetch("/api/courses?limit=3");
-        if (res.ok) {
-          const json = await res.json();
-          if (json.data?.courses) {
-            setCourses(json.data.courses);
-          } else if (json.data?.items) {
-            setCourses(json.data.items);
-          }
-        }
-      } catch (err) {
-        // Fallback gracefully
-      } finally {
-        setLoading(false);
-      }
-    }
-    fetchCourses();
-  }, []);
+  const features = [
+    {
+      icon: Video,
+      title: "Video Lessons",
+      desc: "Structured, high-definition modular video lessons designed by verified educators to break down complex topics into clear concepts.",
+    },
+    {
+      icon: BookOpen,
+      title: "Study Resources",
+      desc: "Comprehensive chapter notes, formula cheat-sheets, and curated practice sets for thorough academic revision.",
+    },
+    {
+      icon: CheckCircle2,
+      title: "Quizzes",
+      desc: "Interactive topic assessments and practice quizzes with instant feedback to test and strengthen understanding.",
+    },
+  ];
 
   return (
     <section className="py-20 lg:py-28 bg-white border-b border-[#DCE5E4] font-sans">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 space-y-12">
         {/* Section Header */}
-        <div className="flex flex-col md:flex-row items-center justify-between gap-6">
-          <div className="space-y-2 text-center md:text-left">
-            <span className="text-xs font-black text-[#0F5C5A] uppercase tracking-widest px-3 py-1 rounded-full bg-[#E6F0EF]">
-              STRUCTURED LMS CURRICULA
-            </span>
-            <h2 className="text-3xl sm:text-4xl font-black text-[#102A2A] tracking-tight">
-              Learn through structured courses
-            </h2>
-            <p className="text-xs sm:text-sm text-[#5D7373] max-w-xl">
-              Access comprehensive video lessons, study resources, and quizzes created by subject experts.
-            </p>
-          </div>
-
-          <Link href="/courses">
-            <GlassButton
-              variant="primary"
-              className="bg-[#0F5C5A] hover:bg-[#083F3D] active:bg-[#052C2A] text-white font-extrabold px-6 rounded-full transition-all"
-              rightIcon={<ArrowRight className="h-4 w-4" />}
-            >
-              Explore All Courses →
-            </GlassButton>
-          </Link>
+        <div className="text-center max-w-3xl mx-auto space-y-3">
+          <span className="text-xs font-black text-[#0F5C5A] uppercase tracking-widest px-3.5 py-1.5 rounded-full bg-[#E6F0EF] inline-block">
+            LEARNING EXPERIENCE
+          </span>
+          <h2 className="text-3xl sm:text-4xl lg:text-5xl font-black text-[#102A2A] tracking-tight">
+            Learn. Practice. Grow.
+          </h2>
+          <p className="text-sm sm:text-base text-[#5D7373] leading-relaxed">
+            Advance your learning journey with structured video lessons, comprehensive study resources, and interactive quizzes designed by verified educators to support every step of your academic path.
+          </p>
         </div>
 
-        {/* Dynamic Courses Grid or Fallback State */}
-        {loading ? (
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-            {[1, 2, 3].map((i) => (
-              <div key={i} className="h-72 bg-[#F5F7F8] animate-pulse rounded-3xl border border-[#DCE5E4]" />
-            ))}
-          </div>
-        ) : courses.length > 0 ? (
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-            {courses.map((c) => (
-              <div
-                key={c.id}
-                className="p-5 rounded-3xl bg-[#F5F7F8] border border-[#DCE5E4] shadow-sm hover:shadow-xl transition-all space-y-4 flex flex-col justify-between group"
-              >
-                <div className="space-y-3">
-                  {/* Thumbnail */}
-                  <div className="h-44 rounded-2xl overflow-hidden bg-[#DCE5E4] relative">
-                    <img
-                      src={
-                        c.thumbnailUrl ||
-                        "https://images.unsplash.com/photo-1516321318423-f06f85e504b3?w=500&auto=format&fit=crop&q=80"
-                      }
-                      alt={c.title}
-                      className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
-                    />
-                    {c.category && (
-                      <span className="absolute top-3 left-3 px-2.5 py-1 rounded-full text-[10px] font-black bg-black/60 text-white backdrop-blur-md uppercase tracking-wider">
-                        {c.category}
-                      </span>
-                    )}
-                  </div>
-
-                  <h3 className="text-base font-extrabold text-[#102A2A] line-clamp-2 group-hover:text-[#0F5C5A] transition-colors">
-                    {c.title}
-                  </h3>
-
-                  {c.teacher?.name && (
-                    <p className="text-xs text-[#5D7373] font-semibold">
-                      By {c.teacher.name}
-                    </p>
-                  )}
-
-                  <div className="flex items-center justify-between text-xs pt-1 border-t border-[#DCE5E4]">
-                    {c.level && (
-                      <span className="text-[#5D7373] font-semibold">{c.level}</span>
-                    )}
-                    <span className="text-base font-black text-[#0F5C5A]">
-                      {c.price ? `₹${c.price}` : "Free"}
-                    </span>
-                  </div>
-                </div>
-
-                <Link href={`/courses/${c.slug || c.id}`}>
-                  <GlassButton variant="secondary" className="w-full justify-center text-xs font-bold bg-white hover:bg-[#083F3D] hover:text-white active:bg-[#052C2A] transition-all">
-                    View Course Details
-                  </GlassButton>
-                </Link>
-              </div>
-            ))}
-          </div>
-        ) : (
-          /* Polished Empty State for Courses */
-          <div className="p-10 rounded-3xl bg-[#F5F7F8] border border-[#DCE5E4] text-center space-y-4 max-w-xl mx-auto">
-            <div className="p-3.5 rounded-full bg-[#E6F0EF] text-[#0F5C5A] w-fit mx-auto">
-              <BookOpen className="h-8 w-8" />
+        {/* Content & Showcase Grid */}
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-12 items-center">
+          {/* Left: Image Showcase */}
+          <div className="lg:col-span-5 flex justify-center">
+            <div className="relative rounded-3xl overflow-hidden border border-[#DCE5E4] bg-[#F5F7F8] shadow-md p-3 sm:p-4 group w-full max-w-md lg:max-w-none">
+              <img
+                src="/images/courses-learning.png"
+                alt="EduConnects Learning Experience - Video Lessons, Study Resources, Quizzes"
+                className="w-full h-auto object-cover rounded-2xl group-hover:scale-[1.02] transition-transform duration-300"
+              />
             </div>
-            <h3 className="text-xl font-black text-[#102A2A]">Courses Coming Soon</h3>
-            <p className="text-xs sm:text-sm text-[#5D7373] leading-relaxed">
-              Our verified educators are actively recording new curriculum modules. Check back shortly or browse educators offering live classes.
-            </p>
+          </div>
+
+          {/* Right: 3 Feature Cards + CTA */}
+          <div className="lg:col-span-7 space-y-6">
+            <div className="space-y-4">
+              {features.map((item) => {
+                const IconComp = item.icon;
+                return (
+                  <div
+                    key={item.title}
+                    className="p-5 sm:p-6 rounded-3xl bg-[#F5F7F8] border border-[#DCE5E4] hover:border-[#0F5C5A]/40 hover:bg-[#E6F0EF]/40 transition-all flex items-start gap-4 sm:gap-5 group"
+                  >
+                    <div className="p-3 sm:p-3.5 rounded-2xl bg-[#E6F0EF] text-[#0F5C5A] group-hover:bg-[#0F5C5A] group-hover:text-white transition-colors shrink-0 mt-0.5">
+                      <IconComp className="h-6 w-6" />
+                    </div>
+                    <div className="space-y-1">
+                      <h3 className="text-base sm:text-lg font-black text-[#102A2A] group-hover:text-[#0F5C5A] transition-colors">
+                        {item.title}
+                      </h3>
+                      <p className="text-xs sm:text-sm text-[#5D7373] leading-relaxed">
+                        {item.desc}
+                      </p>
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+
+            {/* CTA Button */}
             <div className="pt-2">
-              <Link href="/find-teachers">
-                <GlassButton variant="primary" className="bg-[#0F5C5A] hover:bg-[#083F3D] active:bg-[#052C2A] text-white text-xs font-extrabold transition-all">
-                  Find Live Educators →
+              <Link href="/find-teachers" className="inline-block w-full sm:w-auto">
+                <GlassButton
+                  variant="primary"
+                  className="w-full sm:w-auto bg-[#0F5C5A] hover:bg-[#083F3D] active:bg-[#052C2A] text-white font-extrabold px-8 py-3.5 rounded-full transition-all shadow-md inline-flex items-center justify-center gap-2"
+                  rightIcon={<ArrowRight className="h-4 w-4" />}
+                >
+                  Explore Educators
                 </GlassButton>
               </Link>
             </div>
           </div>
-        )}
+        </div>
       </div>
     </section>
   );
