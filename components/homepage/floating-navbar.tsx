@@ -326,7 +326,7 @@ export function FloatingNavbar({ variant }: FloatingNavbarProps = {}) {
             <Link
               href="/teacher"
               onClick={() => setMobileOpen(false)}
-              className="group flex items-center gap-2.5 sm:gap-3 focus:outline-none focus-visible:ring-2 focus-visible:ring-emerald-400 rounded-xl select-none shrink-0"
+              className="group flex items-center gap-2 sm:gap-2.5 focus:outline-none focus-visible:ring-2 focus-visible:ring-emerald-400 rounded-xl select-none shrink-0"
               aria-label="EduConnects Educator Home"
             >
               <div className="relative h-10 sm:h-11 md:h-12 w-auto aspect-[3/2] flex items-center justify-center shrink-0 transition-transform duration-200 group-hover:scale-[1.03]">
@@ -340,19 +340,53 @@ export function FloatingNavbar({ variant }: FloatingNavbarProps = {}) {
                   sizes="(max-width: 640px) 80px, (max-width: 1024px) 100px, 120px"
                 />
               </div>
-              <span className="text-base sm:text-lg font-black tracking-tight leading-none text-white transition-opacity group-hover:opacity-95">
-                Edu<span className="text-[#35A979]">Connects</span>
-              </span>
+              <div className="flex items-center gap-1.5 sm:gap-2">
+                <span className="text-base sm:text-lg font-black tracking-tight leading-none text-white transition-opacity group-hover:opacity-95">
+                  Edu<span className="text-[#35A979]">Connects</span>
+                </span>
+                <span className="text-white/40 font-light text-xs sm:text-sm select-none">|</span>
+                <span className="text-xs sm:text-sm font-bold text-emerald-200 tracking-wide whitespace-nowrap">
+                  Educator Portal
+                </span>
+              </div>
+            </Link>
+          ) : isLearner ? (
+            <Link
+              href="/student"
+              onClick={() => setMobileOpen(false)}
+              className="group flex items-center gap-2 sm:gap-2.5 focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-400 rounded-xl select-none shrink-0"
+              aria-label="EduConnects Learner Home"
+            >
+              <div className="relative h-10 sm:h-11 md:h-12 w-auto aspect-[3/2] flex items-center justify-center shrink-0 transition-transform duration-200 group-hover:scale-[1.03]">
+                <Image
+                  src={officialLogo}
+                  alt="EduConnects"
+                  width={1536}
+                  height={1024}
+                  priority
+                  className="h-full w-auto max-h-full object-contain filter drop-shadow-[0_2px_8px_rgba(0,0,0,0.3)]"
+                  sizes="(max-width: 640px) 80px, (max-width: 1024px) 100px, 120px"
+                />
+              </div>
+              <div className="flex items-center gap-1.5 sm:gap-2">
+                <span className="text-base sm:text-lg font-black tracking-tight leading-none text-white transition-opacity group-hover:opacity-95">
+                  Edu<span className="text-blue-400">Connects</span>
+                </span>
+                <span className="text-white/40 font-light text-xs sm:text-sm select-none">|</span>
+                <span className="text-xs sm:text-sm font-bold text-blue-200 tracking-wide whitespace-nowrap">
+                  Learner Portal
+                </span>
+              </div>
             </Link>
           ) : (
             <div className="flex items-center gap-2 sm:gap-3 shrink-0">
               <Logo
                 variant="compact"
                 size="md"
-                roleContext={isLearner ? "student" : "default"}
-                theme={isMainWebsite || isLearner ? "dark" : "auto"}
-                href={isLearner ? "/student" : getMainDomain() + "/"}
-                showTagline={!isLearner}
+                roleContext="default"
+                theme={isMainWebsite ? "dark" : "auto"}
+                href={getMainDomain() + "/"}
+                showTagline
                 tagline="Learn • Grow • Belong"
                 onClick={() => setMobileOpen(false)}
                 priority
@@ -527,13 +561,32 @@ export function FloatingNavbar({ variant }: FloatingNavbarProps = {}) {
           </nav>
 
           {/* ========================================================================= */}
-          {/* 3. RIGHT: ROLE-AWARE ACTION CLUSTER (PORTAL ONLY) */}
+          {/* 3. RIGHT: ROLE-AWARE ACTION CLUSTER & RESPONSIVE BADGE */}
           {/* ========================================================================= */}
-          {isLearner ? (
-            /* ========================================================================= */
-            /* 3A. LEARNER RIGHT ACTION CLUSTER (INDEPENDENT, CLEAN, STRICT ORDER) */
-            /* ========================================================================= */
-            <div className="hidden lg:flex items-center gap-3 shrink-0">
+          <div className="flex items-center gap-2 sm:gap-3 shrink-0">
+            {/* Provided Right-Side Badge (Neat & Responsive for Learner & Educator Portals) */}
+            {(isLearner || isEducator) && (
+              <Link
+                href="/courses"
+                className="flex items-center shrink-0 transition-transform duration-150 hover:scale-[1.03] active:scale-95 focus:outline-none focus-visible:ring-2 focus-visible:ring-white/40"
+                aria-label="Explore Courses"
+              >
+                <Image
+                  src="/images/header-right-badge.png"
+                  alt="Explore Courses"
+                  width={140}
+                  height={36}
+                  priority
+                  className="h-7 sm:h-8 md:h-8.5 w-auto object-contain drop-shadow-xs"
+                />
+              </Link>
+            )}
+
+            {isLearner ? (
+              /* ========================================================================= */
+              /* 3A. LEARNER RIGHT ACTION CLUSTER (INDEPENDENT, CLEAN, STRICT ORDER) */
+              /* ========================================================================= */
+              <div className="hidden lg:flex items-center gap-3 shrink-0">
               {userSession && isLearnerRole(userSession.role) ? (
                 <div className="flex items-center gap-3">
                   <Link
@@ -873,6 +926,7 @@ export function FloatingNavbar({ variant }: FloatingNavbarProps = {}) {
           >
             {mobileOpen ? <X className="h-5 w-5" /> : <Menu className="h-5 w-5" />}
           </button>
+          </div>
         </div>
       </header>
 
