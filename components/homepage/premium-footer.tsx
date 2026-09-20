@@ -704,7 +704,7 @@ export function PremiumFooter({ showCta = false, variant }: PremiumFooterProps =
                   : isLearner
                   ? "bg-[#1A2C76] border border-[#3157D5]/50"
                   : "bg-[#052C2A]/90 border border-[#1B6863]"
-              } rounded-2xl text-xs space-y-1.5 shadow-sm`}
+              } rounded-2xl text-xs space-y-2.5 shadow-sm`}
             >
               <div className="flex items-center gap-2 font-bold text-white text-xs">
                 <CreditCard
@@ -729,6 +729,133 @@ export function PremiumFooter({ showCta = false, variant }: PremiumFooterProps =
               >
                 Secure online payments.
               </p>
+
+              {/* Payment Methods */}
+              <div className="pt-2.5 border-t border-white/10 space-y-1.5">
+                <span
+                  className={`block text-[10px] font-bold uppercase tracking-wider ${
+                    isEducator
+                      ? "text-emerald-200/70"
+                      : isLearner
+                      ? "text-blue-200/70"
+                      : "text-teal-200/70"
+                  }`}
+                >
+                  Payment Methods
+                </span>
+                <div
+                  className="flex items-center gap-1.5 flex-wrap"
+                  aria-label="Accepted Payment Methods: UPI, Visa, Mastercard, RuPay"
+                >
+                  {/* UPI */}
+                  <div
+                    className="h-6 px-1.5 bg-white rounded flex items-center justify-center shadow-2xs border border-white/20 shrink-0"
+                    title="UPI"
+                  >
+                    <svg
+                      viewBox="0 0 54 18"
+                      className="h-3.5 w-auto"
+                      fill="none"
+                      xmlns="http://www.w3.org/2000/svg"
+                      aria-label="UPI"
+                    >
+                      <path d="M6.5 15.5L12 2.5H8L2.5 15.5H6.5Z" fill="#F47B20" />
+                      <path d="M11 15.5L16.5 2.5H12.5L7 15.5H11Z" fill="#097F52" />
+                      <text
+                        x="18"
+                        y="13.5"
+                        fontFamily="system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif"
+                        fontWeight="900"
+                        fontStyle="italic"
+                        fontSize="12.5"
+                        fill="#1A2746"
+                        letterSpacing="0.5"
+                      >
+                        UPI
+                      </text>
+                    </svg>
+                  </div>
+
+                  {/* Visa */}
+                  <div
+                    className="h-6 px-1.5 bg-white rounded flex items-center justify-center shadow-2xs border border-white/20 shrink-0"
+                    title="Visa"
+                  >
+                    <svg
+                      viewBox="0 0 50 16"
+                      className="h-3 w-auto"
+                      fill="none"
+                      xmlns="http://www.w3.org/2000/svg"
+                      aria-label="Visa"
+                    >
+                      <path
+                        d="M19.1 1.2L12.5 14.8H8.2L5 3.8C4.8 3.1 4.6 2.8 4 2.5C3.1 2 1.4 1.5 0 1.2L0.1 0.8H6.9C7.8 0.8 8.5 1.4 8.7 2.3L10.4 10.6L14.7 0.8H19.1ZM35.7 10.1C35.8 6.3 30.1 6.1 30.2 4.4C30.2 3.8 30.7 3.2 31.9 3.1C32.5 3 34.1 3 35.8 3.7L36.5 0.8C35.5 0.4 34.2 0 32.7 0C28.7 0 25.9 2 25.9 4.9C25.9 7 27.9 8.2 29.4 8.9C31 9.6 31.5 10.1 31.5 10.8C31.5 11.8 30.2 12.3 29.1 12.3C27 12.3 25.8 11.7 24.8 11.3L24.1 14.3C25.2 14.8 27.2 15.2 29.2 15.2C33.5 15.2 36.3 13.2 35.7 10.1ZM46.3 14.8H50L46.8 0.8H43.4C42.6 0.8 42 1.3 41.7 2L35.6 14.8H39.9L40.7 12.5H45.9L46.3 14.8ZM41.9 9.6L44 3.8L45.2 9.6H41.9ZM25 0.8L21.6 14.8H17.5L20.9 0.8H25Z"
+                        fill="#1434CB"
+                      />
+                    </svg>
+                  </div>
+
+                  {/* Mastercard */}
+                  <div
+                    className="h-6 px-1.5 bg-white rounded flex items-center justify-center shadow-2xs border border-white/20 shrink-0"
+                    title="Mastercard"
+                  >
+                    <svg
+                      viewBox="0 0 36 22"
+                      className="h-3.5 w-auto"
+                      fill="none"
+                      xmlns="http://www.w3.org/2000/svg"
+                      aria-label="Mastercard"
+                    >
+                      <circle cx="12" cy="11" r="9" fill="#EB001B" />
+                      <circle cx="24" cy="11" r="9" fill="#F79E1B" />
+                      <path
+                        d="M18 4.35A8.96 8.96 0 0 1 21.46 11 8.96 8.96 0 0 1 18 17.65 8.96 8.96 0 0 1 14.54 11 8.96 8.96 0 0 1 18 4.35Z"
+                        fill="#FF5F00"
+                      />
+                    </svg>
+                  </div>
+
+                  {/* RuPay */}
+                  <div
+                    className="h-6 px-1.5 bg-white rounded flex items-center justify-center shadow-2xs border border-white/20 shrink-0"
+                    title="RuPay"
+                  >
+                    <svg
+                      viewBox="0 0 52 16"
+                      className="h-3 w-auto"
+                      fill="none"
+                      xmlns="http://www.w3.org/2000/svg"
+                      aria-label="RuPay"
+                    >
+                      <text
+                        x="0"
+                        y="13"
+                        fontFamily="system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif"
+                        fontWeight="900"
+                        fontStyle="italic"
+                        fontSize="12.5"
+                        fill="#00396B"
+                      >
+                        Ru
+                      </text>
+                      <text
+                        x="17"
+                        y="13"
+                        fontFamily="system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif"
+                        fontWeight="900"
+                        fontStyle="italic"
+                        fontSize="12.5"
+                        fill="#F47B20"
+                      >
+                        Pay
+                      </text>
+                      <path d="M42 3L46 8L42 13H39L43 8L39 3H42Z" fill="#00A651" />
+                      <path d="M46 3L50 8L46 13H43L47 8L43 3H46Z" fill="#F47B20" />
+                    </svg>
+                  </div>
+                </div>
+              </div>
             </div>
           </div>
         </div>
