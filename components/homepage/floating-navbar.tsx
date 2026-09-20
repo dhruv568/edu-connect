@@ -1137,7 +1137,6 @@ export function FloatingNavbar({ variant }: FloatingNavbarProps = {}) {
                       className="py-2.5 px-3.5 rounded-xl text-teal-100 hover:bg-[#0F5C5A]/60 hover:text-white transition-colors flex items-center justify-between"
                     >
                       <span>For Learners</span>
-                      <span className="text-[10px] uppercase font-bold text-teal-200 bg-[#0F5C5A] px-2 py-0.5 rounded-md">↗ New Tab</span>
                     </a>
                     <a
                       href="https://educators.educonnects.co.in"
@@ -1147,7 +1146,6 @@ export function FloatingNavbar({ variant }: FloatingNavbarProps = {}) {
                       className="py-2.5 px-3.5 rounded-xl text-teal-100 hover:bg-[#0F5C5A]/60 hover:text-white transition-colors flex items-center justify-between"
                     >
                       <span>For Educators</span>
-                      <span className="text-[10px] uppercase font-bold text-teal-200 bg-[#0F5C5A] px-2 py-0.5 rounded-md">↗ New Tab</span>
                     </a>
                     <Link
                       href="/#success-stories"
