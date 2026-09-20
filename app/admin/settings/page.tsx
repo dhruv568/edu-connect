@@ -46,6 +46,7 @@ export default function AdminSettingsPage() {
     facebookUrl: OFFICIAL_COMPANY_INFO.socials.facebook,
     instagramUrl: OFFICIAL_COMPANY_INFO.socials.instagram,
     linkedinUrl: OFFICIAL_COMPANY_INFO.socials.linkedin,
+    whatsappUrl: OFFICIAL_COMPANY_INFO.socials.whatsapp || OFFICIAL_COMPANY_INFO.whatsappUrl,
   });
   const [savingSocial, setSavingSocial] = useState(false);
   const [socialError, setSocialError] = useState("");
@@ -101,6 +102,7 @@ export default function AdminSettingsPage() {
           facebookUrl: json.data.facebookUrl !== undefined ? json.data.facebookUrl : OFFICIAL_COMPANY_INFO.socials.facebook,
           instagramUrl: json.data.instagramUrl !== undefined ? json.data.instagramUrl : OFFICIAL_COMPANY_INFO.socials.instagram,
           linkedinUrl: json.data.linkedinUrl !== undefined ? json.data.linkedinUrl : OFFICIAL_COMPANY_INFO.socials.linkedin,
+          whatsappUrl: json.data.whatsappUrl !== undefined ? json.data.whatsappUrl : (OFFICIAL_COMPANY_INFO.socials.whatsapp || OFFICIAL_COMPANY_INFO.whatsappUrl),
         });
       }
     } catch (err) {
@@ -185,7 +187,22 @@ export default function AdminSettingsPage() {
   const saveSocialSettings = async () => {
     setSocialError("");
     const urlPattern = /^https?:\/\/.+/i;
-    for (const [platform, url] of Object.entries(socialSettings)) {
+
+    let currentWhatsapp = (socialSettings.whatsappUrl || "").trim();
+    if (currentWhatsapp && !urlPattern.test(currentWhatsapp)) {
+      if (/^[0-9+\s\-()]+$/.test(currentWhatsapp)) {
+        currentWhatsapp = `https://wa.me/${currentWhatsapp.replace(/[^0-9]/g, "")}`;
+      } else if (currentWhatsapp.startsWith("wa.me/")) {
+        currentWhatsapp = `https://${currentWhatsapp}`;
+      }
+    }
+
+    const payloadToValidate: Record<string, string | undefined> = {
+      ...socialSettings,
+      whatsappUrl: currentWhatsapp,
+    };
+
+    for (const [platform, url] of Object.entries(payloadToValidate)) {
       const val = typeof url === "string" ? url.trim() : "";
       if (val !== "" && !urlPattern.test(val)) {
         setSocialError(`Please enter a valid URL starting with http:// or https:// for ${platform}.`);
@@ -203,10 +220,14 @@ export default function AdminSettingsPage() {
           social_facebook_url: (socialSettings.facebookUrl || "").trim(),
           social_instagram_url: (socialSettings.instagramUrl || "").trim(),
           social_linkedin_url: (socialSettings.linkedinUrl || "").trim(),
+          social_whatsapp_url: currentWhatsapp,
         }),
       });
       const data = await res.json();
       if (res.ok) {
+        if (currentWhatsapp !== socialSettings.whatsappUrl) {
+          setSocialSettings((prev) => ({ ...prev, whatsappUrl: currentWhatsapp }));
+        }
         alert("Social media settings updated successfully!");
       } else {
         setSocialError(data?.error?.message || "Failed to update social media links.");
@@ -620,6 +641,17 @@ export default function AdminSettingsPage() {
                   placeholder="https://instagram.com/educonnects"
                   value={socialSettings.instagramUrl}
                   onChange={(e) => setSocialSettings({ ...socialSettings, instagramUrl: e.target.value })}
+                  className="w-full h-10 px-3 bg-slate-100 dark:bg-slate-800 border-none rounded-xl font-semibold outline-none focus:ring-2 focus:ring-blue-500"
+                />
+              </div>
+
+              <div>
+                <label className="font-bold text-slate-700 dark:text-slate-300 block mb-1">WhatsApp URL / Link</label>
+                <input
+                  type="url"
+                  placeholder="https://wa.me/919109019090 or https://chat.whatsapp.com/..."
+                  value={socialSettings.whatsappUrl}
+                  onChange={(e) => setSocialSettings({ ...socialSettings, whatsappUrl: e.target.value })}
                   className="w-full h-10 px-3 bg-slate-100 dark:bg-slate-800 border-none rounded-xl font-semibold outline-none focus:ring-2 focus:ring-blue-500"
                 />
               </div>

@@ -1,6 +1,7 @@
 import { prisma } from "@/lib/prisma";
 import { AuditLogger } from "@/lib/audit-logger";
 import { DEFAULT_CURRENCY } from "@/lib/currency";
+import { OFFICIAL_COMPANY_INFO } from "@/lib/company";
 
 export interface UserFilterOptions {
   search?: string;
@@ -984,6 +985,7 @@ export class AdminService {
       facebookUrl: settings.social_facebook_url || "",
       instagramUrl: settings.social_instagram_url || "",
       linkedinUrl: settings.social_linkedin_url || "",
+      whatsappUrl: settings.social_whatsapp_url !== undefined ? settings.social_whatsapp_url : (settings.company_whatsapp_url || OFFICIAL_COMPANY_INFO.socials.whatsapp || OFFICIAL_COMPANY_INFO.whatsappUrl || ""),
     };
   }
 

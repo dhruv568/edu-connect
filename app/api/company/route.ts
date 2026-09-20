@@ -39,6 +39,7 @@ export async function GET() {
         facebook: settingsMap.social_facebook_url !== undefined ? settingsMap.social_facebook_url : OFFICIAL_COMPANY_INFO.socials.facebook,
         instagram: settingsMap.social_instagram_url !== undefined ? settingsMap.social_instagram_url : OFFICIAL_COMPANY_INFO.socials.instagram,
         linkedin: settingsMap.social_linkedin_url !== undefined ? settingsMap.social_linkedin_url : OFFICIAL_COMPANY_INFO.socials.linkedin,
+        whatsapp: settingsMap.social_whatsapp_url !== undefined ? settingsMap.social_whatsapp_url : (settingsMap.company_whatsapp_url || OFFICIAL_COMPANY_INFO.socials.whatsapp || OFFICIAL_COMPANY_INFO.whatsappUrl),
       },
     };
 

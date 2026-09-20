@@ -29,6 +29,7 @@ export interface CompanyInfo {
     facebook: string;
     youtube: string;
     linkedin?: string;
+    whatsapp?: string;
   };
 }
 
@@ -60,6 +61,7 @@ export const OFFICIAL_COMPANY_INFO: CompanyInfo = {
     facebook: "My Pro Funnels",
     youtube: "myprofunnels",
     linkedin: "",
+    whatsapp: "https://wa.me/919109019090",
   },
 };
 
