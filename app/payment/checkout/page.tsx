@@ -86,10 +86,31 @@ function CheckoutContent() {
         const data = await res.json();
         if (!res.ok) {
           // If code was rejected, provide specific offer error if relevant
-          if (effectiveOfferCode && (data.error?.includes("offer") || data.error?.includes("OFFER") || data.error?.includes("NOT_FOUND"))) {
-            setOfferError(data.error || "Invalid or expired offer code.");
-            // Re-fetch without code if the user tried applying an invalid code
-            if (codeToApply) {
+          if (effectiveOfferCode) {
+            const cleanError = (data.error || "Invalid or expired offer code.")
+              .replace(/^[A-Z_]+:\s*/, "");
+            setOfferError(cleanError);
+
+            // If we don't have orderData yet (e.g. invalid code from URL), initialize order WITHOUT the bad code so checkout doesn't stay blank
+            if (!orderData) {
+              const retryRes = await fetch("/api/payments/create-order", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({
+                  type,
+                  courseId: activeCourseId || undefined,
+                  liveClassSlotId: slotId || undefined,
+                }),
+              });
+              const retryData = await retryRes.json();
+              if (retryRes.ok && retryData.data) {
+                setOrderData(retryData.data);
+                setAppliedCode("");
+                setInputCode("");
+                return;
+              }
+            } else {
+              // Existing orderData exists, keep checkout active
               return;
             }
           }
@@ -117,7 +138,7 @@ function CheckoutContent() {
         setValidatingOffer(false);
       }
     },
-    [type, courseId, educatorId, slotId, appliedCode, router]
+    [type, courseId, educatorId, slotId, appliedCode, orderData, router]
   );
 
   useEffect(() => {
@@ -177,7 +198,7 @@ function CheckoutContent() {
 
     try {
       const isProd = orderData.env === "PRODUCTION";
-      const isMockSession = orderData.paymentSessionId?.startsWith("session_");
+      const isMockSession = orderData.paymentSessionId?.startsWith("session_mock_");
 
       // In production or when real Cashfree session exists, launch Cashfree Hosted Checkout SDK
       if (orderData.paymentSessionId && (isProd || !isMockSession)) {
@@ -283,7 +304,7 @@ function CheckoutContent() {
                 <div className="flex gap-2">
                   <input
                     type="text"
-                    placeholder="Enter code, e.g. 900FF"
+                    placeholder="Enter coupon code, e.g. EDU40"
                     value={inputCode}
                     onChange={(e) => {
                       setInputCode(e.target.value.toUpperCase());

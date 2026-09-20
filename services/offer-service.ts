@@ -22,17 +22,27 @@ export interface OfferValidationResult {
 
 export class OfferService {
   /**
-   * Find an offer dynamically by code (case-insensitive, trims whitespace, handles 90OFF/900FF variants and legacy offers)
+   * Find an offer dynamically by code (prioritized direct match, case-insensitive, trims whitespace, handles typo variants and fallback)
    */
   static async findOfferByCode(rawCode: string) {
     if (!rawCode) return null;
     const cleanCode = rawCode.trim().toUpperCase();
     if (!cleanCode) return null;
 
-    const candidates = new Set<string>();
-    candidates.add(cleanCode);
+    // 1. Direct prioritized match on code (case-insensitive)
+    let offer = await prisma.offer.findFirst({
+      where: {
+        code: {
+          equals: cleanCode,
+          mode: "insensitive",
+        },
+      },
+    });
 
-    // Common typo substitutions (e.g. 90OFF <-> 900FF)
+    if (offer) return offer;
+
+    // 2. Candidate typo substitutions (e.g. 0 vs O, 90OFF <-> 900FF)
+    const candidates = new Set<string>();
     if (cleanCode.includes("90OFF")) {
       candidates.add(cleanCode.replace(/90OFF/g, "900FF"));
     }
@@ -47,25 +57,27 @@ export class OfferService {
     }
     candidates.add(cleanCode.replace(/O/g, "0"));
     candidates.add(cleanCode.replace(/0/g, "O"));
+    candidates.delete(cleanCode);
 
     const candidateList = Array.from(candidates);
 
-    // 1. Direct code match (case-insensitive across candidates)
-    let offer = await prisma.offer.findFirst({
-      where: {
-        code: {
-          in: candidateList,
-          mode: "insensitive",
+    if (candidateList.length > 0) {
+      offer = await prisma.offer.findFirst({
+        where: {
+          code: {
+            in: candidateList,
+            mode: "insensitive",
+          },
         },
-      },
-    });
+      });
+      if (offer) return offer;
+    }
 
-    if (offer) return offer;
-
-    // 2. Fallback: match inside discountText or title
+    // 3. Fallback: match inside discountText or title
+    const searchTerms = [cleanCode, ...candidateList];
     offer = await prisma.offer.findFirst({
       where: {
-        OR: candidateList.flatMap((cand) => [
+        OR: searchTerms.flatMap((cand) => [
           { discountText: { contains: cand, mode: "insensitive" } },
           { title: { contains: cand, mode: "insensitive" } },
         ]),
@@ -165,8 +177,16 @@ export class OfferService {
     }
 
     // Check Target Audience if specified
-    if (options?.targetAudience && offer.targetAudience !== "ALL") {
-      if (offer.targetAudience !== options.targetAudience) {
+    if (options?.targetAudience && offer.targetAudience && offer.targetAudience !== "ALL") {
+      const allowedAudiences = new Set<string>(["ALL"]);
+      if (options.targetAudience === "LEARNERS" || options.targetAudience === "STUDENT") {
+        // Students can use offers designated for the main portal or learner app
+        allowedAudiences.add("LEARNERS");
+        allowedAudiences.add("MAIN");
+      } else {
+        allowedAudiences.add(options.targetAudience);
+      }
+      if (!allowedAudiences.has(offer.targetAudience)) {
         throw new Error("AUDIENCE_RESTRICTION: This offer is not applicable for your account type.");
       }
     }

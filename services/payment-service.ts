@@ -217,7 +217,18 @@ export class PaymentService {
       }
 
       if (slot.status === "PENDING" && slot.lockedUntil && new Date(slot.lockedUntil) > new Date()) {
-        throw new Error("SLOT_LOCKED: This slot is currently locked in checkout. Please choose another slot or try again shortly.");
+        // Check if there is an active checkout order by a DIFFERENT user within the 15-minute lock window
+        const activeOtherOrder = await prisma.paymentOrder.findFirst({
+          where: {
+            liveClassSlotId: slot.id,
+            userId: { not: userId },
+            status: "CREATED",
+            createdAt: { gte: new Date(Date.now() - 15 * 60 * 1000) },
+          },
+        });
+        if (activeOtherOrder) {
+          throw new Error("SLOT_LOCKED: This slot is currently locked in checkout by another learner. Please choose another slot or try again shortly.");
+        }
       }
 
       // Capacity protection check
@@ -363,7 +374,8 @@ export class PaymentService {
     const studentName = user.profile
       ? `${user.profile.firstName} ${user.profile.lastName}`.trim()
       : "EduConnects Learner";
-    const studentPhone = user.profile?.phone || "9999999999";
+    const rawPhone = (user.profile?.phone || "").replace(/\D/g, "");
+    const studentPhone = rawPhone.length >= 10 ? rawPhone.slice(-10) : "9999999999";
 
     const cfOrder = await cashfreeClient.createOrder({
       orderId: cfOrderId,
