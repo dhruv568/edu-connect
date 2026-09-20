@@ -26,6 +26,37 @@ import {
 import { OFFICIAL_COMPANY_INFO } from "@/lib/company";
 import { Logo } from "@/components/brand/logo";
 
+function WhatsAppIcon({ className }: { className?: string }) {
+  return (
+    <svg
+      viewBox="0 0 24 24"
+      fill="currentColor"
+      className={className}
+      aria-hidden="true"
+      xmlns="http://www.w3.org/2000/svg"
+    >
+      <path d="M17.472 14.382c-.301-.15-1.78-.878-2.056-.978-.276-.101-.477-.15-.678.15-.2.301-.777.978-.952 1.178-.175.201-.35.226-.651.076-.301-.15-1.272-.469-2.424-1.496-.896-.799-1.501-1.786-1.677-2.087-.175-.301-.019-.464.132-.614.135-.135.301-.35.451-.526.15-.175.201-.301.301-.501.101-.201.05-.376-.025-.526-.075-.15-.678-1.634-.928-2.238-.244-.588-.492-.508-.678-.517-.175-.01-.376-.01-.577-.01-.201 0-.526.075-.802.376-.276.301-1.053 1.028-1.053 2.507 0 1.479 1.078 2.908 1.229 3.109.15.201 2.12 3.238 5.137 4.542.718.31 1.279.496 1.716.635.721.23 1.377.198 1.896.12.578-.088 1.78-.727 2.03-1.43.25-.702.25-1.303.175-1.43-.075-.126-.276-.201-.577-.351z" />
+      <path d="M12.004 2C6.48 2 2 6.48 2 12.004c0 1.954.56 3.784 1.528 5.334L2.25 21.75l4.546-1.246a9.96 9.96 0 0 0 5.208 1.496c5.524 0 10.004-4.48 10.004-10.004C22.008 6.48 17.528 2 12.004 2zm0 18.275a8.23 8.23 0 0 1-4.22-1.164l-.303-.18-3.136.86.842-3.056-.197-.314a8.243 8.243 0 1 1 15.258-4.425 8.28 8.28 0 0 1-8.244 8.279z" />
+    </svg>
+  );
+}
+
+const normalizeSocialUrl = (url?: string, platform?: string) => {
+  if (!url || typeof url !== "string" || !url.trim()) return "";
+  const trimmed = url.trim();
+  if (trimmed.startsWith("http://") || trimmed.startsWith("https://")) return trimmed;
+  if (platform === "whatsapp") {
+    const cleanDigits = trimmed.replace(/[^0-9]/g, "");
+    if (cleanDigits) return `https://wa.me/${cleanDigits}`;
+    return `https://${trimmed}`;
+  }
+  if (platform === "youtube") return `https://youtube.com/@${trimmed.replace(/^@/, "")}`;
+  if (platform === "facebook") return `https://facebook.com/${trimmed}`;
+  if (platform === "instagram") return `https://instagram.com/${trimmed.replace(/^@/, "")}`;
+  if (platform === "linkedin") return `https://linkedin.com/in/${trimmed}`;
+  return `https://${trimmed}`;
+};
+
 export interface PremiumFooterProps {
   showCta?: boolean;
   variant?: "default" | "student" | "teacher";
@@ -80,25 +111,31 @@ export function PremiumFooter({ showCta = false, variant }: PremiumFooterProps =
   const socialLinks = [
     {
       name: "YouTube",
-      url: socials.youtube,
+      url: normalizeSocialUrl(socials.youtube, "youtube"),
       icon: Youtube,
       hoverClass: "hover:text-red-400 hover:border-red-400/40",
     },
     {
       name: "Facebook",
-      url: socials.facebook,
+      url: normalizeSocialUrl(socials.facebook, "facebook"),
       icon: Facebook,
       hoverClass: "hover:text-blue-400 hover:border-blue-400/40",
     },
     {
       name: "Instagram",
-      url: socials.instagram,
+      url: normalizeSocialUrl(socials.instagram, "instagram"),
       icon: Instagram,
       hoverClass: "hover:text-pink-400 hover:border-pink-400/40",
     },
     {
+      name: "WhatsApp",
+      url: normalizeSocialUrl(socials.whatsapp, "whatsapp"),
+      icon: WhatsAppIcon,
+      hoverClass: "hover:text-emerald-400 hover:border-emerald-400/40",
+    },
+    {
       name: "LinkedIn",
-      url: socials.linkedin,
+      url: normalizeSocialUrl(socials.linkedin, "linkedin"),
       icon: Linkedin,
       hoverClass: "hover:text-sky-400 hover:border-sky-400/40",
     },
