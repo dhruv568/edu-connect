@@ -515,29 +515,6 @@ function AboutContent({ initialTheme }: AboutContentProps = {}) {
 
           <div className="relative z-10 p-6 sm:p-10 lg:p-14 text-white">
             <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-12 items-center">
-              {/* Founder Portrait Column */}
-              <div className="lg:col-span-5 flex flex-col items-center text-center">
-                <div
-                  className={`relative w-full max-w-[320px] sm:max-w-[360px] aspect-[4/5] rounded-3xl overflow-hidden shadow-2xl border-4 ${theme.founder.portraitBorder} bg-slate-900 group`}
-                >
-                  <img
-                    src="/images/educonnect-owner-photo.jpeg"
-                    alt="Neeraj Shrivastava - Founder of EduConnects"
-                    className="w-full h-full object-cover object-top transition-transform duration-500 group-hover:scale-105"
-                  />
-                  <div className="absolute inset-0 bg-gradient-to-t from-slate-950/90 via-slate-950/20 to-transparent" />
-                  <div className="absolute bottom-4 left-4 right-4 text-left">
-                    <span
-                      className={`inline-block text-[10px] font-extrabold uppercase tracking-wider ${theme.founder.badgeText} ${theme.founder.badgeBg} px-2.5 py-0.5 rounded-full border ${theme.founder.badgeBorder} mb-1`}
-                    >
-                      Founder & Academic Leader
-                    </span>
-                    <div className="text-lg sm:text-xl font-black text-white">Neeraj Shrivastava</div>
-                    <div className="text-xs text-slate-300 font-medium">Founder of EduConnects</div>
-                  </div>
-                </div>
-              </div>
-
               {/* Founder Narrative & Vision/Mission Column */}
               <div className="lg:col-span-7 space-y-6">
                 <div className="space-y-3">
@@ -613,6 +590,29 @@ function AboutContent({ initialTheme }: AboutContentProps = {}) {
                   className={`pt-3 border-t ${theme.founder.taglineBorder} flex items-center justify-between flex-wrap gap-2 text-xs sm:text-sm font-bold ${theme.founder.taglineText}`}
                 >
                   <span>EduConnects — Connecting Education. Creating Opportunities.</span>
+                </div>
+              </div>
+
+              {/* Founder Portrait Column */}
+              <div className="lg:col-span-5 flex flex-col items-center text-center">
+                <div
+                  className={`relative w-full max-w-[320px] sm:max-w-[360px] aspect-[4/5] rounded-3xl overflow-hidden shadow-2xl border-4 ${theme.founder.portraitBorder} bg-slate-900 group`}
+                >
+                  <img
+                    src="/images/educonnect-owner-photo.jpeg"
+                    alt="Neeraj Shrivastava - Founder of EduConnects"
+                    className="w-full h-full object-cover object-top transition-transform duration-500 group-hover:scale-105"
+                  />
+                  <div className="absolute inset-0 bg-gradient-to-t from-slate-950/90 via-slate-950/20 to-transparent" />
+                  <div className="absolute bottom-4 left-4 right-4 text-left">
+                    <span
+                      className={`inline-block text-[10px] font-extrabold uppercase tracking-wider ${theme.founder.badgeText} ${theme.founder.badgeBg} px-2.5 py-0.5 rounded-full border ${theme.founder.badgeBorder} mb-1`}
+                    >
+                      Founder & Academic Leader
+                    </span>
+                    <div className="text-lg sm:text-xl font-black text-white">Neeraj Shrivastava</div>
+                    <div className="text-xs text-slate-300 font-medium">Founder of EduConnects</div>
+                  </div>
                 </div>
               </div>
             </div>

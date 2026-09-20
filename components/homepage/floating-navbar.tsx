@@ -564,8 +564,8 @@ export function FloatingNavbar({ variant }: FloatingNavbarProps = {}) {
           {/* 3. RIGHT: ROLE-AWARE ACTION CLUSTER & RESPONSIVE BADGE */}
           {/* ========================================================================= */}
           <div className="flex items-center gap-2 sm:gap-3 shrink-0">
-            {/* Provided Right-Side Badge (Neat & Responsive for Learner & Educator Portals) */}
-            {(isLearner || isEducator) && (
+            {/* Provided Right-Side Badge (Educator Portal) */}
+            {isEducator && (
               <Link
                 href="/courses"
                 className="flex items-center shrink-0 transition-transform duration-150 hover:scale-[1.03] active:scale-95 focus:outline-none focus-visible:ring-2 focus-visible:ring-white/40"
