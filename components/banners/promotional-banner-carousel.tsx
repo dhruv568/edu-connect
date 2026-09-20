@@ -1,22 +1,11 @@
 "use client";
 
-import React, { useState, useEffect, useMemo, useRef, useCallback } from "react";
+import React, { useState, useEffect, useMemo, useCallback } from "react";
 import Link from "next/link";
 import Image from "next/image";
 import { usePathname } from "next/navigation";
 import { motion, AnimatePresence } from "framer-motion";
-import {
-  ChevronLeft,
-  ChevronRight,
-  ArrowRight,
-  Flame,
-  Sparkles,
-  Bell,
-  BookOpen,
-  Calendar,
-  Tag,
-  ExternalLink,
-} from "lucide-react";
+import { ChevronLeft, ChevronRight } from "lucide-react";
 
 export interface PromotionalBannerItem {
   id: string;
@@ -213,77 +202,14 @@ export function PromotionalBannerCarousel({
   const currentBanner = banners[currentIndex] || banners[0];
   if (!currentBanner) return null;
 
-  // Website Theme Styles Configuration
-  const themeStyles = {
-    MAIN: {
-      cardBg: "bg-gradient-to-br from-[#083F3D] via-[#0B4F4B] to-[#0F5C5A]",
-      border: "border-[#1B6863]/60",
-      shadow: "shadow-xl shadow-teal-950/25",
-      badgeDefault: "bg-[#F2C14E] text-[#083F3D]",
-      titleColor: "text-white",
-      subtitleColor: "text-[#F2C14E]",
-      descColor: "text-teal-100/90",
-      ctaBg: "bg-[#F2C14E] hover:bg-[#E0B03C] text-[#083F3D] shadow-md shadow-amber-950/30",
-      arrowBg: "bg-white/15 hover:bg-white/25 text-white border-white/20 focus:ring-[#F2C14E]",
-      dotActive: "bg-[#F2C14E] w-6",
-      dotInactive: "bg-white/35 hover:bg-white/60",
-      imageGlow: "group-hover:ring-2 group-hover:ring-[#F2C14E]/60",
-    },
-    LEARNERS: {
-      cardBg: "bg-gradient-to-br from-[#1A2E7B] via-[#243B9B] to-[#3157D5]",
-      border: "border-[#BFDBFE]/40",
-      shadow: "shadow-xl shadow-blue-950/25",
-      badgeDefault: "bg-white text-[#1E3185]",
-      titleColor: "text-white",
-      subtitleColor: "text-blue-200",
-      descColor: "text-blue-100/90",
-      ctaBg: "bg-white hover:bg-blue-50 text-[#1E3185] shadow-md shadow-blue-950/30",
-      arrowBg: "bg-white/15 hover:bg-white/25 text-white border-white/20 focus:ring-blue-300",
-      dotActive: "bg-white w-6",
-      dotInactive: "bg-white/35 hover:bg-white/60",
-      imageGlow: "group-hover:ring-2 group-hover:ring-blue-300/60",
-    },
-    EDUCATORS: {
-      cardBg: "bg-gradient-to-br from-[#0A4732] via-[#0D5C41] to-[#16805B]",
-      border: "border-[#A7F3D0]/40",
-      shadow: "shadow-xl shadow-emerald-950/25",
-      badgeDefault: "bg-[#DCFCE7] text-[#0D5C41]",
-      titleColor: "text-white",
-      subtitleColor: "text-[#A7F3D0]",
-      descColor: "text-emerald-100/90",
-      ctaBg: "bg-white hover:bg-emerald-50 text-[#0D5C41] shadow-md shadow-emerald-950/30",
-      arrowBg: "bg-white/15 hover:bg-white/25 text-white border-white/20 focus:ring-[#A7F3D0]",
-      dotActive: "bg-[#A7F3D0] w-6",
-      dotInactive: "bg-white/35 hover:bg-white/60",
-      imageGlow: "group-hover:ring-2 group-hover:ring-[#A7F3D0]/60",
-    },
-  };
-  const currentTheme = themeStyles[siteContext] || themeStyles.MAIN;
-
-  // Banner Type Icon & Label Mapping
-  const getBannerTypeDetails = (type: string) => {
-    switch (type.toUpperCase()) {
-      case "OFFER":
-        return { icon: Flame, label: "Special Offer" };
-      case "PROMOTION":
-        return { icon: Sparkles, label: "Featured Promotion" };
-      case "ANNOUNCEMENT":
-        return { icon: Bell, label: "Announcement" };
-      case "COURSE_PROMOTION":
-        return { icon: BookOpen, label: "Course Spotlight" };
-      case "EVENT":
-        return { icon: Calendar, label: "Special Event" };
-      default:
-        return { icon: Tag, label: "EduConnects Update" };
-    }
-  };
-
-  const { icon: BannerIcon, label: defaultTypeLabel } = getBannerTypeDetails(
-    currentBanner.bannerType
-  );
-
   const hasImageClick = Boolean(currentBanner.imageClickUrl && currentBanner.imageClickUrl.trim());
-  const hasCta = Boolean(currentBanner.ctaText && currentBanner.ctaUrl);
+  const clickTarget = currentBanner.imageClickTarget === "_blank" ? "_blank" : undefined;
+  const clickRel = currentBanner.imageClickTarget === "_blank" ? "noopener noreferrer" : undefined;
+
+  const bannerImageSrc =
+    imageErrorMap[currentBanner.id || currentBanner.imageUrl]
+      ? "/images/educonnects-owner-banner.jpeg"
+      : currentBanner.imageUrl;
 
   return (
     <section
@@ -302,150 +228,63 @@ export function PromotionalBannerCarousel({
       onTouchEnd={handleTouchEnd}
     >
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div
-          className={`relative rounded-3xl overflow-hidden border backdrop-blur-xl ${currentTheme.cardBg} ${currentTheme.border} ${currentTheme.shadow} transition-all duration-300`}
-        >
-          {/* Subtle Decorative Ambient Glow */}
-          <div className="absolute -top-24 -right-24 w-96 h-96 bg-white/10 rounded-full blur-3xl pointer-events-none" />
-          <div className="absolute -bottom-24 -left-24 w-96 h-96 bg-black/10 rounded-full blur-3xl pointer-events-none" />
-
+        <div className="relative w-full rounded-2xl sm:rounded-3xl overflow-hidden border border-slate-200/60 dark:border-slate-800/60 shadow-xl bg-slate-900/5 aspect-[16/8] sm:aspect-[21/8] md:aspect-[24/8] lg:aspect-[3/1] min-h-[160px] max-h-[440px]">
           {/* Animated Slide Transition */}
           <AnimatePresence mode="wait">
             <motion.div
               key={currentBanner.id || currentIndex}
-              initial={{ opacity: 0, y: 12 }}
-              animate={{ opacity: 1, y: 0 }}
-              exit={{ opacity: 0, y: -12 }}
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
               transition={{ duration: 0.35, ease: "easeInOut" }}
-              className="relative z-10 grid grid-cols-1 lg:grid-cols-12 items-center gap-6 sm:gap-8 p-5 sm:p-7 lg:p-9"
+              className="relative w-full h-full"
             >
-              {/* Left Column: Banner Typography & CTA Action */}
-              <div className="lg:col-span-7 space-y-3 sm:space-y-4 text-center lg:text-left flex flex-col justify-center">
-                {/* Banner Badge */}
-                <div className="flex items-center justify-center lg:justify-start gap-2 flex-wrap">
-                  <span
-                    className={`inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-[11px] sm:text-xs font-black uppercase tracking-wider shadow-2xs ${currentTheme.badgeDefault}`}
-                  >
-                    <BannerIcon className="h-3.5 w-3.5" />
-                    <span>{defaultTypeLabel}</span>
-                  </span>
-
-                  {currentBanner.subtitle && currentBanner.bannerType.toUpperCase() === "OFFER" && (
-                    <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[11px] font-extrabold uppercase tracking-wider bg-white/15 text-white border border-white/20">
-                      {currentBanner.subtitle}
-                    </span>
-                  )}
-                </div>
-
-                {/* Banner Headline */}
-                <h2
-                  className={`text-2xl sm:text-3xl lg:text-4xl font-black tracking-tight leading-tight ${currentTheme.titleColor}`}
+              {hasImageClick ? (
+                <Link
+                  href={currentBanner.imageClickUrl!.trim()}
+                  target={clickTarget}
+                  rel={clickRel}
+                  aria-label={`Promotional banner: ${currentBanner.title || "EduConnects Banner"}`}
+                  className="relative block w-full h-full cursor-pointer focus:outline-none select-none"
                 >
-                  {currentBanner.title}
-                </h2>
-
-                {/* Subtitle (when not purely offer badge) */}
-                {currentBanner.subtitle && currentBanner.bannerType.toUpperCase() !== "OFFER" && (
-                  <p className={`text-sm sm:text-base font-bold ${currentTheme.subtitleColor}`}>
-                    {currentBanner.subtitle}
-                  </p>
-                )}
-
-                {/* Description */}
-                {currentBanner.description && (
-                  <p
-                    className={`text-xs sm:text-sm lg:text-base font-normal leading-relaxed line-clamp-2 sm:line-clamp-3 ${currentTheme.descColor}`}
-                  >
-                    {currentBanner.description}
-                  </p>
-                )}
-
-                {/* CTA Button */}
-                {hasCta && (
-                  <div className="pt-2 flex items-center justify-center lg:justify-start">
-                    <Link
-                      href={currentBanner.ctaUrl!}
-                      onClick={(e) => e.stopPropagation()}
-                      className={`inline-flex items-center gap-2 px-5 sm:px-6 py-2.5 sm:py-3 rounded-2xl text-xs sm:text-sm font-black transition-all duration-200 transform hover:scale-[1.03] active:scale-95 cursor-pointer select-none ${currentTheme.ctaBg}`}
-                    >
-                      <span>{currentBanner.ctaText}</span>
-                      <ArrowRight className="h-4 w-4" />
-                    </Link>
-                  </div>
-                )}
-              </div>
-
-              {/* Right Column: Banner Image Container */}
-              <div className="lg:col-span-5 flex items-center justify-center">
-                {hasImageClick ? (
-                  /* ========================================================= */
-                  /* CLICKABLE IMAGE (When Image Click URL is configured)     */
-                  /* ========================================================= */
-                  <Link
-                    href={currentBanner.imageClickUrl!}
-                    target={currentBanner.imageClickTarget === "_blank" ? "_blank" : undefined}
-                    rel={currentBanner.imageClickTarget === "_blank" ? "noopener noreferrer" : undefined}
-                    aria-label={`Promotional banner: ${currentBanner.title}. Click to visit ${currentBanner.imageClickUrl}`}
-                    className={`group relative block w-full max-w-md aspect-video sm:aspect-[16/9] lg:aspect-[4/3] min-h-[190px] sm:min-h-[220px] lg:min-h-[250px] rounded-2xl overflow-hidden border border-white/20 shadow-lg cursor-pointer transition-all duration-300 transform hover:scale-[1.02] active:scale-[0.99] ${currentTheme.imageGlow}`}
-                  >
-                    <Image
-                      src={
-                        imageErrorMap[currentBanner.id || currentBanner.imageUrl]
-                          ? "/images/educonnects-owner-banner.jpeg"
-                          : currentBanner.imageUrl
-                      }
-                      alt={currentBanner.title}
-                      fill
-                      priority={currentIndex === 0}
-                      sizes="(max-width: 768px) 100vw, (max-width: 1200px) 45vw, 400px"
-                      className="object-cover transition-transform duration-500 group-hover:scale-105"
-                      unoptimized={true}
-                      onError={() => {
-                        setImageErrorMap((prev) => ({
-                          ...prev,
-                          [currentBanner.id || currentBanner.imageUrl]: true,
-                        }));
-                      }}
-                    />
-
-                    {/* Subtle Overlay Hint indicating clickable destination */}
-                    <div className="absolute inset-0 bg-black/0 group-hover:bg-black/20 transition-colors duration-200 flex items-center justify-center">
-                      <div className="opacity-0 group-hover:opacity-100 transition-opacity duration-200 px-3 py-1.5 rounded-full bg-black/60 backdrop-blur-md text-white text-[11px] font-bold flex items-center gap-1.5 shadow-lg">
-                        <span>Visit Link</span>
-                        <ExternalLink className="h-3 w-3" />
-                      </div>
-                    </div>
-                  </Link>
-                ) : (
-                  /* ========================================================= */
-                  /* NON-CLICKABLE IMAGE (When Image Click URL is empty)       */
-                  /* ========================================================= */
-                  <div
-                    aria-label={`Promotional banner image: ${currentBanner.title}`}
-                    className="relative w-full max-w-md aspect-video sm:aspect-[16/9] lg:aspect-[4/3] min-h-[190px] sm:min-h-[220px] lg:min-h-[250px] rounded-2xl overflow-hidden border border-white/20 shadow-lg cursor-default select-none"
-                  >
-                    <Image
-                      src={
-                        imageErrorMap[currentBanner.id || currentBanner.imageUrl]
-                          ? "/images/educonnects-owner-banner.jpeg"
-                          : currentBanner.imageUrl
-                      }
-                      alt={currentBanner.title}
-                      fill
-                      priority={currentIndex === 0}
-                      sizes="(max-width: 768px) 100vw, (max-width: 1200px) 45vw, 400px"
-                      className="object-cover"
-                      unoptimized={true}
-                      onError={() => {
-                        setImageErrorMap((prev) => ({
-                          ...prev,
-                          [currentBanner.id || currentBanner.imageUrl]: true,
-                        }));
-                      }}
-                    />
-                  </div>
-                )}
-              </div>
+                  <Image
+                    src={bannerImageSrc}
+                    alt={currentBanner.title || "Promotional Banner"}
+                    fill
+                    priority={currentIndex === 0}
+                    sizes="(max-width: 640px) 100vw, (max-width: 1024px) 95vw, 1280px"
+                    className="object-cover w-full h-full"
+                    unoptimized={true}
+                    onError={() => {
+                      setImageErrorMap((prev) => ({
+                        ...prev,
+                        [currentBanner.id || currentBanner.imageUrl]: true,
+                      }));
+                    }}
+                  />
+                </Link>
+              ) : (
+                <div
+                  aria-label={`Promotional banner: ${currentBanner.title || "EduConnects Banner"}`}
+                  className="relative w-full h-full cursor-default select-none"
+                >
+                  <Image
+                    src={bannerImageSrc}
+                    alt={currentBanner.title || "Promotional Banner"}
+                    fill
+                    priority={currentIndex === 0}
+                    sizes="(max-width: 640px) 100vw, (max-width: 1024px) 95vw, 1280px"
+                    className="object-cover w-full h-full"
+                    unoptimized={true}
+                    onError={() => {
+                      setImageErrorMap((prev) => ({
+                        ...prev,
+                        [currentBanner.id || currentBanner.imageUrl]: true,
+                      }));
+                    }}
+                  />
+                </div>
+              )}
             </motion.div>
           </AnimatePresence>
 
@@ -455,11 +294,12 @@ export function PromotionalBannerCarousel({
               <button
                 type="button"
                 onClick={(e) => {
+                  e.preventDefault();
                   e.stopPropagation();
                   prevSlide();
                 }}
                 aria-label="Previous promotional slide"
-                className={`absolute left-3 top-1/2 -translate-y-1/2 z-20 p-2 sm:p-2.5 rounded-full border backdrop-blur-md transition-all duration-200 cursor-pointer shadow-md focus:outline-none focus:ring-2 ${currentTheme.arrowBg}`}
+                className="absolute left-3 top-1/2 -translate-y-1/2 z-30 p-2 sm:p-2.5 rounded-full bg-black/40 hover:bg-black/70 text-white border border-white/20 backdrop-blur-md transition-all duration-200 cursor-pointer shadow-lg focus:outline-none"
               >
                 <ChevronLeft className="h-4 w-4 sm:h-5 sm:w-5" />
               </button>
@@ -467,11 +307,12 @@ export function PromotionalBannerCarousel({
               <button
                 type="button"
                 onClick={(e) => {
+                  e.preventDefault();
                   e.stopPropagation();
                   nextSlide();
                 }}
                 aria-label="Next promotional slide"
-                className={`absolute right-3 top-1/2 -translate-y-1/2 z-20 p-2 sm:p-2.5 rounded-full border backdrop-blur-md transition-all duration-200 cursor-pointer shadow-md focus:outline-none focus:ring-2 ${currentTheme.arrowBg}`}
+                className="absolute right-3 top-1/2 -translate-y-1/2 z-30 p-2 sm:p-2.5 rounded-full bg-black/40 hover:bg-black/70 text-white border border-white/20 backdrop-blur-md transition-all duration-200 cursor-pointer shadow-lg focus:outline-none"
               >
                 <ChevronRight className="h-4 w-4 sm:h-5 sm:w-5" />
               </button>
@@ -481,7 +322,7 @@ export function PromotionalBannerCarousel({
           {/* Carousel Indicators / Dots (Only shown when multiple banners exist) */}
           {total > 1 && (
             <div
-              className="absolute bottom-2.5 left-1/2 -translate-x-1/2 z-20 flex items-center gap-1.5"
+              className="absolute bottom-3 left-1/2 -translate-x-1/2 z-30 flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-black/35 backdrop-blur-sm"
               role="tablist"
               aria-label="Promotional banner carousel pagination"
             >
@@ -491,13 +332,14 @@ export function PromotionalBannerCarousel({
                   type="button"
                   role="tab"
                   aria-selected={idx === currentIndex}
-                  aria-label={`Go to slide ${idx + 1}: ${b.title}`}
+                  aria-label={`Go to slide ${idx + 1}`}
                   onClick={(e) => {
+                    e.preventDefault();
                     e.stopPropagation();
                     goToSlide(idx);
                   }}
                   className={`h-1.5 rounded-full transition-all duration-300 cursor-pointer ${
-                    idx === currentIndex ? currentTheme.dotActive : `w-2 ${currentTheme.dotInactive}`
+                    idx === currentIndex ? "w-6 bg-white" : "w-1.5 bg-white/50 hover:bg-white/80"
                   }`}
                 />
               ))}
