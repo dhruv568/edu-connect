@@ -227,23 +227,41 @@ Key Educator Features:
 Do not disclose admin dashboards or other educators' confidential data.`;
   } else if (role === "LEARNER") {
     let enrollmentsCount = 0;
+    let academicFocusText = "";
     if (userId) {
       try {
         enrollmentsCount = await prisma.enrollment.count({ where: { studentId: userId } });
-        dynamicContext = `Learner Status: Enrolled in ${enrollmentsCount} courses.`;
+        const studentProfile = await prisma.studentProfile.findUnique({
+          where: { userId },
+        });
+        if (studentProfile) {
+          if (studentProfile.educationType === "DIPLOMA") {
+            academicFocusText = `Diploma Studies (${studentProfile.diplomaBranch || "General Engineering"})`;
+          } else if (studentProfile.educationType === "SCHOOL") {
+            const parts = [
+              studentProfile.gradeLevel || "School",
+              studentProfile.stream ? `Stream: ${studentProfile.stream}` : null,
+              studentProfile.competitiveExam ? `Target Exam: ${studentProfile.competitiveExam}` : null,
+            ].filter(Boolean);
+            academicFocusText = `School (${parts.join(" • ")})`;
+          }
+        }
+        dynamicContext = `Learner Status: Enrolled in ${enrollmentsCount} courses.${academicFocusText ? ` Academic Focus: ${academicFocusText}.` : ""}`;
       } catch {}
     }
 
     roleInstructions = `
-You are assisting an authenticated LEARNER (Student).
+You are assisting an authenticated LEARNER.
 ${userName ? `Learner Name: ${userName}.` : ""}
-${dynamicContext ? `Account Status: ${dynamicContext}` : ""}
+${dynamicContext ? `Academic & Enrollment Context: ${dynamicContext}` : ""}
+${academicFocusText ? `Personalization Directive: The learner's academic focus is ${academicFocusText}. Proactively personalize your guidance, subject explanations, homework help, exam tips, and tutor/course recommendations to match this exact syllabus and curriculum level.` : ""}
 Key Learner Features:
 - Learner Dashboard: /student/dashboard
 - My Courses: /student/courses (access enrolled video courses, track lesson progress)
 - Live Classes: /student/live-classes (view booked live sessions, join interactive classroom)
-- Find Verified Educators: /find-teachers (filter by subject, hourly rate, book trial sessions)
+- Find Verified Educators: /find-teachers (filter by subject, grade, stream, diploma branch, book sessions)
 - Browse Courses: /courses
+- Free Practice Exams: /exam
 - Payment Receipts: /student/payments
 - Profile Settings: /profile`;
   } else {

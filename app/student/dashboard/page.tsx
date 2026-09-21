@@ -18,7 +18,12 @@ import {
   CheckCircle2,
   CreditCard,
   Loader2,
+  GraduationCap,
+  Award,
+  Sparkles,
+  ArrowRight,
 } from "lucide-react";
+import { formatAcademicProfileSummary } from "@/lib/constants/academic";
 
 export default function StudentDashboardPage() {
   const [loading, setLoading] = useState(true);
@@ -33,6 +38,15 @@ export default function StudentDashboardPage() {
     upcomingClasses: any[];
     enrolledCourses?: any[];
     recentActivity?: any[];
+    academicProfile?: {
+      educationType?: string | null;
+      gradeLevel?: string | null;
+      stream?: string | null;
+      competitiveExam?: string | null;
+      diplomaBranch?: string | null;
+    } | null;
+    recommendedCourses?: any[];
+    recommendedEducators?: any[];
     stats: {
       enrolledCount: number;
       completedCoursesCount: number;
@@ -48,6 +62,8 @@ export default function StudentDashboardPage() {
     upcomingClasses: [],
     enrolledCourses: [],
     recentActivity: [],
+    recommendedCourses: [],
+    recommendedEducators: [],
     stats: {
       enrolledCount: 0,
       completedCoursesCount: 0,
@@ -112,11 +128,35 @@ export default function StudentDashboardPage() {
                 <h1 className="text-2xl lg:text-3xl font-black tracking-tight">
                   {getGreeting()}, {data.userName} 👋
                 </h1>
-                {data.gradeLevel && (
+                {data.academicProfile?.educationType === "DIPLOMA" ? (
+                  <Badge variant="outline" className="text-white border-white/30 bg-white/10 text-[10px] hidden sm:inline-flex items-center gap-1">
+                    <GraduationCap className="w-3 h-3 text-cyan-300" />
+                    Diploma{data.academicProfile.diplomaBranch ? ` • ${data.academicProfile.diplomaBranch}` : ""}
+                  </Badge>
+                ) : data.academicProfile?.educationType === "SCHOOL" ? (
+                  <div className="hidden sm:inline-flex items-center gap-1.5 flex-wrap">
+                    {data.academicProfile.gradeLevel && (
+                      <Badge variant="outline" className="text-white border-white/30 bg-white/10 text-[10px]">
+                        {data.academicProfile.gradeLevel}
+                      </Badge>
+                    )}
+                    {data.academicProfile.stream && (
+                      <Badge variant="outline" className="text-amber-200 border-amber-300/40 bg-amber-400/20 text-[10px]">
+                        {data.academicProfile.stream}
+                      </Badge>
+                    )}
+                    {data.academicProfile.competitiveExam && (
+                      <Badge variant="outline" className="text-emerald-200 border-emerald-300/40 bg-emerald-400/20 text-[10px] items-center gap-1">
+                        <Award className="w-2.5 h-2.5" />
+                        Target: {data.academicProfile.competitiveExam}
+                      </Badge>
+                    )}
+                  </div>
+                ) : data.gradeLevel ? (
                   <Badge variant="outline" className="text-white border-white/30 bg-white/10 text-[10px] hidden sm:inline-flex">
                     {data.gradeLevel}
                   </Badge>
-                )}
+                ) : null}
               </div>
               <p className="text-xs sm:text-sm text-blue-100 font-medium">
                 {data.userEmail || "Your personalized learning dashboard"} • Ready to continue?
@@ -413,6 +453,120 @@ export default function StudentDashboardPage() {
               </Card>
             )}
           </div>
+        </div>
+
+        {/* Academic Focus & Personalized Recommendations */}
+        <div className="space-y-6">
+          <Card className="p-6 bg-gradient-to-r from-blue-50/80 via-indigo-50/50 to-purple-50/50 border border-blue-200/80 rounded-3xl shadow-sm">
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+              <div className="flex items-center gap-3">
+                <div className="w-12 h-12 rounded-2xl bg-[#3157D5]/10 text-[#3157D5] flex items-center justify-center shrink-0">
+                  <GraduationCap className="w-6 h-6" />
+                </div>
+                <div>
+                  <div className="flex items-center gap-2">
+                    <h3 className="text-base font-bold text-slate-900">Academic Profile & Focus</h3>
+                    <span className="inline-flex items-center gap-1 text-[11px] font-semibold text-emerald-700 bg-emerald-100/80 px-2 py-0.5 rounded-full">
+                      <Sparkles className="w-3 h-3" /> Active
+                    </span>
+                  </div>
+                  <p className="text-xs text-slate-600 mt-0.5">
+                    {data.academicProfile
+                      ? formatAcademicProfileSummary(data.academicProfile as any)
+                      : "Set your academic level to unlock personalized recommendations for educators and courses."}
+                  </p>
+                </div>
+              </div>
+
+              <Link href="/profile/edit" className="shrink-0">
+                <Button variant="outline" size="sm" className="bg-white border-blue-200 text-[#3157D5] hover:bg-blue-50 font-bold shadow-sm">
+                  Update Academic Focus
+                </Button>
+              </Link>
+            </div>
+          </Card>
+
+          {/* Recommended Educators & Courses based on Academic Profile */}
+          {((data.recommendedEducators && data.recommendedEducators.length > 0) ||
+            (data.recommendedCourses && data.recommendedCourses.length > 0)) && (
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+              {/* Recommended Educators */}
+              {data.recommendedEducators && data.recommendedEducators.length > 0 && (
+                <Card className="p-6 bg-white border border-slate-200 rounded-3xl shadow-sm space-y-4">
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <h4 className="text-sm font-bold text-slate-900 flex items-center gap-2">
+                        <Sparkles className="w-4 h-4 text-[#3157D5]" />
+                        Recommended Educators For You
+                      </h4>
+                      <p className="text-xs text-slate-500">Matching your academic stream and subjects</p>
+                    </div>
+                    <Link href="/student/teachers" className="text-xs font-bold text-[#3157D5] hover:underline flex items-center gap-1">
+                      View All <ArrowRight className="w-3 h-3" />
+                    </Link>
+                  </div>
+
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                    {data.recommendedEducators.map((t) => (
+                      <Link
+                        key={t.id}
+                        href={`/teachers/${t.id}`}
+                        className="p-3.5 rounded-2xl border border-slate-100 bg-slate-50/60 hover:bg-blue-50/50 hover:border-blue-200 transition-all flex items-center gap-3 group"
+                      >
+                        {t.avatarUrl ? (
+                          <img src={t.avatarUrl} alt={t.name} className="w-10 h-10 rounded-xl object-cover" />
+                        ) : (
+                          <div className="w-10 h-10 rounded-xl bg-blue-100 text-[#3157D5] font-bold flex items-center justify-center text-sm">
+                            {t.name.charAt(0)}
+                          </div>
+                        )}
+                        <div className="min-w-0 flex-1">
+                          <p className="text-xs font-bold text-slate-900 truncate group-hover:text-[#3157D5]">{t.name}</p>
+                          <p className="text-[11px] text-slate-500 truncate">{t.headline || t.subjects?.slice(0, 2).join(", ")}</p>
+                          <p className="text-[10px] font-bold text-emerald-600 mt-0.5">{t.hourlyRateFormatted}/hr</p>
+                        </div>
+                      </Link>
+                    ))}
+                  </div>
+                </Card>
+              )}
+
+              {/* Recommended Courses */}
+              {data.recommendedCourses && data.recommendedCourses.length > 0 && (
+                <Card className="p-6 bg-white border border-slate-200 rounded-3xl shadow-sm space-y-4">
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <h4 className="text-sm font-bold text-slate-900 flex items-center gap-2">
+                        <BookOpen className="w-4 h-4 text-purple-600" />
+                        Curriculum-Aligned Courses
+                      </h4>
+                      <p className="text-xs text-slate-500">Selected for your learning pathway</p>
+                    </div>
+                    <Link href="/courses" className="text-xs font-bold text-purple-600 hover:underline flex items-center gap-1">
+                      View All <ArrowRight className="w-3 h-3" />
+                    </Link>
+                  </div>
+
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                    {data.recommendedCourses.map((c) => (
+                      <Link
+                        key={c.id}
+                        href={`/courses/${c.slug}`}
+                        className="p-3 rounded-2xl border border-slate-100 bg-slate-50/60 hover:bg-purple-50/50 hover:border-purple-200 transition-all flex items-center gap-3 group"
+                      >
+                        <img src={c.thumbnailUrl} alt={c.title} className="w-12 h-12 rounded-xl object-cover bg-slate-200" />
+                        <div className="min-w-0 flex-1">
+                          <p className="text-xs font-bold text-slate-900 truncate group-hover:text-purple-600">{c.title}</p>
+                          <p className="text-[11px] text-slate-500 truncate">{c.subject} • {c.level}</p>
+                          <p className="text-[10px] font-bold text-purple-700 mt-0.5">{c.priceFormatted}</p>
+                        </div>
+                      </Link>
+                    ))}
+                  </div>
+                </Card>
+              )}
+            </div>
+          )}
         </div>
 
         {/* Quick Actions & Navigation Shortcuts */}

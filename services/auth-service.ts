@@ -78,11 +78,15 @@ export class AuthService {
       hourlyRate: input.hourlyRate,
       qualifications: input.qualifications,
       languages: input.languages,
-      teachingMode: input.teachingMode,
-      gradeLevel: input.gradeLevel,
-      interests: input.interests,
-      learningPreferences: input.learningPreferences,
-      emergencyContact: input.emergencyContact,
+      teachingMode: (input as any).teachingMode,
+      educationType: (input as any).educationType,
+      gradeLevel: (input as any).gradeLevel,
+      stream: (input as any).stream,
+      competitiveExam: (input as any).competitiveExam,
+      diplomaBranch: (input as any).diplomaBranch,
+      interests: (input as any).interests,
+      learningPreferences: (input as any).learningPreferences,
+      emergencyContact: (input as any).emergencyContact,
       phone: input.phone,
     };
 
@@ -448,11 +452,21 @@ export class AuthService {
               });
             }
           } else if (role === "STUDENT" || targetUser.role === "STUDENT") {
+            const isDiploma = extra.educationType === "DIPLOMA";
+            const cleanGrade = isDiploma ? null : extra.gradeLevel || "Grade 10";
+            const cleanStream = isDiploma ? null : extra.stream || null;
+            const cleanExam = isDiploma ? null : extra.competitiveExam || null;
+            const cleanBranch = isDiploma ? extra.diplomaBranch || null : null;
+
             if (targetUser.studentProfile) {
               await tx.studentProfile.update({
                 where: { userId: targetUser.id },
                 data: {
-                  gradeLevel: extra.gradeLevel || targetUser.studentProfile.gradeLevel,
+                  educationType: extra.educationType || targetUser.studentProfile.educationType || "SCHOOL",
+                  gradeLevel: cleanGrade ?? targetUser.studentProfile.gradeLevel,
+                  stream: cleanStream ?? targetUser.studentProfile.stream,
+                  competitiveExam: cleanExam ?? targetUser.studentProfile.competitiveExam,
+                  diplomaBranch: cleanBranch ?? targetUser.studentProfile.diplomaBranch,
                   interests: extra.interests || targetUser.studentProfile.interests,
                   learningPreferences: extra.learningPreferences || targetUser.studentProfile.learningPreferences,
                 },
@@ -461,7 +475,11 @@ export class AuthService {
               await tx.studentProfile.create({
                 data: {
                   userId: targetUser.id,
-                  gradeLevel: extra.gradeLevel || "Grade 10",
+                  educationType: extra.educationType || "SCHOOL",
+                  gradeLevel: cleanGrade,
+                  stream: cleanStream,
+                  competitiveExam: cleanExam,
+                  diplomaBranch: cleanBranch,
                   interests: extra.interests,
                   learningPreferences: extra.learningPreferences,
                 },
@@ -500,7 +518,11 @@ export class AuthService {
               ...(role === "STUDENT" && {
                 studentProfile: {
                   create: {
-                    gradeLevel: extra.gradeLevel || "Grade 10",
+                    educationType: extra.educationType || "SCHOOL",
+                    gradeLevel: extra.educationType === "DIPLOMA" ? null : extra.gradeLevel || "Grade 10",
+                    stream: extra.educationType === "DIPLOMA" ? null : extra.stream || null,
+                    competitiveExam: extra.educationType === "DIPLOMA" ? null : extra.competitiveExam || null,
+                    diplomaBranch: extra.educationType === "DIPLOMA" ? extra.diplomaBranch || null : null,
                     interests: extra.interests,
                     learningPreferences: extra.learningPreferences,
                   },
@@ -814,11 +836,21 @@ export class AuthService {
               });
             }
           } else if (role === "STUDENT" || targetUser.role === "STUDENT") {
+            const isDiploma = extra.educationType === "DIPLOMA";
+            const cleanGrade = isDiploma ? null : extra.gradeLevel || "Grade 10";
+            const cleanStream = isDiploma ? null : extra.stream || null;
+            const cleanExam = isDiploma ? null : extra.competitiveExam || null;
+            const cleanBranch = isDiploma ? extra.diplomaBranch || null : null;
+
             if (targetUser.studentProfile) {
               await tx.studentProfile.update({
                 where: { userId: targetUser.id },
                 data: {
-                  gradeLevel: extra.gradeLevel || targetUser.studentProfile.gradeLevel,
+                  educationType: extra.educationType || targetUser.studentProfile.educationType || "SCHOOL",
+                  gradeLevel: cleanGrade ?? targetUser.studentProfile.gradeLevel,
+                  stream: cleanStream ?? targetUser.studentProfile.stream,
+                  competitiveExam: cleanExam ?? targetUser.studentProfile.competitiveExam,
+                  diplomaBranch: cleanBranch ?? targetUser.studentProfile.diplomaBranch,
                   interests: extra.interests || targetUser.studentProfile.interests,
                   learningPreferences: extra.learningPreferences || targetUser.studentProfile.learningPreferences,
                 },
@@ -827,7 +859,11 @@ export class AuthService {
               await tx.studentProfile.create({
                 data: {
                   userId: targetUser.id,
-                  gradeLevel: extra.gradeLevel || "Grade 10",
+                  educationType: extra.educationType || "SCHOOL",
+                  gradeLevel: cleanGrade,
+                  stream: cleanStream,
+                  competitiveExam: cleanExam,
+                  diplomaBranch: cleanBranch,
                   interests: extra.interests,
                   learningPreferences: extra.learningPreferences,
                 },
@@ -865,7 +901,11 @@ export class AuthService {
               ...(role === "STUDENT" && {
                 studentProfile: {
                   create: {
-                    gradeLevel: extra.gradeLevel || "Grade 10",
+                    educationType: extra.educationType || "SCHOOL",
+                    gradeLevel: extra.educationType === "DIPLOMA" ? null : extra.gradeLevel || "Grade 10",
+                    stream: extra.educationType === "DIPLOMA" ? null : extra.stream || null,
+                    competitiveExam: extra.educationType === "DIPLOMA" ? null : extra.competitiveExam || null,
+                    diplomaBranch: extra.educationType === "DIPLOMA" ? extra.diplomaBranch || null : null,
                     interests: extra.interests,
                     learningPreferences: extra.learningPreferences,
                   },

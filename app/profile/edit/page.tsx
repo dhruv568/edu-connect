@@ -10,6 +10,10 @@ import { useToast } from "@/components/ui/toast";
 import { Save, ArrowLeft } from "lucide-react";
 import { BackButton } from "@/components/ui/back-button";
 import { ProfilePhotoUploader } from "@/components/profile/profile-photo-uploader";
+import {
+  LearnerAcademicFields,
+  AcademicFieldsState,
+} from "@/components/learner/learner-academic-fields";
 import Link from "next/link";
 
 export default function ProfileEditPage() {
@@ -21,7 +25,13 @@ export default function ProfileEditPage() {
 
   const [headline, setHeadline] = useState("");
   const [subjects, setSubjects] = useState("");
-  const [gradeLevel, setGradeLevel] = useState("");
+  const [academicState, setAcademicState] = useState<AcademicFieldsState>({
+    educationType: "SCHOOL",
+    gradeLevel: "Grade 10",
+    stream: "",
+    competitiveExam: "",
+    diplomaBranch: "",
+  });
   const [emergencyContact, setEmergencyContact] = useState("");
 
   const [userRole, setUserRole] = useState("STUDENT");
@@ -49,7 +59,13 @@ export default function ProfileEditPage() {
             setSubjects(u.teacherProfile.subjects || "");
           }
           if (u.studentProfile) {
-            setGradeLevel(u.studentProfile.gradeLevel || "");
+            setAcademicState({
+              educationType: u.studentProfile.educationType || "SCHOOL",
+              gradeLevel: u.studentProfile.gradeLevel || "Grade 10",
+              stream: u.studentProfile.stream || "",
+              competitiveExam: u.studentProfile.competitiveExam || "",
+              diplomaBranch: u.studentProfile.diplomaBranch || "",
+            });
           }
         }
       })
@@ -73,7 +89,11 @@ export default function ProfileEditPage() {
           phone,
           headline,
           subjects,
-          gradeLevel,
+          educationType: academicState.educationType,
+          gradeLevel: academicState.gradeLevel,
+          stream: academicState.stream,
+          competitiveExam: academicState.competitiveExam,
+          diplomaBranch: academicState.diplomaBranch,
           emergencyContact,
         }),
       });
@@ -146,7 +166,15 @@ export default function ProfileEditPage() {
             )}
 
             {userRole === "STUDENT" && (
-              <Input label="Grade Level" value={gradeLevel} onChange={(e) => setGradeLevel(e.target.value)} />
+              <div className="pt-2 border-t border-slate-100">
+                <h2 className="text-xs font-black uppercase text-slate-800 tracking-wider mb-3">
+                  Learner Academic Profile
+                </h2>
+                <LearnerAcademicFields
+                  value={academicState}
+                  onChange={setAcademicState}
+                />
+              </div>
             )}
 
             <Button type="submit" variant="primary" className="w-full mt-4" isLoading={saving} leftIcon={<Save className="h-4 w-4" />}>

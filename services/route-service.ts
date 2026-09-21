@@ -81,17 +81,8 @@ export class RouteService {
     const isAccountActive = payoutAccount?.status === "ACTIVE" && Boolean(payoutAccount.providerAccountId);
 
     if (!routeEnabled || !isAccountActive) {
-      // Record internal pending payout record without live transfer
-      const payout = await prisma.teacherPayout.create({
-        data: {
-          teacherId: params.teacherId,
-          transactionId: params.transactionId,
-          ledgerEntryId: params.ledgerEntryId,
-          amountPaise: params.teacherSharePaise,
-          status: "PENDING", // PENDING_PAYOUT
-        },
-      });
-      return { transferred: false, payout, reason: !routeEnabled ? "ROUTE_DISABLED" : "ACCOUNT_NOT_ACTIVE" };
+      // If split route is not active, earnings remain in educator's available balance for on-demand withdrawal
+      return { transferred: false, reason: !routeEnabled ? "ROUTE_DISABLED" : "ACCOUNT_NOT_ACTIVE" };
     }
 
     try {

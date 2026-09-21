@@ -28,6 +28,13 @@ import {
   Sparkles,
 } from "lucide-react";
 import { formatCurrency } from "@/lib/currency";
+import {
+  SCHOOL_GRADES,
+  SENIOR_SECONDARY_STREAMS,
+  COMPETITIVE_EXAMS,
+  DIPLOMA_BRANCHES,
+  isSeniorSecondaryGrade,
+} from "@/lib/constants/academic";
 
 export default function StudentFindTeachersPage() {
   const router = useRouter();
@@ -35,6 +42,11 @@ export default function StudentFindTeachersPage() {
   // Search and filter states
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedSubject, setSelectedSubject] = useState("all");
+  const [selectedAcademicLevel, setSelectedAcademicLevel] = useState("all");
+  const [selectedGrade, setSelectedGrade] = useState("all");
+  const [selectedStream, setSelectedStream] = useState("all");
+  const [selectedExam, setSelectedExam] = useState("all");
+  const [selectedDiplomaBranch, setSelectedDiplomaBranch] = useState("all");
   const [maxPrice, setMaxPrice] = useState(5000);
   const [minRating, setMinRating] = useState(0);
   const [minExperience, setMinExperience] = useState(0);
@@ -71,6 +83,11 @@ export default function StudentFindTeachersPage() {
       if (minRating > 0) params.set("ratingMin", String(minRating));
       if (minExperience > 0) params.set("experienceMin", String(minExperience));
       if (sortBy !== "recommended") params.set("sortBy", sortBy);
+      if (selectedAcademicLevel !== "all") params.set("academicLevel", selectedAcademicLevel);
+      if (selectedGrade !== "all") params.set("grade", selectedGrade);
+      if (selectedStream !== "all") params.set("stream", selectedStream);
+      if (selectedExam !== "all") params.set("exam", selectedExam);
+      if (selectedDiplomaBranch !== "all") params.set("diplomaBranch", selectedDiplomaBranch);
 
       const res = await fetch(`/api/teachers?${params.toString()}`);
       const json = await res.json();
@@ -86,7 +103,18 @@ export default function StudentFindTeachersPage() {
 
   useEffect(() => {
     fetchTeachers();
-  }, [selectedSubject, maxPrice, minRating, minExperience, sortBy]);
+  }, [
+    selectedSubject,
+    maxPrice,
+    minRating,
+    minExperience,
+    sortBy,
+    selectedAcademicLevel,
+    selectedGrade,
+    selectedStream,
+    selectedExam,
+    selectedDiplomaBranch,
+  ]);
 
   const handleSearchSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -96,6 +124,11 @@ export default function StudentFindTeachersPage() {
   const handleResetFilters = () => {
     setSearchQuery("");
     setSelectedSubject("all");
+    setSelectedAcademicLevel("all");
+    setSelectedGrade("all");
+    setSelectedStream("all");
+    setSelectedExam("all");
+    setSelectedDiplomaBranch("all");
     setMaxPrice(5000);
     setMinRating(0);
     setMinExperience(0);
@@ -238,6 +271,118 @@ export default function StudentFindTeachersPage() {
                   ))}
                 </select>
               </div>
+
+              {/* Academic Level */}
+              <div className="space-y-2">
+                <label className="block text-xs font-bold text-slate-700 uppercase tracking-wider flex items-center gap-1.5">
+                  <GraduationCap className="h-3.5 w-3.5 text-blue-600" /> Academic Level
+                </label>
+                <select
+                  value={selectedAcademicLevel}
+                  onChange={(e) => {
+                    setSelectedAcademicLevel(e.target.value);
+                    setSelectedGrade("all");
+                    setSelectedStream("all");
+                    setSelectedExam("all");
+                    setSelectedDiplomaBranch("all");
+                  }}
+                  className="w-full h-10 px-3 text-xs bg-slate-50 border border-slate-200 rounded-xl text-slate-800 outline-none focus:ring-2 focus:ring-blue-500 font-medium cursor-pointer"
+                >
+                  <option value="all">All Academic Levels</option>
+                  <option value="SCHOOL">School Education</option>
+                  <option value="DIPLOMA">Diploma Studies</option>
+                </select>
+              </div>
+
+              {/* Conditional: School Grade */}
+              {selectedAcademicLevel === "SCHOOL" && (
+                <div className="space-y-2">
+                  <label className="block text-xs font-bold text-slate-700 uppercase tracking-wider">
+                    Grade / Class
+                  </label>
+                  <select
+                    value={selectedGrade}
+                    onChange={(e) => {
+                      const val = e.target.value;
+                      setSelectedGrade(val);
+                      if (!isSeniorSecondaryGrade(val)) {
+                        setSelectedStream("all");
+                        setSelectedExam("all");
+                      }
+                    }}
+                    className="w-full h-10 px-3 text-xs bg-slate-50 border border-slate-200 rounded-xl text-slate-800 outline-none focus:ring-2 focus:ring-blue-500 font-medium cursor-pointer"
+                  >
+                    <option value="all">All School Grades</option>
+                    {SCHOOL_GRADES.map((g) => (
+                      <option key={g.value} value={g.value}>
+                        {g.label}
+                      </option>
+                    ))}
+                  </select>
+                </div>
+              )}
+
+              {/* Conditional: Senior Secondary Stream (Grades 11–12 only) */}
+              {selectedAcademicLevel === "SCHOOL" && isSeniorSecondaryGrade(selectedGrade) && (
+                <>
+                  <div className="space-y-2">
+                    <label className="block text-xs font-bold text-slate-700 uppercase tracking-wider">
+                      Stream
+                    </label>
+                    <select
+                      value={selectedStream}
+                      onChange={(e) => setSelectedStream(e.target.value)}
+                      className="w-full h-10 px-3 text-xs bg-slate-50 border border-slate-200 rounded-xl text-slate-800 outline-none focus:ring-2 focus:ring-blue-500 font-medium cursor-pointer"
+                    >
+                      <option value="all">All Streams</option>
+                      {SENIOR_SECONDARY_STREAMS.map((s) => (
+                        <option key={s} value={s}>
+                          {s}
+                        </option>
+                      ))}
+                    </select>
+                  </div>
+
+                  <div className="space-y-2">
+                    <label className="block text-xs font-bold text-slate-700 uppercase tracking-wider">
+                      Target Exam (Optional)
+                    </label>
+                    <select
+                      value={selectedExam}
+                      onChange={(e) => setSelectedExam(e.target.value)}
+                      className="w-full h-10 px-3 text-xs bg-slate-50 border border-slate-200 rounded-xl text-slate-800 outline-none focus:ring-2 focus:ring-blue-500 font-medium cursor-pointer"
+                    >
+                      <option value="all">Any / General Preparation</option>
+                      {COMPETITIVE_EXAMS.map((x) => (
+                        <option key={x} value={x}>
+                          {x}
+                        </option>
+                      ))}
+                    </select>
+                  </div>
+                </>
+              )}
+
+              {/* Conditional: Diploma Branch */}
+              {selectedAcademicLevel === "DIPLOMA" && (
+                <div className="space-y-2">
+                  <label className="block text-xs font-bold text-slate-700 uppercase tracking-wider">
+                    Diploma Branch
+                  </label>
+                  <select
+                    value={selectedDiplomaBranch}
+                    onChange={(e) => setSelectedDiplomaBranch(e.target.value)}
+                    className="w-full h-10 px-3 text-xs bg-slate-50 border border-slate-200 rounded-xl text-slate-800 outline-none focus:ring-2 focus:ring-blue-500 font-medium cursor-pointer"
+                  >
+                    <option value="all">All Diploma Branches</option>
+                    {DIPLOMA_BRANCHES.map((b) => (
+                      <option key={b} value={b}>
+                        {b}
+                      </option>
+                    ))}
+                  </select>
+                </div>
+              )}
 
               {/* Hourly Price Slider */}
               <div className="space-y-2">

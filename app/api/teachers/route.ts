@@ -16,6 +16,12 @@ export async function GET(request: NextRequest) {
     const sortBy = searchParams.get("sortBy") || "recommended";
     const includeUnverified = searchParams.get("includeUnverified") === "true"; // For internal admin discovery if explicitly requested
 
+    const academicLevel = searchParams.get("academicLevel");
+    const grade = searchParams.get("grade")?.toLowerCase();
+    const stream = searchParams.get("stream")?.toLowerCase();
+    const exam = searchParams.get("exam")?.toLowerCase();
+    const diplomaBranch = searchParams.get("diplomaBranch")?.toLowerCase();
+
     const teacherProfiles = await prisma.teacherProfile.findMany({
       where: {
         ...(!includeUnverified && {
@@ -79,6 +85,25 @@ export async function GET(request: NextRequest) {
 
     if (subject && subject !== "all") {
       results = results.filter((t) => t.subjects.some((s) => s.toLowerCase().includes(subject)));
+    }
+
+    // Academic level & focus filtering
+    const academicQuery = diplomaBranch || exam || stream || grade;
+    if (academicQuery && academicQuery !== "all") {
+      results = results.filter(
+        (t) =>
+          t.headline.toLowerCase().includes(academicQuery) ||
+          (t.bio && t.bio.toLowerCase().includes(academicQuery)) ||
+          t.subjects.some((s) => s.toLowerCase().includes(academicQuery))
+      );
+    } else if (academicLevel === "DIPLOMA") {
+      results = results.filter(
+        (t) =>
+          t.headline.toLowerCase().includes("diploma") ||
+          t.headline.toLowerCase().includes("engineering") ||
+          (t.bio && (t.bio.toLowerCase().includes("diploma") || t.bio.toLowerCase().includes("polytechnic"))) ||
+          t.subjects.some((s) => s.toLowerCase().includes("engineering") || s.toLowerCase().includes("computer") || s.toLowerCase().includes("diploma"))
+      );
     }
 
     // Sorting

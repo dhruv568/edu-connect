@@ -29,6 +29,13 @@ export async function GET(request: NextRequest) {
         kycStatus: payoutAccount.kycStatus,
         routeEnabled: RouteService.isRouteEnabled(),
       },
+      payoutDetails: {
+        accountHolderName: teacherProfile.accountHolderName,
+        accountNumber: teacherProfile.accountNumber,
+        bankName: teacherProfile.bankName,
+        ifscCode: teacherProfile.ifscCode,
+        upiId: teacherProfile.upiId,
+      },
     });
   } catch (error: any) {
     return handleApiError(error);

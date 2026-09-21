@@ -30,6 +30,7 @@ export async function PATCH(request: NextRequest) {
       bankName,
       ifscCode,
       cancelledChequeUrl,
+      upiId,
     } = body;
 
     let validatedHourlyRate: number | undefined = undefined;
@@ -74,6 +75,7 @@ export async function PATCH(request: NextRequest) {
         ...(bankName !== undefined && { bankName }),
         ...(ifscCode !== undefined && { ifscCode: ifscCode ? ifscCode.toUpperCase().trim() : ifscCode }),
         ...(cancelledChequeUrl !== undefined && { cancelledChequeUrl }),
+        ...(upiId !== undefined && { upiId: upiId ? upiId.trim() : null }),
       },
     });
 

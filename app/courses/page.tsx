@@ -18,6 +18,13 @@ import {
 import { CourseCard } from "@/components/courses/course-card";
 import { FloatingNavbar } from "@/components/homepage/floating-navbar";
 import { PremiumFooter } from "@/components/homepage/premium-footer";
+import {
+  SCHOOL_GRADES,
+  SENIOR_SECONDARY_STREAMS,
+  COMPETITIVE_EXAMS,
+  DIPLOMA_BRANCHES,
+  isSeniorSecondaryGrade,
+} from "@/lib/constants/academic";
 
 const SUBJECTS = ["All", "Mathematics", "Science", "Physics", "Chemistry", "Biology", "Computer Science", "English", "Economics"];
 const LEVELS = [
@@ -48,6 +55,11 @@ export default function CoursePlatformPage() {
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedSubject, setSelectedSubject] = useState("All");
   const [selectedLevel, setSelectedLevel] = useState("all");
+  const [academicLevel, setAcademicLevel] = useState("all");
+  const [gradeLevel, setGradeLevel] = useState("all");
+  const [stream, setStream] = useState("all");
+  const [competitiveExam, setCompetitiveExam] = useState("all");
+  const [diplomaBranch, setDiplomaBranch] = useState("all");
   const [sortBy, setSortBy] = useState("recommended");
   const [priceMax, setPriceMax] = useState<number | undefined>(undefined);
   const [showFiltersMobile, setShowFiltersMobile] = useState(false);
@@ -59,6 +71,11 @@ export default function CoursePlatformPage() {
       if (searchQuery) params.set("search", searchQuery);
       if (selectedSubject !== "All") params.set("subject", selectedSubject);
       if (selectedLevel !== "all") params.set("level", selectedLevel);
+      if (academicLevel !== "all") params.set("academicLevel", academicLevel);
+      if (gradeLevel !== "all") params.set("grade", gradeLevel);
+      if (stream !== "all") params.set("stream", stream);
+      if (competitiveExam !== "all") params.set("exam", competitiveExam);
+      if (diplomaBranch !== "all") params.set("diplomaBranch", diplomaBranch);
       if (sortBy) params.set("sortBy", sortBy);
       if (priceMax !== undefined) params.set("priceMax", priceMax.toString());
       params.set("page", page.toString());
@@ -81,7 +98,19 @@ export default function CoursePlatformPage() {
 
   useEffect(() => {
     fetchCourses();
-  }, [searchQuery, selectedSubject, selectedLevel, sortBy, priceMax, page]);
+  }, [
+    searchQuery,
+    selectedSubject,
+    selectedLevel,
+    academicLevel,
+    gradeLevel,
+    stream,
+    competitiveExam,
+    diplomaBranch,
+    sortBy,
+    priceMax,
+    page,
+  ]);
 
   return (
     <div className="min-h-screen flex flex-col bg-slate-50 dark:bg-slate-950 text-slate-900 dark:text-slate-100 font-sans selection:bg-blue-500 selection:text-white">
@@ -165,11 +194,16 @@ export default function CoursePlatformPage() {
                 <h3 className="font-bold text-slate-900 dark:text-slate-100 flex items-center gap-2 text-sm uppercase tracking-wider">
                   <Filter className="w-4 h-4 text-blue-500" /> Filter Courses
                 </h3>
-                {(selectedSubject !== "All" || selectedLevel !== "all" || priceMax !== undefined) && (
+                {(selectedSubject !== "All" || selectedLevel !== "all" || academicLevel !== "all" || priceMax !== undefined) && (
                   <button
                     onClick={() => {
                       setSelectedSubject("All");
                       setSelectedLevel("all");
+                      setAcademicLevel("all");
+                      setGradeLevel("all");
+                      setStream("all");
+                      setCompetitiveExam("all");
+                      setDiplomaBranch("all");
                       setPriceMax(undefined);
                       setPage(1);
                     }}
@@ -179,6 +213,129 @@ export default function CoursePlatformPage() {
                   </button>
                 )}
               </div>
+
+              {/* Academic Level Filter */}
+              <div>
+                <label className="text-xs font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400 flex items-center gap-1.5 mb-2">
+                  <GraduationCap className="w-3.5 h-3.5 text-blue-500" /> Academic Level
+                </label>
+                <select
+                  value={academicLevel}
+                  onChange={(e) => {
+                    setAcademicLevel(e.target.value);
+                    setGradeLevel("all");
+                    setStream("all");
+                    setCompetitiveExam("all");
+                    setDiplomaBranch("all");
+                    setPage(1);
+                  }}
+                  className="w-full text-xs p-2.5 rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-800 dark:text-slate-200 outline-none focus:ring-2 focus:ring-blue-500 font-medium cursor-pointer"
+                >
+                  <option value="all">All Academic Levels</option>
+                  <option value="SCHOOL">School Education</option>
+                  <option value="DIPLOMA">Diploma Studies</option>
+                </select>
+              </div>
+
+              {/* Conditional: School Grade */}
+              {academicLevel === "SCHOOL" && (
+                <div>
+                  <label className="text-xs font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400 block mb-2">
+                    Grade / Class
+                  </label>
+                  <select
+                    value={gradeLevel}
+                    onChange={(e) => {
+                      const val = e.target.value;
+                      setGradeLevel(val);
+                      if (!isSeniorSecondaryGrade(val)) {
+                        setStream("all");
+                        setCompetitiveExam("all");
+                      }
+                      setPage(1);
+                    }}
+                    className="w-full text-xs p-2.5 rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-800 dark:text-slate-200 outline-none focus:ring-2 focus:ring-blue-500 font-medium cursor-pointer"
+                  >
+                    <option value="all">All School Grades</option>
+                    {SCHOOL_GRADES.map((g) => (
+                      <option key={g.value} value={g.value}>
+                        {g.label}
+                      </option>
+                    ))}
+                  </select>
+                </div>
+              )}
+
+              {/* Conditional: Stream & Exam for Grades 11-12 */}
+              {academicLevel === "SCHOOL" && isSeniorSecondaryGrade(gradeLevel) && (
+                <>
+                  <div>
+                    <label className="text-xs font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400 block mb-2">
+                      Stream
+                    </label>
+                    <select
+                      value={stream}
+                      onChange={(e) => {
+                        setStream(e.target.value);
+                        setPage(1);
+                      }}
+                      className="w-full text-xs p-2.5 rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-800 dark:text-slate-200 outline-none focus:ring-2 focus:ring-blue-500 font-medium cursor-pointer"
+                    >
+                      <option value="all">All Streams</option>
+                      {SENIOR_SECONDARY_STREAMS.map((s) => (
+                        <option key={s} value={s}>
+                          {s}
+                        </option>
+                      ))}
+                    </select>
+                  </div>
+
+                  <div>
+                    <label className="text-xs font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400 block mb-2">
+                      Target Exam
+                    </label>
+                    <select
+                      value={competitiveExam}
+                      onChange={(e) => {
+                        setCompetitiveExam(e.target.value);
+                        setPage(1);
+                      }}
+                      className="w-full text-xs p-2.5 rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-800 dark:text-slate-200 outline-none focus:ring-2 focus:ring-blue-500 font-medium cursor-pointer"
+                    >
+                      <option value="all">Any / General</option>
+                      {COMPETITIVE_EXAMS.map((x) => (
+                        <option key={x} value={x}>
+                          {x}
+                        </option>
+                      ))}
+                    </select>
+                  </div>
+                </>
+              )}
+
+              {/* Conditional: Diploma Branch */}
+              {academicLevel === "DIPLOMA" && (
+                <div>
+                  <label className="text-xs font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400 block mb-2">
+                    Diploma Branch
+                  </label>
+                  <select
+                    value={diplomaBranch}
+                    onChange={(e) => {
+                      setDiplomaBranch(e.target.value);
+                      setPage(1);
+                    }}
+                    className="w-full text-xs p-2.5 rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-800 dark:text-slate-200 outline-none focus:ring-2 focus:ring-blue-500 font-medium cursor-pointer"
+                  >
+                    <option value="all">All Diploma Branches</option>
+                    {DIPLOMA_BRANCHES.map((b) => (
+                      <option key={b} value={b}>
+                        {b}
+                      </option>
+                    ))}
+                  </select>
+                </div>
+              )}
 
               {/* Level Filter */}
               <div>

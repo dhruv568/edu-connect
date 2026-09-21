@@ -32,8 +32,11 @@ import {
   Video,
   Check,
   LayoutDashboard,
-  CheckCircle,
 } from "lucide-react";
+import {
+  LearnerAcademicFields,
+  AcademicFieldsState,
+} from "@/components/learner/learner-academic-fields";
 
 interface FlowState {
   step: number;
@@ -42,6 +45,7 @@ interface FlowState {
   phone: string;
   password: string;
   confirmPassword: string;
+  academic: AcademicFieldsState;
   captchaToken: string;
   captchaAnswer: string;
   otp: string;
@@ -112,6 +116,13 @@ function LearnerRegistrationFlowContent() {
     phone: "",
     password: "",
     confirmPassword: "",
+    academic: {
+      educationType: "SCHOOL",
+      gradeLevel: "Grade 10",
+      stream: "",
+      competitiveExam: "",
+      diplomaBranch: "",
+    },
     captchaToken: "",
     captchaAnswer: "",
     otp: "",
@@ -384,6 +395,11 @@ function LearnerRegistrationFlowContent() {
           role: "STUDENT",
           captchaToken: state.captchaToken,
           captchaAnswer: state.captchaAnswer,
+          educationType: state.academic.educationType,
+          gradeLevel: state.academic.educationType === "SCHOOL" ? state.academic.gradeLevel : undefined,
+          stream: state.academic.educationType === "SCHOOL" ? state.academic.stream : undefined,
+          competitiveExam: state.academic.educationType === "SCHOOL" ? state.academic.competitiveExam : undefined,
+          diplomaBranch: state.academic.educationType === "DIPLOMA" ? state.academic.diplomaBranch : undefined,
         }),
       });
 
@@ -781,6 +797,15 @@ function LearnerRegistrationFlowContent() {
                   required
                   leftIcon={<Lock className="h-4 w-4 text-[#3157D5]" />}
                   helperText="Must match your password"
+                />
+              </div>
+
+              {/* Learner Academic Profile Selection */}
+              <div className="pt-1">
+                <LearnerAcademicFields
+                  value={state.academic}
+                  onChange={(academic) => setState((p) => ({ ...p, academic }))}
+                  compact
                 />
               </div>
 
@@ -1517,7 +1542,7 @@ function LearnerRegistrationFlowContent() {
 
           <div className="space-y-2">
             <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-emerald-100 text-emerald-800 text-xs font-bold uppercase tracking-wider">
-              <CheckCircle className="w-3.5 h-3.5 text-emerald-600" /> Registration & Enrollment Complete
+              <CheckCircle2 className="w-3.5 h-3.5 text-emerald-600" /> Registration & Enrollment Complete
             </span>
             <h1 className="text-3xl sm:text-4xl font-black text-slate-900 tracking-tight">
               Your EduConnects account is ready!

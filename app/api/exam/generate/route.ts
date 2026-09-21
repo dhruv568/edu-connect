@@ -7,7 +7,16 @@ export const dynamic = "force-dynamic";
 export async function POST(request: NextRequest) {
   try {
     const body = await request.json();
-    const { subject, difficulty, count } = body;
+    const {
+      subject,
+      difficulty,
+      count,
+      academicLevel,
+      gradeLevel,
+      stream,
+      competitiveExam,
+      diplomaBranch,
+    } = body;
 
     if (!subject || typeof subject !== "string" || !subject.trim()) {
       return NextResponse.json(
@@ -26,6 +35,11 @@ export async function POST(request: NextRequest) {
       difficulty: difficulty || "Intermediate",
       count: count ? Number(count) : 5,
       userIp: ip,
+      academicLevel,
+      gradeLevel,
+      stream,
+      competitiveExam,
+      diplomaBranch,
     });
 
     return apiSuccess(examData);

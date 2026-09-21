@@ -473,11 +473,34 @@ export class ExamService {
     difficulty?: "Beginner" | "Intermediate" | "Advanced";
     count?: number;
     userIp?: string;
+    academicLevel?: string;
+    gradeLevel?: string;
+    stream?: string;
+    competitiveExam?: string;
+    diplomaBranch?: string;
   }): Promise<{ examId: string; subject: string; difficulty: string; questions: ClientExamQuestion[] }> {
-    const { subject, difficulty = "Intermediate", count = 5, userIp = "unknown" } = params;
+    const {
+      subject,
+      difficulty = "Intermediate",
+      count = 5,
+      userIp = "unknown",
+      academicLevel,
+      gradeLevel,
+      stream,
+      competitiveExam,
+      diplomaBranch,
+    } = params;
     const cleanSubject = subject.trim();
     const cleanDifficulty = difficulty;
     const questionCount = Math.min(Math.max(count, 3), 10);
+
+    const academicFocusParts = [
+      academicLevel === "DIPLOMA" ? `Diploma (${diplomaBranch || "Engineering"})` : null,
+      gradeLevel && gradeLevel !== "all" ? gradeLevel : null,
+      stream && stream !== "all" ? `Stream: ${stream}` : null,
+      competitiveExam && competitiveExam !== "all" ? `Target: ${competitiveExam}` : null,
+    ].filter(Boolean);
+    const academicFocus = academicFocusParts.length > 0 ? academicFocusParts.join(" • ") : undefined;
 
     // Rate Limiting: 10 exam generations per hour per IP
     const rateLimitKey = `exam-gen-${userIp}`;
@@ -489,7 +512,7 @@ export class ExamService {
     }
 
     // Cache Check
-    const cacheKey = `${cleanSubject.toLowerCase()}_${cleanDifficulty.toLowerCase()}_${questionCount}`;
+    const cacheKey = `${cleanSubject.toLowerCase()}_${cleanDifficulty.toLowerCase()}_${questionCount}_${academicFocus || "general"}`;
     const cached = examQuestionCache.get(cacheKey);
     let questions: ExamQuestion[] = [];
 
@@ -500,7 +523,7 @@ export class ExamService {
       const apiKey = process.env.OPENAI_API_KEY;
       if (apiKey && apiKey.trim().length > 0 && !apiKey.includes("your_openai_api_key_here")) {
         try {
-          questions = await this.generateWithOpenAI(cleanSubject, cleanDifficulty, questionCount);
+          questions = await this.generateWithOpenAI(cleanSubject, cleanDifficulty, questionCount, academicFocus);
           // Cache successful AI response
           examQuestionCache.set(cacheKey, { questions, cachedAt: Date.now() });
         } catch (aiErr) {
@@ -610,12 +633,13 @@ export class ExamService {
   private static async generateWithOpenAI(
     subject: string,
     difficulty: string,
-    count: number
+    count: number,
+    academicFocus?: string
   ): Promise<ExamQuestion[]> {
     const openai = new OpenAI({ apiKey: process.env.OPENAI_API_KEY });
     const model = process.env.OPENAI_MODEL || "gpt-4o-mini";
 
-    const prompt = `Generate exactly ${count} objective multiple-choice questions for the subject "${subject}" at "${difficulty}" level.
+    const prompt = `Generate exactly ${count} objective multiple-choice questions for the subject "${subject}"${academicFocus ? ` specifically tailored for learners at: ${academicFocus}` : ""} at "${difficulty}" level.
 Requirements:
 1. Each question must have exactly 4 options labeled A, B, C, D.
 2. Only ONE option must be correct.

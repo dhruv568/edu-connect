@@ -1,5 +1,5 @@
 import { prisma } from "@/lib/prisma";
-import { formatPaise } from "@/lib/currency";
+import { formatPaise, formatCurrency } from "@/lib/currency";
 import { isLearnerRole } from "@/lib/auth/roles";
 
 export class AnalyticsService {
@@ -315,12 +315,102 @@ export class AnalyticsService {
       };
     });
 
+    // 8. Academic Profile and Personalized Recommendations
+    const sp = user.studentProfile;
+    const academicTerms: string[] = [];
+    if (sp) {
+      if (sp.educationType === "DIPLOMA" && sp.diplomaBranch) {
+        academicTerms.push(sp.diplomaBranch);
+        academicTerms.push("Diploma");
+        academicTerms.push("Engineering");
+      } else if (sp.educationType === "SCHOOL") {
+        if (sp.competitiveExam) academicTerms.push(sp.competitiveExam);
+        if (sp.stream) academicTerms.push(sp.stream);
+        if (sp.gradeLevel) academicTerms.push(sp.gradeLevel);
+      }
+      if (Array.isArray(sp.interests)) {
+        sp.interests.forEach((i: string) => {
+          if (i && typeof i === "string") academicTerms.push(i);
+        });
+      }
+    }
+
+    const recommendedCourses = await prisma.course.findMany({
+      where: {
+        status: "PUBLISHED",
+        ...(academicTerms.length > 0
+          ? {
+              OR: academicTerms.slice(0, 5).flatMap((term) => [
+                { title: { contains: term, mode: "insensitive" as const } },
+                { subject: { contains: term, mode: "insensitive" as const } },
+                { level: { contains: term, mode: "insensitive" as const } },
+              ]),
+            }
+          : {}),
+      },
+      include: {
+        teacher: { include: { user: { include: { profile: true } } } },
+      },
+      take: 4,
+    });
+
+    const recommendedEducators = await prisma.teacherProfile.findMany({
+      where: {
+        verificationStatus: "VERIFIED",
+        ...(academicTerms.length > 0
+          ? {
+              OR: academicTerms.slice(0, 5).flatMap((term) => [
+                { subjects: { contains: term, mode: "insensitive" as const } },
+                { headline: { contains: term, mode: "insensitive" as const } },
+                { bio: { contains: term, mode: "insensitive" as const } },
+              ]),
+            }
+          : {}),
+      },
+      include: {
+        user: { include: { profile: true } },
+      },
+      take: 4,
+    });
+
     return {
       userName,
       userEmail: user.email,
       avatarUrl: user.profile?.avatarUrl || null,
       gradeLevel: user.studentProfile?.gradeLevel || null,
       interests: user.studentProfile?.interests || null,
+      academicProfile: sp
+        ? {
+            educationType: sp.educationType,
+            gradeLevel: sp.gradeLevel,
+            stream: sp.stream,
+            competitiveExam: sp.competitiveExam,
+            diplomaBranch: sp.diplomaBranch,
+          }
+        : null,
+      recommendedCourses: recommendedCourses.map((c) => ({
+        id: c.id,
+        title: c.title,
+        slug: c.slug,
+        subject: c.subject,
+        level: c.level,
+        thumbnailUrl: c.thumbnailUrl || "/images/course-placeholder.jpg",
+        teacherName: c.teacher?.user?.profile
+          ? `${c.teacher.user.profile.firstName} ${c.teacher.user.profile.lastName}`.trim()
+          : "Educator",
+        priceFormatted: formatCurrency(c.price || 0),
+      })),
+      recommendedEducators: recommendedEducators.map((t) => ({
+        id: t.id,
+        name: t.user.profile
+          ? `${t.user.profile.firstName} ${t.user.profile.lastName}`.trim()
+          : "Educator",
+        headline: t.headline,
+        avatarUrl: t.user.profile?.avatarUrl || null,
+        subjects: t.subjects,
+        hourlyRateFormatted: formatCurrency(t.hourlyRate || 0),
+        rating: t.rating || 5.0,
+      })),
       unreadNotificationsCount,
       continueLearning,
       upcomingClasses,

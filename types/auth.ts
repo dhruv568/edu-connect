@@ -107,3 +107,16 @@ export interface VerificationReadiness {
   completionPercentage: number;
   missingItems: string[];
 }
+
+export interface LearnerAcademicProfile {
+  id?: string;
+  userId?: string;
+  educationType?: "SCHOOL" | "DIPLOMA" | null;
+  gradeLevel?: string | null;
+  stream?: string | null;
+  competitiveExam?: string | null;
+  diplomaBranch?: string | null;
+  interests?: string | null;
+  learningPreferences?: string | null;
+}
+

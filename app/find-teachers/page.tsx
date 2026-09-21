@@ -54,6 +54,11 @@ function FindTeachersContent() {
         if (filters.priceMax && filters.priceMax < 5000) queryParams.set("priceMax", String(filters.priceMax));
         if (filters.ratingMin) queryParams.set("ratingMin", String(filters.ratingMin));
         if (filters.sortBy) queryParams.set("sortBy", filters.sortBy);
+        if (filters.academicLevel && filters.academicLevel !== "all") queryParams.set("academicLevel", filters.academicLevel);
+        if (filters.gradeLevel && filters.gradeLevel !== "all") queryParams.set("grade", filters.gradeLevel);
+        if (filters.stream && filters.stream !== "all") queryParams.set("stream", filters.stream);
+        if (filters.competitiveExam && filters.competitiveExam !== "all") queryParams.set("exam", filters.competitiveExam);
+        if (filters.diplomaBranch && filters.diplomaBranch !== "all") queryParams.set("diplomaBranch", filters.diplomaBranch);
 
         const res = await fetch(`/api/teachers?${queryParams.toString()}`);
         const data = await res.json();

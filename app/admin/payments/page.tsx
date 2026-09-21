@@ -12,6 +12,8 @@ import {
   ExternalLink,
   Loader2,
   TrendingUp,
+  Clock,
+  ArrowDownCircle,
 } from "lucide-react";
 import { DashboardLayout } from "@/components/layout/dashboard-layout";
 import { AdminBreadcrumb } from "@/components/ui/admin-breadcrumb";
@@ -134,9 +136,14 @@ export default function AdminPaymentsPage() {
               </p>
             </div>
 
-            <div className="flex items-center gap-2">
+            <div className="flex flex-wrap items-center gap-2">
+              <Link href="/admin/payments/withdrawals">
+                <button className="px-3.5 py-2 bg-purple-50 hover:bg-purple-100 text-purple-800 text-xs font-bold rounded-xl border border-purple-200 transition-colors shadow-2xs flex items-center gap-1.5 cursor-pointer">
+                  <ArrowDownCircle className="w-3.5 h-3.5 text-purple-600" /> Educator Withdrawals
+                </button>
+              </Link>
               <Link href="/admin/refunds">
-                <button className="px-3.5 py-2 bg-white hover:bg-slate-50 text-slate-700 text-xs font-bold rounded-xl border border-slate-200 transition-colors shadow-2xs">
+                <button className="px-3.5 py-2 bg-white hover:bg-slate-50 text-slate-700 text-xs font-bold rounded-xl border border-slate-200 transition-colors shadow-2xs cursor-pointer">
                   Refund Management
                 </button>
               </Link>

@@ -39,8 +39,9 @@ export async function GET() {
     if (user.teacherProfile.subjects) filledFields++;
     if (user.teacherProfile.qualifications) filledFields++;
   } else if (user.role === "STUDENT" && user.studentProfile) {
-    totalFields += 2;
-    if (user.studentProfile.gradeLevel) filledFields++;
+    totalFields += 3;
+    if (user.studentProfile.educationType) filledFields++;
+    if (user.studentProfile.gradeLevel || user.studentProfile.diplomaBranch) filledFields++;
     if (user.studentProfile.interests) filledFields++;
   }
 
@@ -74,7 +75,22 @@ export async function PATCH(request: NextRequest) {
 
   try {
     const body = await request.json();
-    const { firstName, lastName, bio, phone, avatarUrl, headline, subjects, qualifications, gradeLevel, interests } = body;
+    const {
+      firstName,
+      lastName,
+      bio,
+      phone,
+      avatarUrl,
+      headline,
+      subjects,
+      qualifications,
+      educationType,
+      gradeLevel,
+      stream,
+      competitiveExam,
+      diplomaBranch,
+      interests,
+    } = body;
 
     const updatedUser = await prisma.$transaction(async (tx) => {
       // Update basic profile
@@ -100,10 +116,35 @@ export async function PATCH(request: NextRequest) {
           },
         });
       } else if (session.role === "STUDENT") {
-        await tx.studentProfile.update({
+        const isDiploma = educationType === "DIPLOMA";
+        const isSeniorSec =
+          gradeLevel === "Grade 11" ||
+          gradeLevel === "Grade 12" ||
+          gradeLevel === "Class 11" ||
+          gradeLevel === "Class 12";
+
+        const cleanGradeLevel = isDiploma ? null : gradeLevel || null;
+        const cleanStream = isDiploma || !isSeniorSec ? null : stream || null;
+        const cleanCompetitiveExam = isDiploma || !isSeniorSec ? null : competitiveExam || null;
+        const cleanDiplomaBranch = isDiploma ? diplomaBranch || null : null;
+
+        await tx.studentProfile.upsert({
           where: { userId: session.id },
-          data: {
-            ...(gradeLevel !== undefined && { gradeLevel }),
+          create: {
+            userId: session.id,
+            educationType: educationType || "SCHOOL",
+            gradeLevel: cleanGradeLevel,
+            stream: cleanStream,
+            competitiveExam: cleanCompetitiveExam,
+            diplomaBranch: cleanDiplomaBranch,
+            interests: interests !== undefined ? interests : null,
+          },
+          update: {
+            ...(educationType !== undefined && { educationType }),
+            ...(gradeLevel !== undefined && { gradeLevel: cleanGradeLevel }),
+            ...(stream !== undefined && { stream: cleanStream }),
+            ...(competitiveExam !== undefined && { competitiveExam: cleanCompetitiveExam }),
+            ...(diplomaBranch !== undefined && { diplomaBranch: cleanDiplomaBranch }),
             ...(interests !== undefined && { interests }),
           },
         });

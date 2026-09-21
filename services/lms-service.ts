@@ -7,6 +7,10 @@ export interface CourseFilterParams {
   subject?: string;
   category?: string;
   level?: string;
+  gradeLevel?: string;
+  stream?: string;
+  competitiveExam?: string;
+  diplomaBranch?: string;
   priceMax?: number;
   ratingMin?: number;
   sortBy?: string;
@@ -93,6 +97,22 @@ export class LmsService {
 
     if (params.ratingMin !== undefined && !isNaN(params.ratingMin)) {
       where.rating = { gte: params.ratingMin };
+    }
+
+    const academicQuery = params.diplomaBranch || params.competitiveExam || params.stream || params.gradeLevel;
+    if (academicQuery && academicQuery !== "all") {
+      const q = academicQuery.trim();
+      where.AND = [
+        ...(where.AND || []),
+        {
+          OR: [
+            { title: { contains: q, mode: "insensitive" } },
+            { description: { contains: q, mode: "insensitive" } },
+            { subject: { contains: q, mode: "insensitive" } },
+            { level: { contains: q, mode: "insensitive" } },
+          ],
+        },
+      ];
     }
 
     if (params.search) {

@@ -176,7 +176,7 @@ export class LedgerService {
       }
     }
 
-    // Payout status counts
+    // Payout status counts (from TeacherPayout and WithdrawalRequest)
     const payouts = await prisma.teacherPayout.findMany({
       where: { teacherId },
     });
@@ -190,6 +190,20 @@ export class LedgerService {
       } else if (payout.status === "PENDING" || payout.status === "PROCESSING") {
         pendingPaise += payout.amountPaise;
       }
+    }
+
+    const withdrawals = await prisma.withdrawalRequest.findMany({
+      where: { teacherId },
+    });
+
+    for (const wd of withdrawals) {
+      if (wd.status === "COMPLETED") {
+        paidPaise += wd.amountPaise;
+      } else if (wd.status === "PENDING" || wd.status === "APPROVED" || wd.status === "PROCESSING") {
+        pendingPaise += wd.amountPaise;
+      }
+      // Note: REJECTED or FAILED are intentionally excluded from both,
+      // which automatically releases and restores the held balance to availablePaise.
     }
 
     const availablePaise = Math.max(0, totalEarningsPaise - paidPaise - pendingPaise);
@@ -206,6 +220,45 @@ export class LedgerService {
       availableAmount: availablePaise / 100,
       refundedAmount: refundedPaise / 100,
     };
+  }
+
+  /**
+   * Record double-entry financial ledger entry for a completed withdrawal disbursement
+   */
+  static async recordWithdrawalDisbursementLedger(params: {
+    withdrawalId: string;
+    teacherId: string;
+    amountPaise: number;
+    referenceId?: string;
+    description?: string;
+  }) {
+    return await prisma.$transaction(async (tx) => {
+      const entry = await tx.financialLedgerEntry.create({
+        data: {
+          teacherId: params.teacherId,
+          type: "TRANSFER",
+          amountPaise: params.amountPaise,
+          currency: "INR",
+          direction: "DEBIT",
+          status: "COMPLETED",
+          description:
+            params.description ||
+            `Withdrawal payout transfer disbursed (Ref: ${params.referenceId || params.withdrawalId})`,
+        },
+      });
+
+      await tx.withdrawalRequest.update({
+        where: { id: params.withdrawalId },
+        data: {
+          ledgerEntryId: entry.id,
+          status: "COMPLETED",
+          completedAt: new Date(),
+          ...(params.referenceId ? { providerReferenceId: params.referenceId } : {}),
+        },
+      });
+
+      return entry;
+    });
   }
 
   /**

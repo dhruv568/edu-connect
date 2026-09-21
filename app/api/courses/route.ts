@@ -12,6 +12,10 @@ export async function GET(request: NextRequest) {
     const subject = searchParams.get("subject") || undefined;
     const category = searchParams.get("category") || undefined;
     const level = searchParams.get("level") || undefined;
+    const gradeLevel = searchParams.get("grade") || searchParams.get("gradeLevel") || undefined;
+    const stream = searchParams.get("stream") || undefined;
+    const competitiveExam = searchParams.get("exam") || searchParams.get("competitiveExam") || undefined;
+    const diplomaBranch = searchParams.get("diplomaBranch") || undefined;
     const priceMax = searchParams.get("priceMax") ? Number(searchParams.get("priceMax")) : undefined;
     const ratingMin = searchParams.get("ratingMin") ? Number(searchParams.get("ratingMin")) : undefined;
     const sortBy = searchParams.get("sortBy") || "recommended";
@@ -23,6 +27,10 @@ export async function GET(request: NextRequest) {
       subject,
       category,
       level,
+      gradeLevel,
+      stream,
+      competitiveExam,
+      diplomaBranch,
       priceMax,
       ratingMin,
       sortBy,

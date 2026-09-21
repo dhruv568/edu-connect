@@ -154,13 +154,61 @@ export default function UserProfilePage() {
 
             {userData.role === "STUDENT" && userData.studentProfile && (
               <>
-                <div>
-                  <span className="text-slate-500 font-medium">Grade Level</span>
-                  <p className="text-slate-800 font-bold mt-0.5">{userData.studentProfile.gradeLevel}</p>
+                <div className="col-span-full pt-2 border-t border-slate-100">
+                  <h3 className="text-xs font-black uppercase text-slate-800 tracking-wider mb-2">
+                    Academic Profile
+                  </h3>
                 </div>
                 <div>
-                  <span className="text-slate-500 font-medium">Interests</span>
-                  <p className="text-slate-800 font-bold mt-0.5">{userData.studentProfile.interests || "General STEM"}</p>
+                  <span className="text-slate-500 font-medium">Education Type</span>
+                  <p className="text-slate-800 font-bold mt-0.5">
+                    {userData.studentProfile.educationType === "DIPLOMA"
+                      ? "Diploma / Polytechnic"
+                      : "School Education"}
+                  </p>
+                </div>
+
+                {userData.studentProfile.educationType === "DIPLOMA" ? (
+                  <div>
+                    <span className="text-slate-500 font-medium">Diploma Branch</span>
+                    <p className="text-slate-800 font-bold mt-0.5">
+                      {userData.studentProfile.diplomaBranch || "Not specified"}
+                    </p>
+                  </div>
+                ) : (
+                  <>
+                    <div>
+                      <span className="text-slate-500 font-medium">Grade / Class</span>
+                      <p className="text-slate-800 font-bold mt-0.5">
+                        {userData.studentProfile.gradeLevel || "Not specified"}
+                      </p>
+                    </div>
+
+                    {(userData.studentProfile.gradeLevel === "Grade 11" ||
+                      userData.studentProfile.gradeLevel === "Grade 12") && (
+                      <>
+                        <div>
+                          <span className="text-slate-500 font-medium">Academic Stream</span>
+                          <p className="text-slate-800 font-bold mt-0.5">
+                            {userData.studentProfile.stream || "Not specified"}
+                          </p>
+                        </div>
+                        <div>
+                          <span className="text-slate-500 font-medium">Target Competitive Exam</span>
+                          <p className="text-slate-800 font-bold mt-0.5">
+                            {userData.studentProfile.competitiveExam || "None / Not Preparing"}
+                          </p>
+                        </div>
+                      </>
+                    )}
+                  </>
+                )}
+
+                <div>
+                  <span className="text-slate-500 font-medium">Interests & Goals</span>
+                  <p className="text-slate-800 font-bold mt-0.5">
+                    {userData.studentProfile.interests || "General STEM & Academics"}
+                  </p>
                 </div>
               </>
             )}

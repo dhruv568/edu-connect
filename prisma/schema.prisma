@@ -100,6 +100,7 @@ model TeacherProfile {
   bankName           String?
   ifscCode           String?
   cancelledChequeUrl String?
+  upiId              String?
 
   createdAt          DateTime @default(now())
   updatedAt          DateTime @updatedAt
@@ -119,6 +120,7 @@ model TeacherProfile {
   payoutAccount         TeacherPayoutAccount?
   payouts               TeacherPayout[]
   ledgerEntries         FinancialLedgerEntry[]
+  withdrawals           WithdrawalRequest[]
 
   @@map("teacher_profiles")
 }
@@ -205,7 +207,11 @@ model AdminNote {
 model StudentProfile {
   id                  String   @id @default(uuid())
   userId              String   @unique
-  gradeLevel          String?
+  educationType       String?  // "SCHOOL" | "DIPLOMA"
+  gradeLevel          String?  // "Grade 1" .. "Grade 12"
+  stream              String?  // "Science", "Commerce", "Arts/Humanities", "Other" (Grades 11-12)
+  competitiveExam     String?  // "JEE", "NEET", "CUET", etc. (Grades 11-12, optional)
+  diplomaBranch       String?  // "Computer Engineering", etc. (Diploma)
   interests           String?
   learningPreferences String? // Comma-separated preference tags
   createdAt           DateTime @default(now())
@@ -783,6 +789,7 @@ model FinancialLedgerEntry {
   transaction   PaymentTransaction? @relation(fields: [transactionId], references: [id], onDelete: SetNull)
   teacher       TeacherProfile?     @relation(fields: [teacherId], references: [id], onDelete: SetNull)
   payouts       TeacherPayout[]
+  withdrawals   WithdrawalRequest[]
 
   @@index([teacherId, type])
   @@map("financial_ledger_entries")
@@ -795,6 +802,7 @@ model TeacherPayoutAccount {
   providerAccountId String?   // Cashfree Vendor ID / Beneficiary ID
   accountName       String?
   accountType       String?   @default("STANDARD")
+  upiId             String?
   status            String    @default("NOT_STARTED") // NOT_STARTED | PENDING | UNDER_REVIEW | ACTIVE | REJECTED
   onboardingUrl     String?
   kycStatus         String?
@@ -828,6 +836,52 @@ model TeacherPayout {
 
   @@index([teacherId, status])
   @@map("teacher_payouts")
+}
+
+model WithdrawalRequest {
+  id                  String    @id @default(uuid())
+  teacherId           String
+  amountPaise         Int
+  currency            String    @default("INR")
+  status              String    @default("PENDING") // PENDING | APPROVED | REJECTED | PROCESSING | COMPLETED | FAILED
+  payoutMethod        String    @default("BANK_TRANSFER") // BANK_TRANSFER | UPI
+  
+  // Beneficiary snapshot at request time
+  accountHolderName   String?
+  accountNumber       String?
+  bankName            String?
+  ifscCode            String?
+  upiId               String?
+
+  // Cashfree Payout transfer details
+  providerTransferId  String?   @unique
+  providerReferenceId String?   // UTR or Bank Reference
+  
+  adminNotes          String?
+  rejectionReason     String?
+  failureReason       String?
+  
+  requestedAt         DateTime  @default(now())
+  approvedAt          DateTime?
+  approvedBy          String?   // Admin User ID
+  rejectedAt          DateTime?
+  rejectedBy          String?   // Admin User ID
+  processedAt         DateTime?
+  completedAt         DateTime?
+  failedAt            DateTime?
+
+  idempotencyKey      String?   @unique
+
+  createdAt           DateTime  @default(now())
+  updatedAt           DateTime  @updatedAt
+
+  teacher             TeacherProfile        @relation(fields: [teacherId], references: [id], onDelete: Cascade)
+  ledgerEntryId       String?
+  ledgerEntry         FinancialLedgerEntry? @relation(fields: [ledgerEntryId], references: [id], onDelete: SetNull)
+
+  @@index([teacherId, status])
+  @@index([status])
+  @@map("withdrawal_requests")
 }
 
 model Refund {

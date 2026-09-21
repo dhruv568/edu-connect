@@ -22,6 +22,13 @@ import {
   GraduationCap,
 } from "lucide-react";
 import { useToast } from "@/components/ui/toast";
+import {
+  SCHOOL_GRADES,
+  SENIOR_SECONDARY_STREAMS,
+  COMPETITIVE_EXAMS,
+  DIPLOMA_BRANCHES,
+  isSeniorSecondaryGrade,
+} from "@/lib/constants/academic";
 
 interface SubjectOption {
   id: string;
@@ -80,6 +87,11 @@ export default function FreeExamPage() {
   const [selectedSubject, setSelectedSubject] = useState<string>("");
   const [difficulty, setDifficulty] = useState<"Beginner" | "Intermediate" | "Advanced">("Intermediate");
   const [questionCount, setQuestionCount] = useState<number>(5);
+  const [academicLevel, setAcademicLevel] = useState<"ALL" | "SCHOOL" | "DIPLOMA">("ALL");
+  const [gradeLevel, setGradeLevel] = useState<string>("Grade 10");
+  const [stream, setStream] = useState<string>("Science");
+  const [competitiveExam, setCompetitiveExam] = useState<string>("");
+  const [diplomaBranch, setDiplomaBranch] = useState<string>("Computer Engineering");
 
   // Active exam state
   const [examId, setExamId] = useState("");
@@ -92,7 +104,7 @@ export default function FreeExamPage() {
   // Result state
   const [result, setResult] = useState<ExamResult | null>(null);
 
-  // Load platform subjects
+  // Load platform subjects and auto-detect learner's profile
   useEffect(() => {
     fetch("/api/subjects")
       .then((res) => (res.ok ? res.json() : null))
@@ -104,6 +116,20 @@ export default function FreeExamPage() {
       })
       .catch(() => {})
       .finally(() => setLoadingSubjects(false));
+
+    fetch("/api/profile")
+      .then((res) => (res.ok ? res.json() : null))
+      .then((json) => {
+        if (json?.data?.academicProfile) {
+          const ap = json.data.academicProfile;
+          if (ap.educationType) setAcademicLevel(ap.educationType);
+          if (ap.gradeLevel) setGradeLevel(ap.gradeLevel);
+          if (ap.stream) setStream(ap.stream);
+          if (ap.competitiveExam) setCompetitiveExam(ap.competitiveExam);
+          if (ap.diplomaBranch) setDiplomaBranch(ap.diplomaBranch);
+        }
+      })
+      .catch(() => {});
   }, []);
 
   const handleStartExam = async () => {
@@ -121,6 +147,11 @@ export default function FreeExamPage() {
           subject: selectedSubject,
           difficulty,
           count: questionCount,
+          academicLevel,
+          gradeLevel: academicLevel === "SCHOOL" ? gradeLevel : undefined,
+          stream: academicLevel === "SCHOOL" && isSeniorSecondaryGrade(gradeLevel) ? stream : undefined,
+          competitiveExam: academicLevel === "SCHOOL" && isSeniorSecondaryGrade(gradeLevel) ? competitiveExam : undefined,
+          diplomaBranch: academicLevel === "DIPLOMA" ? diplomaBranch : undefined,
         }),
       });
 
@@ -261,10 +292,100 @@ export default function FreeExamPage() {
                 )}
               </div>
 
+              {/* Academic Target / Syllabus Selection */}
+              <div className="space-y-3 pt-2 border-t border-slate-100">
+                <label className="block text-xs font-bold text-slate-800 uppercase tracking-wider flex items-center gap-1.5">
+                  <GraduationCap className="w-4 h-4 text-[#3157D5]" /> 2. Academic Focus (Optional)
+                </label>
+                <div className="grid grid-cols-3 gap-2">
+                  {[
+                    { id: "ALL", label: "General Level" },
+                    { id: "SCHOOL", label: "School Education" },
+                    { id: "DIPLOMA", label: "Diploma Studies" },
+                  ].map((lvl) => (
+                    <button
+                      key={lvl.id}
+                      type="button"
+                      onClick={() => setAcademicLevel(lvl.id as any)}
+                      className={`py-2 px-2.5 rounded-xl border text-xs font-bold text-center transition-all ${
+                        academicLevel === lvl.id
+                          ? "bg-blue-50 border-blue-600 text-[#3157D5] ring-1 ring-blue-600"
+                          : "bg-white text-slate-700 border-slate-200 hover:border-slate-300"
+                      }`}
+                    >
+                      {lvl.label}
+                    </button>
+                  ))}
+                </div>
+
+                {academicLevel === "SCHOOL" && (
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 pt-1">
+                    <div>
+                      <label className="block text-[11px] font-bold text-slate-600 uppercase mb-1">Grade Level</label>
+                      <select
+                        value={gradeLevel}
+                        onChange={(e) => setGradeLevel(e.target.value)}
+                        className="w-full text-xs h-9 px-2.5 rounded-xl border border-slate-200 bg-white font-medium"
+                      >
+                        {SCHOOL_GRADES.map((g) => (
+                          <option key={g.value} value={g.value}>{g.label}</option>
+                        ))}
+                      </select>
+                    </div>
+
+                    {isSeniorSecondaryGrade(gradeLevel) && (
+                      <div>
+                        <label className="block text-[11px] font-bold text-slate-600 uppercase mb-1">Stream</label>
+                        <select
+                          value={stream}
+                          onChange={(e) => setStream(e.target.value)}
+                          className="w-full text-xs h-9 px-2.5 rounded-xl border border-slate-200 bg-white font-medium"
+                        >
+                          {SENIOR_SECONDARY_STREAMS.map((s) => (
+                            <option key={s} value={s}>{s}</option>
+                          ))}
+                        </select>
+                      </div>
+                    )}
+
+                    {isSeniorSecondaryGrade(gradeLevel) && (
+                      <div className="sm:col-span-2">
+                        <label className="block text-[11px] font-bold text-slate-600 uppercase mb-1">Target Exam (Optional)</label>
+                        <select
+                          value={competitiveExam}
+                          onChange={(e) => setCompetitiveExam(e.target.value)}
+                          className="w-full text-xs h-9 px-2.5 rounded-xl border border-slate-200 bg-white font-medium"
+                        >
+                          <option value="">General School Curriculum</option>
+                          {COMPETITIVE_EXAMS.map((x) => (
+                            <option key={x} value={x}>{x}</option>
+                          ))}
+                        </select>
+                      </div>
+                    )}
+                  </div>
+                )}
+
+                {academicLevel === "DIPLOMA" && (
+                  <div className="pt-1">
+                    <label className="block text-[11px] font-bold text-slate-600 uppercase mb-1">Diploma Branch</label>
+                    <select
+                      value={diplomaBranch}
+                      onChange={(e) => setDiplomaBranch(e.target.value)}
+                      className="w-full text-xs h-9 px-2.5 rounded-xl border border-slate-200 bg-white font-medium"
+                    >
+                      {DIPLOMA_BRANCHES.map((b) => (
+                        <option key={b} value={b}>{b}</option>
+                      ))}
+                    </select>
+                  </div>
+                )}
+              </div>
+
               {/* Difficulty Selection */}
               <div className="space-y-2 pt-2 border-t border-slate-100">
                 <label className="block text-xs font-bold text-slate-800 uppercase tracking-wider">
-                  2. Select Difficulty Level
+                  3. Select Difficulty Level
                 </label>
                 <div className="grid grid-cols-3 gap-2.5">
                   {(["Beginner", "Intermediate", "Advanced"] as const).map((lvl) => {
@@ -290,7 +411,7 @@ export default function FreeExamPage() {
               {/* Question Count Selection */}
               <div className="space-y-2 pt-2 border-t border-slate-100">
                 <label className="block text-xs font-bold text-slate-800 uppercase tracking-wider">
-                  3. Question Count
+                  4. Question Count
                 </label>
                 <div className="grid grid-cols-2 gap-2.5">
                   {[5, 10].map((num) => {

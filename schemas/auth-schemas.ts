@@ -13,6 +13,11 @@ export const RegisterSchema = z.object({
   lastName: z.string().min(2, "Last name must be at least 2 characters"),
   phone: z.string().optional(),
   role: RoleEnum.default("STUDENT"),
+  educationType: z.string().optional(),
+  gradeLevel: z.string().optional(),
+  stream: z.string().optional(),
+  competitiveExam: z.string().optional(),
+  diplomaBranch: z.string().optional(),
 });
 
 export type RegisterInput = z.infer<typeof RegisterSchema>;
