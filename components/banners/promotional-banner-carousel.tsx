@@ -219,7 +219,7 @@ export function PromotionalBannerCarousel({
       className={`w-full relative z-20 focus:outline-none ${
         previewMode
           ? "pt-0 pb-0"
-          : "pt-16 sm:pt-24 lg:pt-28 pb-2 sm:pb-4"
+          : "pt-16 sm:pt-20 lg:pt-24 pb-0 bg-slate-950"
       }`}
       onMouseEnter={() => setIsHovered(true)}
       onMouseLeave={() => setIsHovered(false)}
@@ -227,8 +227,27 @@ export function PromotionalBannerCarousel({
       onTouchMove={handleTouchMove}
       onTouchEnd={handleTouchEnd}
     >
-      <div className="max-w-7xl mx-auto px-3 sm:px-6 lg:px-8">
-        <div className="relative w-full max-w-[800px] mx-auto rounded-xl sm:rounded-3xl overflow-hidden border border-slate-200/60 dark:border-slate-800/60 shadow-lg sm:shadow-xl bg-slate-900/5 aspect-[3/1] sm:aspect-[4/1]">
+      <div className={previewMode ? "px-0" : "w-full"}>
+        <div
+          className={`relative w-full overflow-hidden bg-slate-950 ${
+            previewMode
+              ? "max-w-[800px] mx-auto rounded-xl sm:rounded-2xl border border-slate-200/60 dark:border-slate-800/60 shadow-lg aspect-[3/1] sm:aspect-[4/1]"
+              : "shadow-2xl aspect-[16/7] sm:aspect-[2.5/1] md:aspect-[3.2/1] lg:aspect-[4/1] xl:aspect-[4.5/1]"
+          }`}
+        >
+          {/* Ambient Blurred Backdrop matching Banner Image colors */}
+          <div className="absolute inset-0 overflow-hidden pointer-events-none select-none" aria-hidden="true">
+            <Image
+              src={bannerImageSrc}
+              alt=""
+              fill
+              className="object-cover w-full h-full blur-2xl scale-110 opacity-30"
+              unoptimized={true}
+              aria-hidden="true"
+            />
+            <div className="absolute inset-0 bg-black/20 backdrop-blur-[2px]" />
+          </div>
+
           {/* Animated Slide Transition */}
           <AnimatePresence mode="wait">
             <motion.div
@@ -237,7 +256,7 @@ export function PromotionalBannerCarousel({
               animate={{ opacity: 1 }}
               exit={{ opacity: 0 }}
               transition={{ duration: 0.35, ease: "easeInOut" }}
-              className="relative w-full h-full"
+              className="relative w-full h-full z-10 flex items-center justify-center"
             >
               {hasImageClick ? (
                 <Link
@@ -252,7 +271,7 @@ export function PromotionalBannerCarousel({
                     alt={currentBanner.title || "Promotional Banner"}
                     fill
                     priority={currentIndex === 0}
-                    sizes="(max-width: 640px) 100vw, (max-width: 1024px) 95vw, 1280px"
+                    sizes="100vw"
                     className="object-contain w-full h-full"
                     unoptimized={true}
                     onError={() => {
@@ -273,7 +292,7 @@ export function PromotionalBannerCarousel({
                     alt={currentBanner.title || "Promotional Banner"}
                     fill
                     priority={currentIndex === 0}
-                    sizes="(max-width: 640px) 100vw, (max-width: 1024px) 95vw, 1280px"
+                    sizes="100vw"
                     className="object-contain w-full h-full"
                     unoptimized={true}
                     onError={() => {
@@ -299,9 +318,11 @@ export function PromotionalBannerCarousel({
                   prevSlide();
                 }}
                 aria-label="Previous promotional slide"
-                className="absolute left-1.5 sm:left-3 top-1/2 -translate-y-1/2 z-30 p-1.5 sm:p-2.5 rounded-full bg-black/40 hover:bg-black/70 text-white border border-white/20 backdrop-blur-md transition-all duration-200 cursor-pointer shadow-lg focus:outline-none"
+                className={`absolute top-1/2 -translate-y-1/2 z-30 p-2 sm:p-3 rounded-full bg-black/40 hover:bg-black/75 text-white border border-white/20 backdrop-blur-md transition-all duration-200 cursor-pointer shadow-xl focus:outline-none hover:scale-105 active:scale-95 ${
+                  previewMode ? "left-1.5 sm:left-3" : "left-3 sm:left-6 lg:left-8"
+                }`}
               >
-                <ChevronLeft className="h-3.5 w-3.5 sm:h-5 sm:w-5" />
+                <ChevronLeft className="h-4 w-4 sm:h-6 sm:w-6" />
               </button>
 
               <button
@@ -312,9 +333,11 @@ export function PromotionalBannerCarousel({
                   nextSlide();
                 }}
                 aria-label="Next promotional slide"
-                className="absolute right-1.5 sm:right-3 top-1/2 -translate-y-1/2 z-30 p-1.5 sm:p-2.5 rounded-full bg-black/40 hover:bg-black/70 text-white border border-white/20 backdrop-blur-md transition-all duration-200 cursor-pointer shadow-lg focus:outline-none"
+                className={`absolute top-1/2 -translate-y-1/2 z-30 p-2 sm:p-3 rounded-full bg-black/40 hover:bg-black/75 text-white border border-white/20 backdrop-blur-md transition-all duration-200 cursor-pointer shadow-xl focus:outline-none hover:scale-105 active:scale-95 ${
+                  previewMode ? "right-1.5 sm:right-3" : "right-3 sm:right-6 lg:right-8"
+                }`}
               >
-                <ChevronRight className="h-3.5 w-3.5 sm:h-5 sm:w-5" />
+                <ChevronRight className="h-4 w-4 sm:h-6 sm:w-6" />
               </button>
             </>
           )}
@@ -322,7 +345,9 @@ export function PromotionalBannerCarousel({
           {/* Carousel Indicators / Dots (Only shown when multiple banners exist) */}
           {total > 1 && (
             <div
-              className="absolute bottom-2 sm:bottom-3 left-1/2 -translate-x-1/2 z-30 flex items-center gap-1 sm:gap-1.5 px-2 sm:px-2.5 py-0.5 sm:py-1 rounded-full bg-black/35 backdrop-blur-sm"
+              className={`absolute left-1/2 -translate-x-1/2 z-30 flex items-center gap-1.5 sm:gap-2 px-3 py-1.5 rounded-full bg-black/40 backdrop-blur-md border border-white/15 shadow-xl ${
+                previewMode ? "bottom-2 sm:bottom-3" : "bottom-3 sm:bottom-4 lg:bottom-6"
+              }`}
               role="tablist"
               aria-label="Promotional banner carousel pagination"
             >
@@ -338,8 +363,8 @@ export function PromotionalBannerCarousel({
                     e.stopPropagation();
                     goToSlide(idx);
                   }}
-                  className={`h-1 sm:h-1.5 rounded-full transition-all duration-300 cursor-pointer ${
-                    idx === currentIndex ? "w-4 sm:w-6 bg-white" : "w-1 sm:w-1.5 bg-white/50 hover:bg-white/80"
+                  className={`h-1.5 sm:h-2 rounded-full transition-all duration-300 cursor-pointer ${
+                    idx === currentIndex ? "w-5 sm:w-8 bg-white" : "w-1.5 sm:w-2 bg-white/40 hover:bg-white/70"
                   }`}
                 />
               ))}
