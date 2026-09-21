@@ -1,6 +1,8 @@
 export * from "./verification-email";
 export * from "./password-reset-email";
 export * from "./verification-templates";
+export * from "./certificate-email";
+export * from "./email-footer";
 
 /**
  * Placeholder signatures for future EduConnects module email templates.

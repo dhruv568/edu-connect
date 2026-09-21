@@ -7,6 +7,7 @@ import { Badge } from "@/components/ui/badge";
 import { Camera, CameraOff, Mic, MicOff, Volume2, Settings, ShieldCheck, Clock } from "lucide-react";
 import { DeviceSelection, LiveSessionDetails } from "@/types/classroom";
 import { BackButton } from "@/components/ui/back-button";
+import { Logo } from "@/components/brand/logo";
 
 interface PreJoinScreenProps {
   sessionDetails: LiveSessionDetails;
@@ -152,7 +153,15 @@ export function PreJoinScreen({
   return (
     <div className="min-h-screen bg-slate-950 text-slate-100 flex items-center justify-center p-4 md:p-8">
       <div className="max-w-4xl w-full space-y-6">
-        <div className="flex justify-start">
+        <div className="flex items-center justify-between">
+          <Logo
+            variant="compact"
+            size="sm"
+            theme="dark"
+            href="/"
+            showTagline={false}
+            priority
+          />
           <BackButton
             fallbackUrl={isTeacher ? "/teacher/live-classes" : "/student/live-classes"}
             label={isTeacher ? "Back to Live Classes" : "Back to Schedule"}

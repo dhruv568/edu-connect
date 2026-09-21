@@ -24,9 +24,11 @@ import {
   Check,
   X,
   MessageSquare,
+  AlertCircle,
 } from "lucide-react";
 import { BackButton } from "@/components/ui/back-button";
 import { BackToHomeButton } from "@/components/ui/back-to-home-button";
+import { Logo } from "@/components/brand/logo";
 
 export default function LmsClassroomPlayerPage() {
   const params = useParams();
@@ -91,6 +93,14 @@ export default function LmsClassroomPlayerPage() {
   useEffect(() => {
     if (slug) fetchClassroomData();
   }, [slug]);
+
+  // Reset video player states when active lesson changes
+  useEffect(() => {
+    setVideoError(false);
+    setIsPlaying(false);
+    setCurrentTime(0);
+    setDuration(0);
+  }, [activeLesson?.id]);
 
   // Fetch Mux signed playback token whenever active lesson changes
   useEffect(() => {
@@ -252,14 +262,23 @@ export default function LmsClassroomPlayerPage() {
       {/* Top LMS Header */}
       <header className="h-16 px-4 sm:px-6 bg-slate-900 border-b border-slate-800 flex items-center justify-between z-30 shrink-0">
         <div className="flex items-center gap-4">
+          <Logo
+            variant="compact"
+            size="sm"
+            theme="dark"
+            href="/"
+            showTagline={false}
+            priority
+          />
+          <span className="text-slate-700 hidden sm:inline">|</span>
           <BackButton
             fallbackUrl="/student/courses"
             label="My Courses"
             variant="dark"
             size="sm"
           />
-          <span className="text-slate-700">|</span>
-          <h1 className="text-sm font-bold text-slate-100 truncate max-w-xs sm:max-w-md">
+          <span className="text-slate-700 hidden md:inline">|</span>
+          <h1 className="text-sm font-bold text-slate-100 truncate max-w-xs sm:max-w-md hidden md:block">
             {courseData.title}
           </h1>
         </div>
@@ -292,28 +311,59 @@ export default function LmsClassroomPlayerPage() {
               <video
                 ref={videoRef}
                 src={activeLesson.videoUrl}
+                onLoadedMetadata={() => {
+                  if (videoRef.current) {
+                    setDuration(videoRef.current.duration || 0);
+                  }
+                }}
                 onTimeUpdate={handleTimeUpdate}
                 onEnded={handleVideoEnded}
                 onError={() => setVideoError(true)}
                 className="w-full h-full object-contain cursor-pointer"
                 onClick={togglePlay}
               />
+            ) : videoError ? (
+              <div className="p-8 text-center space-y-3">
+                <AlertCircle className="w-12 h-12 text-red-500 mx-auto" />
+                <div className="text-sm font-bold text-slate-200">
+                  Unable to load video stream
+                </div>
+                <p className="text-xs text-slate-400 max-w-sm mx-auto">
+                  Please check your internet connection or check if the video file is accessible.
+                </p>
+                <button
+                  onClick={() => setVideoError(false)}
+                  className="px-4 py-2 text-xs font-bold rounded-xl bg-blue-600 hover:bg-blue-500 text-white transition"
+                >
+                  Retry Loading
+                </button>
+              </div>
+            ) : !activeLesson?.isAccessible ? (
+              <div className="p-8 text-center space-y-3">
+                <Lock className="w-12 h-12 text-slate-600 mx-auto" />
+                <div className="text-sm font-bold text-slate-300">
+                  Lesson Locked
+                </div>
+                <p className="text-xs text-slate-500 max-w-sm mx-auto">
+                  Enroll in this course to unlock protected lessons and resources.
+                </p>
+              </div>
             ) : (
               <div className="p-8 text-center space-y-3">
                 <PlayCircle className="w-12 h-12 text-slate-600 mx-auto" />
                 <div className="text-sm font-bold text-slate-300">
-                  {activeLesson?.isAccessible ? "Video Lesson Loaded" : "Lesson Locked"}
+                  {activeLesson?.type === "LIVE" ? "Live Class Session" : "No Video File Attached"}
                 </div>
                 <p className="text-xs text-slate-500 max-w-sm mx-auto">
-                  {activeLesson?.isAccessible
-                    ? "Click play below to begin watching this lesson."
-                    : "Enroll in this course to unlock protected lessons and resources."}
+                  {activeLesson?.type === "LIVE"
+                    ? "This is a scheduled live class session. Join through your Live Classes dashboard."
+                    : "This lesson contains reading materials and downloadable resources below."}
                 </p>
               </div>
             )}
 
-            {/* Custom Overlay Video Controls Bar */}
-            {activeLesson?.isAccessible && (
+            {/* Custom Overlay Video Controls Bar - Render ONLY when valid video is loaded */}
+            {activeLesson?.isAccessible && activeLesson?.videoUrl && !videoError && (
               <div className="absolute bottom-0 left-0 right-0 p-4 bg-gradient-to-t from-slate-950 via-slate-950/80 to-transparent flex flex-col gap-2 opacity-90 transition-opacity">
                 {/* Seek Bar */}
                 <input

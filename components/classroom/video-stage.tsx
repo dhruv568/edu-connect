@@ -103,6 +103,13 @@ export function VideoStage({
               </div>
             )}
 
+            {/* EduConnects Watermark Branding Overlay */}
+            <div className="absolute top-4 left-4 bg-slate-950/80 backdrop-blur-md border border-slate-700/50 px-3 py-1.5 rounded-xl text-xs font-bold text-white flex items-center gap-2 z-10">
+              <span className="w-2 h-2 rounded-full bg-blue-500 animate-pulse" />
+              <span className="bg-gradient-to-r from-blue-400 to-indigo-300 bg-clip-text text-transparent font-black">EduConnects</span>
+              <span className="text-[10px] text-slate-400 font-semibold uppercase tracking-wider">Live Classroom</span>
+            </div>
+
             {/* Overlays */}
             <div className="absolute bottom-4 left-4 bg-slate-950/85 backdrop-blur-md border border-slate-700/60 px-3.5 py-1.5 rounded-xl text-xs font-bold text-white flex items-center gap-2">
               <span>{teacherParticipant ? teacherParticipant.name : "Teacher"}</span>

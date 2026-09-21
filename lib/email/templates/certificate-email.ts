@@ -1,4 +1,5 @@
 import { OFFICIAL_COMPANY_INFO } from "@/lib/company";
+import { generateEmailFooterHtml } from "./email-footer";
 
 export interface CertificateEmailParams {
   recipientEmail: string;
@@ -26,6 +27,11 @@ export function generateCertificateEmailHtml(params: CertificateEmailParams): st
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Your EduConnects Completion Certificate</title>
+  <style>
+    @media screen and (max-width: 600px) {
+      .footer-padding { padding: 20px 16px !important; }
+    }
+  </style>
 </head>
 <body style="margin: 0; padding: 0; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; background-color: #F0FAF5; color: #1E293B;">
   <table role="presentation" width="100%" cellspacing="0" cellpadding="0" style="background-color: #F0FAF5; padding: 32px 16px;">
@@ -115,20 +121,8 @@ export function generateCertificateEmailHtml(params: CertificateEmailParams): st
             </td>
           </tr>
 
-          <!-- Footer with Official Legal Entity -->
-          <tr>
-            <td style="background-color: #F8FAFC; padding: 24px 32px; border-top: 1px solid #E2E8F0; text-align: center;">
-              <p style="margin: 0 0 6px 0; font-size: 12px; font-weight: 700; color: #0F172A;">
-                EduConnects • Operated by Shrivastava ProFunnels Ventures Pvt Ltd
-              </p>
-              <p style="margin: 0 0 6px 0; font-size: 11px; color: #64748B; line-height: 1.4;">
-                CIN: U85499UP2024PTC212061 • Registered Office: Bard No. 8, Basundhara Colony, Chandmari, Lalitpur (UP), 284403
-              </p>
-              <p style="margin: 0; font-size: 11px; color: #94A3B8;">
-                © ${new Date().getFullYear()} EduConnects. All rights reserved.
-              </p>
-            </td>
-          </tr>
+          <!-- Standardized EduConnects Redesigned Footer -->
+          ${generateEmailFooterHtml({ baseUrl: appUrl, isEducator: true })}
 
         </table>
       </td>

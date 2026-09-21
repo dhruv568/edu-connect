@@ -1,5 +1,6 @@
 import { getPublicAppUrl } from "../../app-url";
 import { OFFICIAL_COMPANY_INFO } from "../../company";
+import { generateEmailFooterHtml } from "./email-footer";
 
 export interface EmailTemplateParams {
   recipientEmail: string;
@@ -161,29 +162,8 @@ export function generateVerificationEmailHtml(params: EmailTemplateParams): stri
             </td>
           </tr>
 
-          <!-- Standardized EduConnects Footer (Exact User Requirement) -->
-          <tr>
-            <td class="footer-padding" style="background-color: #f8fafc; border-top: 1px solid #e2e8f0; padding: 24px 32px; text-align: center; font-size: 12px; line-height: 1.6; color: #64748b;">
-              <p style="margin: 0 0 4px 0; font-weight: 700; color: #1e293b; font-size: 13px;">
-                &copy; 2026 EduConnects
-              </p>
-              <p style="margin: 0 0 2px 0; color: #64748b;">
-                Powered by MyProFunnels Ventures
-              </p>
-              <p style="margin: 0 0 4px 0; color: #64748b;">
-                Registered Business: Shrivastava ProFunnels Ventures Pvt Ltd
-              </p>
-              <p style="margin: 0 0 4px 0; font-weight: 600; color: #475569;">
-                Office Address
-              </p>
-              <p style="margin: 0 0 2px 0; color: #64748b;">
-                Civil Lines, Lalitpur, Uttar Pradesh, India
-              </p>
-              <p style="margin: 0; color: #64748b;">
-                Pin: 284403
-              </p>
-            </td>
-          </tr>
+          <!-- Standardized EduConnects Redesigned Footer -->
+          ${generateEmailFooterHtml({ baseUrl })}
 
         </table>
 

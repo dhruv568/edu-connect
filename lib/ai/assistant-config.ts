@@ -12,8 +12,13 @@ export function isAiAssistantExcluded(pathname: string): boolean {
   if (!pathname) return false;
   const clean = pathname.toLowerCase().trim();
 
-  // Classroom controls
-  if (clean.startsWith("/classroom") || clean.startsWith("/live/session")) {
+  // Classroom, Live Class & LMS Video Player routes
+  if (
+    clean.startsWith("/classroom") ||
+    clean.startsWith("/live") ||
+    clean.startsWith("/learn") ||
+    clean.startsWith("/student/live-classes")
+  ) {
     return true;
   }
 
