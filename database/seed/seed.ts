@@ -1,6 +1,33 @@
+import fs from "node:fs";
+import path from "node:path";
 import { PrismaClient } from "@prisma/client";
 import bcrypt from "bcryptjs";
 import { seedSyntheticEducators } from "./seed-synthetic-educators";
+
+function loadEnv() {
+  try {
+    const envPath = path.resolve(process.cwd(), ".env");
+    if (fs.existsSync(envPath)) {
+      const content = fs.readFileSync(envPath, "utf8");
+      for (const line of content.split("\n")) {
+        const trimmed = line.trim();
+        if (!trimmed || trimmed.startsWith("#")) continue;
+        const eqIdx = trimmed.indexOf("=");
+        if (eqIdx !== -1) {
+          const key = trimmed.slice(0, eqIdx).trim();
+          let val = trimmed.slice(eqIdx + 1).trim();
+          if ((val.startsWith('"') && val.endsWith('"')) || (val.startsWith("'") && val.endsWith("'"))) {
+            val = val.slice(1, -1);
+          }
+          if (!process.env[key]) {
+            process.env[key] = val;
+          }
+        }
+      }
+    }
+  } catch {}
+}
+loadEnv();
 
 const prisma = new PrismaClient();
 
@@ -66,9 +93,14 @@ async function main() {
   await prisma.emailVerification.deleteMany({
     where: preservedUserIds.length > 0 ? { userId: { notIn: preservedUserIds } } : {},
   });
+  const preservedTeacherProfileIds = [
+    existingRealEducator?.teacherProfile?.id,
+    existingTestEducator?.teacherProfile?.id,
+  ].filter(Boolean) as string[];
+
   await prisma.studentProfile.deleteMany();
   await prisma.teacherProfile.deleteMany({
-    where: existingRealEducator?.teacherProfile?.id ? { id: { not: existingRealEducator.teacherProfile.id } } : {},
+    where: preservedTeacherProfileIds.length > 0 ? { id: { notIn: preservedTeacherProfileIds } } : {},
   });
   if (preservedUserIds.length > 0) {
     await prisma.profile.deleteMany({
@@ -82,7 +114,8 @@ async function main() {
     await prisma.user.deleteMany();
   }
 
-  const defaultPasswordHash = await bcrypt.hash("Password123!", 10);
+  const defaultPassword = process.env.TEST_EDUCATOR_PASSWORD || "Password123!";
+  const defaultPasswordHash = await bcrypt.hash(defaultPassword, 10);
   const now = new Date();
 
   // 1. Seed or Update Admin User (Idempotent)
@@ -169,9 +202,9 @@ async function main() {
   });
   console.log(`✅ Real Educator Preserved/Created: ${realEducator.email}`);
 
-  // 1c. Ensure Dedicated Test Educator Account (dhruvjari2006@gmail.com) exists
+  const testEducatorEmail = process.env.TEST_EDUCATOR_EMAIL || "dhruvjari2006@gmail.com";
   const testEducator = await prisma.user.upsert({
-    where: { email: "dhruvjari2006@gmail.com" },
+    where: { email: testEducatorEmail },
     update: {
       passwordHash: defaultPasswordHash,
       role: "TEACHER",
@@ -179,7 +212,7 @@ async function main() {
       emailVerified: true,
     },
     create: {
-      email: "dhruvjari2006@gmail.com",
+      email: testEducatorEmail,
       passwordHash: defaultPasswordHash,
       role: "TEACHER",
       status: "ACTIVE",
@@ -207,6 +240,31 @@ async function main() {
     },
     include: { teacherProfile: true },
   });
+
+  if (testEducator.teacherProfile) {
+    await prisma.teacherProfile.update({
+      where: { id: testEducator.teacherProfile.id },
+      data: {
+        verificationStatus: "VERIFIED",
+        verifiedAt: testEducator.teacherProfile.verifiedAt || now,
+        isSeededProfile: false,
+      },
+    });
+  } else {
+    await prisma.teacherProfile.create({
+      data: {
+        userId: testEducator.id,
+        headline: "Verified Educator",
+        subjects: "Mathematics, Physics",
+        experienceYears: 5,
+        hourlyRate: 300.0,
+        teachingMode: "BOTH",
+        verificationStatus: "VERIFIED",
+        verifiedAt: now,
+        isSeededProfile: false,
+      },
+    });
+  }
   console.log(`✅ Test Educator Preserved/Created: ${testEducator.email}`);
 
   // 2. Seed Verified Teacher 1: Ananya Sharma (Mathematics)

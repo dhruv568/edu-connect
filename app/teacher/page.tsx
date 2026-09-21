@@ -262,7 +262,7 @@ export default function TeacherLandingPage() {
                 </p>
 
                 {/* Hero CTAs */}
-                <div className="flex flex-col sm:flex-row items-center justify-center lg:justify-start gap-4 pt-2">
+                <div className="flex flex-col sm:flex-row items-center justify-center lg:justify-start gap-3 sm:gap-4 pt-2">
                   {userSession && isEducatorRole(userSession.role) ? (
                     <Link href="/teacher/dashboard" className="w-full sm:w-auto">
                       <button className="w-full sm:w-auto px-7 py-3.5 rounded-xl font-bold text-white bg-[#16805B] hover:bg-[#0D5C41] shadow-xl shadow-emerald-900/20 text-sm flex items-center justify-center gap-2 transition-all active:scale-95 cursor-pointer">
@@ -271,12 +271,20 @@ export default function TeacherLandingPage() {
                       </button>
                     </Link>
                   ) : (
-                    <Link href="/teacher/register" className="w-full sm:w-auto">
-                      <button className="w-full sm:w-auto px-7 py-3.5 rounded-xl font-bold text-white bg-[#16805B] hover:bg-[#0D5C41] shadow-xl shadow-emerald-900/20 text-sm flex items-center justify-center gap-2 transition-all active:scale-95 cursor-pointer">
-                        <span>Become an Educator</span>
-                        <ArrowRight className="h-4 w-4" />
-                      </button>
-                    </Link>
+                    <>
+                      <Link href="/teacher/login" className="w-full sm:w-auto">
+                        <button className="w-full sm:w-auto px-7 py-3.5 rounded-xl font-bold text-white bg-[#16805B] hover:bg-[#0D5C41] shadow-xl shadow-emerald-900/20 text-sm flex items-center justify-center gap-2 transition-all active:scale-95 cursor-pointer">
+                          <span>Educator Login</span>
+                          <ArrowRight className="h-4 w-4" />
+                        </button>
+                      </Link>
+                      <Link href="/teacher/register" className="w-full sm:w-auto">
+                        <button className="w-full sm:w-auto px-6 py-3.5 rounded-xl font-bold text-[#0D5C41] bg-[#F0FAF5] hover:bg-[#E2F7ED] border border-[#A7F3D0] shadow-sm text-sm flex items-center justify-center gap-2 transition-all active:scale-95 cursor-pointer">
+                          <span>Become an Educator</span>
+                          <ArrowRight className="h-4 w-4" />
+                        </button>
+                      </Link>
+                    </>
                   )}
 
                   <a href="#how-it-works" className="w-full sm:w-auto">
@@ -918,12 +926,22 @@ export default function TeacherLandingPage() {
             </p>
 
             <div className="pt-4 flex flex-col sm:flex-row items-center justify-center gap-4">
-              <Link href="/teacher/register" className="w-full sm:w-auto">
+              <Link href="/teacher/login" className="w-full sm:w-auto">
                 <GlassButton
                   variant="educator"
                   size="lg"
                   className="w-full sm:w-auto shadow-xl"
                   rightIcon={<ArrowRight className="h-4 w-4" />}
+                >
+                  Educator Login
+                </GlassButton>
+              </Link>
+
+              <Link href="/teacher/register" className="w-full sm:w-auto">
+                <GlassButton
+                  variant="ghost"
+                  size="lg"
+                  className="w-full sm:w-auto text-white border border-white/30 hover:bg-white/10"
                 >
                   Become an Educator
                 </GlassButton>

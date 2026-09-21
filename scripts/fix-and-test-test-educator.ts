@@ -1,12 +1,38 @@
+import fs from "node:fs";
+import path from "node:path";
 import { prisma } from "../lib/prisma";
 import { hashPassword, verifyPassword } from "../lib/auth/password";
 import { AuthService } from "../services/auth-service";
 
-async function main() {
-  console.log("Checking LIVE production database for dhruvjari2006@gmail.com...");
+function loadEnv() {
+  try {
+    const envPath = path.resolve(process.cwd(), ".env");
+    if (fs.existsSync(envPath)) {
+      const content = fs.readFileSync(envPath, "utf8");
+      for (const line of content.split("\n")) {
+        const trimmed = line.trim();
+        if (!trimmed || trimmed.startsWith("#")) continue;
+        const eqIdx = trimmed.indexOf("=");
+        if (eqIdx !== -1) {
+          const key = trimmed.slice(0, eqIdx).trim();
+          let val = trimmed.slice(eqIdx + 1).trim();
+          if ((val.startsWith('"') && val.endsWith('"')) || (val.startsWith("'") && val.endsWith("'"))) {
+            val = val.slice(1, -1);
+          }
+          if (!process.env[key]) {
+            process.env[key] = val;
+          }
+        }
+      }
+    }
+  } catch {}
+}
+loadEnv();
 
-  const email = "dhruvjari2006@gmail.com";
-  const rawPassword = "Password123!";
+async function main() {
+  const email = process.env.TEST_EDUCATOR_EMAIL || "dhruvjari2006@gmail.com";
+  const rawPassword = process.env.TEST_EDUCATOR_PASSWORD || "Password123!";
+  console.log(`Checking database for ${email}...`);
   const newHash = await hashPassword(rawPassword);
   const now = new Date();
 
@@ -51,7 +77,7 @@ async function main() {
     console.log(`Found existing user (ID: ${user.id}). Verifying attributes & password hash...`);
 
     const isMatch = await verifyPassword(rawPassword, user.passwordHash);
-    console.log(`Existing password match for '${rawPassword}': ${isMatch}`);
+    console.log(`Existing password match: ${isMatch}`);
 
     user = await prisma.user.update({
       where: { id: user.id },
