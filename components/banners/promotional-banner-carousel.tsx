@@ -219,7 +219,7 @@ export function PromotionalBannerCarousel({
       className={`w-full relative z-20 focus:outline-none ${
         previewMode
           ? "pt-0 pb-0"
-          : "pt-20 sm:pt-24 lg:pt-28 pb-3 sm:pb-4"
+          : "pt-16 sm:pt-24 lg:pt-28 pb-2 sm:pb-4"
       }`}
       onMouseEnter={() => setIsHovered(true)}
       onMouseLeave={() => setIsHovered(false)}
@@ -227,8 +227,8 @@ export function PromotionalBannerCarousel({
       onTouchMove={handleTouchMove}
       onTouchEnd={handleTouchEnd}
     >
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="relative w-full max-w-[800px] mx-auto rounded-2xl sm:rounded-3xl overflow-hidden border border-slate-200/60 dark:border-slate-800/60 shadow-xl bg-slate-900/5 aspect-[4/1]">
+      <div className="max-w-7xl mx-auto px-3 sm:px-6 lg:px-8">
+        <div className="relative w-full max-w-[800px] mx-auto rounded-xl sm:rounded-3xl overflow-hidden border border-slate-200/60 dark:border-slate-800/60 shadow-lg sm:shadow-xl bg-slate-900/5 aspect-[3/1] sm:aspect-[4/1]">
           {/* Animated Slide Transition */}
           <AnimatePresence mode="wait">
             <motion.div
@@ -299,9 +299,9 @@ export function PromotionalBannerCarousel({
                   prevSlide();
                 }}
                 aria-label="Previous promotional slide"
-                className="absolute left-3 top-1/2 -translate-y-1/2 z-30 p-2 sm:p-2.5 rounded-full bg-black/40 hover:bg-black/70 text-white border border-white/20 backdrop-blur-md transition-all duration-200 cursor-pointer shadow-lg focus:outline-none"
+                className="absolute left-1.5 sm:left-3 top-1/2 -translate-y-1/2 z-30 p-1.5 sm:p-2.5 rounded-full bg-black/40 hover:bg-black/70 text-white border border-white/20 backdrop-blur-md transition-all duration-200 cursor-pointer shadow-lg focus:outline-none"
               >
-                <ChevronLeft className="h-4 w-4 sm:h-5 sm:w-5" />
+                <ChevronLeft className="h-3.5 w-3.5 sm:h-5 sm:w-5" />
               </button>
 
               <button
@@ -312,9 +312,9 @@ export function PromotionalBannerCarousel({
                   nextSlide();
                 }}
                 aria-label="Next promotional slide"
-                className="absolute right-3 top-1/2 -translate-y-1/2 z-30 p-2 sm:p-2.5 rounded-full bg-black/40 hover:bg-black/70 text-white border border-white/20 backdrop-blur-md transition-all duration-200 cursor-pointer shadow-lg focus:outline-none"
+                className="absolute right-1.5 sm:right-3 top-1/2 -translate-y-1/2 z-30 p-1.5 sm:p-2.5 rounded-full bg-black/40 hover:bg-black/70 text-white border border-white/20 backdrop-blur-md transition-all duration-200 cursor-pointer shadow-lg focus:outline-none"
               >
-                <ChevronRight className="h-4 w-4 sm:h-5 sm:w-5" />
+                <ChevronRight className="h-3.5 w-3.5 sm:h-5 sm:w-5" />
               </button>
             </>
           )}
@@ -322,7 +322,7 @@ export function PromotionalBannerCarousel({
           {/* Carousel Indicators / Dots (Only shown when multiple banners exist) */}
           {total > 1 && (
             <div
-              className="absolute bottom-3 left-1/2 -translate-x-1/2 z-30 flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-black/35 backdrop-blur-sm"
+              className="absolute bottom-2 sm:bottom-3 left-1/2 -translate-x-1/2 z-30 flex items-center gap-1 sm:gap-1.5 px-2 sm:px-2.5 py-0.5 sm:py-1 rounded-full bg-black/35 backdrop-blur-sm"
               role="tablist"
               aria-label="Promotional banner carousel pagination"
             >
@@ -338,8 +338,8 @@ export function PromotionalBannerCarousel({
                     e.stopPropagation();
                     goToSlide(idx);
                   }}
-                  className={`h-1.5 rounded-full transition-all duration-300 cursor-pointer ${
-                    idx === currentIndex ? "w-6 bg-white" : "w-1.5 bg-white/50 hover:bg-white/80"
+                  className={`h-1 sm:h-1.5 rounded-full transition-all duration-300 cursor-pointer ${
+                    idx === currentIndex ? "w-4 sm:w-6 bg-white" : "w-1 sm:w-1.5 bg-white/50 hover:bg-white/80"
                   }`}
                 />
               ))}
