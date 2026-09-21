@@ -1,5 +1,6 @@
 /**
  * Standardized EduConnects Redesigned Email Footer
+ * Version: 2.0.0 (Professional Standardized Design)
  * 
  * Features:
  * - Prominent EduConnects branding & logo
