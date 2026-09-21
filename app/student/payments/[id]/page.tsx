@@ -563,21 +563,7 @@ export default function StudentPaymentReceiptPage() {
             </div>
           )}
 
-          {/* Request Purchase Refund Button */}
-          {isCaptured && !isPendingReview && !isRefunded && (
-            <div className="space-y-2 text-center">
-              <button
-                onClick={handleOpenRefundModal}
-                className="w-full py-3.5 bg-slate-900 hover:bg-rose-950/40 text-rose-400 hover:text-rose-300 font-bold rounded-2xl text-xs border border-slate-800 hover:border-rose-900/50 transition-all cursor-pointer shadow-sm flex items-center justify-center gap-2"
-              >
-                <RotateCcw className="w-4 h-4" />
-                <span>Request Purchase Refund</span>
-              </button>
-              <p className="text-[11px] text-slate-500">
-                Refund requests are reviewed by our finance team in accordance with EduConnects Refund Policy.
-              </p>
-            </div>
-          )}
+
         </div>
 
         {/* Refund Request Confirmation / Form Modal */}
