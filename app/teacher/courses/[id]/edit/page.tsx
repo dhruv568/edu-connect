@@ -381,7 +381,7 @@ export default function TeacherCourseEditorPage() {
 
   const handleDeleteSection = async (sectionId: string) => {
     try {
-      const res = await fetch(`/api/teacher/courses/${courseId}/sections/${sectionId}`, {
+      const res = await fetch(`/api/teacher/sections/${sectionId}`, {
         method: "DELETE",
       });
       const data = await res.json();
@@ -395,7 +395,7 @@ export default function TeacherCourseEditorPage() {
     e.preventDefault();
     if (!lessonTitle.trim() || !selectedSectionId) return;
     try {
-      const res = await fetch(`/api/teacher/courses/${courseId}/sections/${selectedSectionId}/lessons`, {
+      const res = await fetch(`/api/teacher/sections/${selectedSectionId}/lessons`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
@@ -403,7 +403,7 @@ export default function TeacherCourseEditorPage() {
           type: lessonType,
           isPreview: lessonIsPreview,
           content: lessonContent,
-          duration: videoDurationSeconds,
+          durationSeconds: videoDurationSeconds,
         }),
       });
       const data = await res.json();
@@ -415,8 +415,9 @@ export default function TeacherCourseEditorPage() {
         setLessonIsPreview(false);
 
         if (pendingVideoFile) {
-          await handleDirectLessonVideoUpload(newLessonId, pendingVideoFile);
+          const videoToUpload = pendingVideoFile;
           setPendingVideoFile(null);
+          await handleDirectLessonVideoUpload(newLessonId, videoToUpload);
         } else {
           fetchEditorData();
         }
@@ -430,7 +431,7 @@ export default function TeacherCourseEditorPage() {
 
   const handleDeleteLesson = async (sectionId: string, lessonId: string) => {
     try {
-      const res = await fetch(`/api/teacher/courses/${courseId}/sections/${sectionId}/lessons/${lessonId}`, {
+      const res = await fetch(`/api/teacher/lessons/${lessonId}`, {
         method: "DELETE",
       });
       const data = await res.json();
@@ -786,6 +787,7 @@ export default function TeacherCourseEditorPage() {
                         <button
                           onClick={() => {
                             setSelectedSectionId(sec.id);
+                            setPendingVideoFile(null);
                             setShowLessonModal(true);
                           }}
                           className="px-3 py-1.5 text-xs font-bold rounded-lg bg-blue-500/20 text-blue-400 border border-blue-500/30 hover:bg-blue-500/30 transition"
@@ -1311,7 +1313,15 @@ export default function TeacherCourseEditorPage() {
                   <label className="text-xs font-bold text-slate-300 block mb-1">Lesson Video Upload</label>
                   <label className="w-full py-3 px-4 text-xs font-semibold rounded-xl bg-slate-950 border border-slate-800 border-dashed text-slate-300 flex items-center justify-center gap-2 cursor-pointer hover:border-blue-500">
                     <Upload className="w-4 h-4 text-blue-400" />
-                    <span>{uploadingVideo ? "Uploading Video..." : uploadedVideoAssetId ? "Video Selected ✓" : "Upload Video Lesson File"}</span>
+                    <span>
+                      {uploadingVideo
+                        ? "Uploading Video..."
+                        : pendingVideoFile
+                        ? `Selected: ${pendingVideoFile.name} ✓`
+                        : uploadedVideoAssetId
+                        ? "Video Selected ✓"
+                        : "Upload Video Lesson File"}
+                    </span>
                     <input type="file" accept="video/*" onChange={handleVideoUpload} className="hidden" />
                   </label>
                 </div>
