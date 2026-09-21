@@ -2,10 +2,11 @@
 
 import React, { useState, useEffect } from "react";
 import Link from "next/link";
-import { CreditCard, CheckCircle2, AlertCircle, RefreshCw, Receipt, Search, ArrowRight, ExternalLink } from "lucide-react";
+import { CreditCard, CheckCircle2, AlertCircle, RefreshCw, Receipt, Search, ArrowRight, ExternalLink, ShieldCheck } from "lucide-react";
 import { formatCurrency } from "@/lib/currency";
 import { BackButton } from "@/components/ui/back-button";
 import { BackToHomeButton } from "@/components/ui/back-to-home-button";
+import { Logo } from "@/components/brand/logo";
 
 export default function StudentPaymentsPage() {
   const [payments, setPayments] = useState<any[]>([]);
@@ -47,21 +48,42 @@ export default function StudentPaymentsPage() {
 
   return (
     <div className="min-h-screen bg-slate-950 text-slate-100 p-6 md:p-10 space-y-8">
-      {/* Header */}
+      {/* EduConnects Brand Header Bar */}
+      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 bg-slate-900/40 border border-slate-800/80 p-4 rounded-3xl backdrop-blur-xl shadow-lg">
+        <div className="flex items-center gap-4">
+          <Logo
+            variant="horizontal"
+            size="md"
+            theme="dark"
+            roleContext="student"
+            href="/student/dashboard"
+            showTagline
+            tagline="Learner Portal"
+            priority
+          />
+          <div className="hidden sm:flex items-center gap-2 pl-4 border-l border-slate-800 text-xs text-slate-400">
+            <ShieldCheck className="w-4 h-4 text-blue-400 shrink-0" />
+            <span className="font-medium text-slate-300">Official Billing & Invoices</span>
+          </div>
+        </div>
+
+        <div className="flex items-center gap-2.5 w-full sm:w-auto justify-end">
+          <BackButton
+            fallbackUrl="/student/dashboard"
+            label="Back to Dashboard"
+            variant="dark"
+          />
+          <BackToHomeButton variant="dark" />
+        </div>
+      </div>
+
+      {/* Page Title & Navigation Header */}
       <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 border-b border-slate-800/80 pb-6">
         <div>
-          <div className="flex items-center gap-2.5 mb-3">
-            <BackButton
-              fallbackUrl="/student/dashboard"
-              label="Back to Dashboard"
-              variant="dark"
-            />
-            <BackToHomeButton variant="dark" />
-          </div>
-          <h1 className="text-3xl font-extrabold text-white tracking-tight flex items-center gap-3">
-            <CreditCard className="w-8 h-8 text-blue-400" /> Payment & Purchase History
+          <h1 className="text-2xl sm:text-3xl font-extrabold text-white tracking-tight flex items-center gap-3">
+            <CreditCard className="w-7 h-7 sm:w-8 sm:h-8 text-blue-400" /> Payment & Purchase History
           </h1>
-          <p className="text-sm text-slate-400 mt-1">
+          <p className="text-xs sm:text-sm text-slate-400 mt-1">
             Track all course enrollments, live class bookings, receipts, and payment statuses.
           </p>
         </div>
