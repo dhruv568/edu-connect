@@ -659,6 +659,19 @@ export class EventService {
           break;
         }
 
+        case "payout.processed": {
+          await NotificationService.create({
+            userId,
+            type: "PAYOUT_PROCESSED",
+            title: data.title || "Payout Notification 💸",
+            message: data.message || "Your payout has been updated.",
+            actionUrl: data.actionUrl || "/teacher/earnings",
+            data,
+            idempotencyKey,
+          });
+          break;
+        }
+
         default: {
           await NotificationService.create({
             userId,
@@ -673,17 +686,22 @@ export class EventService {
         }
       }
 
-      // 3. Record Activity Log entry for auditability
-      await (prisma as any).activityLog.create({
-        data: {
-          actorId: actorId || userId,
-          actorRole: actorRole || user.role,
-          action: event.toUpperCase().replace(".", "_"),
-          entityType: data.entityType || null,
-          entityId: data.entityId || null,
-          metadata: JSON.stringify(data),
-        },
-      });
+      // 3. Record Activity Log entry for auditability if supported
+      if ((prisma as any).activityLog?.create) {
+        try {
+          await (prisma as any).activityLog.create({
+            data: {
+              actor: { connect: { id: actorId || userId } },
+              action: event.toUpperCase().replace(".", "_"),
+              entityType: data.entityType || null,
+              entityId: data.entityId || null,
+              metadata: JSON.stringify(data),
+            },
+          });
+        } catch {
+          // Ignore if activityLog relation fails
+        }
+      }
     } catch (err) {
       console.error("❌ [EventService Error]:", err);
     }

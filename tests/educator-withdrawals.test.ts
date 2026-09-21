@@ -197,7 +197,6 @@ async function runEducatorWithdrawalTests() {
 
     // Verify balance is completely restored
     const restoredSummary = await LedgerService.getTeacherEarningsSummary(testTeacherProfile.id);
-    console.log("DEBUG restoredSummary:", JSON.stringify(restoredSummary));
     assert(restoredSummary.pendingAmount === 0, "Pending escrow hold cleared to ₹0");
     assert(restoredSummary.availableAmount === 10000, "Available balance completely restored to ₹10,000");
 
