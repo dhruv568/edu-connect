@@ -31,6 +31,7 @@ import {
   Tag,
   Sparkles,
   Award,
+  MessageSquare,
 } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { UserRole } from "@/types/auth";
@@ -238,6 +239,7 @@ export function DashboardLayout({ role, userName, userEmail, children }: Dashboa
     Settings,
     Tag,
     Sparkles,
+    MessageSquare,
   };
 
   // Structured grouped admin navigation sections
@@ -335,6 +337,7 @@ export function DashboardLayout({ role, userName, userEmail, children }: Dashboa
       id: "security_ops",
       title: "SECURITY & OPERATIONS",
       items: [
+        { label: "WhatsApp Notifications", icon: MessageSquare, href: "/admin/whatsapp" },
         { label: "Audit & Security Logs", icon: Activity, href: "/admin/activity" },
         { label: "System Health", icon: Server, href: "/admin/system-health" },
       ],

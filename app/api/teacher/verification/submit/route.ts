@@ -125,6 +125,24 @@ export async function POST(request: NextRequest) {
       console.error("Failed to send verification submission email notification:", emailErr);
     }
 
+    // Trigger WhatsApp notification for educator verification pending
+    try {
+      const { WhatsAppService } = require("@/services/whatsapp-service");
+      await WhatsAppService.sendEventNotification({
+        userId: user.id,
+        phone: tp.contactPhone || p?.phone,
+        eventType: "EDUCATOR_VERIFICATION_PENDING",
+        data: {
+          name: p?.firstName || "Educator",
+          statusMessage: "Your verification application is currently under review by EduConnects Administration.",
+          statusUrl: `${getPublicAppUrl()}/teacher/verification`,
+        },
+        idempotencyKey: `wa-teach-verif-pend-${tp.id}-${updatedTp.submittedAt?.getTime() || Date.now()}`,
+      });
+    } catch (waErr) {
+      console.error("Failed to send WhatsApp verification pending notification:", waErr);
+    }
+
     const confirmationMessage =
       "Thank You for applying. We shall verify your documents, and if they meet our policy requirements, the next round will proceed. You will be informed through our official email, WhatsApp, or via call.";
 

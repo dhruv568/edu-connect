@@ -4,12 +4,12 @@ import React, { useState, useEffect } from "react";
 import { DashboardLayout } from "@/components/layout/dashboard-layout";
 import { Card } from "@/components/ui/card";
 import { GlassButton } from "@/components/glass/glass-button";
-import { Settings, Percent, Layers, Shield, Save, Loader2, Plus, Check, Building2, Phone, FileText, Share2 } from "lucide-react";
+import { Settings, Percent, Layers, Shield, Save, Loader2, Plus, Check, Building2, Phone, FileText, Share2, MessageSquare, CheckCircle, XCircle, AlertCircle, ExternalLink } from "lucide-react";
 import { BackButton } from "@/components/ui/back-button";
 import { OFFICIAL_COMPANY_INFO } from "@/lib/company";
 
 export default function AdminSettingsPage() {
-  const [activeTab, setActiveTab] = useState<"general" | "company" | "social" | "commission" | "categories">("general");
+  const [activeTab, setActiveTab] = useState<"general" | "company" | "social" | "commission" | "categories" | "whatsapp">("general");
 
   // General Settings State
   const [generalSettings, setGeneralSettings] = useState({
@@ -21,6 +21,51 @@ export default function AdminSettingsPage() {
   });
   const [loadingSettings, setLoadingSettings] = useState(true);
   const [savingSettings, setSavingSettings] = useState(false);
+
+  // WhatsApp Automation Settings State
+  const [whatsappSettings, setWhatsappSettings] = useState({
+    enabled: true,
+    phoneNumberId: "",
+    businessAccountId: "",
+    isApiConfigured: false,
+    notifications: {
+      PAYMENT_SUCCESS: true,
+      PAYMENT_FAILED: true,
+      PAYMENT_RECEIPT: true,
+      REFUND_REQUESTED: true,
+      REFUND_APPROVED: true,
+      REFUND_COMPLETED: true,
+      REFUND_REJECTED: true,
+      LEARNER_REGISTRATION: true,
+      EDUCATOR_REGISTRATION: true,
+      EDUCATOR_VERIFIED: true,
+      EDUCATOR_VERIFICATION_PENDING: true,
+      EDUCATOR_REJECTED: true,
+      COURSE_ENROLLED: true,
+      BOOKING_CONFIRMED: true,
+      CLASS_REMINDER: true,
+      CLASS_CANCELLED: true,
+    },
+    templateMapping: {
+      PAYMENT_SUCCESS: "edu_payment_success",
+      PAYMENT_FAILED: "edu_payment_failed",
+      PAYMENT_RECEIPT: "edu_payment_receipt",
+      REFUND_REQUESTED: "edu_refund_requested",
+      REFUND_APPROVED: "edu_refund_approved",
+      REFUND_COMPLETED: "edu_refund_completed",
+      REFUND_REJECTED: "edu_refund_rejected",
+      LEARNER_REGISTRATION: "edu_learner_welcome",
+      EDUCATOR_REGISTRATION: "edu_teacher_welcome",
+      EDUCATOR_VERIFIED: "edu_teacher_verified",
+      EDUCATOR_VERIFICATION_PENDING: "edu_teacher_pending",
+      EDUCATOR_REJECTED: "edu_teacher_rejected",
+      COURSE_ENROLLED: "edu_course_enrolled",
+      BOOKING_CONFIRMED: "edu_booking_confirmed",
+      CLASS_REMINDER: "edu_class_reminder",
+      CLASS_CANCELLED: "edu_class_cancelled",
+    },
+  });
+  const [savingWhatsapp, setSavingWhatsapp] = useState(false);
 
   // Company Profile Settings State
   const [companySettings, setCompanySettings] = useState({
@@ -104,11 +149,55 @@ export default function AdminSettingsPage() {
           linkedinUrl: json.data.linkedinUrl !== undefined ? json.data.linkedinUrl : OFFICIAL_COMPANY_INFO.socials.linkedin,
           whatsappUrl: json.data.whatsappUrl !== undefined ? json.data.whatsappUrl : (OFFICIAL_COMPANY_INFO.socials.whatsapp || OFFICIAL_COMPANY_INFO.whatsappUrl),
         });
+
+        setWhatsappSettings((prev) => ({
+          ...prev,
+          enabled: json.data.whatsappEnabled !== false,
+          phoneNumberId: json.data.whatsappPhoneNumberId || "",
+          businessAccountId: json.data.whatsappBusinessAccountId || "",
+          isApiConfigured: Boolean(json.data.isWhatsAppApiConfigured),
+          notifications: {
+            ...prev.notifications,
+            ...(json.data.whatsappNotificationsEnabled || {}),
+          },
+          templateMapping: {
+            ...prev.templateMapping,
+            ...(json.data.whatsappTemplateMapping || {}),
+          },
+        }));
       }
     } catch (err) {
       console.error("Failed to load settings:", err);
     } finally {
       setLoadingSettings(false);
+    }
+  };
+
+  const saveWhatsappSettings = async () => {
+    setSavingWhatsapp(true);
+    try {
+      const res = await fetch("/api/admin/settings", {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          whatsappEnabled: whatsappSettings.enabled,
+          whatsappPhoneNumberId: whatsappSettings.phoneNumberId,
+          whatsappBusinessAccountId: whatsappSettings.businessAccountId,
+          whatsappNotificationsEnabled: whatsappSettings.notifications,
+          whatsappTemplateMapping: whatsappSettings.templateMapping,
+        }),
+      });
+      if (res.ok) {
+        alert("WhatsApp automation settings saved successfully!");
+      } else {
+        const json = await res.json().catch(() => ({}));
+        alert(json.error?.message || "Failed to save WhatsApp settings.");
+      }
+    } catch (err) {
+      console.error("Failed to save WhatsApp settings:", err);
+      alert("Network error saving WhatsApp settings.");
+    } finally {
+      setSavingWhatsapp(false);
     }
   };
 
@@ -371,6 +460,18 @@ export default function AdminSettingsPage() {
           >
             <Layers className="h-4 w-4" />
             Course Categories
+          </button>
+
+          <button
+            onClick={() => setActiveTab("whatsapp")}
+            className={`flex items-center gap-2 px-4 py-2 rounded-2xl text-xs font-black transition-all ${
+              activeTab === "whatsapp"
+                ? "bg-emerald-600 text-white shadow-md shadow-emerald-500/20"
+                : "text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800"
+            }`}
+          >
+            <MessageSquare className="h-4 w-4" />
+            WhatsApp Automation
           </button>
         </div>
 
@@ -823,6 +924,307 @@ export default function AdminSettingsPage() {
                   )}
                 </tbody>
               </table>
+            </Card>
+          </div>
+        )}
+
+        {/* Tab 6: WhatsApp Automation */}
+        {activeTab === "whatsapp" && (
+          <div className="space-y-6 max-w-4xl">
+            {/* Meta Cloud API Status Banner */}
+            <Card className="p-6 border-slate-200 dark:border-slate-800 bg-gradient-to-br from-emerald-500/5 via-teal-500/5 to-transparent">
+              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+                <div className="flex items-center gap-3">
+                  <div className="p-3 bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 rounded-2xl">
+                    <MessageSquare className="h-6 w-6" />
+                  </div>
+                  <div>
+                    <h3 className="text-base font-black text-slate-900 dark:text-slate-100 flex items-center gap-2">
+                      Meta WhatsApp Cloud API Integration
+                      {whatsappSettings.isApiConfigured ? (
+                        <span className="px-2 py-0.5 rounded-full text-[10px] font-extrabold bg-emerald-100 text-emerald-800 dark:bg-emerald-950/60 dark:text-emerald-300 flex items-center gap-1">
+                          <CheckCircle className="h-3 w-3" /> CONNECTED (v20.0)
+                        </span>
+                      ) : (
+                        <span className="px-2 py-0.5 rounded-full text-[10px] font-extrabold bg-amber-100 text-amber-800 dark:bg-amber-950/60 dark:text-amber-300 flex items-center gap-1">
+                          <AlertCircle className="h-3 w-3" /> TOKEN REQUIRED IN ENV
+                        </span>
+                      )}
+                    </h3>
+                    <p className="text-xs text-slate-500 mt-0.5">
+                      Server-side transactional notification engine utilizing Meta WhatsApp Cloud API.
+                    </p>
+                  </div>
+                </div>
+
+                <div className="flex items-center gap-3">
+                  <a
+                    href="/admin/whatsapp"
+                    className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-black bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 hover:bg-slate-200 dark:hover:bg-slate-700 transition-colors"
+                  >
+                    <FileText className="h-3.5 w-3.5" />
+                    View Message Logs
+                    <ExternalLink className="h-3 w-3 opacity-60" />
+                  </a>
+                </div>
+              </div>
+
+              {/* Master Global Toggle & Credentials */}
+              <div className="mt-6 pt-6 border-t border-slate-200/60 dark:border-slate-800/60 grid grid-cols-1 md:grid-cols-2 gap-4 text-xs">
+                <div className="flex items-center justify-between p-4 bg-white dark:bg-slate-900/60 rounded-xl border border-slate-200/80 dark:border-slate-800">
+                  <div>
+                    <label className="font-bold text-slate-800 dark:text-slate-200 block">
+                      Global WhatsApp Automation
+                    </label>
+                    <span className="text-[11px] text-slate-500">
+                      Master toggle for all outbound event messages
+                    </span>
+                  </div>
+                  <input
+                    type="checkbox"
+                    checked={whatsappSettings.enabled}
+                    onChange={(e) =>
+                      setWhatsappSettings({
+                        ...whatsappSettings,
+                        enabled: e.target.checked,
+                      })
+                    }
+                    className="h-5 w-5 rounded text-emerald-600 focus:ring-emerald-500"
+                  />
+                </div>
+
+                <div className="p-4 bg-white dark:bg-slate-900/60 rounded-xl border border-slate-200/80 dark:border-slate-800 space-y-2">
+                  <label className="font-bold text-slate-800 dark:text-slate-200 block">
+                    Meta Phone Number ID
+                  </label>
+                  <input
+                    type="text"
+                    value={whatsappSettings.phoneNumberId}
+                    onChange={(e) =>
+                      setWhatsappSettings({
+                        ...whatsappSettings,
+                        phoneNumberId: e.target.value,
+                      })
+                    }
+                    placeholder="e.g. 109283746592019"
+                    className="w-full h-8 px-2.5 bg-slate-100 dark:bg-slate-800 border-none rounded-lg font-mono text-[11px] outline-none focus:ring-2 focus:ring-emerald-500"
+                  />
+                </div>
+              </div>
+            </Card>
+
+            {/* Individual Notification Event Toggles */}
+            <Card className="p-6 border-slate-200 dark:border-slate-800 space-y-6">
+              <div>
+                <h3 className="text-base font-black text-slate-900 dark:text-slate-100">
+                  Automatic Notification Triggers
+                </h3>
+                <p className="text-xs text-slate-500 mt-0.5">
+                  Select which platform actions automatically trigger WhatsApp notifications.
+                </p>
+              </div>
+
+              {/* Group 1: Payments & Financial Events */}
+              <div className="space-y-3">
+                <h4 className="text-xs font-black uppercase tracking-wider text-slate-400">
+                  Payment & Financial Lifecycle
+                </h4>
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 text-xs">
+                  {[
+                    { key: "PAYMENT_SUCCESS", label: "Payment Success", desc: "Sent upon payment confirmation" },
+                    { key: "PAYMENT_FAILED", label: "Payment Failed", desc: "Sent when transaction fails with retry link" },
+                    { key: "PAYMENT_RECEIPT", label: "Receipt Generated", desc: "Includes official secure receipt link" },
+                    { key: "REFUND_REQUESTED", label: "Refund Request Received", desc: "Informs user request is under review" },
+                    { key: "REFUND_APPROVED", label: "Refund Approved", desc: "Notifies user refund is authorized" },
+                    { key: "REFUND_COMPLETED", label: "Refund Completed", desc: "Triggered only after gateway confirms" },
+                    { key: "REFUND_REJECTED", label: "Refund Rejected", desc: "Includes explanation for rejection" },
+                  ].map(({ key, label, desc }) => (
+                    <label
+                      key={key}
+                      className="flex items-start gap-3 p-3 bg-slate-50 dark:bg-slate-900/40 rounded-xl border border-slate-100 dark:border-slate-800/80 cursor-pointer hover:bg-slate-100/60 dark:hover:bg-slate-800/40 transition-colors"
+                    >
+                      <input
+                        type="checkbox"
+                        checked={Boolean((whatsappSettings.notifications as any)[key])}
+                        onChange={(e) =>
+                          setWhatsappSettings({
+                            ...whatsappSettings,
+                            notifications: {
+                              ...whatsappSettings.notifications,
+                              [key]: e.target.checked,
+                            },
+                          })
+                        }
+                        className="mt-0.5 h-4 w-4 rounded text-emerald-600 focus:ring-emerald-500"
+                      />
+                      <div>
+                        <span className="font-bold text-slate-800 dark:text-slate-200 block">{label}</span>
+                        <span className="text-[11px] text-slate-500">{desc}</span>
+                      </div>
+                    </label>
+                  ))}
+                </div>
+              </div>
+
+              {/* Group 2: Registration & Verification */}
+              <div className="space-y-3 pt-2">
+                <h4 className="text-xs font-black uppercase tracking-wider text-slate-400">
+                  User Registration & Verification
+                </h4>
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 text-xs">
+                  {[
+                    { key: "LEARNER_REGISTRATION", label: "Learner Registration", desc: "Welcome confirmation upon verified signup" },
+                    { key: "EDUCATOR_REGISTRATION", label: "Educator Registration", desc: "Onboarding guide after educator signup" },
+                    { key: "EDUCATOR_VERIFIED", label: "Educator Verification Approved", desc: "Confirmation when Admin verifies educator" },
+                    { key: "EDUCATOR_VERIFICATION_PENDING", label: "Educator Verification Pending", desc: "Explains documents are under review" },
+                    { key: "EDUCATOR_REJECTED", label: "Educator Application Revision", desc: "Notifies educator of needed changes" },
+                  ].map(({ key, label, desc }) => (
+                    <label
+                      key={key}
+                      className="flex items-start gap-3 p-3 bg-slate-50 dark:bg-slate-900/40 rounded-xl border border-slate-100 dark:border-slate-800/80 cursor-pointer hover:bg-slate-100/60 dark:hover:bg-slate-800/40 transition-colors"
+                    >
+                      <input
+                        type="checkbox"
+                        checked={Boolean((whatsappSettings.notifications as any)[key])}
+                        onChange={(e) =>
+                          setWhatsappSettings({
+                            ...whatsappSettings,
+                            notifications: {
+                              ...whatsappSettings.notifications,
+                              [key]: e.target.checked,
+                            },
+                          })
+                        }
+                        className="mt-0.5 h-4 w-4 rounded text-emerald-600 focus:ring-emerald-500"
+                      />
+                      <div>
+                        <span className="font-bold text-slate-800 dark:text-slate-200 block">{label}</span>
+                        <span className="text-[11px] text-slate-500">{desc}</span>
+                      </div>
+                    </label>
+                  ))}
+                </div>
+              </div>
+
+              {/* Group 3: Course & Live Classes */}
+              <div className="space-y-3 pt-2">
+                <h4 className="text-xs font-black uppercase tracking-wider text-slate-400">
+                  Courses & Live Learning Sessions
+                </h4>
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 text-xs">
+                  {[
+                    { key: "COURSE_ENROLLED", label: "Course Enrollment", desc: "Confirmation with learning dashboard link" },
+                    { key: "BOOKING_CONFIRMED", label: "Booking Confirmation", desc: "Live class slot reservation confirmed" },
+                    { key: "CLASS_REMINDER", label: "Class Starting Reminder", desc: "Automated alert at 24h, 1h, and 10m windows" },
+                    { key: "CLASS_CANCELLED", label: "Class Cancellation", desc: "Alerts students when session is cancelled" },
+                  ].map(({ key, label, desc }) => (
+                    <label
+                      key={key}
+                      className="flex items-start gap-3 p-3 bg-slate-50 dark:bg-slate-900/40 rounded-xl border border-slate-100 dark:border-slate-800/80 cursor-pointer hover:bg-slate-100/60 dark:hover:bg-slate-800/40 transition-colors"
+                    >
+                      <input
+                        type="checkbox"
+                        checked={Boolean((whatsappSettings.notifications as any)[key])}
+                        onChange={(e) =>
+                          setWhatsappSettings({
+                            ...whatsappSettings,
+                            notifications: {
+                              ...whatsappSettings.notifications,
+                              [key]: e.target.checked,
+                            },
+                          })
+                        }
+                        className="mt-0.5 h-4 w-4 rounded text-emerald-600 focus:ring-emerald-500"
+                      />
+                      <div>
+                        <span className="font-bold text-slate-800 dark:text-slate-200 block">{label}</span>
+                        <span className="text-[11px] text-slate-500">{desc}</span>
+                      </div>
+                    </label>
+                  ))}
+                </div>
+              </div>
+            </Card>
+
+            {/* Meta Template Mapping Table */}
+            <Card className="p-6 border-slate-200 dark:border-slate-800 space-y-4">
+              <div>
+                <h3 className="text-base font-black text-slate-900 dark:text-slate-100">
+                  Approved Meta WhatsApp Template Mapping
+                </h3>
+                <p className="text-xs text-slate-500 mt-0.5">
+                  Configure custom template names if you registered alternate template identifiers in Meta Business Suite.
+                </p>
+              </div>
+
+              <div className="border border-slate-200 dark:border-slate-800 rounded-xl overflow-hidden">
+                <table className="w-full text-left text-xs border-collapse">
+                  <thead>
+                    <tr className="bg-slate-100 dark:bg-slate-800/80 text-slate-600 dark:text-slate-300 font-extrabold border-b border-slate-200 dark:border-slate-700">
+                      <th className="p-3">Platform Event</th>
+                      <th className="p-3">Default Approved Template</th>
+                      <th className="p-3">Active Meta Template Name Override</th>
+                    </tr>
+                  </thead>
+                  <tbody className="divide-y divide-slate-100 dark:divide-slate-800">
+                    {[
+                      { event: "PAYMENT_SUCCESS", defaultName: "edu_payment_success" },
+                      { event: "PAYMENT_RECEIPT", defaultName: "edu_payment_receipt" },
+                      { event: "PAYMENT_FAILED", defaultName: "edu_payment_failed" },
+                      { event: "REFUND_REQUESTED", defaultName: "edu_refund_requested" },
+                      { event: "REFUND_APPROVED", defaultName: "edu_refund_approved" },
+                      { event: "REFUND_COMPLETED", defaultName: "edu_refund_completed" },
+                      { event: "REFUND_REJECTED", defaultName: "edu_refund_rejected" },
+                      { event: "LEARNER_REGISTRATION", defaultName: "edu_learner_welcome" },
+                      { event: "EDUCATOR_REGISTRATION", defaultName: "edu_teacher_welcome" },
+                      { event: "EDUCATOR_VERIFIED", defaultName: "edu_teacher_verified" },
+                      { event: "EDUCATOR_VERIFICATION_PENDING", defaultName: "edu_teacher_pending" },
+                      { event: "EDUCATOR_REJECTED", defaultName: "edu_teacher_rejected" },
+                      { event: "COURSE_ENROLLED", defaultName: "edu_course_enrolled" },
+                      { event: "BOOKING_CONFIRMED", defaultName: "edu_booking_confirmed" },
+                      { event: "CLASS_REMINDER", defaultName: "edu_class_reminder" },
+                      { event: "CLASS_CANCELLED", defaultName: "edu_class_cancelled" },
+                    ].map(({ event, defaultName }) => (
+                      <tr key={event} className="hover:bg-slate-50/60 dark:hover:bg-slate-800/30">
+                        <td className="p-3 font-mono font-bold text-[11px] text-slate-800 dark:text-slate-200">
+                          {event}
+                        </td>
+                        <td className="p-3 font-mono text-[11px] text-slate-500">
+                          {defaultName}
+                        </td>
+                        <td className="p-3">
+                          <input
+                            type="text"
+                            value={(whatsappSettings.templateMapping as any)[event] || defaultName}
+                            onChange={(e) =>
+                              setWhatsappSettings({
+                                ...whatsappSettings,
+                                templateMapping: {
+                                  ...whatsappSettings.templateMapping,
+                                  [event]: e.target.value.trim(),
+                                },
+                              })
+                            }
+                            placeholder={defaultName}
+                            className="w-full h-8 px-2.5 bg-slate-100 dark:bg-slate-800 border-none rounded-lg font-mono text-[11px] outline-none focus:ring-2 focus:ring-emerald-500"
+                          />
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+
+              <div className="pt-2 flex justify-end">
+                <GlassButton
+                  onClick={saveWhatsappSettings}
+                  disabled={savingWhatsapp}
+                  className="bg-emerald-600 hover:bg-emerald-700 text-white font-black"
+                >
+                  {savingWhatsapp ? <Loader2 className="h-4 w-4 animate-spin mr-2" /> : <Save className="h-4 w-4 mr-2" />}
+                  Save WhatsApp Automation Settings
+                </GlassButton>
+              </div>
             </Card>
           </div>
         )}

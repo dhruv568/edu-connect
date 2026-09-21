@@ -5,6 +5,7 @@ import { getEmailProvider } from "@/lib/email/email-service";
 import { prisma } from "@/lib/prisma";
 import { formatPaise } from "@/lib/currency";
 import { getPublicAppUrl } from "@/lib/app-url";
+import { WhatsAppService } from "./whatsapp-service";
 
 export type EventType =
   | "auth.welcome"
@@ -24,7 +25,9 @@ export type EventType =
   | "payment.captured"
   | "payment.failed"
   | "refund.requested"
+  | "refund.approved"
   | "refund.processed"
+  | "refund.rejected"
   | "payout.processed"
   | "system.announcement";
 
@@ -38,7 +41,7 @@ export interface EventPayload {
 
 export class EventService {
   /**
-   * Emit an event and trigger notification, email, and activity logging
+   * Emit an event and trigger in-app notification, email, WhatsApp, and activity logging
    */
   static async emit(event: EventType, payload: EventPayload) {
     const { userId, actorId, actorRole, data = {}, idempotencyKey } = payload;
@@ -47,12 +50,13 @@ export class EventService {
       // 1. Fetch target user and notification preferences
       const user = await prisma.user.findUnique({
         where: { id: userId },
-        include: { profile: true, notificationPreference: true },
+        include: { profile: true, notificationPreference: true, teacherProfile: true },
       });
 
       if (!user) return;
 
       const userName = user.profile ? `${user.profile.firstName} ${user.profile.lastName}`.trim() : user.email;
+      const userPhone = user.profile?.phone || user.teacherProfile?.contactPhone || null;
       const prefs = user.notificationPreference || {
         emailCourseUpdates: true,
         emailClassReminders: true,
@@ -69,9 +73,38 @@ export class EventService {
             type: "WELCOME",
             title: "Welcome to EduConnects! 🎓",
             message: "Your account is set up. Explore courses or schedule live learning sessions.",
-            actionUrl: "/courses",
+            actionUrl: user.role === "TEACHER" ? "/teacher/dashboard" : "/courses",
             idempotencyKey,
           });
+
+          // WhatsApp Trigger
+          try {
+            if (user.role === "TEACHER") {
+              await WhatsAppService.sendEventNotification({
+                userId,
+                phone: userPhone,
+                eventType: "EDUCATOR_REGISTRATION",
+                data: {
+                  name: userName,
+                  onboardingUrl: `${getPublicAppUrl()}/teacher/onboarding`,
+                },
+                idempotencyKey: `wa-reg-teacher-${userId}`,
+              });
+            } else {
+              await WhatsAppService.sendEventNotification({
+                userId,
+                phone: userPhone,
+                eventType: "LEARNER_REGISTRATION",
+                data: {
+                  name: userName,
+                  portalUrl: `${getPublicAppUrl()}/courses`,
+                },
+                idempotencyKey: `wa-reg-learner-${userId}`,
+              });
+            }
+          } catch (waErr) {
+            console.error("WhatsApp welcome trigger warning:", waErr);
+          }
           break;
         }
 
@@ -98,6 +131,22 @@ export class EventService {
               actionUrl: `${getPublicAppUrl()}/teacher/dashboard`,
               actionText: "Go to Teacher Dashboard",
             });
+          }
+
+          // WhatsApp Trigger
+          try {
+            await WhatsAppService.sendEventNotification({
+              userId,
+              phone: userPhone,
+              eventType: "EDUCATOR_VERIFIED",
+              data: {
+                name: userName,
+                dashboardUrl: `${getPublicAppUrl()}/teacher/dashboard`,
+              },
+              idempotencyKey: `wa-teach-verif-${userId}`,
+            });
+          } catch (waErr) {
+            console.error("WhatsApp educator verified warning:", waErr);
           }
           break;
         }
@@ -127,6 +176,23 @@ export class EventService {
               actionUrl: `${getPublicAppUrl()}/teacher/onboarding`,
               actionText: "Update Application",
             });
+          }
+
+          // WhatsApp Trigger
+          try {
+            await WhatsAppService.sendEventNotification({
+              userId,
+              phone: userPhone,
+              eventType: "EDUCATOR_REJECTED",
+              data: {
+                name: userName,
+                reason,
+                onboardingUrl: `${getPublicAppUrl()}/teacher/onboarding`,
+              },
+              idempotencyKey: `wa-teach-rej-${userId}-${Date.now()}`,
+            });
+          } catch (waErr) {
+            console.error("WhatsApp educator rejected warning:", waErr);
           }
           break;
         }
@@ -170,6 +236,24 @@ export class EventService {
               actionText: "View My Schedule",
             });
           }
+
+          // WhatsApp Trigger
+          try {
+            await WhatsAppService.sendEventNotification({
+              userId,
+              phone: userPhone,
+              eventType: "BOOKING_CONFIRMED",
+              data: {
+                name: userName,
+                classTitle,
+                startTime: startTime || "Scheduled Session",
+                joinUrl: `${getPublicAppUrl()}/student/dashboard`,
+              },
+              idempotencyKey: `wa-book-${data.slotId || "slot"}-${userId}`,
+            });
+          } catch (waErr) {
+            console.error("WhatsApp booking confirmed warning:", waErr);
+          }
           break;
         }
 
@@ -199,6 +283,23 @@ export class EventService {
               reasonText: reason,
             });
           }
+
+          // WhatsApp Trigger
+          try {
+            await WhatsAppService.sendEventNotification({
+              userId,
+              phone: userPhone,
+              eventType: "CLASS_CANCELLED",
+              data: {
+                name: userName,
+                classTitle,
+                reason,
+              },
+              idempotencyKey: `wa-cancel-${data.slotId || "slot"}-${userId}`,
+            });
+          } catch (waErr) {
+            console.error("WhatsApp class cancelled warning:", waErr);
+          }
           break;
         }
 
@@ -214,6 +315,24 @@ export class EventService {
             data,
             idempotencyKey,
           });
+
+          // WhatsApp Trigger
+          try {
+            await WhatsAppService.sendEventNotification({
+              userId,
+              phone: userPhone,
+              eventType: "CLASS_REMINDER",
+              data: {
+                name: userName,
+                classTitle,
+                timeLabel,
+                joinUrl: data.joinUrl || `${getPublicAppUrl()}/student/dashboard`,
+              },
+              idempotencyKey: `wa-remind-${data.slotId || "slot"}-${userId}-${timeLabel.replace(/\s+/g, "_")}`,
+            });
+          } catch (waErr) {
+            console.error("WhatsApp class reminder warning:", waErr);
+          }
           break;
         }
 
@@ -254,6 +373,23 @@ export class EventService {
               actionUrl: `${getPublicAppUrl()}/learn/${data.courseSlug || ""}`,
               actionText: "Start Learning Now",
             });
+          }
+
+          // WhatsApp Trigger
+          try {
+            await WhatsAppService.sendEventNotification({
+              userId,
+              phone: userPhone,
+              eventType: "COURSE_ENROLLED",
+              data: {
+                name: userName,
+                courseTitle,
+                courseUrl: `${getPublicAppUrl()}/learn/${data.courseSlug || ""}`,
+              },
+              idempotencyKey: `wa-enroll-${data.courseId || "course"}-${userId}`,
+            });
+          } catch (waErr) {
+            console.error("WhatsApp course enrolled warning:", waErr);
           }
           break;
         }
@@ -297,6 +433,150 @@ export class EventService {
               actionText: "View Payment Details",
             });
           }
+
+          // 1. WhatsApp Trigger: Payment Success
+          try {
+            await WhatsAppService.sendEventNotification({
+              userId,
+              phone: userPhone,
+              eventType: "PAYMENT_SUCCESS",
+              data: {
+                name: userName,
+                title,
+                amount: amountFormatted,
+                date: new Date().toLocaleDateString("en-IN"),
+                orderId: data.orderId || data.transactionId || "N/A",
+                transactionId: data.transactionId,
+                supportInfo: "support@educonnects.com | +91 9109019090",
+              },
+              idempotencyKey: `wa-pay-${data.transactionId || userId}`,
+            });
+          } catch (waErr) {
+            console.error("WhatsApp payment success warning:", waErr);
+          }
+
+          // 2. WhatsApp Trigger: Payment Receipt
+          try {
+            const receiptNumber = data.receipt || `RCPT-${data.transactionId || Date.now()}`;
+            const receiptUrl = data.transactionId
+              ? `${getPublicAppUrl()}/student/payments/${data.transactionId}`
+              : `${getPublicAppUrl()}/student/payments`;
+
+            await WhatsAppService.sendEventNotification({
+              userId,
+              phone: userPhone,
+              eventType: "PAYMENT_RECEIPT",
+              data: {
+                name: userName,
+                receiptNumber,
+                title,
+                amount: amountFormatted,
+                receiptUrl,
+              },
+              idempotencyKey: `wa-rcpt-${data.transactionId || userId}`,
+            });
+          } catch (waErr) {
+            console.error("WhatsApp payment receipt warning:", waErr);
+          }
+          break;
+        }
+
+        case "payment.failed": {
+          const title = data.title || "EduConnects Purchase";
+          await NotificationService.create({
+            userId,
+            type: "PAYMENT_FAILED",
+            title: "Payment Incomplete ⚠️",
+            message: `Your payment for "${title}" could not be completed.`,
+            actionUrl: data.retryUrl || "/courses",
+            data,
+            idempotencyKey,
+          });
+
+          // WhatsApp Trigger
+          try {
+            await WhatsAppService.sendEventNotification({
+              userId,
+              phone: userPhone,
+              eventType: "PAYMENT_FAILED",
+              data: {
+                name: userName,
+                title,
+                orderId: data.orderId || "N/A",
+                reason: data.reason || "Payment was not completed by gateway",
+                retryUrl: data.retryUrl || `${getPublicAppUrl()}/courses`,
+              },
+              idempotencyKey: `wa-pay-fail-${data.orderId || userId}-${Date.now()}`,
+            });
+          } catch (waErr) {
+            console.error("WhatsApp payment failed warning:", waErr);
+          }
+          break;
+        }
+
+        case "refund.requested": {
+          const amountFormatted = formatPaise(data.amountPaise || 0);
+          const title = data.title || "EduConnects Purchase";
+
+          await NotificationService.create({
+            userId,
+            type: "INFO",
+            title: "Refund Request Under Review ⏳",
+            message: `Your refund request of ${amountFormatted} for "${title}" is under review.`,
+            actionUrl: "/student/payments",
+            data,
+            idempotencyKey,
+          });
+
+          // WhatsApp Trigger
+          try {
+            await WhatsAppService.sendEventNotification({
+              userId,
+              phone: userPhone,
+              eventType: "REFUND_REQUESTED",
+              data: {
+                name: userName,
+                title,
+                amount: amountFormatted,
+              },
+              idempotencyKey: `wa-rfnd-req-${data.refundId || data.transactionId || userId}`,
+            });
+          } catch (waErr) {
+            console.error("WhatsApp refund requested warning:", waErr);
+          }
+          break;
+        }
+
+        case "refund.approved": {
+          const amountFormatted = formatPaise(data.amountPaise || 0);
+          const title = data.title || "EduConnects Purchase";
+
+          await NotificationService.create({
+            userId,
+            type: "SUCCESS",
+            title: "Refund Approved ✅",
+            message: `Your refund of ${amountFormatted} for "${title}" has been approved.`,
+            actionUrl: "/student/payments",
+            data,
+            idempotencyKey,
+          });
+
+          // WhatsApp Trigger
+          try {
+            await WhatsAppService.sendEventNotification({
+              userId,
+              phone: userPhone,
+              eventType: "REFUND_APPROVED",
+              data: {
+                name: userName,
+                title,
+                amount: amountFormatted,
+              },
+              idempotencyKey: `wa-rfnd-appr-${data.refundId || data.transactionId || userId}`,
+            });
+          } catch (waErr) {
+            console.error("WhatsApp refund approved warning:", waErr);
+          }
           break;
         }
 
@@ -323,6 +603,58 @@ export class EventService {
               statusBadgeText: "REFUNDED",
               statusBadgeVariant: "success",
             });
+          }
+
+          // WhatsApp Trigger
+          try {
+            await WhatsAppService.sendEventNotification({
+              userId,
+              phone: userPhone,
+              eventType: "REFUND_COMPLETED",
+              data: {
+                name: userName,
+                amount: amountFormatted,
+                orderId: data.orderId || data.transactionId || "N/A",
+                transactionId: data.transactionId,
+              },
+              idempotencyKey: `wa-rfnd-done-${data.refundId || data.transactionId || userId}`,
+            });
+          } catch (waErr) {
+            console.error("WhatsApp refund completed warning:", waErr);
+          }
+          break;
+        }
+
+        case "refund.rejected": {
+          const title = data.title || "EduConnects Purchase";
+          const reason = data.reason || "Request did not meet refund policy terms.";
+
+          await NotificationService.create({
+            userId,
+            type: "WARNING",
+            title: "Refund Request Rejected ❌",
+            message: `Your refund request for "${title}" was rejected: ${reason}`,
+            actionUrl: "/student/payments",
+            data,
+            idempotencyKey,
+          });
+
+          // WhatsApp Trigger
+          try {
+            await WhatsAppService.sendEventNotification({
+              userId,
+              phone: userPhone,
+              eventType: "REFUND_REJECTED",
+              data: {
+                name: userName,
+                title,
+                reason,
+                supportInfo: "support@educonnects.com",
+              },
+              idempotencyKey: `wa-rfnd-rej-${data.refundId || data.transactionId || userId}`,
+            });
+          } catch (waErr) {
+            console.error("WhatsApp refund rejected warning:", waErr);
           }
           break;
         }

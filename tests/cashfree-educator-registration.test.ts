@@ -142,7 +142,7 @@ async function runCashfreeEducatorRegistrationTests() {
       where: { email: testEmail },
     });
     assert.ok(pendingAfterOrder, "Pending registration must exist");
-    const regData = JSON.parse(pendingAfterOrder.registrationData);
+    const regData = JSON.parse(pendingAfterOrder.registrationData || "{}");
     assert.strictEqual(regData.orderData?.orderId, generatedOrderId, "orderId must be persisted in orderData");
     assert.strictEqual(regData.orderData?.amount, 99.00, "amount must be ₹99");
     console.log(`   ✅ Cashfree order created: orderId=${generatedOrderId}, cfOrderId=${generatedCfOrderId}`);

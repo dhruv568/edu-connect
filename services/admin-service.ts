@@ -893,10 +893,52 @@ export class AdminService {
         metadata: { refundId, transactionId: refund.transactionId, reason },
       });
 
+      // Dispatch refund.rejected event for in-app notification & WhatsApp
+      try {
+        const { EventService } = require("@/services/event-service");
+        await EventService.emit("refund.rejected", {
+          userId: refund.transaction.userId,
+          actorId: adminId,
+          actorRole: "ADMIN",
+          data: {
+            refundId: refund.id,
+            transactionId: refund.transactionId,
+            reason: reason.trim(),
+            title: "EduConnects Purchase",
+            entityType: "Refund",
+            entityId: refund.id,
+          },
+          idempotencyKey: `refund-rej-${refund.id}`,
+        });
+      } catch (evtErr) {
+        console.error("Failed to emit refund.rejected event:", evtErr);
+      }
+
       return updated;
     }
 
-    // APPROVE: Execute live Cashfree refund and access revocation via PaymentService
+    // APPROVE: First notify approval via EventService / WhatsApp
+    try {
+      const { EventService } = require("@/services/event-service");
+      await EventService.emit("refund.approved", {
+        userId: refund.transaction.userId,
+        actorId: adminId,
+        actorRole: "ADMIN",
+        data: {
+          refundId: refund.id,
+          transactionId: refund.transactionId,
+          amountPaise: refund.amountPaise,
+          title: "EduConnects Purchase",
+          entityType: "Refund",
+          entityId: refund.id,
+        },
+        idempotencyKey: `refund-appr-${refund.id}`,
+      });
+    } catch (evtErr) {
+      console.error("Failed to emit refund.approved event:", evtErr);
+    }
+
+    // Execute live Cashfree refund and access revocation via PaymentService
     const processedRefund = await PaymentService.processRefund({
       transactionId: refund.transactionId,
       requestedBy: adminId,
@@ -989,11 +1031,34 @@ export class AdminService {
       instagramUrl: settings.social_instagram_url || "",
       linkedinUrl: settings.social_linkedin_url || "",
       whatsappUrl: settings.social_whatsapp_url !== undefined ? settings.social_whatsapp_url : (settings.company_whatsapp_url || OFFICIAL_COMPANY_INFO.socials.whatsapp || OFFICIAL_COMPANY_INFO.whatsappUrl || ""),
+      whatsappEnabled: settings.whatsapp_enabled !== "false",
+      whatsappPhoneNumberId: settings.whatsapp_phone_number_id || process.env.WHATSAPP_PHONE_NUMBER_ID || "",
+      whatsappBusinessAccountId: settings.whatsapp_business_account_id || process.env.WHATSAPP_BUSINESS_ACCOUNT_ID || "",
+      whatsappNotificationsEnabled: settings.whatsapp_notifications_enabled ? JSON.parse(settings.whatsapp_notifications_enabled) : {},
+      whatsappTemplateMapping: settings.whatsapp_template_mapping ? JSON.parse(settings.whatsapp_template_mapping) : {},
+      isWhatsAppApiConfigured: Boolean(process.env.WHATSAPP_ACCESS_TOKEN && (process.env.WHATSAPP_PHONE_NUMBER_ID || settings.whatsapp_phone_number_id)),
     };
   }
 
   static async updatePlatformSettings(adminId: string, settingsPayload: Record<string, any>) {
+    const mapped: Record<string, any> = {};
     for (const [key, val] of Object.entries(settingsPayload)) {
+      if (key === "whatsappEnabled") {
+        mapped["whatsapp_enabled"] = String(val);
+      } else if (key === "whatsappPhoneNumberId") {
+        mapped["whatsapp_phone_number_id"] = String(val);
+      } else if (key === "whatsappBusinessAccountId") {
+        mapped["whatsapp_business_account_id"] = String(val);
+      } else if (key === "whatsappNotificationsEnabled") {
+        mapped["whatsapp_notifications_enabled"] = typeof val === "string" ? val : JSON.stringify(val);
+      } else if (key === "whatsappTemplateMapping") {
+        mapped["whatsapp_template_mapping"] = typeof val === "string" ? val : JSON.stringify(val);
+      } else {
+        mapped[key] = val;
+      }
+    }
+
+    for (const [key, val] of Object.entries(mapped)) {
       await prisma.platformConfig.upsert({
         where: { key },
         update: { value: String(val) },

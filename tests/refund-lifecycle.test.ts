@@ -126,7 +126,7 @@ async function runRefundLifecycleTests() {
 
     assert(refundRequest.status === "PENDING", "Refund record created with status 'PENDING'");
     assert(
-      refundRequest.reason?.includes("Course content did not match syllabus"),
+      Boolean(refundRequest.reason?.includes("Course content did not match syllabus")),
       "Refund reason properly captured"
     );
 

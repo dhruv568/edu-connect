@@ -50,6 +50,7 @@ model User {
   aiConversations       AiConversation[]
   trainingEnrollments   TrainingEnrollment[]
   certificates          Certificate[]
+  whatsappMessages      WhatsAppMessage[]
 
   @@map("users")
 }
@@ -1329,6 +1330,35 @@ model CertificateAuditLog {
 
   @@index([certificateId])
   @@map("certificate_audit_logs")
+}
+
+model WhatsAppMessage {
+  id              String    @id @default(uuid())
+  userId          String?
+  phoneNumber     String
+  eventType       String    // e.g. PAYMENT_SUCCESS, REFUND_REQUESTED, etc.
+  templateName    String
+  parameters      String?   // JSON string of template parameter values
+  metaMessageId   String?   @unique // WAMID from Meta Cloud API
+  status          String    @default("PENDING") // SENT | DELIVERED | READ | FAILED | PENDING
+  errorMessage    String?
+  idempotencyKey  String?   @unique
+  metadata        String?   // JSON string for additional context
+  sentAt          DateTime?
+  deliveredAt     DateTime?
+  readAt          DateTime?
+  failedAt        DateTime?
+  createdAt       DateTime  @default(now())
+  updatedAt       DateTime  @updatedAt
+
+  user            User?     @relation(fields: [userId], references: [id], onDelete: SetNull)
+
+  @@index([userId])
+  @@index([phoneNumber])
+  @@index([eventType])
+  @@index([status])
+  @@index([createdAt])
+  @@map("whatsapp_messages")
 }
 
 

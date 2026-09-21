@@ -534,6 +534,23 @@ export class AuthService {
         userName: createdUser.profile?.firstName,
       });
 
+      // Dispatch auth.welcome event to trigger in-app notification & WhatsApp registration confirmation
+      try {
+        const { EventService } = require("@/services/event-service");
+        await EventService.emit("auth.welcome", {
+          userId: createdUser.id,
+          actorId: createdUser.id,
+          actorRole: createdUser.role,
+          data: {
+            name: `${createdUser.profile?.firstName || ""} ${createdUser.profile?.lastName || ""}`.trim(),
+            role: createdUser.role,
+          },
+          idempotencyKey: `auth-welcome-${createdUser.id}`,
+        });
+      } catch (evtErr) {
+        console.error("Failed to emit auth.welcome event:", evtErr);
+      }
+
       const userSession: UserSession = {
         id: createdUser.id,
         userId: createdUser.id,

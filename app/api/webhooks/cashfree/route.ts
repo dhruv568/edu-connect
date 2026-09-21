@@ -96,6 +96,11 @@ export async function POST(request: NextRequest) {
       payment.payment_status === "USER_DROPPED"
     ) {
       if (orderId) {
+        const tx = await prisma.paymentTransaction.findFirst({
+          where: { providerOrderId: orderId },
+          include: { course: true, liveClassSlot: true },
+        });
+
         await prisma.paymentTransaction.updateMany({
           where: { providerOrderId: orderId, status: "PENDING" },
           data: {
@@ -104,6 +109,27 @@ export async function POST(request: NextRequest) {
             failureReason: payment.payment_message || "Cashfree payment failed or user dropped",
           },
         });
+
+        if (tx && tx.userId) {
+          try {
+            const { EventService } = require("@/services/event-service");
+            const { getPublicAppUrl } = require("@/lib/app-url");
+            await EventService.emit("payment.failed", {
+              userId: tx.userId,
+              actorId: tx.userId,
+              actorRole: "STUDENT",
+              data: {
+                orderId,
+                title: tx.course?.title || tx.liveClassSlot?.title || "EduConnects Purchase",
+                reason: payment.payment_message || "Payment attempt was unsuccessful",
+                retryUrl: tx.course ? `${getPublicAppUrl()}/courses/${tx.course.slug}` : `${getPublicAppUrl()}/courses`,
+              },
+              idempotencyKey: `pay-fail-${orderId}`,
+            });
+          } catch (failErr) {
+            console.error("Failed to emit payment.failed event:", failErr);
+          }
+        }
       }
     }
 

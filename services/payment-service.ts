@@ -700,6 +700,7 @@ export class PaymentService {
           amountPaise: transaction.amountPaise,
           title: productTitle,
           orderId: transaction.providerOrderId,
+          receipt: transaction.order?.receipt || `rcpt_${transaction.internalReference || transaction.id}`,
           teacherUserId: teacherId
             ? (await prisma.teacherProfile.findUnique({ where: { id: teacherId } }))?.userId
             : undefined,
@@ -772,6 +773,10 @@ export class PaymentService {
 
     const transaction = await prisma.paymentTransaction.findUnique({
       where: { id: transactionId },
+      include: {
+        course: true,
+        liveClassSlot: true,
+      },
     });
 
     if (!transaction) {
@@ -826,6 +831,27 @@ export class PaymentService {
         requestedBy,
       },
     });
+
+    // Emit refund.requested event for in-app notification & WhatsApp
+    try {
+      const { EventService } = require("@/services/event-service");
+      await EventService.emit("refund.requested", {
+        userId: transaction.userId,
+        actorId: requestedBy,
+        actorRole: "STUDENT",
+        data: {
+          refundId: refundRecord.id,
+          transactionId: transaction.id,
+          amountPaise: transaction.amountPaise,
+          title: transaction.course?.title || transaction.liveClassSlot?.title || "EduConnects Purchase",
+          entityType: "Refund",
+          entityId: refundRecord.id,
+        },
+        idempotencyKey: `refund-req-${refundRecord.id}`,
+      });
+    } catch (evtErr) {
+      console.error("Failed to emit refund.requested event:", evtErr);
+    }
 
     return refundRecord;
   }
@@ -947,6 +973,28 @@ export class PaymentService {
         teacherId,
         refundAmountPaise: transaction.amountPaise,
       });
+    }
+
+    // Emit refund.processed event for in-app notification, email & WhatsApp
+    try {
+      const { EventService } = require("@/services/event-service");
+      await EventService.emit("refund.processed", {
+        userId: transaction.userId,
+        actorId: requestedBy,
+        actorRole: isAdmin ? "ADMIN" : "STUDENT",
+        data: {
+          refundId: refundRecord.id,
+          transactionId: transaction.id,
+          amountPaise: transaction.amountPaise,
+          title: transaction.course?.title || transaction.liveClassSlot?.title || "EduConnects Purchase",
+          orderId: transaction.providerOrderId,
+          entityType: "Refund",
+          entityId: refundRecord.id,
+        },
+        idempotencyKey: `refund-proc-${refundRecord.id}`,
+      });
+    } catch (evtErr) {
+      console.error("Failed to emit refund.processed event:", evtErr);
     }
 
     return refundRecord;

@@ -280,8 +280,7 @@ async function runVerificationLockTests() {
     // 4c. Course Slug Lookup for Students
     const studentSlugLookup = await LmsService.getCourseBySlug(
       testCourse.slug,
-      studentUser.id,
-      "STUDENT"
+      studentUser.id
     );
     assert(
       studentSlugLookup === null,
@@ -291,8 +290,7 @@ async function runVerificationLockTests() {
     // 4d. Course Slug Lookup allows Educator Owner to view and work on their draft
     const ownerSlugLookup = await LmsService.getCourseBySlug(
       testCourse.slug,
-      unverifiedTeacherUser.id,
-      "TEACHER"
+      unverifiedTeacherUser.id
     );
     assert(
       !!ownerSlugLookup && ownerSlugLookup.id === testCourse.id,
@@ -449,8 +447,7 @@ async function runVerificationLockTests() {
     // 7e. Course Slug Lookup for Students Unlocked
     const unlockedSlugLookup = await LmsService.getCourseBySlug(
       testCourse.slug,
-      studentUser.id,
-      "STUDENT"
+      studentUser.id
     );
     assert(
       !!unlockedSlugLookup && unlockedSlugLookup.id === testCourse.id,
