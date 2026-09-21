@@ -1,11 +1,10 @@
 "use client";
 
-import React, { useState, useEffect, useMemo, useCallback } from "react";
+import React, { useState, useEffect, useMemo, useCallback, useRef } from "react";
 import Link from "next/link";
 import Image from "next/image";
 import { usePathname } from "next/navigation";
 import { motion, AnimatePresence } from "framer-motion";
-import { ChevronLeft, ChevronRight } from "lucide-react";
 
 export interface PromotionalBannerItem {
   id: string;
@@ -28,19 +27,15 @@ export interface PromotionalBannerCarouselProps {
   previewMode?: boolean;
 }
 
+// Global in-memory cache to prevent blank loading spaces and repeat network waits
+const activeBannersCache: Record<string, PromotionalBannerItem[]> = {};
+
 export function PromotionalBannerCarousel({
   placement: explicitPlacement,
   initialBanners,
   previewMode = false,
 }: PromotionalBannerCarouselProps) {
   const pathname = usePathname() || "/";
-  const [banners, setBanners] = useState<PromotionalBannerItem[]>(initialBanners && initialBanners.length > 0 ? initialBanners : []);
-  const [currentIndex, setCurrentIndex] = useState(0);
-  const [isHovered, setIsHovered] = useState(false);
-  const [touchStartX, setTouchStartX] = useState<number | null>(null);
-  const [touchEndX, setTouchEndX] = useState<number | null>(null);
-  const [loading, setLoading] = useState(!initialBanners || initialBanners.length === 0);
-  const [imageErrorMap, setImageErrorMap] = useState<Record<string, boolean>>({});
 
   // Exclude non-public pages (admin, classroom, auth, live sessions)
   const isExcluded = useMemo(() => {
@@ -88,7 +83,24 @@ export function PromotionalBannerCarousel({
     return "MAIN";
   }, [explicitPlacement, pathname]);
 
-  // Fetch active banners for this website placement
+  // Initialize banners from props or in-memory cache to eliminate loading flickers
+  const [banners, setBanners] = useState<PromotionalBannerItem[]>(() => {
+    if (initialBanners && initialBanners.length > 0) return initialBanners;
+    if (activeBannersCache[siteContext]) return activeBannersCache[siteContext];
+    return [];
+  });
+
+  const [currentIndex, setCurrentIndex] = useState(0);
+  const [isHovered, setIsHovered] = useState(false);
+  const [imageErrorMap, setImageErrorMap] = useState<Record<string, boolean>>({});
+
+  // Mouse & Touch Drag Navigation state
+  const isDraggingRef = useRef(false);
+  const startXRef = useRef<number | null>(null);
+  const dragDistanceRef = useRef(0);
+  const containerRef = useRef<HTMLDivElement>(null);
+
+  // Fetch active banners for this placement & keep memory cache updated
   useEffect(() => {
     if ((initialBanners && initialBanners.length > 0) || isExcluded) return;
 
@@ -100,7 +112,6 @@ export function PromotionalBannerCarousel({
           cache: "no-store",
         });
 
-        // If relative fetch fails (e.g. reverse proxy subdomain routing issue), fallback to canonical origin
         if (!res.ok && typeof window !== "undefined") {
           try {
             res = await fetch(`${window.location.origin}/api/banners/active${queryParam}`, {
@@ -114,13 +125,13 @@ export function PromotionalBannerCarousel({
         if (res.ok) {
           const json = await res.json();
           if (isMounted && json.success && Array.isArray(json.data?.banners)) {
-            setBanners(json.data.banners);
+            const fetched: PromotionalBannerItem[] = json.data.banners;
+            activeBannersCache[siteContext] = fetched;
+            setBanners(fetched);
           }
         }
       } catch (err) {
-        console.error("[PromotionalBannerCarousel] Failed to fetch active banners:", err);
-      } finally {
-        if (isMounted) setLoading(false);
+        console.error("[PromotionalBannerCarousel] Active banners fetch error:", err);
       }
     };
 
@@ -144,22 +155,96 @@ export function PromotionalBannerCarousel({
     setCurrentIndex((prev) => (prev - 1 + total) % total);
   }, [total]);
 
-  const goToSlide = (index: number) => {
-    setCurrentIndex(index);
-  };
-
-  // 3-second autoplay with pause on hover
+  // Smooth automatic banner rotation with pause on center hover/hold
   useEffect(() => {
     if (total <= 1 || isHovered) return;
 
     const interval = setInterval(() => {
       nextSlide();
-    }, 3000); // 3 seconds
+    }, 3500); // 3.5s rotation
 
     return () => clearInterval(interval);
   }, [total, isHovered, nextSlide]);
 
-  // Keyboard navigation (Left / Right arrow keys)
+  // Center Hover / Movement Detection to pause rotation
+  const handleMouseMove = (e: React.MouseEvent<HTMLDivElement>) => {
+    if (!containerRef.current) return;
+    const rect = containerRef.current.getBoundingClientRect();
+    const relativeX = (e.clientX - rect.left) / rect.width;
+    // Center 70% region (0.15 to 0.85) pauses autoplay
+    if (relativeX >= 0.15 && relativeX <= 0.85) {
+      setIsHovered(true);
+    } else if (!isDraggingRef.current) {
+      setIsHovered(false);
+    }
+  };
+
+  // Mouse Drag / Swipe Handlers
+  const handleMouseDown = (e: React.MouseEvent) => {
+    isDraggingRef.current = true;
+    startXRef.current = e.clientX;
+    dragDistanceRef.current = 0;
+    setIsHovered(true);
+  };
+
+  const handleMouseDragMove = (e: React.MouseEvent) => {
+    if (!isDraggingRef.current || startXRef.current === null) return;
+    const diff = e.clientX - startXRef.current;
+    dragDistanceRef.current = Math.abs(diff);
+  };
+
+  const handleMouseUp = (e: React.MouseEvent) => {
+    if (isDraggingRef.current && startXRef.current !== null) {
+      const diff = e.clientX - startXRef.current;
+      const threshold = 35; // px threshold for drag navigation
+      if (diff < -threshold) {
+        nextSlide();
+      } else if (diff > threshold) {
+        prevSlide();
+      }
+    }
+    isDraggingRef.current = false;
+    startXRef.current = null;
+  };
+
+  // Touch Swipe Handlers
+  const handleTouchStart = (e: React.TouchEvent) => {
+    isDraggingRef.current = true;
+    startXRef.current = e.touches[0].clientX;
+    dragDistanceRef.current = 0;
+    setIsHovered(true);
+  };
+
+  const handleTouchMove = (e: React.TouchEvent) => {
+    if (!isDraggingRef.current || startXRef.current === null) return;
+    const diff = e.touches[0].clientX - startXRef.current;
+    dragDistanceRef.current = Math.abs(diff);
+  };
+
+  const handleTouchEnd = (e: React.TouchEvent) => {
+    if (isDraggingRef.current && startXRef.current !== null && e.changedTouches[0]) {
+      const diff = e.changedTouches[0].clientX - startXRef.current;
+      const threshold = 35;
+      if (diff < -threshold) {
+        nextSlide();
+      } else if (diff > threshold) {
+        prevSlide();
+      }
+    }
+    isDraggingRef.current = false;
+    startXRef.current = null;
+    setIsHovered(false);
+  };
+
+  // Prevent link click when dragging
+  const handleLinkClick = (e: React.MouseEvent) => {
+    if (dragDistanceRef.current > 8) {
+      e.preventDefault();
+      e.stopPropagation();
+    }
+  };
+
+  // Keyboard navigation
   const handleKeyDown = (e: React.KeyboardEvent) => {
     if (total <= 1) return;
     if (e.key === "ArrowLeft") {
@@ -171,30 +256,6 @@ export function PromotionalBannerCarousel({
     }
   };
 
-  // Touch / Swipe gestures for mobile
-  const handleTouchStart = (e: React.TouchEvent) => {
-    setTouchStartX(e.touches[0].clientX);
-    setTouchEndX(null);
-  };
-
-  const handleTouchMove = (e: React.TouchEvent) => {
-    setTouchEndX(e.touches[0].clientX);
-  };
-
-  const handleTouchEnd = () => {
-    if (touchStartX === null || touchEndX === null) return;
-    const diff = touchStartX - touchEndX;
-    const threshold = 50; // min distance for swipe
-    if (diff > threshold) {
-      nextSlide();
-    } else if (diff < -threshold) {
-      prevSlide();
-    }
-    setTouchStartX(null);
-    setTouchEndX(null);
-  };
-
-  // If excluded, loading, or no banners: return null completely
   if (isExcluded || (!previewMode && banners.length === 0)) {
     return null;
   }
@@ -213,26 +274,34 @@ export function PromotionalBannerCarousel({
 
   return (
     <section
-      aria-label="Promotional Carousel"
+      aria-label="Promotional Banner Carousel"
       onKeyDown={handleKeyDown}
       tabIndex={0}
       className={`w-full relative z-20 focus:outline-none ${
         previewMode
           ? "pt-0 pb-0"
-          : "pt-16 sm:pt-20 lg:pt-24 pb-0 bg-slate-950"
+          : "pt-20 sm:pt-24 pb-2 sm:pb-3"
       }`}
-      onMouseEnter={() => setIsHovered(true)}
-      onMouseLeave={() => setIsHovered(false)}
-      onTouchStart={handleTouchStart}
-      onTouchMove={handleTouchMove}
-      onTouchEnd={handleTouchEnd}
     >
-      <div className={previewMode ? "px-0" : "w-full"}>
+      <div className={previewMode ? "px-0" : "max-w-7xl mx-auto px-4 sm:px-6 lg:px-8"}>
         <div
-          className={`relative w-full overflow-hidden bg-slate-950 ${
+          ref={containerRef}
+          onMouseMove={handleMouseMove}
+          onMouseEnter={() => setIsHovered(true)}
+          onMouseLeave={() => {
+            setIsHovered(false);
+            isDraggingRef.current = false;
+          }}
+          onMouseDown={handleMouseDown}
+          onMouseMoveCapture={handleMouseDragMove}
+          onMouseUp={handleMouseUp}
+          onTouchStart={handleTouchStart}
+          onTouchMove={handleTouchMove}
+          onTouchEnd={handleTouchEnd}
+          className={`relative w-full overflow-hidden bg-slate-950 select-none ${
             previewMode
               ? "max-w-[800px] mx-auto rounded-xl sm:rounded-2xl border border-slate-200/60 dark:border-slate-800/60 shadow-lg aspect-[3/1] sm:aspect-[4/1]"
-              : "shadow-2xl aspect-[16/7] sm:aspect-[2.5/1] md:aspect-[3.2/1] lg:aspect-[4/1] xl:aspect-[4.5/1]"
+              : "rounded-2xl sm:rounded-3xl border border-slate-200/60 dark:border-slate-800/60 shadow-xl aspect-[16/7] sm:aspect-[2.5/1] md:aspect-[2.8/1] lg:aspect-[3.2/1]"
           }`}
         >
           {/* Ambient Blurred Backdrop matching Banner Image colors */}
@@ -248,14 +317,14 @@ export function PromotionalBannerCarousel({
             <div className="absolute inset-0 bg-black/20 backdrop-blur-[2px]" />
           </div>
 
-          {/* Animated Slide Transition */}
+          {/* Smooth Fade-Scale Slide Transition */}
           <AnimatePresence mode="wait">
             <motion.div
               key={currentBanner.id || currentIndex}
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              exit={{ opacity: 0 }}
-              transition={{ duration: 0.35, ease: "easeInOut" }}
+              initial={{ opacity: 0, scale: 0.98 }}
+              animate={{ opacity: 1, scale: 1 }}
+              exit={{ opacity: 0, scale: 0.98 }}
+              transition={{ duration: 0.4, ease: [0.25, 1, 0.5, 1] }}
               className="relative w-full h-full z-10 flex items-center justify-center"
             >
               {hasImageClick ? (
@@ -263,6 +332,7 @@ export function PromotionalBannerCarousel({
                   href={currentBanner.imageClickUrl!.trim()}
                   target={clickTarget}
                   rel={clickRel}
+                  onClick={handleLinkClick}
                   aria-label={`Promotional banner: ${currentBanner.title || "EduConnects Banner"}`}
                   className="relative block w-full h-full cursor-pointer focus:outline-none select-none"
                 >
@@ -271,7 +341,8 @@ export function PromotionalBannerCarousel({
                     alt={currentBanner.title || "Promotional Banner"}
                     fill
                     priority={currentIndex === 0}
-                    sizes="100vw"
+                    loading="eager"
+                    sizes="(max-width: 1280px) 100vw, 1280px"
                     className="object-contain w-full h-full"
                     unoptimized={true}
                     onError={() => {
@@ -292,7 +363,8 @@ export function PromotionalBannerCarousel({
                     alt={currentBanner.title || "Promotional Banner"}
                     fill
                     priority={currentIndex === 0}
-                    sizes="100vw"
+                    loading="eager"
+                    sizes="(max-width: 1280px) 100vw, 1280px"
                     className="object-contain w-full h-full"
                     unoptimized={true}
                     onError={() => {
@@ -306,70 +378,6 @@ export function PromotionalBannerCarousel({
               )}
             </motion.div>
           </AnimatePresence>
-
-          {/* Navigation Arrows (Only shown when multiple banners exist) */}
-          {total > 1 && (
-            <>
-              <button
-                type="button"
-                onClick={(e) => {
-                  e.preventDefault();
-                  e.stopPropagation();
-                  prevSlide();
-                }}
-                aria-label="Previous promotional slide"
-                className={`absolute top-1/2 -translate-y-1/2 z-30 p-2 sm:p-3 rounded-full bg-black/40 hover:bg-black/75 text-white border border-white/20 backdrop-blur-md transition-all duration-200 cursor-pointer shadow-xl focus:outline-none hover:scale-105 active:scale-95 ${
-                  previewMode ? "left-1.5 sm:left-3" : "left-3 sm:left-6 lg:left-8"
-                }`}
-              >
-                <ChevronLeft className="h-4 w-4 sm:h-6 sm:w-6" />
-              </button>
-
-              <button
-                type="button"
-                onClick={(e) => {
-                  e.preventDefault();
-                  e.stopPropagation();
-                  nextSlide();
-                }}
-                aria-label="Next promotional slide"
-                className={`absolute top-1/2 -translate-y-1/2 z-30 p-2 sm:p-3 rounded-full bg-black/40 hover:bg-black/75 text-white border border-white/20 backdrop-blur-md transition-all duration-200 cursor-pointer shadow-xl focus:outline-none hover:scale-105 active:scale-95 ${
-                  previewMode ? "right-1.5 sm:right-3" : "right-3 sm:right-6 lg:right-8"
-                }`}
-              >
-                <ChevronRight className="h-4 w-4 sm:h-6 sm:w-6" />
-              </button>
-            </>
-          )}
-
-          {/* Carousel Indicators / Dots (Only shown when multiple banners exist) */}
-          {total > 1 && (
-            <div
-              className={`absolute left-1/2 -translate-x-1/2 z-30 flex items-center gap-1.5 sm:gap-2 px-3 py-1.5 rounded-full bg-black/40 backdrop-blur-md border border-white/15 shadow-xl ${
-                previewMode ? "bottom-2 sm:bottom-3" : "bottom-3 sm:bottom-4 lg:bottom-6"
-              }`}
-              role="tablist"
-              aria-label="Promotional banner carousel pagination"
-            >
-              {banners.map((b, idx) => (
-                <button
-                  key={b.id || idx}
-                  type="button"
-                  role="tab"
-                  aria-selected={idx === currentIndex}
-                  aria-label={`Go to slide ${idx + 1}`}
-                  onClick={(e) => {
-                    e.preventDefault();
-                    e.stopPropagation();
-                    goToSlide(idx);
-                  }}
-                  className={`h-1.5 sm:h-2 rounded-full transition-all duration-300 cursor-pointer ${
-                    idx === currentIndex ? "w-5 sm:w-8 bg-white" : "w-1.5 sm:w-2 bg-white/40 hover:bg-white/70"
-                  }`}
-                />
-              ))}
-            </div>
-          )}
         </div>
       </div>
     </section>
